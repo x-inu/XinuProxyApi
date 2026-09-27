@@ -1,0 +1,48 @@
+# Git and GitHub folders
+.git
+.github
+
+# Docker and CI/CD related files
+docker-compose.yml
+.dockerignore
+.gitignore
+.goreleaser.yml
+Dockerfile
+
+# Frontend development output
+web/management-center/node_modules
+web/management-center/dist
+
+# Documentation and license
+docs
+README.md
+README_CN.md
+LICENSE
+
+# Generated local management artifact (rebuilt in the Bun stage)
+static/management.html
+
+# Runtime data folders (should be mounted as volumes)
+auths
+logs
+conv
+config.yaml
+
+# Development/editor
+bin
+.vscode
+.claude
+.codex
+.codex-worktrees
+.gemini
+.serena
+.agent
+.agents
+.antigravitycli
+.opencode
+.idea
+.junie
+.worktrees
+.bmad
+_bmad
+_bmad-output

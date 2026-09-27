@@ -1,0 +1,70 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - dev
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: '1.3.14'
+  NODE_VERSION: '24'
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/management-center
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - run: bun run verify
+      - name: Verify single-file output
+        run: |
+          test -f dist/index.html
+          test "$(find dist -type f | wc -l)" -eq 1
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Test
+        run: go test ./...
+      - name: Build
+        run: go build -o test-output ./cmd/server
+
+  integrated-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Build management center
+        run: VERSION=ci ./scripts/build-management.sh
+      - name: Build server
+        run: go build -o test-output ./cmd/server
+      - name: Verify bundled runtime asset
+        run: test -s static/management.html

@@ -307,15 +307,23 @@ func (s *Server) pluginResourceNoRoute(c *gin.Context) {
 }
 
 func (s *Server) serveManagementControlPanel(c *gin.Context) {
+	if !s.tryServeManagementControlPanel(c) {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+}
+
+// tryServeManagementControlPanel serves the bundled management control panel.
+// It returns true when a response was written (panel served or a hard error
+// reported), and false when the panel is unavailable and the caller should fall
+// back to another response (for example the root JSON endpoint list).
+func (s *Server) tryServeManagementControlPanel(c *gin.Context) bool {
 	cfg := s.cfg
 	if cfg == nil || cfg.Home.Enabled || cfg.RemoteManagement.DisableControlPanel {
-		c.AbortWithStatus(http.StatusNotFound)
-		return
+		return false
 	}
 	filePath := managementasset.FilePath(s.configFilePath)
 	if strings.TrimSpace(filePath) == "" {
-		c.AbortWithStatus(http.StatusNotFound)
-		return
+		return false
 	}
 
 	if _, err := os.Stat(filePath); err != nil {
@@ -323,15 +331,32 @@ func (s *Server) serveManagementControlPanel(c *gin.Context) {
 			// Synchronously ensure management.html is available with a detached context.
 			// Control panel bootstrap should not be canceled by client disconnects.
 			if !managementasset.EnsureLatestManagementHTML(context.Background(), managementasset.StaticDir(s.configFilePath), cfg.ProxyURL, cfg.RemoteManagement.PanelGitHubRepository) {
-				c.AbortWithStatus(http.StatusNotFound)
-				return
+				return false
 			}
 		} else {
 			log.WithError(err).Error("failed to stat management control panel asset")
 			c.AbortWithStatus(http.StatusInternalServerError)
-			return
+			return true
 		}
 	}
 
 	c.File(filePath)
+	return true
+}
+
+// clientAcceptsHTML reports whether the request prefers an HTML response, which
+// is how the root endpoint decides between the browser control panel and the
+// JSON endpoint listing used by API clients.
+func clientAcceptsHTML(c *gin.Context) bool {
+	if c == nil || c.Request == nil {
+		return false
+	}
+	accept := strings.ToLower(c.GetHeader("Accept"))
+	if accept == "" {
+		return false
+	}
+	if strings.Contains(accept, "text/html") || strings.Contains(accept, "application/xhtml+xml") {
+		return true
+	}
+	return false
 }

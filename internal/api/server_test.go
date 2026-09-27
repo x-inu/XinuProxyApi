@@ -1802,6 +1802,78 @@ func TestVideosRoutesKeepXAINativeAndExposeOpenAIPrefix(t *testing.T) {
 	}
 }
 
+func TestRootServesControlPanelForBrowsersAndJSONForAPIClients(t *testing.T) {
+	t.Setenv("MANAGEMENT_PASSWORD", "test-management-key")
+	staticDir := t.TempDir()
+	t.Setenv("MANAGEMENT_STATIC_PATH", staticDir)
+	if err := os.WriteFile(filepath.Join(staticDir, "management.html"), []byte("<html>management app</html>"), 0o600); err != nil {
+		t.Fatalf("failed to write management asset: %v", err)
+	}
+
+	server := newTestServer(t)
+
+	t.Run("browser Accept header serves the control panel", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("Accept", "text/html,application/xhtml+xml")
+		rr := httptest.NewRecorder()
+		server.engine.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusOK, rr.Body.String())
+		}
+		if !strings.Contains(rr.Body.String(), "management app") {
+			t.Fatalf("root did not serve the control panel: %s", rr.Body.String())
+		}
+	})
+
+	t.Run("API clients still receive the JSON endpoint listing", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		rr := httptest.NewRecorder()
+		server.engine.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusOK, rr.Body.String())
+		}
+		if !strings.Contains(rr.Body.String(), "CLI Proxy API Server") {
+			t.Fatalf("root did not serve the JSON listing: %s", rr.Body.String())
+		}
+	})
+
+	t.Run("explicit JSON Accept receives the JSON endpoint listing", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("Accept", "application/json")
+		rr := httptest.NewRecorder()
+		server.engine.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusOK, rr.Body.String())
+		}
+		if !strings.Contains(rr.Body.String(), "CLI Proxy API Server") {
+			t.Fatalf("root did not serve the JSON listing: %s", rr.Body.String())
+		}
+	})
+}
+
+func TestRootServesJSONForBrowsersWhenControlPanelDisabled(t *testing.T) {
+	t.Setenv("MANAGEMENT_PASSWORD", "test-management-key")
+	staticDir := t.TempDir()
+	t.Setenv("MANAGEMENT_STATIC_PATH", staticDir)
+	if err := os.WriteFile(filepath.Join(staticDir, "management.html"), []byte("<html>management app</html>"), 0o600); err != nil {
+		t.Fatalf("failed to write management asset: %v", err)
+	}
+
+	server := newTestServer(t)
+	server.cfg.RemoteManagement.DisableControlPanel = true
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Accept", "text/html")
+	rr := httptest.NewRecorder()
+	server.engine.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusOK, rr.Body.String())
+	}
+	if !strings.Contains(rr.Body.String(), "CLI Proxy API Server") {
+		t.Fatalf("root should fall back to JSON when the panel is disabled: %s", rr.Body.String())
+	}
+}
+
 func TestHomeEnabledHidesManagementEndpointsAndControlPanel(t *testing.T) {
 	t.Setenv("MANAGEMENT_PASSWORD", "test-management-key")
 

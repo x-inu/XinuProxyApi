@@ -127,8 +127,12 @@ func (s *Server) setupRoutes() {
 		v1beta.GET("/models/*action", s.geminiGetHandler(geminiHandlers))
 	}
 
-	// Root endpoint
+	// Root endpoint: browsers get the management control panel directly, while
+	// API clients (curl, SDKs) keep receiving the JSON endpoint listing.
 	s.engine.GET("/", func(c *gin.Context) {
+		if clientAcceptsHTML(c) && s.tryServeManagementControlPanel(c) {
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"message": "CLI Proxy API Server",
 			"endpoints": []string{

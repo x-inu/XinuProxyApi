@@ -51,6 +51,24 @@ describe('Devin quota identity', () => {
     expect(getQuotaDisplayName({ ...devinFile(null), account: 'secret' })).toBe('shared.json');
   });
 
+  test('non-Devin cards show the account email and hide the filename noise', () => {
+    expect(
+      getQuotaDisplayName({
+        name: 'antigravity-vikogts0@gmail.com.json',
+        provider: 'antigravity',
+        email: 'vikogts0@gmail.com',
+      })
+    ).toBe('vikogts0@gmail.com');
+    // No email available: fall back to the filename without the .json suffix.
+    expect(
+      getQuotaDisplayName({ name: 'antigravity-team.json', provider: 'antigravity' })
+    ).toBe('antigravity-team');
+    // The raw account field must never be used as a display label (it can be a secret).
+    expect(
+      getQuotaDisplayName({ name: 'codex-a.json', provider: 'codex', account: 'secret' })
+    ).toBe('codex-a');
+  });
+
   test('does not merge same-name Devin identities or leak quota and email between them', () => {
     const response = normalizeAuthFilesResponse({
       files: [

@@ -1,5 +1,6 @@
 import type { AuthFileItem } from '@/types';
 import { normalizeRecentRequestAuthIndex } from '@/utils/recentRequests';
+import { stripJsonExtension } from '@/features/authFiles/identity';
 import { isDevinFile } from './validators';
 
 const QUOTA_IDENTITY_SEPARATOR = '\0';
@@ -15,10 +16,18 @@ export function getQuotaCacheKey(file: AuthFileItem): string {
   return `${file.name}${QUOTA_IDENTITY_SEPARATOR}${authIndex ?? ''}`;
 }
 
-/** Disambiguate same-name Devin cards without ever falling back to account (a secret). */
+/**
+ * Card/lane label. Prefers the account email so a fleet of many credentials
+ * reads as a list of addresses (e.g. `vikogts0@gmail.com`) instead of raw
+ * filenames like `antigravity-vikogts0@gmail.com.json`. Devin still appends its
+ * disambiguator because several Devin identities can share one physical file.
+ */
 export function getQuotaDisplayName(file: AuthFileItem): string {
-  if (!isDevinFile(file)) return file.name;
-  const identity = file.email?.trim() || normalizeRecentRequestAuthIndex(file.authIndex);
+  const email = file.email?.trim();
+  if (!isDevinFile(file)) {
+    return email || stripJsonExtension(file.name);
+  }
+  const identity = email || normalizeRecentRequestAuthIndex(file.authIndex);
   return identity ? `${file.name} · ${identity}` : file.name;
 }
 

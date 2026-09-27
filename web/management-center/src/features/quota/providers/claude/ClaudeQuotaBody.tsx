@@ -1,6 +1,4 @@
-/**
- * Claude 额度渲染体：套餐/额外用量 chip 行 + 用量窗口水位条。
- */
+
 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

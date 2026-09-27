@@ -1,7 +1,7 @@
-// 配置文档的加载 / 保存状态机 —— 从旧 pages/ConfigPage.tsx 逐字提取。
-// 正确性核心，勿随手「顺化」：两阶段保存（预览前 re-fetch → diff → 确认时再 re-fetch，
-// 服务端变更则重新预览不落盘）、可视化模式的规范化 diff、commercial-mode 重启警告、
-// 保存成功后刷新全局 config store。
+
+
+
+
 
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +30,7 @@ function normalizeYamlForVisualDiff(yamlContent: string): string {
 }
 
 export type UseConfigDocumentArgs = {
-  /** 当前编辑模式（旧实现中的 activeTab）。 */
+
   mode: ConfigEditorMode;
   visualDirty: boolean;
   visualParseError: string | null;
@@ -38,7 +38,7 @@ export type UseConfigDocumentArgs = {
   applyVisualChangesToYaml: (yaml: string) => string;
 };
 
-/** 可视化保存仅在用户真正编辑过源码时以本地草稿为合并基底。 */
+
 export function selectVisualMergeBase(
   latestServerYaml: string,
   sourceDraftYaml: string,
@@ -58,10 +58,7 @@ export function buildConfigSaveDraft(
   return applyVisualChanges(selectVisualMergeBase(latestServerYaml, sourceDraftYaml, sourceDirty));
 }
 
-/**
- * 未编辑源码的模式往返不应重载可视化值，否则会清空字段级 dirty，改变并发合并策略。
- * YAML 曾解析失败时仍须重试解析，避免仅靠切换模式绕过错误。
- */
+
 export function shouldReloadVisualDraft(sourceDirty: boolean, visualParseError: string | null) {
   return sourceDirty || visualParseError !== null;
 }
@@ -81,7 +78,7 @@ export function useConfigDocument({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  // 仅表示用户在源码编辑器中改过草稿；可视化字段同步到 content 不得修改它。
+
   const [sourceDirty, setSourceDirty] = useState(false);
   const [diffModalOpen, setDiffModalOpen] = useState(false);
   const [serverYaml, setServerYaml] = useState('');
@@ -288,12 +285,12 @@ export function useConfigDocument({
     visualParseError,
   ]);
 
-  /** 可视化→源码时只物化当前字段值，不把同步动作冒充为用户源码编辑。 */
+
   const syncContentFromVisual = useCallback((value: string) => {
     setContent(value);
   }, []);
 
-  /** 源码编辑器 onChange：写入内容并记录真正的源码草稿。 */
+
   const handleChange = useCallback((value: string) => {
     setContent(value);
     setSourceDirty(true);
@@ -317,7 +314,7 @@ export function useConfigDocument({
     });
   }, [isDirty, loadConfig, showConfirmation, t]);
 
-  /** 无需联网，直接恢复最近一次成功读取的原始服务端 YAML。 */
+
   const handleDiscard = useCallback(() => {
     if (!isDirty) return;
 

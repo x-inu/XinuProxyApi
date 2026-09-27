@@ -1,9 +1,8 @@
 @use '../../../../styles/mixins' as *;
 
-/* 字段原语：表单控件的 scoped 覆盖 + 开关行 / 网格 / 字段组 / 搜索锚点。
-   交互反馈一律引用全局动效 tokens（--dur-* / --ease-out-strong）。 */
 
-/* ---------- 表单控件宿主（原 .visualEditor 的 :global 覆盖收编于此） ---------- */
+
+
 
 .fieldsRoot {
   :global(.form-group) {
@@ -78,7 +77,7 @@
   }
 }
 
-/* ---------- 开关行 ---------- */
+
 
 .toggleRow {
   display: grid;
@@ -126,7 +125,7 @@
   line-height: 1.55;
 }
 
-/* ---------- 布局原语 ---------- */
+
 
 .fieldGrid {
   display: grid;
@@ -149,7 +148,7 @@
   background: var(--border-color);
 }
 
-/* ---------- 搜索锚点与脉冲高亮 ---------- */
+
 
 .fieldAnchor {
   display: block;
@@ -157,7 +156,7 @@
   scroll-margin-top: calc(var(--header-height, 64px) + 16px);
 }
 
-/* 跨两列的字段（如长文本的代理 URL）；移动端单列布局下回退为一列。 */
+
 .fieldAnchorWide {
   grid-column: span 2;
 
@@ -166,7 +165,7 @@
   }
 }
 
-/* 字段标签下方的赞助跳转小字行（代理 URL 字段）。 */
+
 .fieldSponsorHint {
   margin: -2px 0 0;
   color: var(--text-secondary);
@@ -174,8 +173,7 @@
   line-height: 1.5;
 }
 
-/* 与赞助行同字号同高度的隐形占位：同排右侧字段用它补齐标签区高度，让输入框与代理 URL 对齐。
-   移动端单列堆叠时无需对齐，直接隐藏。 */
+
 .fieldSponsorSpacer {
   margin: -2px 0 0;
   font-size: 12px;
@@ -187,7 +185,7 @@
   }
 }
 
-/* 与正文融为一体的高亮链接：同字号，复用全站金色（amber）badge 配方，hover 底色加深。 */
+
 .fieldSponsorLink {
   display: inline-flex;
   align-items: center;
@@ -231,7 +229,7 @@
   }
 }
 
-/* ---------- 字段组（原 subsection） ---------- */
+
 
 .group {
   display: flex;
@@ -264,7 +262,7 @@
   line-height: 1.6;
 }
 
-/* ---------- 字段外壳 ---------- */
+
 
 .fieldShell {
   display: flex;
@@ -307,7 +305,7 @@
   font-weight: 700;
 }
 
-/* ---------- 响应式 ---------- */
+
 
 @include mobile {
   .group,
@@ -323,7 +321,7 @@
   }
 }
 
-/* ---------- 无障碍 ---------- */
+
 
 @media (prefers-reduced-motion: reduce) {
   .fieldsRoot :global(.input),

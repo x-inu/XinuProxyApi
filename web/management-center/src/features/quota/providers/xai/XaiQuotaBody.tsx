@@ -1,7 +1,4 @@
-/**
- * xAI 额度渲染体：套餐 chip 行（SuperGrok Heavy / 付费档=金卡）、
- * 周/月账单水位条、按量付费余额。
- */
+
 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

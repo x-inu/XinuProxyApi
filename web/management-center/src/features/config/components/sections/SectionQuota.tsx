@@ -7,7 +7,7 @@ import { QuotaSwitchPreviewModelToggle, QuotaSwitchProjectToggle } from '../fiel
 
 const Icon = CONFIG_TAB_ICONS.quota;
 
-/** 04 配额回退：配额耗尽时的回退策略（两个开关默认 true）。 */
+
 export function SectionQuota({ values, disabled, animateIn, onChange }: ConfigSectionProps) {
   const { t } = useTranslation();
 

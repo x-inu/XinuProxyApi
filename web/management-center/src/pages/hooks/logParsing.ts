@@ -81,7 +81,7 @@ const inferLogLevel = (line: string): LogLevel | undefined => {
   const lowered = line.toLowerCase();
   if (/\bfatal\b/.test(lowered)) return 'fatal';
   if (/\berror\b/.test(lowered)) return 'error';
-  if (/\bwarn(?:ing)?\b/.test(lowered) || line.includes('警告')) return 'warn';
+  if (/\bwarn(?:ing)?\b/.test(lowered)) return 'warn';
   if (/\binfo\b/.test(lowered)) return 'info';
   if (/\bdebug\b/.test(lowered)) return 'debug';
   if (/\btrace\b/.test(lowered)) return 'trace';

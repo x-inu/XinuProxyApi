@@ -36,10 +36,9 @@ const snapshot = (): MetaQuotaState => ({
 afterEach(() => useQuotaStore.getState().clearQuotaCache());
 
 describe('Muse quota UI integration', () => {
-  test('provides quota labels in all four locales', () => {
-    for (const locale of ['en', 'zh-CN', 'zh-TW', 'ru']) {
-      const translations = JSON.parse(readFileSync(`src/i18n/locales/${locale}.json`, 'utf8'));
-      for (const key of [
+  test('provides quota labels in English', () => {
+    const translations = JSON.parse(readFileSync('src/i18n/locales/en.json', 'utf8'));
+    for (const key of [
         'title',
         'empty_title',
         'empty_desc',
@@ -64,8 +63,7 @@ describe('Muse quota UI integration', () => {
         'unknown',
         'remaining',
       ]) {
-        expect(translations.meta_quota[key]).toBeTruthy();
-      }
+      expect(translations.meta_quota[key]).toBeTruthy();
     }
   });
   test('registers quota and filters disabled credentials', () => {

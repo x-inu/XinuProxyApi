@@ -52,17 +52,15 @@ describe('Kimi regional login', () => {
     expect(new URL(KIMI_INTERNATIONAL_AFFILIATE_URL).hostname).toBe('platform.kimi.ai');
   });
 
-  for (const locale of ['en', 'zh-CN', 'zh-TW', 'ru']) {
-    test(`provides complete regional login translations (${locale})`, () => {
-      const { auth_login: messages } = JSON.parse(
-        readFileSync(`src/i18n/locales/${locale}.json`, 'utf8')
-      ) as { auth_login: Record<string, string> };
+  test('provides complete English login translations', () => {
+    const { auth_login: messages } = JSON.parse(
+      readFileSync('src/i18n/locales/en.json', 'utf8')
+    ) as { auth_login: Record<string, string> };
       for (const key of Object.keys(messages).filter((key) => key.startsWith('kimi_'))) {
         if (key.startsWith('kimi_ai_') || key === 'kimi_sign_up_button') continue;
         expect(messages[key.replace('kimi_', 'kimi_ai_')]).toBeTruthy();
       }
       expect(messages.kimi_oauth_title).toContain('kimi.com');
       expect(messages.kimi_ai_oauth_title).toContain('kimi.ai');
-    });
-  }
+  });
 });

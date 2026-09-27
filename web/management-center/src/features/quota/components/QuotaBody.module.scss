@@ -1,17 +1,8 @@
 @use '../../../styles/mixins' as *;
 
-/* ============================================================
- * 额度卡片 body 的全页外衣（类型化契约见 features/quota/types.ts）。
- *
- * 两段构成：
- * 1. 额度行 / 水位条 / Antigravity 分组 —— mono 遥测风，与紧凑外衣同族；
- * 2. 套餐徽章区（.codexPlan* 起至文件末尾）—— 从 pages/QuotaPage.module.scss
- *    第 429–1023 行逐字节搬迁的定稿资产（金卡 + Pro 20x 液态铂金，含暗色 /
- *    HDR / 减动效冻结帧 / 移动端降级）。**该区块禁止改动**：改配方等于重设计
- *    已验收的徽章，验证方式是与 git 历史做 diff（应为空）。
- * ============================================================ */
 
-/* ---------- 额度行 ---------- */
+
+
 
 .quotaRow {
   display: flex;
@@ -36,7 +27,7 @@
   @include text-ellipsis;
 }
 
-/* 遥测：mono + 等宽数字，刷新时数字不跳位 */
+
 .quotaMeta {
   display: inline-flex;
   align-items: baseline;
@@ -48,7 +39,7 @@
   letter-spacing: 0.01em;
 }
 
-/* 百分比穿墨色而非填充色 —— 文字不承担状态编码，颜色留给水位条 */
+
 .quotaPercent {
   font-weight: 650;
   color: var(--text-primary);
@@ -91,9 +82,7 @@
   padding: 6px 4px;
 }
 
-/* ---------- 水位条（QuotaMeter）----------
- * 轨道退居背景（8% 墨色），填充按剩余量三档着色；
- * percent === null 时宽度为 0 —— 未知不着色。 */
+
 
 .quotaBar {
   height: 6px;
@@ -105,10 +94,9 @@
 .quotaBarFill {
   height: 100%;
   border-radius: $radius-full;
-  /* 刷新时平滑重定向到新水位（可中断） */
+
   transition: width 360ms var(--ease-out-strong, ease);
-  /* 数据到达是本页的高潮时刻：水位逐行铺开（每行 40ms 级差）。
-   * 走 scaleX 而非 width，避免与上面的 width 过渡互相抢夺同一属性。 */
+
   transform-origin: left center;
   animation: quota-meter-fill 480ms var(--ease-out-strong, ease-out) both;
   animation-delay: calc(var(--meter-index, 0) * 40ms);
@@ -132,7 +120,7 @@
   background: var(--viz-failure);
 }
 
-/* ---------- Antigravity 分组 ---------- */
+
 
 .antigravityQuotaGroup {
   display: flex;
@@ -190,9 +178,7 @@
   }
 }
 
-/* ============================================================
- * 以下至文件末尾：套餐徽章定稿区块（逐字节搬迁，禁止改动）
- * ============================================================ */
+
 
 .codexPlan {
   display: flex;
@@ -449,15 +435,7 @@
   }
 }
 
-/* Codex Pro 20x —— 液态铂金（B2：精修液态铬 + 呼吸光晕，2026-07-31 定稿）。
- * 与金卡（premiumPlanValue）的档差来自「材质行为」而非颜色：金是静止的贵金属，
- * 20x 是一枚会流动的镜面铬 —— 三层异速反光带永续对流（12s）+ 光晕呼吸（7s）
- * + 每 7.5s 一道巡回扫光。全程零彩色，唯一的色彩暗示是第三层几乎无色的冰蓝微光。
- *
- * 试过并被推翻的方向（勿回退）：MC 青绿换色（太保守）、切面宝石区（20px 糊成噪点）、
- * 黑曜/紫晶/全息黑钻（弃暗体）、棱镜彩虹环、极光/油膜/星云晶体（太花）。
- * 口味锚点：单色金属 + 慢动态。文字两主题同为深灰蓝 —— 铬体恒亮，
- * 主题只微调石体明度与光晕强度。 */
+
 .elitePlanValue {
   position: relative;
   display: inline-flex;
@@ -530,7 +508,7 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
   text-transform: capitalize;
 
-  /* 呼吸光晕：与金卡同一套 blur 光晕构造，外加 7s 极缓呼吸 */
+
   &::before {
     content: '';
     position: absolute;
@@ -550,7 +528,7 @@
     z-index: -1;
   }
 
-  /* 巡回扫光：一道冷白亮带扫过镜面，只占 7.5s 周期的前 13%，其余时间静止 */
+
   &::after {
     content: '';
     position: absolute;
@@ -571,8 +549,7 @@
     pointer-events: none;
   }
 
-  /* 中性铬没有彩度可扩，P3 分支无收益（金卡需要它是因为暖金有色域外的彩度）。
-   * HDR 增益全部走 rec2100 超白：扫光与外发光在 HDR 屏上亮过 SDR 白。 */
+
   @supports (color: #{'color(rec2100-linear 1 1 1)'}) {
     @media (dynamic-range: high) {
       dynamic-range-limit: no-limit;
@@ -638,7 +615,7 @@
   }
 }
 
-/* 暗色：铬体不换血统只提亮 —— 暗卡上它自己就是光源；文字保持深灰蓝。 */
+
 :global([data-theme='dark']) .elitePlanValue {
   background:
     radial-gradient(
@@ -711,7 +688,7 @@
   }
 }
 
-/* 减动效：三条动画全停，亮带冻结在压字前的一帧 —— 静态也是完成品。 */
+
 @media (prefers-reduced-motion: reduce) {
   .elitePlanValue,
   :global([data-theme='dark']) .elitePlanValue {
@@ -771,8 +748,8 @@
       0 0 10px rgba(255, 196, 44, 0.18);
   }
 
-  // 铂金徽章移动端：与金卡同一刀 —— 砍模糊光晕层（呼吸随之消失）、收一档外发光。
-  // 液态对流与扫光只是 background-position 重绘，~70×20px 成本可忽略，保留。
+
+
   .elitePlanValue {
     overflow: hidden;
     box-shadow:

@@ -17,7 +17,7 @@ export interface ProviderDescriptor {
   supportsWebsockets: boolean;
   supportsCloak: boolean;
   supportsApiKeyEntries: boolean;
-  /** Sheet 默认宽度 */
+
   sheetSize: 'md' | 'lg' | 'xl';
 }
 

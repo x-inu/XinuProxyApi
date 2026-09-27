@@ -1,7 +1,4 @@
-/**
- * Claude 额度数据层：用量窗口 + 套餐 + 额外用量。
- * React-free / SCSS-free —— 由 tests/claudeFableQuota.test.ts 直接消费。
- */
+
 
 import type { TFunction } from 'i18next';
 import type {

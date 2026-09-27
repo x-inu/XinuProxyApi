@@ -1,9 +1,4 @@
-/**
- * 本地存储混淆工具函数（可逆）
- * 从原项目 src/utils/secure-storage.js 迁移
- *
- * IMPORTANT: 这不是安全边界。浏览器端长期持久化的密钥仍应视为可被读取。
- */
+
 
 const ENC_PREFIX = 'enc::v1::';
 const SECRET_SALT = 'cli-proxy-api-webui::secure-storage';
@@ -60,9 +55,7 @@ function fromBase64(base64: string): Uint8Array {
   return bytes;
 }
 
-/**
- * 加密数据
- */
+
 export function obfuscateData(value: string): string {
   if (!value) return value;
 
@@ -76,9 +69,7 @@ export function obfuscateData(value: string): string {
   }
 }
 
-/**
- * 解密数据
- */
+
 export function deobfuscateData(payload: string): string {
   if (!payload || !payload.startsWith(ENC_PREFIX)) {
     return payload;
@@ -95,9 +86,7 @@ export function deobfuscateData(payload: string): string {
   }
 }
 
-/**
- * 检查是否已加密
- */
+
 export function isObfuscated(value: string): boolean {
   return value?.startsWith(ENC_PREFIX) || false;
 }

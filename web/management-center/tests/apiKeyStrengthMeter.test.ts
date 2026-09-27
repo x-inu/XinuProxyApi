@@ -6,8 +6,6 @@ import { ApiKeyStrengthMeter } from '@/features/config/components/blocks/ApiKeyS
 import { SEGMENT_STAGGER_MS, segmentFillDelayMs } from '@/features/config/components/blocks/shared';
 import { generateSecureApiKey } from '@/utils/apiKey';
 
-const LOCALES = ['en', 'zh-CN', 'zh-TW', 'ru'];
-
 describe('ApiKeyStrengthMeter', () => {
   test('exposes the tier through the progressbar', () => {
     const markup = renderToStaticMarkup(
@@ -34,33 +32,26 @@ describe('ApiKeyStrengthMeter', () => {
     const delays = (segments: number, previous: number) =>
       [0, 1, 2, 3].map((index) => segmentFillDelayMs(index, segments, previous));
 
-    // 0 → 4（点「生成」）：四段依次起跑
+    // 0 to 4: all four segments start in sequence.
     expect(delays(4, 0)).toEqual([
       0,
       SEGMENT_STAGGER_MS,
       SEGMENT_STAGGER_MS * 2,
       SEGMENT_STAGGER_MS * 3,
     ]);
-    // 2 → 3（键入一个字符）：新增的那段立刻亮，不为它的下标排队
+    // 2 to 3: the newly added segment lights immediately.
     expect(delays(3, 2)).toEqual([0, 0, 0, 0]);
-    // 1 → 3：只有新增的两段排队
+    // 1 to 3: only the two newly added segments are staggered.
     expect(delays(3, 1)).toEqual([0, 0, SEGMENT_STAGGER_MS, 0]);
-    // 4 → 2（删字符）：熄灭立即发生
+    // 4 to 2: segments turn off immediately.
     expect(delays(2, 4)).toEqual([0, 0, 0, 0]);
   });
 
-  test('every tier label is translated in all locales', async () => {
-    const original = i18n.language;
-
-    for (const locale of LOCALES) {
-      await i18n.changeLanguage(locale);
-      for (const key of ['label', 'empty', 'weak', 'fair', 'good', 'strong']) {
-        const path = `config_management.visual.api_keys.strength.${key}`;
-        expect(i18n.exists(path)).toBe(true);
-        expect(i18n.t(path)).not.toBe(path);
-      }
+  test('every tier label exists in English', () => {
+    for (const key of ['label', 'empty', 'weak', 'fair', 'good', 'strong']) {
+      const path = `config_management.visual.api_keys.strength.${key}`;
+      expect(i18n.exists(path)).toBe(true);
+      expect(i18n.t(path)).not.toBe(path);
     }
-
-    await i18n.changeLanguage(original);
   });
 });

@@ -1,7 +1,4 @@
-/**
- * Axios API 客户端
- * 替代原项目 src/core/api-client.js
- */
+
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import type { ApiClientConfig, ApiError } from '@/types';
@@ -32,9 +29,7 @@ class ApiClient {
     this.setupInterceptors();
   }
 
-  /**
-   * 设置 API 配置
-   */
+
   setConfig(config: ApiClientConfig): void {
     this.apiBase = computeApiUrl(config.apiBase);
     this.managementKey = config.managementKey;
@@ -97,17 +92,15 @@ class ApiClient {
     return null;
   }
 
-  /**
-   * 设置请求/响应拦截器
-   */
+
   private setupInterceptors(): void {
-    // 请求拦截器
+
     this.instance.interceptors.request.use(
       (config) => {
-        // 设置 baseURL
+
         config.baseURL = this.apiBase;
 
-        // 添加认证头
+
         if (this.managementKey) {
           config.headers.Authorization = `Bearer ${this.managementKey}`;
         }
@@ -117,7 +110,7 @@ class ApiClient {
       (error) => Promise.reject(this.handleError(error))
     );
 
-    // 响应拦截器
+
     this.instance.interceptors.response.use(
       (response) => {
         const headers = response.headers as Record<string, string | undefined>;
@@ -127,7 +120,7 @@ class ApiClient {
         const buildDate = cpaBuildDate || this.readHeader(headers, BUILD_DATE_HEADER_KEYS);
         const supportsPlugin = this.readBooleanHeader(headers, CPA_SUPPORT_PLUGIN_HEADER_KEYS);
 
-        // 触发版本更新事件（后续通过 store 处理）
+
         if (version || buildDate) {
           window.dispatchEvent(
             new CustomEvent('server-version-update', {
@@ -149,9 +142,7 @@ class ApiClient {
     );
   }
 
-  /**
-   * 错误处理
-   */
+
   private handleError(error: unknown): ApiError {
     if (axios.isAxiosError(error)) {
       const responseData: unknown = error.response?.data;
@@ -164,7 +155,7 @@ class ApiClient {
       apiError.details = responseData;
       apiError.data = responseData;
 
-      // 401 未授权 - 触发登出事件
+
       if (error.response?.status === 401) {
         window.dispatchEvent(new Event('unauthorized'));
       }
@@ -183,56 +174,42 @@ class ApiClient {
     return fallback;
   }
 
-  /**
-   * GET 请求
-   */
+
   async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.get<T>(url, config);
     return response.data;
   }
 
-  /**
-   * POST 请求
-   */
+
   async post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.post<T>(url, data, config);
     return response.data;
   }
 
-  /**
-   * PUT 请求
-   */
+
   async put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.put<T>(url, data, config);
     return response.data;
   }
 
-  /**
-   * PATCH 请求
-   */
+
   async patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.patch<T>(url, data, config);
     return response.data;
   }
 
-  /**
-   * DELETE 请求
-   */
+
   async delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.delete<T>(url, config);
     return response.data;
   }
 
-  /**
-   * 获取原始响应（用于下载等场景）
-   */
+
   async getRaw(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
     return this.instance.get(url, config);
   }
 
-  /**
-   * 发送 FormData
-   */
+
   async postForm<T = unknown>(
     url: string,
     formData: FormData,
@@ -249,5 +226,5 @@ class ApiClient {
   }
 }
 
-// 导出单例
+
 export const apiClient = new ApiClient();

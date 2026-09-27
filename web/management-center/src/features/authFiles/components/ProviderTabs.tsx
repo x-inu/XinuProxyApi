@@ -19,10 +19,7 @@ export type ProviderTabsProps = {
   onChange: (type: string) => void;
 };
 
-/**
- * 提供商过滤 tabs：水平排布，支持鼠标滚轮与触屏横向滚动。
- * 品牌色只出现在图标上，激活态是文字 + 2px 墨色下划线。
- */
+
 export function ProviderTabs({
   types,
   counts,
@@ -63,7 +60,7 @@ export function ProviderTabs({
               <span
                 className={styles.tabIconWrap}
                 style={
-                  // 与 AI 提供商界面一致：Kimi 图标底座随主题切换颜色
+
                   isThemeSurfaceIconProvider(type)
                     ? { background: getThemeSurfaceIconBackground(resolvedTheme) }
                     : undefined

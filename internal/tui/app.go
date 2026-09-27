@@ -187,11 +187,6 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "ctrl+c", "q":
 				return a, tea.Quit
-			case "L":
-				ToggleLocale()
-				a.refreshTabs()
-				a.setAuthInputPrompt()
-				return a, nil
 			case "enter":
 				if a.authConnecting {
 					return a, nil
@@ -219,10 +214,6 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !a.logsEnabled || a.activeTab != tabLogs {
 				return a, tea.Quit
 			}
-		case "L":
-			ToggleLocale()
-			a.refreshTabs()
-			return a.broadcastToAllTabs(localeChangedMsg{})
 		case "tab":
 			if len(a.tabs) == 0 {
 				return a, nil
@@ -278,7 +269,7 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return a, cmd
 }
 
-// localeChangedMsg is broadcast to all tabs when the user toggles locale.
+// localeChangedMsg is retained for internal compatibility with tab update handlers.
 type localeChangedMsg struct{}
 
 func (a *App) refreshTabs() {

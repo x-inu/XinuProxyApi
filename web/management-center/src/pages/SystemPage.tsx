@@ -103,10 +103,7 @@ export function SystemPage() {
   const versionTapCount = useRef(0);
   const versionTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const otherLabel = useMemo(
-    () => (i18n.language?.toLowerCase().startsWith('zh') ? '其他' : 'Other'),
-    [i18n.language]
-  );
+  const otherLabel = 'Other';
   const groupedModels = useMemo(() => classifyModels(models, { otherLabel }), [models, otherLabel]);
   const requestLogEnabled = config?.requestLog ?? false;
   const requestLogDirty = requestLogDraft !== requestLogEnabled;

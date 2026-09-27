@@ -10,7 +10,7 @@ import { getValidationMessage } from '../blocks/shared';
 
 const Icon = CONFIG_TAB_ICONS.connectivity;
 
-/** 01 接入与认证：服务地址、端口、认证目录、API 密钥 + TLS / 远程管理折叠组。 */
+
 export function SectionConnectivity({
   values,
   validationErrors,

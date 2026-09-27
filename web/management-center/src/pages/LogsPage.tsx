@@ -41,7 +41,7 @@ import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
 import styles from './LogsPage.module.scss';
 
-// 初始只渲染最近 100 行，滚动到顶部再逐步加载更多（避免一次性渲染过多导致卡顿）
+
 const INITIAL_DISPLAY_LINES = 100;
 const MAX_BUFFER_LINES = 10000;
 const LONG_PRESS_MS = 650;
@@ -188,7 +188,7 @@ export function LogsPage() {
     fired: boolean;
   } | null>(null);
 
-  // 保存最新游标用于增量获取；新接口优先使用 cursor，旧接口继续使用 after。
+
   const logPositionRef = useRef<LogPosition>({});
 
   const resetLogPosition = () => {
@@ -263,7 +263,7 @@ export function LogsPage() {
         const visibleFrom = Math.max(buffer.length - INITIAL_DISPLAY_LINES, 0);
         setLogState({ buffer, visibleFrom });
       } else if (incremental && newLines.length > 0) {
-        // 增量更新：追加新日志并限制缓冲区大小（避免内存与渲染膨胀）
+
         setLogState((prev) => {
           const prevRenderedCount = prev.buffer.length - prev.visibleFrom;
           const combined = mergeIncrementalLines(prev.buffer, newLines);
@@ -271,7 +271,7 @@ export function LogsPage() {
           const buffer = dropCount > 0 ? combined.slice(dropCount) : combined;
           let visibleFrom = Math.max(prev.visibleFrom - dropCount, 0);
 
-          // 若用户停留在底部（跟随最新日志），则保持“渲染窗口”大小不变，避免无限增长
+
           if (stickToBottom) {
             visibleFrom = Math.max(buffer.length - prevRenderedCount, 0);
           }
@@ -279,7 +279,7 @@ export function LogsPage() {
           return { buffer, visibleFrom };
         });
       } else if (!incremental) {
-        // 全量加载：默认只渲染最后 100 行，向上滚动再展开更多
+
         const buffer = newLines.slice(-MAX_BUFFER_LINES);
         const visibleFrom = Math.max(buffer.length - INITIAL_DISPLAY_LINES, 0);
         setLogState({ buffer, visibleFrom });
@@ -377,7 +377,7 @@ export function LogsPage() {
     try {
       const res = await logsApi.fetchErrorLogs();
       if (!requests.errors.isCurrent(request)) return;
-      // API 返回 { files: [...] }
+
       setErrorLogs(Array.isArray(res.files) ? res.files : []);
     } catch (err: unknown) {
       if (!requests.errors.isCurrent(request)) return;

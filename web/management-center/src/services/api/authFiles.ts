@@ -1,6 +1,4 @@
-/**
- * 认证文件与 OAuth 排除模型相关 API
- */
+
 
 import { apiClient } from './client';
 import type { AuthFilesResponse } from '@/types/authFile';
@@ -240,11 +238,7 @@ const readRuntimeOnlyField = (entry: AuthFileEntry): boolean => {
   return false;
 };
 
-/**
- * 契约边界归一化：把后端 kebab/snake_case 生字段填充到 AuthFileItem 声明的
- * camelCase 字段上。原始字段全部透传——quota resolvers 仍直接读
- * plan_type / id_token / metadata / attributes 等生字段。
- */
+
 const normalizeAuthFileEntry = (
   entry: AuthFileEntry,
   observedAt: string | undefined,
@@ -255,8 +249,8 @@ const normalizeAuthFileEntry = (
   const statusMessage = readTextField(entry, 'status_message') || declaredStatusMessage;
   const note = readTextField(entry, 'note');
   const email = readTextField(entry, 'email');
-  // account / account_type 故意不归一化：api-key 类凭证的 account 就是 API key 本身
-  // （sdk/cliproxy/auth/types.go AccountInfo），不能进入展示与搜索路径。
+
+
   const projectId = readTextField(entry, 'project_id');
   const modified = readDateField(entry);
   const priority = readIntegerField(entry['priority']);
@@ -500,7 +494,7 @@ export const authFilesApi = {
     return blob.text();
   },
 
-  // OAuth 排除模型
+
   async getOauthExcludedModels(): Promise<Record<string, string[]>> {
     const data = await apiClient.get('/oauth-excluded-models');
     return normalizeOauthExcludedModels(data);
@@ -520,7 +514,7 @@ export const authFilesApi = {
   replaceOauthExcludedModels: (map: Record<string, string[]>) =>
     apiClient.put('/oauth-excluded-models', normalizeOauthExcludedModels(map)),
 
-  // OAuth 模型别名
+
   async getOauthModelAlias(): Promise<Record<string, OAuthModelAliasEntry[]>> {
     const data = await apiClient.get(OAUTH_MODEL_ALIAS_ENDPOINT);
     return normalizeOauthModelAlias(data);
@@ -553,7 +547,7 @@ export const authFilesApi = {
     }
   },
 
-  // 获取认证凭证支持的模型
+
   async getModelsForAuthFile(
     name: string
   ): Promise<{ id: string; display_name?: string; type?: string; owned_by?: string }[]> {
@@ -566,7 +560,7 @@ export const authFilesApi = {
       : [];
   },
 
-  // 获取指定 channel 的模型定义
+
   async getModelDefinitions(
     channel: string
   ): Promise<{ id: string; display_name?: string; type?: string; owned_by?: string }[]> {

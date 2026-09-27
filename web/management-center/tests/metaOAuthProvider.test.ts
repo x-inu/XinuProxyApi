@@ -68,8 +68,7 @@ describe('Muse (Meta) provider and device OAuth', () => {
       /const CALLBACK_SUPPORTED = new Set<string>\(([^;]+)\);/
     );
     expect(callbackProviders?.[1]).not.toContain("'meta'");
-    for (const locale of ['en', 'zh-CN', 'zh-TW', 'ru']) {
-      const translations = JSON.parse(readFileSync(`src/i18n/locales/${locale}.json`, 'utf8'));
+    const translations = JSON.parse(readFileSync('src/i18n/locales/en.json', 'utf8'));
       for (const suffix of [
         'oauth_title',
         'oauth_button',
@@ -88,7 +87,6 @@ describe('Muse (Meta) provider and device OAuth', () => {
       expect(translations.auth_files.filter_meta).toBe('Muse (Meta)');
       expect(translations.providersPage.providerNames.meta).toBe('Muse (Meta)');
       expect(translations.auth_login.device_code_label).toBeTruthy();
-      expect(translations.auth_login.device_code_copy).toBeTruthy();
-    }
+    expect(translations.auth_login.device_code_copy).toBeTruthy();
   });
 });

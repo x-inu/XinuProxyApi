@@ -2,8 +2,6 @@
 
 A single-file Web UI (React + TypeScript) for operating and troubleshooting the **CLI Proxy API** via its **Management API** (config, credentials, and logs).
 
-[中文文档](README_CN.md)
-
 **Main Project**: https://github.com/router-for-me/CLIProxyAPI   
 **Minimum Required Version**: ≥ 7.2.147 (recommended latest)
 
@@ -101,18 +99,11 @@ Check the CLI Proxy API server documentation/config comments for the full authen
 - Motion (animations)
 - CodeMirror 6 (YAML editor)
 - SCSS Modules (styling)
-- i18next (internationalization)
+- i18next (English message catalog)
 
-## Internationalization
+## Language
 
-Currently supports four languages:
-
-- English (en)
-- Simplified Chinese (zh-CN)
-- Traditional Chinese (zh-TW)
-- Russian (ru)
-
-The UI language is automatically detected from browser settings and can be manually switched from the login page or header language menu.
+The UI is English-only. Language detection, language persistence, and language selectors are intentionally disabled.
 
 ## Browser Compatibility
 

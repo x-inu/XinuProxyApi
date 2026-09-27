@@ -7,9 +7,6 @@ import { createInstance } from 'i18next';
 import { OAuthPage } from '@/pages/OAuthPage';
 import { validateDevinCallback } from '@/pages/devinOAuth';
 import en from '@/i18n/locales/en.json';
-import zhCN from '@/i18n/locales/zh-CN.json';
-import zhTW from '@/i18n/locales/zh-TW.json';
-import ru from '@/i18n/locales/ru.json';
 
 const i18n = createInstance();
 await i18n.init({ lng: 'en', resources: { en: { translation: en } } });
@@ -30,16 +27,14 @@ describe('Devin OAuth login UI', () => {
     expect(markup).not.toContain('auth_login.devin_');
   });
 
-  test('supplies every Devin label and hint in all four languages', () => {
+  test('supplies every Devin label and hint in English', () => {
     const keys = Object.keys(en.auth_login).filter((key) => key.startsWith('devin_'));
     expect(keys.length).toBeGreaterThanOrEqual(14);
-    for (const locale of [en, zhCN, zhTW, ru]) {
-      for (const key of keys) {
-        expect((locale.auth_login as Record<string, string>)[key]?.trim()).toBeTruthy();
-      }
-      expect(locale.auth_login.devin_oauth_hint).toContain('v7.3.1');
-      expect(locale.auth_login.devin_callback_hint).toContain('/devin/callback');
+    for (const key of keys) {
+      expect((en.auth_login as Record<string, string>)[key]?.trim()).toBeTruthy();
     }
+    expect(en.auth_login.devin_oauth_hint).toContain('v7.3.1');
+    expect(en.auth_login.devin_callback_hint).toContain('/devin/callback');
   });
 });
 

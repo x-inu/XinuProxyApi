@@ -46,7 +46,7 @@ export type AuthFileCardProps = {
   manualRefreshing: Record<string, boolean>;
   quotaFilterType: AuthFileQuotaFilter;
   statusBarCache: Map<string, AuthFileStatusBarData>;
-  /** 首屏一次性级联入场的延迟；null/undefined 表示不做入场动画。 */
+
   entranceDelayMs?: number | null;
   onShowModels: (file: AuthFileItem) => void;
   onDownload: (name: string) => void;
@@ -105,10 +105,10 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const priorityValue = Number.isSafeInteger(file.priority) ? file.priority : undefined;
   const weightValue = Number.isSafeInteger(file.weight) ? file.weight : undefined;
   const noteValue = typeof file.note === 'string' ? file.note.trim() : '';
-  // 主行显示账号（email/项目 ID），文件名降为满卡宽的 mono 副行
+
   const identity = deriveAuthFileIdentity(file);
 
-  // 挂载时捕获一次入场延迟：父级随后传 null 也不会中断已开始的动画
+
   const [mountEntranceDelayMs] = useState<number | null>(entranceDelayMs ?? null);
   const cardClasses = [
     styles.card,

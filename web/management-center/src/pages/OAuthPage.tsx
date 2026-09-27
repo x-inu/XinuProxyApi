@@ -877,7 +877,7 @@ export function OAuthPage() {
           </div>
         </section>
 
-        {/* Vertex JSON 登录 */}
+
         <section className={styles.providerSection}>
           <h2 className={styles.sectionTitle}>{t('auth_login.other_login_methods')}</h2>
           <Card

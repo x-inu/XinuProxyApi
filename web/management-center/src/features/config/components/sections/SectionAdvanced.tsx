@@ -22,7 +22,7 @@ import { StringListEditor } from '../blocks/StringListEditor';
 
 const Icon = CONFIG_TAB_ICONS.advanced;
 
-/** 06 高级与实验：插件源、供应商敏感词、签名缓存与请求头默认值。 */
+
 export function SectionAdvanced({ values, disabled, animateIn, onChange }: ConfigSectionProps) {
   const { t } = useTranslation();
 

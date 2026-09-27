@@ -16,7 +16,7 @@ import { bindQuotaClasses } from '@/features/quota/types';
 import { QUOTA_ADAPTERS, type QuotaCardState } from '@/features/quota/providers';
 import styles from './AuthFileQuota.module.scss';
 
-/** 认证文件卡片外衣：紧凑额度样式绑定成类型化契约（缺键在模块初始化即抛）。 */
+
 const compactQuotaClasses = bindQuotaClasses(styles, 'AuthFileQuota.module.scss');
 
 const assertNever = (value: never): never => {

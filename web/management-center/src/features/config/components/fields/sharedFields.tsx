@@ -1,6 +1,6 @@
-// 8 个高频字段的唯一渲染源：SectionCommon（常用 tab）与各正典分区共用这些组件，
-// 两处渲染结构性不可能漂移（旧简单模式靠共享 JSX 常量达成同一目的）。
-// 注意：只挂载激活 tab，所以 FieldAnchor 的 DOM id 不会重复。
+
+
+
 
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
@@ -15,7 +15,7 @@ export type SharedFieldProps = {
   values: VisualConfigValues;
   disabled: boolean;
   onChange: (patch: Partial<VisualConfigValues>) => void;
-  /** 可选的标签上方占位行（见 SponsorHintSpacer），仅在需要与代理 URL 字段对齐时传入。 */
+
   topExtra?: ReactNode;
 };
 
@@ -61,7 +61,7 @@ export function PortField({
 
 export function ProxyUrlField({ values, disabled, onChange }: SharedFieldProps) {
   const { t } = useTranslation();
-  // 代理 URL 较长，字段跨两列；标签下方挂赞助跳转行（数据见 sponsors.ts，空则不渲染）。
+
   const sponsor = SPONSORS[0];
   return (
     <FieldAnchor fieldId="proxyUrl" wide>
@@ -94,11 +94,7 @@ export function ProxyUrlField({ values, disabled, onChange }: SharedFieldProps) 
   );
 }
 
-/**
- * 与代理 URL 字段同排时的隐形占位行：渲染在标签上方（Input 的 topExtra），
- * 赞助商存在时把同排字段整体下移与赞助行同高，让输入框水平对齐，
- * 同时标签与输入框之间保持正常间距；无赞助商则不渲染。
- */
+
 export function SponsorHintSpacer() {
   if (SPONSORS.length === 0) return null;
   return (

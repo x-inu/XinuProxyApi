@@ -1,7 +1,4 @@
-/**
- * xAI 额度数据层：免费档账单 + 付费档健康探测回退。
- * React-free / SCSS-free —— 由 tests/xaiPaidQuotaFallback.test.ts 直接消费。
- */
+
 
 import type { TFunction } from 'i18next';
 import type { AuthFileItem, XaiBillingSummary, XaiQuotaState } from '@/types';

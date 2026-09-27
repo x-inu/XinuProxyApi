@@ -3,19 +3,16 @@ import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import { IconEye, IconEyeOff } from '@/components/ui/icons';
-import { useAuthStore, useLanguageStore, useNotificationStore } from '@/stores';
+import { useAuthStore, useNotificationStore } from '@/stores';
 import { detectApiBaseFromLocation, normalizeApiBase } from '@/utils/connection';
-import { LANGUAGE_LABEL_KEYS, LANGUAGE_ORDER } from '@/utils/constants';
-import { isSupportedLanguage } from '@/utils/language';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
 import type { ApiError } from '@/types';
 import styles from './LoginPage.module.scss';
 
 /**
- * 将 API 错误转换为本地化的用户友好消息
+ * Converts API errors into user-friendly English messages.
  */
 type RedirectState = { from?: { pathname?: string } };
 
@@ -47,7 +44,7 @@ function getLocalizedErrorMessage(error: unknown, t: (key: string) => string): s
     return `HTTP ${status}: ${summary}${backendDetail}`;
   };
 
-  // 根据 HTTP 状态码判断
+  // Handle HTTP status codes.
   if (status === 401) {
     return withHttpStatus(t('login.error_unauthorized'));
   }
@@ -61,7 +58,7 @@ function getLocalizedErrorMessage(error: unknown, t: (key: string) => string): s
     return withHttpStatus(t('login.error_server'));
   }
 
-  // 根据 axios 错误码判断
+  // Handle Axios error codes.
   if (code === 'ECONNABORTED' || message.toLowerCase().includes('timeout')) {
     return t('login.error_timeout');
   }
@@ -72,12 +69,12 @@ function getLocalizedErrorMessage(error: unknown, t: (key: string) => string): s
     return t('login.error_ssl');
   }
 
-  // 检查 CORS 错误
+  // Handle CORS errors.
   if (message.toLowerCase().includes('cors') || message.toLowerCase().includes('cross-origin')) {
     return t('login.error_cors');
   }
 
-  // 默认错误消息
+  // Fall back to a generic error message.
   return withHttpStatus(t('login.error_invalid'));
 }
 
@@ -86,8 +83,6 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { showNotification } = useNotificationStore();
-  const language = useLanguageStore((state) => state.language);
-  const setLanguage = useLanguageStore((state) => state.setLanguage);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const login = useAuthStore((state) => state.login);
   const restoreSession = useAuthStore((state) => state.restoreSession);
@@ -106,23 +101,6 @@ export function LoginPage() {
   const [error, setError] = useState('');
 
   const detectedBase = useMemo(() => detectApiBaseFromLocation(), []);
-  const languageOptions = useMemo(
-    () =>
-      LANGUAGE_ORDER.map((lang) => ({
-        value: lang,
-        label: t(LANGUAGE_LABEL_KEYS[lang]),
-      })),
-    [t]
-  );
-  const handleLanguageChange = useCallback(
-    (selectedLanguage: string) => {
-      if (!isSupportedLanguage(selectedLanguage)) {
-        return;
-      }
-      setLanguage(selectedLanguage);
-    },
-    [setLanguage]
-  );
 
   useEffect(() => {
     const init = async () => {
@@ -130,7 +108,7 @@ export function LoginPage() {
         const autoLoggedIn = await restoreSession();
         if (autoLoggedIn) {
           setAutoLoginSuccess(true);
-          // 延迟跳转，让用户看到成功动画
+          // Delay navigation so the success animation remains visible.
           setTimeout(() => {
             const redirect = (location.state as RedirectState | null)?.from?.pathname || '/';
             navigate(redirect, { replace: true });
@@ -141,7 +119,7 @@ export function LoginPage() {
           setRememberPassword(storedRememberPassword || Boolean(storedKey));
         }
       } finally {
-        // 自动登录成功时 showSplash 仍由 autoLoginSuccess 维持，可无条件结束 loading
+        // autoLoginSuccess keeps the splash visible after automatic login completes.
         setAutoLoading(false);
       }
     };
@@ -200,12 +178,12 @@ export function LoginPage() {
     return <Navigate to={redirect} replace />;
   }
 
-  // 显示启动动画（自动登录中或自动登录成功）
+  // Show the splash while automatic login runs or succeeds.
   const showSplash = autoLoading || autoLoginSuccess;
 
   return (
     <div className={styles.container}>
-      {/* 左侧品牌展示区 */}
+      {/* Brand panel. */}
       <div className={styles.brandPanel}>
         <div className={styles.brandContent}>
           <span className={styles.brandWord}>CLI</span>
@@ -214,10 +192,10 @@ export function LoginPage() {
         </div>
       </div>
 
-      {/* 右侧功能交互区 */}
+      {/* Login panel. */}
       <div className={styles.formPanel}>
         {showSplash ? (
-          /* 启动动画 */
+          /* Splash animation. */
           <div className={styles.splashContent}>
             <img src={INLINE_LOGO_JPEG} alt="CPAMC" className={styles.splashLogo} />
             <h1 className={styles.splashTitle}>{t('splash.title')}</h1>
@@ -227,24 +205,16 @@ export function LoginPage() {
             </div>
           </div>
         ) : (
-          /* 登录表单 */
+          /* Login form. */
           <div className={styles.formContent}>
             {/* Logo */}
             <img src={INLINE_LOGO_JPEG} alt="Logo" className={styles.logo} />
 
-            {/* 登录表单卡片 */}
+            {/* Login card. */}
             <div className={styles.loginCard}>
               <div className={styles.loginHeader}>
                 <div className={styles.titleRow}>
                   <div className={styles.title}>{t('title.login')}</div>
-                  <Select
-                    className={styles.languageSelect}
-                    value={language}
-                    options={languageOptions}
-                    onChange={handleLanguageChange}
-                    fullWidth={false}
-                    ariaLabel={t('language.switch')}
-                  />
                 </div>
                 <div className={styles.subtitle}>{t('login.subtitle')}</div>
               </div>
@@ -292,13 +262,13 @@ export function LoginPage() {
                     onClick={() => setShowKey((prev) => !prev)}
                     aria-label={
                       showKey
-                        ? t('login.hide_key', { defaultValue: '隐藏密钥' })
-                        : t('login.show_key', { defaultValue: '显示密钥' })
+                        ? t('login.hide_key', { defaultValue: 'Hide key' })
+                        : t('login.show_key', { defaultValue: 'Show key' })
                     }
                     title={
                       showKey
-                        ? t('login.hide_key', { defaultValue: '隐藏密钥' })
-                        : t('login.show_key', { defaultValue: '显示密钥' })
+                        ? t('login.hide_key', { defaultValue: 'Hide key' })
+                        : t('login.show_key', { defaultValue: 'Show key' })
                     }
                   >
                     {showKey ? <IconEyeOff size={16} /> : <IconEye size={16} />}

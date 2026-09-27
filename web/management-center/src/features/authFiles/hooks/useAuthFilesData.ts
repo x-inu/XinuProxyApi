@@ -27,12 +27,12 @@ type DeleteAllOptions = {
 };
 
 export type LoadFilesOptions = {
-  /** 后台刷新：不置 loading（网格保持内容），改用 refreshing 标志。 */
+
   background?: boolean;
 };
 
 export type UseAuthFilesDataOptions = {
-  /** 文件集发生变更（上传/删除/手动刷新）后触发，供缓存失效等联动。 */
+
   onFilesMutated?: (names?: string[]) => void;
 };
 
@@ -88,7 +88,7 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
   const uploadPendingRef = useRef(false);
   const manualRefreshPendingRef = useRef<Set<string>>(new Set());
   const batchStatusPendingRef = useRef(false);
-  /** 列表请求代号：变更操作会使在途响应过期，防止旧轮询复活已删/已改文件。 */
+
   const loadRequestIdRef = useRef(0);
   const invalidateInFlightLoads = useCallback(() => {
     loadRequestIdRef.current += 1;
@@ -201,7 +201,7 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
 
       try {
         const data = await authFilesApi.list();
-        if (requestId !== loadRequestIdRef.current) return; // 已被更新的请求/变更取代
+        if (requestId !== loadRequestIdRef.current) return;
         setFiles(data?.files || []);
         setError('');
       } catch (err: unknown) {
@@ -690,7 +690,7 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
         );
       }
 
-      // 与 batchSetStatus 保持一致：批量动作完成后清空选择
+
       deselectAll();
     },
     [deselectAll, showNotification, t]

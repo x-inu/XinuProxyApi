@@ -30,7 +30,7 @@ const classes = bindQuotaClasses(
  */
 const now = Date.now();
 
-// The i18n fallback is zh-CN; pin English so the countdown assertions read.
+// Pin English so countdown assertions remain deterministic.
 beforeAll(async () => {
   await i18n.changeLanguage('en');
 });
@@ -60,23 +60,15 @@ describe('CodexQuotaBody', () => {
     rateLimitResetCreditsAvailableCount: 1,
   };
 
-  test.each(['en', 'zh-CN', 'zh-TW', 'ru'])(
-    'renders Business Premium with its premium badge in %s',
-    async (language) => {
-      await i18n.changeLanguage(language);
-      try {
-        for (const planType of ['self_serve_business_prolite', '  SELF_SERVE_BUSINESS_PROLITE  ']) {
+  test('renders Business Premium with its premium badge in English', () => {
+    for (const planType of ['self_serve_business_prolite', '  SELF_SERVE_BUSINESS_PROLITE  ']) {
           const markup = renderToStaticMarkup(
             createElement(CodexQuotaBody, { quota: { ...quota, planType }, classes })
           );
           expect(markup).toContain('<span class="premiumPlanValue">Business Premium</span>');
           expect(markup).not.toContain('self_serve_business_prolite');
-        }
-      } finally {
-        await i18n.changeLanguage('en');
-      }
     }
-  );
+  });
 
   test.each([
     ['pro', 'Pro 20x', 'elitePlanValue'],

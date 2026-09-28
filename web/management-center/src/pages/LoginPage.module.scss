@@ -1,204 +1,211 @@
 @use '../styles/variables.scss' as *;
 
+// Login page in the xinu-mail editorial "access terminal" style, adapted with
+// XinuProxyApi's own identity (源 watermark, amber accent, unified gateway
+// marginalia). Colors follow the two-mode theme tokens so it flips with the
+// rest of the app.
 
 .container {
+  position: relative;
   min-height: 100vh;
-  display: flex;
+  padding: 84px 24px 40px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: $font-family;
 }
 
+// Dotted wallpaper behind the card, masked to a soft vignette.
+.grid {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.56;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--text-primary) 16%, transparent) 1px,
+    transparent 1.3px
+  );
+  background-size: 22px 22px;
+  mask-image: radial-gradient(80% 80% at 50% 48%, #000 12%, transparent 74%);
+  -webkit-mask-image: radial-gradient(80% 80% at 50% 48%, #000 12%, transparent 74%);
+}
 
-.brandPanel {
-  flex: 1;
+// Oversized brand glyph bleeding off the right edge.
+.watermark {
+  position: absolute;
+  right: -3vw;
+  top: 50%;
+  transform: translateY(-48%);
+  color: var(--text-primary);
+  font-family: $font-serif;
+  font-weight: 400;
+  font-size: min(72vh, 680px);
+  line-height: 0.75;
+  opacity: 0.045;
+  filter: blur(2px);
+  user-select: none;
+  pointer-events: none;
+}
+
+// Fixed top bar.
+.header {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  padding: 0 clamp(18px, 4vw, 48px);
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #11100e;
-  color: #e6ded2;
-  padding: clamp(2.5rem, 6vw, 5rem);
-  position: relative;
-  overflow: hidden;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
 
-  // Hairline inset frame, echoing the editorial "dossier" look.
+.headerLogo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.headerGlyph {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease;
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+  }
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-tertiary);
+  font-family: $font-mono;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+}
+
+.status i {
+  width: 5px;
+  height: 5px;
+  background: var(--text-primary);
+  animation: loginPulse 1.5s steps(2) infinite;
+}
+
+.formWrapper {
+  position: relative;
+  z-index: 2;
+  width: min(520px, 100%);
+}
+
+.formKicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: var(--text-tertiary);
+  font-family: $font-mono;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+
   &::before {
     content: '';
-    position: absolute;
-    inset: 20px;
-    border: 1px solid rgba(244, 241, 234, 0.14);
-    pointer-events: none;
-  }
-
-  // Oversized watermark glyph bleeding off the corner.
-  &::after {
-    content: '力';
-    position: absolute;
-    right: -3rem;
-    bottom: -4rem;
-    font-family: 'Iowan Old Style', 'Palatino', 'Georgia', serif;
-    font-size: 28rem;
-    line-height: 1;
-    color: rgba(200, 134, 42, 0.08);
-    pointer-events: none;
-    user-select: none;
-  }
-
-  @media (max-width: $breakpoint-mobile) {
-    display: none;
+    width: 18px;
+    height: 1px;
+    background: var(--text-tertiary);
   }
 }
 
-
-.brandContent {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xl;
-  max-width: 30rem;
-}
-
-.brandGlyph {
-  font-family: $font-serif;
-  font-size: 4.5rem;
-  line-height: 1;
-  color: #f4f1ea;
-}
-
-.brandText {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-sm;
-}
-
-.brandEyebrow {
-  font-family: $font-mono;
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--amber-color, #c8862a);
-}
-
-.brandTitle {
-  font-family: $font-serif;
-  font-size: clamp(2.6rem, 5vw, 3.8rem);
-  font-weight: 600;
-  line-height: 0.98;
-  letter-spacing: -0.01em;
-  color: #f4f1ea;
-}
-
-.brandTagline {
-  color: rgba(244, 241, 234, 0.66);
-  font-size: 0.98rem;
-  line-height: 1.6;
-  max-width: 26rem;
-}
-
-.brandMeta {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  font-family: $font-mono;
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(244, 241, 234, 0.5);
-}
-
-.brandMetaDot {
-  width: 4px;
-  height: 4px;
-  background: var(--amber-color, #c8862a);
-}
-
-
-.formPanel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: $spacing-2xl;
-  background: var(--bg-secondary);
-  position: relative;
-
-  @media (max-width: $breakpoint-mobile) {
-    padding: $spacing-lg;
-    min-height: 100vh;
-  }
-}
-
-
-.formContent {
+.card {
   width: 100%;
-  max-width: 420px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: $spacing-xl;
-}
-
-// Logo
-.logo {
-  width: 64px;
-  height: 64px;
-  border-radius: $radius-md;
-  object-fit: cover;
-}
-
-
-.loginCard {
-  width: 100%;
-  background: var(--bg-primary);
+  padding: clamp(28px, 5vw, 48px);
+  background: color-mix(in srgb, var(--bg-primary) 94%, transparent);
   border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  box-shadow: var(--shadow-lg);
-  padding: $spacing-xl;
+  border-radius: 2px;
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  align-items: flex-start;
+  text-align: left;
 
-  @media (max-width: $breakpoint-mobile) {
-    padding: $spacing-lg;
-    box-shadow: none;
-    border: none;
-    background: transparent;
+  @media (max-width: 480px) {
+    padding: 28px 20px 22px;
   }
 }
 
-// Login header.
-.loginHeader {
+.formTitle {
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
-  text-align: center;
-}
-
-// Title row.
-.titleRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-sm;
-  flex-wrap: wrap;
-}
-
-// Title.
-.title {
+  gap: 0;
   font-family: $font-serif;
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: clamp(34px, 6vw, 52px);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+
+  @media (max-width: 480px) {
+    font-size: 34px;
+  }
+}
+
+.titleLead {
   color: var(--text-primary);
 }
 
-// Subtitle.
-.subtitle {
-  color: var(--text-secondary);
-  font-size: 14px;
+.titleAccent {
+  color: var(--text-primary);
+  font-style: italic;
 }
 
+.formDesc {
+  margin: 10px 0 0;
+  max-width: 380px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.62;
+}
+
+.formBody {
+  width: 100%;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
 .toggleAdvanced {
   display: flex;
@@ -212,7 +219,6 @@
   font-weight: 500;
 }
 
-
 .errorBox {
   background: rgba($error-color, 0.1);
   border: 1px solid rgba($error-color, 0.4);
@@ -222,11 +228,58 @@
   font-size: 14px;
 }
 
+.formMeta {
+  margin-top: 11px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-tertiary);
+  font-family: $font-mono;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+}
 
+.marginal {
+  position: absolute;
+  left: 24px;
+  bottom: 28px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: var(--text-tertiary);
+  font-family: $font-mono;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  user-select: none;
+
+  @media (max-width: $breakpoint-mobile) {
+    display: none;
+  }
+}
+
+@keyframes loginPulse {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0.2;
+  }
+}
+
+// Splash screen shown during automatic login.
+.splashScreen {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+}
 
 
 @keyframes splashEnter {
   from {
+
     opacity: 0;
     transform: scale(0.9) translateY(20px);
   }

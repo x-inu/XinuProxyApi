@@ -30,10 +30,13 @@ export interface UseModelDiscoveryArgs {
 
 export interface UseModelDiscoveryResult {
   available: boolean;
+  brand: ProviderBrand;
   loading: boolean;
   error: string | null;
   models: ModelInfo[];
   hasFetched: boolean;
+  freeOnly: boolean;
+  setFreeOnly: (value: boolean) => void;
   fetch: () => Promise<void>;
   reset: () => void;
 }
@@ -44,8 +47,9 @@ export function useModelDiscovery(args: UseModelDiscoveryArgs): UseModelDiscover
   const available = isModelDiscoveryBrand(brand);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [models, setModels] = useState<ModelInfo[]>([]);
+  const [rawModels, setRawModels] = useState<ModelInfo[]>([]);
   const [hasFetched, setHasFetched] = useState(false);
+  const [freeOnly, setFreeOnly] = useState(false);
 
   const fetch = useCallback(async () => {
     if (!available) return;
@@ -105,10 +109,10 @@ export function useModelDiscovery(args: UseModelDiscoveryArgs): UseModelDiscover
           }
         }
       }
-      setModels(next ?? []);
+      setRawModels(next ?? []);
       setHasFetched(true);
     } catch (err) {
-      setModels([]);
+      setRawModels([]);
       setError(getErrorMessage(err) || 'Failed to fetch models');
       setHasFetched(true);
     } finally {
@@ -116,8 +120,13 @@ export function useModelDiscovery(args: UseModelDiscoveryArgs): UseModelDiscover
     }
   }, [available, apiKey, apiKeyEntries, authIndex, baseUrl, brand, fallbackApiKey, formHeaders]);
 
+  const models = useMemo(() => {
+    if (!freeOnly) return rawModels;
+    return rawModels.filter((m) => m.isFree === true);
+  }, [rawModels, freeOnly]);
+
   const reset = useCallback(() => {
-    setModels([]);
+    setRawModels([]);
     setError(null);
     setLoading(false);
     setHasFetched(false);
@@ -145,5 +154,5 @@ export function useModelDiscovery(args: UseModelDiscoveryArgs): UseModelDiscover
     reset();
   }, [inputSignature, reset]);
 
-  return { available, loading, error, models, hasFetched, fetch, reset };
+  return { available, brand, loading, error, models, hasFetched, freeOnly, setFreeOnly, fetch, reset };
 }

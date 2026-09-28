@@ -893,6 +893,9 @@ export function BaseProviderForm({
                 hasFetched={discovery.hasFetched}
                 existingNames={existingModelNames}
                 mutating={mutating}
+                brand={discovery.brand}
+                freeOnly={discovery.freeOnly}
+                onFreeOnlyChange={discovery.setFreeOnly}
                 onApply={(names) => {
                   applyDiscoveredModels(names);
                 }}

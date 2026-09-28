@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { IconLoader2, IconRefreshCw, IconSearch } from '@/components/ui/icons';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import type { ModelInfo } from '@/utils/models';
+import type { ProviderBrand } from '../../types';
 import styles from './sharedForm.module.scss';
 
 interface ModelDiscoveryPanelProps {
@@ -12,6 +13,9 @@ interface ModelDiscoveryPanelProps {
   hasFetched: boolean;
   existingNames: Set<string>;
   mutating?: boolean;
+  brand?: ProviderBrand;
+  freeOnly?: boolean;
+  onFreeOnlyChange?: (value: boolean) => void;
   onApply: (picked: ModelInfo[]) => void;
   onReload: () => void;
   onClose: () => void;
@@ -24,6 +28,9 @@ export function ModelDiscoveryPanel({
   hasFetched,
   existingNames,
   mutating,
+  brand,
+  freeOnly,
+  onFreeOnlyChange,
   onApply,
   onReload,
   onClose,
@@ -77,6 +84,8 @@ export function ModelDiscoveryPanel({
     </span>
   );
 
+  const showFreeFilter = brand === 'openaiCompatibility' && typeof onFreeOnlyChange === 'function';
+
   return (
     <div className={styles.discoveryPanel}>
       <div className={styles.discoveryToolbar}>
@@ -92,6 +101,22 @@ export function ModelDiscoveryPanel({
             placeholder={t('providersPage.discovery.searchPlaceholder')}
           />
         </div>
+        {showFreeFilter ? (
+          <button
+            type="button"
+            className={
+              freeOnly
+                ? `${styles.connectivityBtn} ${styles.connectivityBtnActive}`
+                : styles.connectivityBtn
+            }
+            onClick={() => onFreeOnlyChange(!freeOnly)}
+            disabled={loading}
+            aria-pressed={freeOnly}
+            aria-label={t('providersPage.discovery.fetchFreeOnly')}
+          >
+            <span>{t('providersPage.discovery.fetchFreeOnly')}</span>
+          </button>
+        ) : null}
         <button
           type="button"
           className={styles.connectivityBtn}

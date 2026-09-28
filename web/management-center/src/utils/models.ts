@@ -6,6 +6,7 @@ export interface ModelInfo {
   name: string;
   alias?: string;
   description?: string;
+  isFree?: boolean;
 }
 
 const MODEL_CATEGORIES = [
@@ -31,6 +32,15 @@ const matchCategory = (text: string) => {
   return null;
 };
 
+const isFreeByPricing = (entry: Record<string, unknown>): boolean | undefined => {
+  const pricing = entry.pricing;
+  if (!isRecord(pricing)) return undefined;
+  const prompt = String(pricing.prompt ?? '').trim();
+  const completion = String(pricing.completion ?? '').trim();
+  if (!prompt && !completion) return undefined;
+  return prompt === '0' && completion === '0';
+};
+
 export function normalizeModelList(payload: unknown, { dedupe = false } = {}): ModelInfo[] {
   const toModel = (entry: unknown): ModelInfo | null => {
     if (typeof entry === 'string') {
@@ -50,6 +60,10 @@ export function normalizeModelList(payload: unknown, { dedupe = false } = {}): M
     }
     if (description) {
       model.description = String(description);
+    }
+    const free = isFreeByPricing(entry);
+    if (free !== undefined) {
+      model.isFree = free;
     }
     return model;
   };

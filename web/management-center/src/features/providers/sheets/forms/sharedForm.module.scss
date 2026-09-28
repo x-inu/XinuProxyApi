@@ -642,6 +642,12 @@
   }
 }
 
+.connectivityBtnActive {
+  border-color: var(--primary-color);
+  background: var(--primary-10);
+  color: var(--primary-color);
+}
+
 .connectivityBtnGhost {
   display: inline-flex;
   align-items: center;

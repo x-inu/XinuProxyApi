@@ -1831,7 +1831,8 @@
       "selectedCount": "{{selected}} / {{total}}",
       "alreadyAdded": "Already added",
       "close": "Close",
-      "apply": "Apply ({{count}})"
+      "apply": "Apply ({{count}})",
+      "fetchFreeOnly": "Free only"
     },
     "toolbar": {
       "sortBy": "Sort by",

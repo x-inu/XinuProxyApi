@@ -305,6 +305,9 @@ function SponsorModelSection({
             hasFetched={discovery.hasFetched}
             existingNames={existingModelNames}
             mutating={mutating}
+            brand={discovery.brand}
+            freeOnly={discovery.freeOnly}
+            onFreeOnlyChange={discovery.setFreeOnly}
             onApply={(picked) => onChange(applyDiscoveredModels(modelsList, picked))}
             onReload={() => void discovery.fetch()}
             onClose={() => setDiscoveryOpen(false)}

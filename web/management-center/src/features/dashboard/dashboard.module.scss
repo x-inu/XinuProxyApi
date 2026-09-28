@@ -102,10 +102,11 @@
 
 .heroTitle {
   margin: 0;
+  font-family: $font-serif;
   font-size: clamp(44px, 6.2vw, 80px);
   line-height: 1.05;
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
   text-wrap: balance;
 }

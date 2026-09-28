@@ -186,9 +186,21 @@ export function LoginPage() {
       {/* Brand panel. */}
       <div className={styles.brandPanel}>
         <div className={styles.brandContent}>
-          <span className={styles.brandWord}>CLI</span>
-          <span className={styles.brandWord}>PROXY</span>
-          <span className={styles.brandWord}>API</span>
+          <span className={styles.brandGlyph} aria-hidden="true">
+            源
+          </span>
+          <div className={styles.brandText}>
+            <span className={styles.brandEyebrow}>力 · Management Center</span>
+            <h1 className={styles.brandTitle}>XinuProxyApi</h1>
+            <p className={styles.brandTagline}>
+              A quiet console for routed models, credentials, and quota — built for control.
+            </p>
+          </div>
+          <div className={styles.brandMeta}>
+            <span>OpenAI · Gemini · Claude · Codex</span>
+            <span className={styles.brandMetaDot} aria-hidden="true" />
+            <span>Same-origin management</span>
+          </div>
         </div>
       </div>
 
@@ -197,7 +209,7 @@ export function LoginPage() {
         {showSplash ? (
           /* Splash animation. */
           <div className={styles.splashContent}>
-            <img src={INLINE_LOGO_JPEG} alt="CPAMC" className={styles.splashLogo} />
+            <img src={INLINE_LOGO_JPEG} alt="XinuProxyApi" className={styles.splashLogo} />
             <h1 className={styles.splashTitle}>{t('splash.title')}</h1>
             <p className={styles.splashSubtitle}>{t('splash.subtitle')}</p>
             <div className={styles.splashLoader}>
@@ -208,7 +220,7 @@ export function LoginPage() {
           /* Login form. */
           <div className={styles.formContent}>
             {/* Logo */}
-            <img src={INLINE_LOGO_JPEG} alt="Logo" className={styles.logo} />
+            <img src={INLINE_LOGO_JPEG} alt="XinuProxyApi" className={styles.logo} />
 
             {/* Login card. */}
             <div className={styles.loginCard}>

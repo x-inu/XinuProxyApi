@@ -13,12 +13,34 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  background: #000000;
-  padding: $spacing-2xl;
+  background: #11100e;
+  color: #e6ded2;
+  padding: clamp(2.5rem, 6vw, 5rem);
   position: relative;
   overflow: hidden;
 
+  // Hairline inset frame, echoing the editorial "dossier" look.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 20px;
+    border: 1px solid rgba(244, 241, 234, 0.14);
+    pointer-events: none;
+  }
+
+  // Oversized watermark glyph bleeding off the corner.
+  &::after {
+    content: '力';
+    position: absolute;
+    right: -3rem;
+    bottom: -4rem;
+    font-family: 'Iowan Old Style', 'Palatino', 'Georgia', serif;
+    font-size: 28rem;
+    line-height: 1;
+    color: rgba(200, 134, 42, 0.08);
+    pointer-events: none;
+    user-select: none;
+  }
 
   @media (max-width: $breakpoint-mobile) {
     display: none;
@@ -31,54 +53,63 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  width: 100%;
-  padding: 0;
-  gap: 0;
+  gap: $spacing-xl;
+  max-width: 30rem;
 }
 
-
-@keyframes brandFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: var(--target-opacity, 0.9);
-    transform: translateY(0);
-  }
+.brandGlyph {
+  font-family: $font-serif;
+  font-size: 4.5rem;
+  line-height: 1;
+  color: #f4f1ea;
 }
 
+.brandText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
 
-.brandWord {
-  font-size: 14vw;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: -0.02em;
-  line-height: 0.85;
+.brandEyebrow {
+  font-family: $font-mono;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  text-align: right;
-  padding-right: 0;
-  opacity: 0;
-  animation: brandFadeIn 0.8s ease-out forwards;
+  color: var(--amber-color, #c8862a);
+}
 
+.brandTitle {
+  font-family: $font-serif;
+  font-size: clamp(2.6rem, 5vw, 3.8rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  color: #f4f1ea;
+}
 
-  &:nth-child(1) {
-    --target-opacity: 0.95;
-    animation-delay: 0.1s;
-  }
+.brandTagline {
+  color: rgba(244, 241, 234, 0.66);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  max-width: 26rem;
+}
 
-  &:nth-child(2) {
-    --target-opacity: 0.7;
-    animation-delay: 0.35s;
-  }
+.brandMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: $font-mono;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.5);
+}
 
-  &:nth-child(3) {
-    --target-opacity: 0.45;
-    animation-delay: 0.6s;
-  }
+.brandMetaDot {
+  width: 4px;
+  height: 4px;
+  background: var(--amber-color, #c8862a);
 }
 
 
@@ -110,12 +141,10 @@
 
 // Logo
 .logo {
-  width: 80px;
-  height: 80px;
-  border-radius: $radius-lg;
+  width: 64px;
+  height: 64px;
+  border-radius: $radius-md;
   object-fit: cover;
-  box-shadow: var(--shadow-lg);
-  border: 3px solid var(--border-color);
 }
 
 
@@ -123,7 +152,7 @@
   width: 100%;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: $radius-lg;
+  border-radius: $radius-md;
   box-shadow: var(--shadow-lg);
   padding: $spacing-xl;
   display: flex;
@@ -157,8 +186,10 @@
 
 // Title.
 .title {
-  font-size: 22px;
-  font-weight: 800;
+  font-family: $font-serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 
@@ -273,20 +304,20 @@
 
 
 .splashLogo {
-  height: 80px;
+  height: 72px;
   width: auto;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-lg;
+  border-radius: $radius-md;
   animation: splashLogoPulse 1.5s ease-in-out infinite;
 }
 
 
 .splashTitle {
+  font-family: $font-serif;
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.01em;
 }
 
 

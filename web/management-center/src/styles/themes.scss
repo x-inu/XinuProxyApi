@@ -173,33 +173,35 @@
 
 
 [data-theme='dark'] {
-  // Ink-on-charcoal: warm dark paper with bone text (ryoku dark parity).
-  --bg-secondary: #14120f;
-  --bg-primary: #1b1815;
-  --bg-tertiary: #24211c;
-  --bg-hover: #2c2822;
-  --bg-quinary: #17140f;
+  // Ink-on-charcoal, tuned to match the sibling projects (portofolio,
+  // archive-worker): warm near-black canvas with bone paper text.
+  --bg-secondary: #11100e; // page canvas (portofolio --canvas)
+  --bg-primary: #191714; // card / surface (portofolio --surface)
+  --bg-tertiary: #221f1a; // hover / muted fill
+  --bg-hover: #2a2620;
+  --bg-quinary: #14120f;
   --bg-error-light: rgba(211, 118, 100, 0.18);
-  --floating-surface: #27231e;
-  --floating-shadow: 0 18px 38px rgba(0, 0, 0, 0.5);
+  --floating-surface: #201d18;
+  --floating-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
 
-  --text-primary: #f2ede4;
-  --text-secondary: #c5bdb1;
-  --text-tertiary: #948c82;
+  // Bone ink stack (family --paper #cdc4ba, --ink-bright #eee8df).
+  --text-primary: #e6ded2;
+  --text-secondary: #b0a9a0;
+  --text-tertiary: #958f87;
   --text-quaternary: #6b645c;
   --text-muted: var(--text-tertiary);
 
-  --border-color: #35302a;
+  // Hairline borders derived from bone ink at low opacity (family --line).
+  --border-color: rgba(205, 196, 186, 0.16);
   --border-secondary: var(--border-color);
-  --border-primary: #45403880;
-  --border-primary: #46403a;
-  --border-hover: #57514a;
+  --border-primary: rgba(205, 196, 186, 0.26);
+  --border-hover: rgba(205, 196, 186, 0.42);
 
   // On dark, ink flips to bone so primary buttons stay high-contrast.
-  --primary-color: #f2ede4;
-  --primary-hover: #e4ddd1;
+  --primary-color: #e6ded2;
+  --primary-hover: #f0e9de;
   --primary-active: #d6cec1;
-  --primary-contrast: #1b1815;
+  --primary-contrast: #14120f;
 
   --success-color: #4faf78;
   --quota-medium-color: #e0aa4a;

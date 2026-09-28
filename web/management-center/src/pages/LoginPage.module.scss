@@ -199,33 +199,6 @@
   font-size: 14px;
 }
 
-// Connection summary.
-.connectionBox {
-  background: var(--bg-secondary);
-  border: 1px dashed var(--border-color);
-  border-radius: $radius-md;
-  padding: $spacing-md;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
-
-  .label {
-    color: var(--text-secondary);
-    font-size: 14px;
-  }
-
-  .value {
-    font-weight: 700;
-    color: var(--text-primary);
-    word-break: break-all;
-  }
-
-  .hint {
-    color: var(--text-secondary);
-    font-size: 12px;
-  }
-}
-
 
 .toggleAdvanced {
   display: flex;

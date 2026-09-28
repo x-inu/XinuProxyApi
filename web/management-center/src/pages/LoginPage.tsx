@@ -92,7 +92,6 @@ export function LoginPage() {
 
   const [apiBase, setApiBase] = useState('');
   const [managementKey, setManagementKey] = useState('');
-  const [showCustomBase, setShowCustomBase] = useState(false);
   const [showKey, setShowKey] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -230,32 +229,6 @@ export function LoginPage() {
                 </div>
                 <div className={styles.subtitle}>{t('login.subtitle')}</div>
               </div>
-
-              <div className={styles.connectionBox}>
-                <div className={styles.label}>{t('login.connection_current')}</div>
-                <div className={styles.value}>{apiBase || detectedBase}</div>
-                <div className={styles.hint}>{t('login.connection_auto_hint')}</div>
-              </div>
-
-              <div className={styles.toggleAdvanced}>
-                <SelectionCheckbox
-                  checked={showCustomBase}
-                  onChange={setShowCustomBase}
-                  ariaLabel={t('login.custom_connection_label')}
-                  label={t('login.custom_connection_label')}
-                  labelClassName={styles.toggleLabel}
-                />
-              </div>
-
-              {showCustomBase && (
-                <Input
-                  label={t('login.custom_connection_label')}
-                  placeholder={t('login.custom_connection_placeholder')}
-                  value={apiBase}
-                  onChange={(e) => setApiBase(e.target.value)}
-                  hint={t('login.custom_connection_hint')}
-                />
-              )}
 
               <Input
                 autoFocus

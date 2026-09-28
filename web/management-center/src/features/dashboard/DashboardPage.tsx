@@ -111,7 +111,7 @@ export function DashboardPage() {
         ? 'common.connecting'
         : 'common.disconnected'
   );
-  const versionLabel = serverVersion ? `v${serverVersion.trim().replace(/^[vV]+/, '')}` : null;
+  const versionLabel = serverVersion?.trim() || null;
   const heroMetaLine = [versionLabel, connectionLabel].filter(Boolean).join(' · ');
 
   const statTiles = [

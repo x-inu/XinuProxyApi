@@ -1,245 +1,181 @@
-# CLI Proxy API
+# XinuProxyApi
 
-If you want to use CLIProxyAPI on your desktop, we recommend our [EasyCLIProxyAPI](https://github.com/router-for-me/EasyCLIProxyAPI) desktop client. It provides a graphical configuration UI, automatic updates, system tray integration, and one-click start/stop for the CLIProxyAPI service.
+XinuProxyApi is a self-hosted proxy server that exposes OpenAI, Gemini, Claude, Codex, and Grok compatible API endpoints, bundled together with its browser-based Management Center in a single application and release.
 
-CLIProxyAPI is a proxy server that provides OpenAI/Gemini/Claude/Codex/Grok compatible API interfaces for CLI.
+Point any OpenAI-, Gemini-, or Claude-compatible client or SDK at your own instance and route requests across multiple CLI accounts with round-robin load balancing — all managed from a built-in web UI.
 
-You can access the following providers locally and with multiple CLI accounts through any OpenAI (including Responses), Gemini (including Interactions), or Claude-compatible client or SDK.
+## Highlights
 
-<table>
-<tbody>
-    <tr>
-        <th align="center" width="100">Provider</th>
-        <th align="center">Description</th>
-    </tr>
-    <tr>
-        <td align="center"><a href="https://www.kimi.com/code/"><img src="./assets/logo/kimi.svg" alt="Kimi" width="28" height="28" /></a></td>
-        <td>Kimi series models (Kimi K3, Kimi K2.7 Code, etc.). <a href="https://platform.kimi.ai/docs/guide/kimi-k3-quickstart">Kimi K3</a> is Moonshot AI’s most capable model and the world’s first open 3T-class model. With 2.8 trillion parameters, native vision, and a 1-million-token context window, K3 is built for long-horizon coding, knowledge work, and reasoning. CLIProxyAPI supports Kimi through OAuth or compatible API interfaces.</td>
-    </tr>
-    <tr>
-        <td align="center"><a href="https://platform.openai.com/docs/guide/gpt-5.6"><img src="./assets/logo/openai.svg" alt="OpenAI" width="28" height="28" /></a></td>
-        <td>OpenAI GPT series models (GPT 5.6, GPT 5.5, etc.). GPT-5.6 sets a new quality and efficiency baseline for complex production workflows. GPT-5.6 is especially token-efficient and improves frontend aesthetics, including layout, visual hierarchy, and design judgment.</td>
-    </tr>
-    <tr>
-        <td align="center"><a href="https://www.anthropic.com/claude/fable"><img src="./assets/logo/claude.svg" alt="Anthropic" width="28" height="28" /></a></td>
-        <td>Anthropic Claude series models (Claude Fable, Claude Opus, Claude Sonnet, etc.). Claude Fable 5 is Anthropic's most capable widely released model, built for the most demanding reasoning and long-horizon agentic work.</td>
-    </tr>
-    <tr>
-        <td align="center"><a href="https://antigravity.google/"><img src="./assets/logo/antigravity.svg" alt="Antigravity" width="28" height="28" /></a></td>
-        <td>Google Gemini series models (Gemini 3.5 Flash, Gemini 3.1 Pro, etc.). Gemini 3.5 Flash provides sustained frontier-level intelligence optimized for real-world tasks at a higher speed and lower cost. Designed for the agentic era, it excels at sub-agent deployment, multi-step workflows, and long-horizon tasks at scale. This model is particularly effective for rapid agentic loops involving complex coding cycles and iterations.</td>
-    </tr>
-    <tr>
-        <td align="center"><a href="https://x.ai/grok"><img src="./assets/logo/xai.svg" alt="xAI" width="28" height="28" /></a></td>
-        <td>xAI Grok series models (Grok 4.5, Grok Composer 2.5 Fast, etc.). Grok 4.5 is SpaceXAI's frontier model built for coding, agentic tasks, and knowledge work. It was trained in SpaceXAI's data centers in Memphis with new datasets spanning science, engineering, and math.</td>
-    </tr>
-</tbody>
-</table>
+- OpenAI / Gemini / Claude / Codex / Grok compatible API endpoints.
+- OAuth login flows for Codex, Claude Code, and Grok Build.
+- Streaming, non-streaming, and WebSocket responses where supported.
+- Function calling / tools and multimodal (text + image) input.
+- Multiple accounts per provider with round-robin load balancing.
+- OpenAI-compatible upstream providers via config (e.g. OpenRouter).
+- Bundled single-file Management Center served from the same origin.
+- Reusable Go SDK for embedding the proxy (see `docs/sdk-usage.md`).
 
+## Repository layout
 
-## Overview
+- `cmd/`, `internal/`, `sdk/`, `test/` — Go proxy server and Management API.
+- `web/management-center/` — React + TypeScript + Vite + Bun frontend source.
+- `static/management.html` — generated single-file frontend, served at `/` and `/management.html`.
+- `scripts/build-management.sh` — reproducible frontend artifact builder.
+- `scripts/verify.sh` — frontend and backend verification.
+- `config.example.yaml` — annotated configuration template.
 
-- OpenAI/Gemini/Claude/Grok compatible API endpoints for CLI models
-- OpenAI Codex support (GPT models) via OAuth login
-- Claude Code support via OAuth login
-- Grok Build support via OAuth login
-- Streaming, non-streaming, and WebSocket responses where supported
-- Function calling/tools support
-- Multimodal input support (text and images)
-- Multiple accounts with round-robin load balancing (Gemini, OpenAI, Claude, Grok)
-- Simple CLI authentication flows (Gemini, OpenAI, Claude, Grok)
-- Generative Language API Key support
-- AI Studio Build multi-account load balancing
-- Claude Code multi-account load balancing
-- OpenAI Codex multi-account load balancing
-- Grok Build multi-account load balancing
-- OpenAI-compatible upstream providers via config (e.g., OpenRouter)
-- Reusable Go SDK for embedding the proxy (see `docs/sdk-usage.md`)
+The frontend uses hash routing and calls the same-origin Management API under `/v0/management`.
 
-## Getting Started
+## Install on Linux
 
-CLIProxyAPI Guides: [https://help.router-for.me/](https://help.router-for.me/)
+### 1. Download a release
 
-## Management API
+Grab the archive that matches your CPU architecture from the repository Releases page:
 
-see [MANAGEMENT_API.md](https://help.router-for.me/management/api)
+- `CLIProxyAPI_<version>_linux_amd64.tar.gz` — standard x86-64 build (glibc 2.17+ baseline, supports dynamic plugins).
+- `CLIProxyAPI_<version>_linux_aarch64.tar.gz` — standard arm64 build.
+- `*_no-plugin.tar.gz` — portable build for musl-based or older systems (no dynamic plugin support).
 
-## Usage Statistics
+```bash
+mkdir -p ~/xinuproxyapi && cd ~/xinuproxyapi
+tar -xzf CLIProxyAPI_<version>_linux_amd64.tar.gz
+```
 
-Since v6.10.0, CLIProxyAPI and [CPAMC](https://github.com/router-for-me/Cli-Proxy-API-Management-Center) no longer ship built-in usage statistics. If you need usage statistics, use:
+Each archive contains the `cli-proxy-api` binary, `static/management.html`, `config.example.yaml`, `README.md`, and `LICENSE`.
 
-### [CPA Usage Keeper](https://github.com/Willxup/cpa-usage-keeper)
+### 2. Create your config
 
-Standalone persistence and visualization service for CLIProxyAPI, with periodic data sync, SQLite storage, aggregate APIs, and a built-in dashboard for usage and statistics.
+Copy the template and set a strong management key. The key is hashed on startup and is required for every Management API request.
 
-### [CPA-Manager-Plus](https://github.com/seakee/CPA-Manager-Plus)
+```bash
+cp config.example.yaml config.yaml
+```
 
-Full CLIProxyAPI management center with request-level monitoring and cost estimates. CPA-Manager tracks collected requests by account, model, channel, latency, status, and token usage; estimates cost with editable model prices and one-click LiteLLM price sync; persists events in SQLite; and provides Codex account-pool operations with batch inspection, quota detection, unhealthy account discovery, cleanup suggestions, and one-click execution for day-to-day multi-account maintenance.
+Edit `config.yaml`:
 
-## SDK Docs
+```yaml
+# Bind address. Keep 127.0.0.1 when a reverse proxy sits in front.
+host: "127.0.0.1"
+port: 8317
+
+remote-management:
+  # Required. Any non-empty value enables the Management API and web UI login.
+  secret-key: "<YOUR_MANAGEMENT_KEY>"
+  # Keep the bundled panel pinned to this release.
+  disable-auto-update-panel: true
+```
+
+Leave `secret-key` empty only if you intentionally want to disable the Management API entirely.
+
+### 3. Run it
+
+```bash
+./cli-proxy-api --config config.yaml
+```
+
+The server binds `port` (default `8317`). Verify it locally:
+
+```bash
+curl http://127.0.0.1:8317/healthz          # -> 200
+curl http://127.0.0.1:8317/v1/models        # -> 401 without a key (expected)
+```
+
+Open `http://127.0.0.1:8317/` in a browser to reach the Management Center.
+
+### 4. Run as a systemd service (optional)
+
+Create `/etc/systemd/system/xinuproxyapi.service`:
+
+```ini
+[Unit]
+Description=XinuProxyApi
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/xinuproxyapi
+ExecStart=/opt/xinuproxyapi/cli-proxy-api --config /opt/xinuproxyapi/config.yaml
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now xinuproxyapi.service
+sudo systemctl status xinuproxyapi.service
+```
+
+### 5. Expose it (optional)
+
+To serve over HTTPS, put a reverse proxy (Nginx, Caddy, Cloudflare Tunnel, etc.) in front of `127.0.0.1:8317` and terminate TLS there. Because the app is same-origin, no extra frontend configuration is required — the web UI automatically talks to the backend on whatever host it is served from.
+
+When exposing the Management API beyond localhost, also set `remote-management.allow-remote: true` and use a long, random `secret-key`.
+
+## Build from source
+
+Requirements: Go 1.26+, Bun 1.3.14 (Node.js 24 for frontend CI parity).
+
+```bash
+# Full build (frontend panel + Go binary)
+make build VERSION=dev
+
+# Equivalent explicit steps
+VERSION=dev ./scripts/build-management.sh   # writes static/management.html
+go build -o cli-proxy-api ./cmd/server
+```
+
+Frontend development server:
+
+```bash
+cd web/management-center
+bun install --frozen-lockfile
+bun run dev
+```
+
+Verify everything (frontend tests, lint, build, Go tests, Go compile):
+
+```bash
+./scripts/verify.sh
+```
+
+## The Management Center (Web UI)
+
+The bundled web UI is a single-file React app served at the site root `/` (browsers get the UI, API clients get JSON) and also at `/management.html`. It is English-only and ships with a two-mode editorial theme — a warm ink-on-charcoal dark default and a light paper mode — with an animated scanline transition between them.
+
+### Logging in
+
+Open the site in a browser and enter your **management key** (the `secret-key` from `config.yaml`). The connection URL is detected automatically from the address you are visiting, so there is nothing else to configure. Enable "Remember password" to persist the key in local browser storage.
+
+### Sections
+
+- **Dashboard** — live request activity, connection status, and a health summary at a glance.
+- **AI Providers** — configure and manage upstream providers and OpenAI-compatible endpoints.
+- **Auth Files** — inspect and manage per-account credential files created by the OAuth login flows.
+- **Quota** — per-account quota tracking cards so you can monitor usage across many accounts.
+- **Config** — structured editor for the server configuration, no manual YAML editing required.
+- **Plugins** — plugin management, gated by backend support.
+
+### Security notes
+
+- The Management Center shell is publicly reachable, but every Management API operation requires the management key.
+- Treat the management key as highly privileged: the Management API can read and change configuration, access stored credentials, and drive outbound API calls. Use a long random value and rotate it if exposed.
+- Never commit `config.yaml`, `.env`, management keys, provider credentials, auth files, or logs.
+
+## SDK docs
 
 - Usage: [docs/sdk-usage.md](docs/sdk-usage.md)
 - Advanced (executors & translators): [docs/sdk-advanced.md](docs/sdk-advanced.md)
 - Access: [docs/sdk-access.md](docs/sdk-access.md)
 - Watcher: [docs/sdk-watcher.md](docs/sdk-watcher.md)
-- Custom Provider Example: `examples/custom-provider`
+- Custom provider example: `examples/custom-provider`
 
-## Contributing
+## Release behavior
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Who is with us?
-
-Those projects are based on CLIProxyAPI:
-
-### [vibeproxy](https://github.com/automazeio/vibeproxy)
-
-Native macOS menu bar app to use your Claude Code & ChatGPT subscriptions with AI coding tools - no API keys needed
-
-### [Subtitle Translator](https://github.com/VjayC/SRT-Subtitle-Translator-Validator)
-
-A cross-platform desktop and web app to translate and validate SRT subtitles using your existing LLM subscriptions (Gemini, ChatGPT, Claude, etc.) via CLIProxyAPI - no API keys needed.
-
-### [CCS (Claude Code Switch)](https://github.com/kaitranntt/ccs)
-
-CLI wrapper for instant switching between multiple Claude accounts and alternative models (Gemini, Codex, Antigravity) via CLIProxyAPI OAuth - no API keys needed
-
-### [Quotio](https://github.com/nguyenphutrong/quotio)
-
-Native macOS menu bar app that unifies Claude, Gemini, OpenAI, and Antigravity subscriptions with real-time quota tracking and smart auto-failover for AI coding tools like Claude Code, OpenCode, and Droid - no API keys needed.
-
-### [ProxyPilot](https://github.com/Finesssee/ProxyPilot)
-
-Windows-native CLIProxyAPI fork with TUI, system tray, and multi-provider OAuth for AI coding tools - no API keys needed.
-
-### [Claude Proxy VSCode](https://github.com/uzhao/claude-proxy-vscode)
-
-VSCode extension for quick switching between Claude Code models, featuring integrated CLIProxyAPI as its backend with automatic background lifecycle management.
-
-### [ZeroLimit](https://github.com/0xtbug/zero-limit)
-
-Windows desktop app built with Tauri + React for monitoring AI coding assistant quotas via CLIProxyAPI. Track usage across Gemini, Claude, OpenAI Codex, and Antigravity accounts with real-time dashboard, system tray integration, and one-click proxy control - no API keys needed.
-
-### [CPA-XXX Panel](https://github.com/ferretgeek/CPA-X)
-
-A lightweight web admin panel for CLIProxyAPI with health checks, resource monitoring, real-time logs, auto-update, request statistics and pricing display. Supports one-click installation and systemd service.
-
-### [CLIProxyAPI Tray](https://github.com/kitephp/CLIProxyAPI_Tray)
-
-A Windows tray application implemented using PowerShell scripts, without relying on any third-party libraries. The main features include: automatic creation of shortcuts, silent running, password management, channel switching (Main / Plus), and automatic downloading and updating.
-
-### [LinJun](https://github.com/wangdabaoqq/LinJun)
-
-LinJun is a cross-platform desktop application for managing AI programming assistants, supporting macOS, Windows, and Linux systems. Unified management of Claude Code, Gemini, OpenAI Codex, and other AI coding tools, with local proxy for multi-account quota tracking and one-click configuration.
-
-### [CLIProxyAPI Dashboard](https://github.com/itsmylife44/cliproxyapi-dashboard)
-
-A modern web-based management dashboard for CLIProxyAPI built with Next.js, React, and PostgreSQL. Features real-time log streaming, structured configuration editing, API key management, OAuth provider integration for Claude/Gemini/Codex, usage analytics, container management, and config sync with OpenCode via companion plugin - no manual YAML editing needed.
-
-### [All API Hub](https://github.com/qixing-jk/all-api-hub)
-
-Browser extension for one-stop management of New API-compatible relay site accounts, featuring balance and usage dashboards, auto check-in, one-click key export to common apps, in-page API availability testing, and channel/model sync and redirection. It integrates with CLIProxyAPI through the Management API for one-click provider import and config sync.
-
-### [Shadow AI](https://github.com/HEUDavid/shadow-ai)
-
-Shadow AI is an AI assistant tool designed specifically for restricted environments. It provides a stealthy operation
-mode without windows or traces, and enables cross-device AI Q&A interaction and control via the local area network (
-LAN). Essentially, it is an automated collaboration layer of "screen/audio capture + AI inference + low-friction delivery",
-helping users to immersively use AI assistants across applications on controlled devices or in restricted environments.
-
-### [ProxyPal](https://github.com/buddingnewinsights/proxypal)
-
-Cross-platform desktop app (macOS, Windows, Linux) wrapping CLIProxyAPI with a native GUI. Connects Claude, ChatGPT, Gemini, GitHub Copilot, and custom OpenAI-compatible endpoints with usage analytics, request monitoring, and auto-configuration for popular coding tools - no API keys needed.
-
-### [CLIProxyAPI Quota Inspector](https://github.com/AllenReder/CLIProxyAPI-Quota-Inspector)
-
-Ready-to-use cross-platform quota inspector for CLIProxyAPI, supporting per-account codex 5h/7d quota windows, plan-based sorting, status coloring, and multi-account summary analytics.
-
-### [CLIProxy Pool Watch](https://github.com/murasame612/CLIProxyPoolWidget)
-
-Native macOS SwiftUI app for monitoring ChatGPT/Codex account quotas in CLIProxyAPI pools. Displays account availability, Plus-base capacity, 5-hour and weekly quota bars, plan weights, and restore forecasts through the Management API.
-
-### [Panopticon](https://github.com/eltmon/panopticon-cli)
-
-Multi-agent orchestration for AI coding assistants. Runs CLIProxyAPI as a local sidecar so its agents can drive GPT models through a ChatGPT subscription, pointing Claude Code at an Anthropic-compatible endpoint with no OpenAI API key required.
-
-### [Tunnel Agent](https://github.com/Villoh/tunnel-agent)
-
-Windows desktop UI that manages CLIProxyAPI and Perplexity WebUI Scraper from a single interface, inspired by Quotio and VibeProxy. Connect OAuth providers (Claude, Gemini, Codex, Kimi, Antigravity), custom API keys, and Perplexity session accounts, then point any coding agent at the local endpoint.
-
-### [Quotio Desktop](https://github.com/xiaocoss/quotio-desktop)
-
-Cross-platform (Tauri) port of Quotio for Windows, macOS and Linux. Manages a pool of AI accounts (Codex, Claude Code, GitHub Copilot, Gemini, Antigravity, Kiro, Cursor, Trae, GLM) through CLIProxyAPI, with per-account 5-hour/weekly quota bars, Codex rate-limit reset credits with one-click reset, smart scheduling, usage statistics, and multi-instance Codex — no API keys needed.
-
-### [Universal Chat Provider](https://github.com/maxdewald/vscode-universal-chat-provider)
-
-VS Code extension that brings your Claude, ChatGPT/Codex, Antigravity, Grok, and Kimi subscriptions into GitHub Copilot Chat as native language models — and can power your Git commit messages, chat titles, and summaries too. Runs CLIProxyAPI in a fully managed background lifecycle (download, verify, supervise) shared across all windows, so it's zero-setup. No API keys needed, just OAuth.
-
-### [CPA-Tray-Powershell](https://github.com/ztzpro/CPA-Tray-Powershell.git)
-
-A PowerShell-based Windows system tray launcher for CLIProxyAPI. It supports running in the background without a console window, opening the management page, keeping the backend running after the management window closes, and reopening the page from the tray. It also supports checking for CLIProxyAPI updates on startup, SHA-256 verification with rollback, one-click CLIProxyAPI restart and update, PID-validated process management, and safe service shutdown.
-
-### [Grok Search MCP](https://github.com/MapleMapleCat/Grok_Search_Mcp)
-
-An HTTP-only Model Context Protocol server that uses a CLIProxyAPI deployment to provide Grok-powered real-time web search, X/Twitter search, and model discovery to MCP clients. It adds MCP transport, client API-key management, quotas, usage tracking, and a web administration panel.
-
-### [AIUsage](https://github.com/sylearn/AIUsage)
-
-Native macOS SwiftUI dashboard for AI subscriptions and coding proxies. It manages official CLIProxyAPI releases end to end (download, verify, supervise, update, and roll back), unifies OAuth accounts and live models, and connects one gateway to Codex, Claude Code/Science, OpenCode, or OpenAI/Anthropic/Gemini clients, with optional LAN access.
-
-### [Claude Dialects](https://github.com/stefandevo/claude-dialects)
-
-Run multiple native-feeling Claude Code commands, each powered by a different model (Codex, GLM, Kimi, Gemini, Grok, MiniMax, DeepSeek, Cursor, Copilot, Claude). Every dialect launches the real Claude Code interface with its own isolated config, history, ports, and an embedded CLIProxyAPI instance linked through the Go SDK — no separate proxy install. macOS only. Learn more at [claude-dialects.cc](https://claude-dialects.cc/).
-
-### [WebBrain](https://github.com/webbrain-one/webbrain)
-
-Browser agent that can connect to CLIProxyAPI's local OpenAI-compatible endpoint as a model provider. See WebBrain's independent [setup, security, and account-risk guide](https://webbrain.one/docs/easy-cli-proxy/) for using CLIProxyAPI through EasyCLIProxyAPI.
-
-### [Infinitus](https://github.com/deathemperor/infinitus)
-
-Native macOS menu bar app that runs a fleet of Claude accounts through CLIProxyAPI's Management API (claude-swap and 9Router too): 5h / 7d / per-model quota gauges, switch / hold / star from the popup, a run-rate forecast of when each window runs out, and an iPhone companion that mirrors it all - no API keys needed.
-
-### [PiCloud](https://github.com/cookerpapa/pi-cloud)
-
-Self-hosted coding-agent platform built on the Pi SDK, with a web UI, concurrent subagents, and CubeSandbox KVM workspaces. Uses CLIProxyAPI as its provider gateway, keeping provider credentials outside the guest workspaces.
-
-### [cc-status-line](https://github.com/kinka/cc-status-line)
-
-Claude Code status line for CLIProxyAPI: per-account Codex / Grok / Antigravity / Claude quotas (5h / 7d / weekly) and reset countdown for the current instance. Picks the CPA instance from `ANTHROPIC_BASE_URL` and reads quotas through the Management API.
-
-### [CLIProxy Quota Tray](https://github.com/ZYHUO/CLIProxy-Quota-Tray)
-
-Cross-platform Electron tray dashboard for CLIProxyAPI. Shows the real OAuth quota windows per account across ChatGPT/Codex, Claude, Gemini/Antigravity, Grok, Kimi and Cursor, estimates usage-queue cost, and tracks OpenAI/Claude service status. Dark terminal-style UI; runs on Windows and Linux.
-
-> [!NOTE]  
-> If you developed a project based on CLIProxyAPI, please open a PR to add it to this list.
-
-## More choices
-
-Those projects are ports of CLIProxyAPI or inspired by it:
-
-### [9Router](https://github.com/decolua/9router)
-
-A Next.js implementation inspired by CLIProxyAPI, easy to install and use, built from scratch with format translation (OpenAI/Claude/Gemini/Ollama), combo system with auto-fallback, multi-account management with exponential backoff, a Next.js web dashboard, and support for CLI tools (Cursor, Claude Code, Cline, RooCode) - no API keys needed.
-
-### [OmniRoute](https://github.com/diegosouzapw/OmniRoute)
-
-Never stop coding. Smart routing to FREE & low-cost AI models with automatic fallback.
-
-OmniRoute is an AI gateway for multi-provider LLMs: an OpenAI-compatible endpoint with smart routing, load balancing, retries, and fallbacks. Add policies, rate limits, caching, and observability for reliable, cost-aware inference.
-
-### [Codex Switch](https://github.com/9ycrooked/CodexSwitch)
-
-This is a tool built with Tauri 2 + Vue 3 for managing multiple OpenAI Codex desktop accounts. Switch between saved ChatGPT/Codex certification profiles, check 5-hour and weekly quota usage in real time, verify token health, view active account details, and import or save auth.json files without manual copying.
-
-> [!NOTE]  
-> If you have developed a port of CLIProxyAPI or a project inspired by it, please open a PR to add it to this list.
+Release archives contain the platform binary, `static/management.html`, `config.example.yaml`, documentation, and the license. The bundled panel is available without a first-start download. Set `disable-auto-update-panel: true` to keep the UI pinned to the shipped release.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The backend and Management Center are MIT licensed. The Management Center license is preserved at `web/management-center/LICENSE`.

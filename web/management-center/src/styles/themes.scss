@@ -1,68 +1,82 @@
-
-
+/**
+ * Ryoku-inspired theme tokens.
+ *
+ * Editorial paper + ink palette: warm bone backgrounds, near-black ink text,
+ * hairline borders, crisp corners, and a single amber/sun accent. Token names
+ * are preserved so every component inherits the new look without edits.
+ */
 
 :root {
-
-  --bg-secondary: #faf9f5;
-  --bg-primary: #f0eee8;
-  --bg-tertiary: #e9e6df;
+  // Paper stack: page is warm bone, cards a touch lighter.
+  --bg-secondary: #f4f1ea; // page background (paper)
+  --bg-primary: #faf8f3; // card / container surface
+  --bg-tertiary: #ece7dc; // hover / muted fill
   --bg-hover: var(--bg-tertiary);
-  --bg-quinary: #f6f4ee;
-  --bg-error-light: rgba(198, 87, 70, 0.1);
-  --floating-surface: #fffdf9;
-  --floating-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+  --bg-quinary: #f0ece3;
+  --bg-error-light: rgba(176, 74, 58, 0.1);
+  --floating-surface: #fbf9f4;
+  --floating-shadow: 0 16px 40px rgba(28, 26, 23, 0.14);
 
-  --text-primary: #2d2a26;
-  --text-secondary: #6d6760;
-  --text-tertiary: #a29c95;
-  --text-quaternary: #c0bab3;
+  // Ink stack.
+  --text-primary: #1c1a17;
+  --text-secondary: #57524b;
+  --text-tertiary: #8f8880;
+  --text-quaternary: #b7b0a6;
   --text-muted: var(--text-tertiary);
 
-  --border-color: #e3e1db;
+  // Hairline borders.
+  --border-color: #e2ddd3;
   --border-secondary: var(--border-color);
-  --border-primary: #d5d2cb;
-  --border-hover: #cecac4;
+  --border-primary: #d3ccbf;
+  --border-hover: #c3bbac;
 
-  --primary-color: #8b8680;
-  --primary-hover: #7f7a74;
-  --primary-active: #726d67;
-  --primary-contrast: #ffffff;
+  // Primary action = ink (editorial, high contrast).
+  --primary-color: #1c1a17;
+  --primary-hover: #322e29;
+  --primary-active: #44403a;
+  --primary-contrast: #f7f4ee;
 
-  --success-color: #10b981;
-  --quota-medium-color: #e0aa14;
-  --warning-color: #c65746;
-  --error-color: #c65746;
+  --success-color: #3f8f5f;
+  --quota-medium-color: #c8862a;
+  --warning-color: #b04a3a;
+  --error-color: #b04a3a;
   --danger-color: var(--error-color);
-  --info-color: var(--primary-color);
+  --info-color: var(--text-secondary);
 
-  --warning-bg: rgba(198, 87, 70, 0.12);
-  --warning-border: rgba(198, 87, 70, 0.35);
+  --warning-bg: rgba(176, 74, 58, 0.1);
+  --warning-border: rgba(176, 74, 58, 0.3);
   --warning-text: var(--warning-color);
 
-  --success-badge-bg: #d1fae5;
-  --success-badge-text: #065f46;
-  --success-badge-border: #6ee7b7;
+  --success-badge-bg: rgba(63, 143, 95, 0.14);
+  --success-badge-text: #2c6844;
+  --success-badge-border: rgba(63, 143, 95, 0.38);
 
-  --failure-badge-bg: rgba(198, 87, 70, 0.14);
+  --failure-badge-bg: rgba(176, 74, 58, 0.12);
   --failure-badge-text: #8a3a30;
-  --failure-badge-border: rgba(198, 87, 70, 0.35);
+  --failure-badge-border: rgba(176, 74, 58, 0.34);
 
-  --count-badge-bg: rgba(139, 134, 128, 0.18);
-  --count-badge-text: var(--primary-active);
+  --count-badge-bg: rgba(28, 26, 23, 0.08);
+  --count-badge-text: var(--text-primary);
 
-  --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.08);
-  --shadow-lg: 0 10px 18px -3px rgb(0 0 0 / 0.1);
+  --shadow: 0 1px 2px 0 rgb(28 26 23 / 0.06);
+  --shadow-lg: 0 12px 28px -8px rgb(28 26 23 / 0.16);
 
-  --radius-md: 8px;
+  // Crisp corners: the editorial look favors near-square cards.
+  --radius-md: 3px;
 
-  // Workbench tokens (Home parity)
+  // Workbench tokens (Home parity).
   --primary-8: color-mix(in srgb, var(--primary-color) 8%, transparent);
   --primary-10: color-mix(in srgb, var(--primary-color) 10%, transparent);
   --primary-30: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  --amber-color: #d97706;
-  --amber-text: #92400e;
-  --amber-10: color-mix(in srgb, var(--amber-color) 10%, transparent);
-  --amber-30: color-mix(in srgb, var(--amber-color) 30%, transparent);
+
+  // Amber / sun accent (used sparingly for highlight, matches ryoku).
+  --amber-color: #c8862a;
+  --amber-text: #8a5a12;
+  --amber-10: color-mix(in srgb, var(--amber-color) 12%, transparent);
+  --amber-30: color-mix(in srgb, var(--amber-color) 32%, transparent);
+  --accent-color: var(--amber-color);
+  --accent-strong: #b3741d;
+
   --destructive-color: var(--error-color);
   --destructive-10: color-mix(in srgb, var(--destructive-color) 10%, transparent);
   --destructive-30: color-mix(in srgb, var(--destructive-color) 30%, transparent);
@@ -70,20 +84,16 @@
   --muted-foreground: var(--text-secondary);
   --accent-bg: var(--bg-tertiary);
 
-  // Glass effect (blurred surfaces)
-  --glass-blur: 12px;
+  // Glass effect (blurred surfaces).
+  --glass-blur: 8px;
   --glass-backdrop-filter: blur(var(--glass-blur));
   --glass-filter: blur(var(--glass-blur));
-  --glass-bg: color-mix(in srgb, var(--bg-primary) 82%, transparent);
-  --glass-bg-secondary: color-mix(in srgb, var(--bg-secondary) 82%, transparent);
-  --glass-border: color-mix(in srgb, var(--border-color) 60%, transparent);
+  --glass-bg: color-mix(in srgb, var(--bg-secondary) 90%, transparent);
+  --glass-bg-secondary: color-mix(in srgb, var(--bg-primary) 90%, transparent);
+  --glass-border: color-mix(in srgb, var(--border-color) 70%, transparent);
 
-
-
-  --viz-success: #10b981;
-  --viz-failure: #c65746;
-
-
+  --viz-success: #3f8f5f;
+  --viz-failure: #b04a3a;
 
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --dur-press: 160ms;
@@ -93,65 +103,66 @@
 
 [data-theme='white'] {
   --bg-secondary: #ffffff;
-  --bg-primary: #ffffff;
-  --bg-tertiary: #f6f6f6;
+  --bg-primary: #fbfaf7;
+  --bg-tertiary: #f2efe8;
   --bg-hover: var(--bg-tertiary);
   --bg-quinary: #ffffff;
-  --bg-error-light: rgba(198, 87, 70, 0.08);
+  --bg-error-light: rgba(176, 74, 58, 0.08);
   --floating-surface: #ffffff;
-  --floating-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+  --floating-shadow: 0 16px 40px rgba(28, 26, 23, 0.12);
 
-  --text-primary: #2d2a26;
-  --text-secondary: #6d6760;
-  --text-tertiary: #a29c95;
-  --text-quaternary: #c0bab3;
+  --text-primary: #1c1a17;
+  --text-secondary: #57524b;
+  --text-tertiary: #8f8880;
+  --text-quaternary: #b7b0a6;
   --text-muted: var(--text-tertiary);
 
-  --border-color: #e5e5e5;
+  --border-color: #e7e3da;
   --border-secondary: var(--border-color);
-  --border-primary: #d9d9d9;
-  --border-hover: #cccccc;
+  --border-primary: #d8d2c7;
+  --border-hover: #c8c1b4;
 
-  --primary-color: #8b8680;
-  --primary-hover: #7f7a74;
-  --primary-active: #726d67;
+  --primary-color: #1c1a17;
+  --primary-hover: #322e29;
+  --primary-active: #44403a;
   --primary-contrast: #ffffff;
 
-  --success-color: #10b981;
-  --quota-medium-color: #e0aa14;
-  --warning-color: #c65746;
-  --error-color: #c65746;
+  --success-color: #3f8f5f;
+  --quota-medium-color: #c8862a;
+  --warning-color: #b04a3a;
+  --error-color: #b04a3a;
   --danger-color: var(--error-color);
-  --info-color: var(--primary-color);
+  --info-color: var(--text-secondary);
 
-  --warning-bg: rgba(198, 87, 70, 0.12);
-  --warning-border: rgba(198, 87, 70, 0.35);
+  --warning-bg: rgba(176, 74, 58, 0.1);
+  --warning-border: rgba(176, 74, 58, 0.3);
   --warning-text: var(--warning-color);
 
-  --success-badge-bg: #d1fae5;
-  --success-badge-text: #065f46;
-  --success-badge-border: #6ee7b7;
+  --success-badge-bg: rgba(63, 143, 95, 0.14);
+  --success-badge-text: #2c6844;
+  --success-badge-border: rgba(63, 143, 95, 0.38);
 
-  --failure-badge-bg: rgba(198, 87, 70, 0.14);
+  --failure-badge-bg: rgba(176, 74, 58, 0.12);
   --failure-badge-text: #8a3a30;
-  --failure-badge-border: rgba(198, 87, 70, 0.35);
+  --failure-badge-border: rgba(176, 74, 58, 0.34);
 
-  --count-badge-bg: rgba(139, 134, 128, 0.18);
-  --count-badge-text: var(--primary-active);
+  --count-badge-bg: rgba(28, 26, 23, 0.08);
+  --count-badge-text: var(--text-primary);
 
-  --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.08);
-  --shadow-lg: 0 10px 18px -3px rgb(0 0 0 / 0.1);
+  --shadow: 0 1px 2px 0 rgb(28 26 23 / 0.06);
+  --shadow-lg: 0 12px 28px -8px rgb(28 26 23 / 0.14);
 
-  --radius-md: 8px;
+  --radius-md: 3px;
 
-  // Workbench tokens (Home parity)
   --primary-8: color-mix(in srgb, var(--primary-color) 8%, transparent);
   --primary-10: color-mix(in srgb, var(--primary-color) 10%, transparent);
   --primary-30: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  --amber-color: #d97706;
-  --amber-text: #92400e;
-  --amber-10: color-mix(in srgb, var(--amber-color) 10%, transparent);
-  --amber-30: color-mix(in srgb, var(--amber-color) 30%, transparent);
+  --amber-color: #c8862a;
+  --amber-text: #8a5a12;
+  --amber-10: color-mix(in srgb, var(--amber-color) 12%, transparent);
+  --amber-30: color-mix(in srgb, var(--amber-color) 32%, transparent);
+  --accent-color: var(--amber-color);
+  --accent-strong: #b3741d;
   --destructive-color: var(--error-color);
   --destructive-10: color-mix(in srgb, var(--destructive-color) 10%, transparent);
   --destructive-30: color-mix(in srgb, var(--destructive-color) 30%, transparent);
@@ -162,80 +173,81 @@
 
 
 [data-theme='dark'] {
+  // Ink-on-charcoal: warm dark paper with bone text (ryoku dark parity).
+  --bg-secondary: #14120f;
+  --bg-primary: #1b1815;
+  --bg-tertiary: #24211c;
+  --bg-hover: #2c2822;
+  --bg-quinary: #17140f;
+  --bg-error-light: rgba(211, 118, 100, 0.18);
+  --floating-surface: #27231e;
+  --floating-shadow: 0 18px 38px rgba(0, 0, 0, 0.5);
 
-  --bg-secondary: #151412;
-  --bg-primary: #1d1b18;
-  --bg-tertiary: #262320;
-  --bg-hover: #2e2a26;
-  --bg-quinary: #191714;
-  --bg-error-light: rgba(198, 87, 70, 0.18);
-  --floating-surface: #2a2723;
-  --floating-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
-
-  --text-primary: #f6f4f1;
-  --text-secondary: #c9c3bb;
-  --text-tertiary: #9c958d;
-  --text-quaternary: #6f6962;
+  --text-primary: #f2ede4;
+  --text-secondary: #c5bdb1;
+  --text-tertiary: #948c82;
+  --text-quaternary: #6b645c;
   --text-muted: var(--text-tertiary);
 
-  --border-color: #3a3530;
+  --border-color: #35302a;
   --border-secondary: var(--border-color);
-  --border-primary: #4a453f;
-  --border-hover: #5a544d;
+  --border-primary: #45403880;
+  --border-primary: #46403a;
+  --border-hover: #57514a;
 
-  --primary-color: #8b8680;
-  --primary-hover: #9a948e;
-  --primary-active: #a6a099;
-  --primary-contrast: #ffffff;
+  // On dark, ink flips to bone so primary buttons stay high-contrast.
+  --primary-color: #f2ede4;
+  --primary-hover: #e4ddd1;
+  --primary-active: #d6cec1;
+  --primary-contrast: #1b1815;
 
-  --success-color: #10b981;
-  --quota-medium-color: #ffd862;
-  --warning-color: #c65746;
-  --error-color: #c65746;
+  --success-color: #4faf78;
+  --quota-medium-color: #e0aa4a;
+  --warning-color: #d37664;
+  --error-color: #d37664;
   --danger-color: var(--error-color);
-  --info-color: var(--primary-color);
+  --info-color: var(--text-secondary);
 
-  --warning-bg: rgba(198, 87, 70, 0.22);
-  --warning-border: rgba(198, 87, 70, 0.45);
-  --warning-text: #f1b0a6;
+  --warning-bg: rgba(211, 118, 100, 0.2);
+  --warning-border: rgba(211, 118, 100, 0.42);
+  --warning-text: #eaa99c;
 
-  --success-badge-bg: rgba(6, 78, 59, 0.3);
-  --success-badge-text: #6ee7b7;
-  --success-badge-border: #059669;
+  --success-badge-bg: rgba(79, 175, 120, 0.18);
+  --success-badge-text: #8fd6ab;
+  --success-badge-border: rgba(79, 175, 120, 0.42);
 
-  --failure-badge-bg: rgba(198, 87, 70, 0.24);
-  --failure-badge-text: #f1b0a6;
-  --failure-badge-border: rgba(198, 87, 70, 0.5);
+  --failure-badge-bg: rgba(211, 118, 100, 0.2);
+  --failure-badge-text: #eaa99c;
+  --failure-badge-border: rgba(211, 118, 100, 0.44);
 
-  --count-badge-bg: rgba(139, 134, 128, 0.28);
-  --count-badge-text: var(--primary-active);
+  --count-badge-bg: rgba(242, 237, 228, 0.12);
+  --count-badge-text: var(--text-primary);
 
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 14px 30px -8px rgb(0 0 0 / 0.45);
 
-  --radius-md: 8px;
+  --radius-md: 3px;
 
-  // Workbench tokens (Home parity, deeper amber for dark)
   --primary-8: color-mix(in srgb, var(--primary-color) 8%, transparent);
   --primary-10: color-mix(in srgb, var(--primary-color) 10%, transparent);
   --primary-30: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  --amber-color: #f59e0b;
-  --amber-text: #fcd34d;
-  --amber-10: color-mix(in srgb, var(--amber-color) 14%, transparent);
-  --amber-30: color-mix(in srgb, var(--amber-color) 38%, transparent);
+  --amber-color: #d99a3c;
+  --amber-text: #f0c579;
+  --amber-10: color-mix(in srgb, var(--amber-color) 16%, transparent);
+  --amber-30: color-mix(in srgb, var(--amber-color) 40%, transparent);
+  --accent-color: var(--amber-color);
+  --accent-strong: #e0aa4a;
   --destructive-color: var(--error-color);
-  --destructive-10: color-mix(in srgb, var(--destructive-color) 14%, transparent);
-  --destructive-30: color-mix(in srgb, var(--destructive-color) 38%, transparent);
+  --destructive-10: color-mix(in srgb, var(--destructive-color) 16%, transparent);
+  --destructive-30: color-mix(in srgb, var(--destructive-color) 40%, transparent);
   --muted-bg: var(--bg-tertiary);
   --muted-foreground: var(--text-secondary);
   --accent-bg: var(--bg-tertiary);
 
-  --glass-border: color-mix(in srgb, var(--border-color) 55%, transparent);
+  --glass-border: color-mix(in srgb, var(--border-color) 60%, transparent);
 
-
-
-  --viz-success: #0fae78;
-  --viz-failure: #cf4b3a;
+  --viz-success: #4faf78;
+  --viz-failure: #d37664;
 }
 
 @media (max-width: 768px),

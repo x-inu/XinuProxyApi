@@ -98,7 +98,7 @@
     height: 52px;
     padding: 0;
     border: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
-    border-radius: 14px;
+    border-radius: 5px;
     background: var(--bg-primary);
     color: color-mix(in srgb, var(--text-secondary) 88%, transparent);
     box-shadow:
@@ -150,7 +150,7 @@
     gap: 4px;
     padding: 6px;
     border: 1px solid color-mix(in srgb, var(--border-color) 68%, transparent);
-    border-radius: 16px;
+    border-radius: 5px;
     background: color-mix(in srgb, var(--bg-primary) 68%, transparent);
     color: var(--text-secondary);
     box-shadow:
@@ -177,7 +177,7 @@
     height: var(--floating-control-size);
     min-width: var(--floating-control-size);
     padding: 0;
-    border-radius: 11px;
+    border-radius: 4px;
     background: transparent;
     color: var(--text-secondary);
     border-color: transparent;
@@ -454,7 +454,7 @@
     width: 30px;
     height: 30px;
     object-fit: contain;
-    border-radius: 7px;
+    border-radius: 3px;
     box-shadow: none;
     flex-shrink: 0;
   }
@@ -552,7 +552,7 @@
 
   .nav-item {
     padding: 6px 10px;
-    border-radius: 9px;
+    border-radius: 4px;
     border: 1px solid transparent;
     color: var(--text-primary);
     font-size: 13px;
@@ -660,7 +660,7 @@
     &.nav-sub-item {
       min-height: 30px;
       padding: 5px 10px;
-      border-radius: 8px;
+      border-radius: 3px;
       font-size: 12.5px;
       font-weight: 600;
 
@@ -694,7 +694,7 @@
   max-height: calc(100vh - 16px);
   padding: 9px 12px;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 4px;
   background: #24211c;
   color: #f6f4f1;
   box-shadow: 0 14px 36px rgb(0 0 0 / 0.32);
@@ -816,7 +816,7 @@
       );
       padding: 5px;
       gap: 2px;
-      border-radius: 14px;
+      border-radius: 5px;
     }
 
     .mobile-sidebar-actions {
@@ -825,7 +825,7 @@
       left: var(--shell-gutter);
       padding: 5px;
       gap: 2px;
-      border-radius: 14px;
+      border-radius: 5px;
     }
 
     .mobile-menu-btn {

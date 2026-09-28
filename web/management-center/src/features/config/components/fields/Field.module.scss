@@ -19,7 +19,7 @@
 
   :global(.input) {
     min-height: 42px;
-    border-radius: 10px;
+    border-radius: 4px;
     background: var(--bg-secondary);
     border-color: var(--border-color);
     box-shadow: none;
@@ -46,7 +46,7 @@
   }
 
   :global(.error-box) {
-    border-radius: 10px;
+    border-radius: 4px;
   }
 
   :global(.item-list) {
@@ -55,7 +55,7 @@
   }
 
   :global(.item-row) {
-    border-radius: 10px;
+    border-radius: 4px;
     padding: 12px;
     background: transparent;
     border-color: var(--border-color);
@@ -71,7 +71,7 @@
 
   :global(.pill) {
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 3px;
     background: transparent;
     color: var(--text-secondary);
   }
@@ -87,7 +87,7 @@
   min-height: 74px;
   padding: 14px;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 4px;
   background: transparent;
   transition:
     border-color var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),
@@ -167,7 +167,7 @@
 
 
 .fieldHighlightActive {
-  border-radius: 10px;
+  border-radius: 4px;
   animation: config-field-highlight 1.8s ease-out;
 }
 
@@ -191,7 +191,7 @@
   gap: 12px;
   padding: 16px;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 4px;
   background: transparent;
 }
 
@@ -252,7 +252,7 @@
   min-height: 24px;
   padding: 0 8px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   background: var(--bg-primary);
   color: var(--text-secondary);
   font-size: 11px;

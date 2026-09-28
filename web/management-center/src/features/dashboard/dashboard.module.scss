@@ -242,7 +242,7 @@
   flex-direction: column;
   gap: $spacing-xs;
   padding: clamp($spacing-lg, 2.5vw, 28px);
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px solid var(--glass-border);
   background: linear-gradient(
     145deg,
@@ -389,7 +389,7 @@
   flex-direction: column;
   gap: 6px;
   padding: $spacing-lg;
-  border-radius: 14px;
+  border-radius: 5px;
   border: 1px solid var(--border-color);
   background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
   transition: border-color $transition-fast;
@@ -501,7 +501,7 @@
   flex-direction: column;
   gap: $spacing-md;
   padding: clamp($spacing-lg, 2.4vw, 28px);
-  border-radius: 16px;
+  border-radius: 5px;
   border: 1px solid var(--border-color);
   background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
 }
@@ -873,7 +873,7 @@
   flex-direction: column;
   gap: 6px;
   padding: $spacing-lg;
-  border-radius: 14px;
+  border-radius: 5px;
   border: 1px solid var(--border-color);
   background: color-mix(in srgb, var(--bg-primary) 76%, transparent);
   text-decoration: none;

@@ -23,7 +23,7 @@
 
   :global(.input) {
     height: 36px;
-    border-radius: 10px;
+    border-radius: 4px;
     font-size: 13px;
   }
 }
@@ -162,7 +162,7 @@
   gap: 10px;
   min-width: 216px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: 4px;
   border: 1px solid var(--border-color);
   background: var(--floating-surface);
   box-shadow: var(--floating-shadow);
@@ -190,7 +190,7 @@
   width: 64px;
   height: 30px;
   padding: 0 8px;
-  border-radius: 8px;
+  border-radius: 3px;
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
   color: var(--text-primary);

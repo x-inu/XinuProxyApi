@@ -22,7 +22,7 @@
   color: var(--danger-color);
   background: var(--bg-error-light);
   border: 1px solid var(--warning-border);
-  border-radius: 8px;
+  border-radius: 3px;
   padding: 8px 10px;
   overflow-wrap: anywhere;
 }
@@ -52,7 +52,7 @@
   color: var(--text-secondary);
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 10px 12px;
 
   &:focus {
@@ -76,7 +76,7 @@
   color: var(--text-secondary);
   background: var(--bg-secondary);
   border: 1px dashed var(--border-hover);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 10px 12px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;

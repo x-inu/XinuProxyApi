@@ -10,10 +10,24 @@
 body {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
+  font-family: $font-family;
   transition:
     background-color $transition-normal,
     color $transition-normal;
 }
+
+// Ryoku editorial typography helpers. Uppercase, wide-tracked labels in the
+// monospace face give sections the "eyebrow / tag" feel from ryoku.dev.
+.eyebrow,
+.section-eyebrow {
+  font-family: $font-mono;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
 
 html.modal-open,
 body.modal-open {

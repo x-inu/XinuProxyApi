@@ -89,7 +89,7 @@
 
 .emptyState {
   border: 1px dashed var(--border-color);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 16px;
   color: var(--text-secondary);
   text-align: center;
@@ -104,7 +104,7 @@
   gap: 12px;
   padding: 12px;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--bg-secondary) 64%, transparent);
 }
 
@@ -231,7 +231,7 @@
   gap: 12px;
   padding: 14px;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--bg-secondary) 42%, transparent);
 }
 

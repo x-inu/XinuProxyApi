@@ -2,7 +2,7 @@
  * Shared application types.
  */
 
-export type Theme = 'light' | 'white' | 'dark' | 'auto';
+export type Theme = 'light' | 'dark';
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
 

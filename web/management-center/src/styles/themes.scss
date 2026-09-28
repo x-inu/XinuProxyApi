@@ -1,9 +1,9 @@
 /**
  * Ryoku-inspired theme tokens.
  *
- * Editorial paper + ink palette: warm bone backgrounds, near-black ink text,
- * hairline borders, crisp corners, and a single amber/sun accent. Token names
- * are preserved so every component inherits the new look without edits.
+ * Two modes only: a warm ink-on-charcoal dark default ([data-theme='dark'],
+ * aligned with the sibling projects) and a light paper fallback (:root). Token
+ * names are preserved so every component inherits the look without edits.
  */
 
 :root {
@@ -98,77 +98,6 @@
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --dur-press: 160ms;
   --dur-hover: 200ms;
-}
-
-
-[data-theme='white'] {
-  --bg-secondary: #ffffff;
-  --bg-primary: #fbfaf7;
-  --bg-tertiary: #f2efe8;
-  --bg-hover: var(--bg-tertiary);
-  --bg-quinary: #ffffff;
-  --bg-error-light: rgba(176, 74, 58, 0.08);
-  --floating-surface: #ffffff;
-  --floating-shadow: 0 16px 40px rgba(28, 26, 23, 0.12);
-
-  --text-primary: #1c1a17;
-  --text-secondary: #57524b;
-  --text-tertiary: #8f8880;
-  --text-quaternary: #b7b0a6;
-  --text-muted: var(--text-tertiary);
-
-  --border-color: #e7e3da;
-  --border-secondary: var(--border-color);
-  --border-primary: #d8d2c7;
-  --border-hover: #c8c1b4;
-
-  --primary-color: #1c1a17;
-  --primary-hover: #322e29;
-  --primary-active: #44403a;
-  --primary-contrast: #ffffff;
-
-  --success-color: #3f8f5f;
-  --quota-medium-color: #c8862a;
-  --warning-color: #b04a3a;
-  --error-color: #b04a3a;
-  --danger-color: var(--error-color);
-  --info-color: var(--text-secondary);
-
-  --warning-bg: rgba(176, 74, 58, 0.1);
-  --warning-border: rgba(176, 74, 58, 0.3);
-  --warning-text: var(--warning-color);
-
-  --success-badge-bg: rgba(63, 143, 95, 0.14);
-  --success-badge-text: #2c6844;
-  --success-badge-border: rgba(63, 143, 95, 0.38);
-
-  --failure-badge-bg: rgba(176, 74, 58, 0.12);
-  --failure-badge-text: #8a3a30;
-  --failure-badge-border: rgba(176, 74, 58, 0.34);
-
-  --count-badge-bg: rgba(28, 26, 23, 0.08);
-  --count-badge-text: var(--text-primary);
-
-  --shadow: 0 1px 2px 0 rgb(28 26 23 / 0.06);
-  --shadow-lg: 0 12px 28px -8px rgb(28 26 23 / 0.14);
-
-  --radius-md: 3px;
-
-  --primary-8: color-mix(in srgb, var(--primary-color) 8%, transparent);
-  --primary-10: color-mix(in srgb, var(--primary-color) 10%, transparent);
-  --primary-30: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  --amber-color: #c8862a;
-  --amber-text: #8a5a12;
-  --amber-10: color-mix(in srgb, var(--amber-color) 12%, transparent);
-  --amber-30: color-mix(in srgb, var(--amber-color) 32%, transparent);
-  --accent-color: var(--amber-color);
-  --accent-strong: #b3741d;
-  --destructive-color: var(--error-color);
-  --destructive-10: color-mix(in srgb, var(--destructive-color) 10%, transparent);
-  --destructive-30: color-mix(in srgb, var(--destructive-color) 30%, transparent);
-  --muted-bg: var(--bg-tertiary);
-  --muted-foreground: var(--text-secondary);
-  --accent-bg: var(--bg-tertiary);
 }
 
 

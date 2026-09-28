@@ -6,52 +6,111 @@ import type { Theme } from '@/types';
 import { STORAGE_KEY_THEME } from '@/utils/constants';
 
 type ResolvedTheme = 'light' | 'dark';
-type AppliedTheme = ResolvedTheme | 'white';
 
 interface ThemeState {
   theme: Theme;
   resolvedTheme: ResolvedTheme;
   setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
   initializeTheme: () => () => void;
 }
 
-const getSystemTheme = (): ResolvedTheme => {
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark';
-  }
-  return 'light';
-};
-
-const resolveAutoTheme = (): AppliedTheme => {
-  return getSystemTheme() === 'dark' ? 'dark' : 'white';
-};
-
-const normalizeResolvedTheme = (theme: AppliedTheme): ResolvedTheme => {
-  return theme === 'dark' ? 'dark' : 'light';
-};
-
-const resolveTheme = (theme: Theme): AppliedTheme => {
-  if (theme === 'auto') {
-    return resolveAutoTheme();
-  }
-  if (theme === 'white') {
-    return 'white';
-  }
-  return theme;
-};
-
-const applyTheme = (resolved: AppliedTheme) => {
-  if (resolved === 'dark') {
+const applyTheme = (theme: Theme) => {
+  if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
     return;
   }
 
-  if (resolved === 'white') {
-    document.documentElement.setAttribute('data-theme', 'white');
+  // Light = the ryoku paper palette (:root defaults, no data-theme attribute).
+  document.documentElement.removeAttribute('data-theme');
+};
+
+// Duration and easing mirror the editorial scanline used across the sibling
+// projects: a hard-edged repaint that advances in discrete rows.
+const SCANLINE_DURATION = 260;
+const SCANLINE_STEPS = 14;
+
+const prefersReducedMotion = (): boolean =>
+  typeof window !== 'undefined' &&
+  !!window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let transitionRunning = false;
+
+/**
+ * Fallback scanline overlay for browsers without the View Transitions API.
+ * A full-viewport panel of the incoming canvas color wipes top-to-bottom in
+ * discrete steps, then the theme is committed.
+ */
+const runScanlineFallback = (commit: () => void): void => {
+  const incomingIsDark = document.documentElement.getAttribute('data-theme') !== 'dark';
+  const overlay = document.createElement('div');
+  overlay.className = 'theme-scanline-fallback';
+  overlay.style.background = incomingIsDark ? '#11100e' : '#f4f1ea';
+  document.body.append(overlay);
+
+  if (!overlay.animate) {
+    overlay.remove();
+    commit();
     return;
   }
 
-  document.documentElement.removeAttribute('data-theme');
+  const animation = overlay.animate(
+    [{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0 0)' }],
+    {
+      duration: SCANLINE_DURATION,
+      easing: `steps(${SCANLINE_STEPS}, end)`,
+      fill: 'forwards',
+    }
+  );
+
+  let switched = false;
+  const finish = () => {
+    if (switched) return;
+    switched = true;
+    commit();
+    overlay.remove();
+  };
+
+  animation.onfinish = finish;
+  animation.oncancel = finish;
+};
+
+/**
+ * Animate a theme change. Uses the native View Transitions API when available
+ * (styled as a scanline wipe in global.scss) and falls back to an overlay
+ * animation otherwise. Instant when reduced motion is requested.
+ */
+const animateThemeChange = (commit: () => void): void => {
+  if (transitionRunning) {
+    commit();
+    return;
+  }
+
+  if (prefersReducedMotion()) {
+    commit();
+    return;
+  }
+
+  transitionRunning = true;
+  const done = () => {
+    transitionRunning = false;
+  };
+
+  const startViewTransition = (
+    document as Document & {
+      startViewTransition?: (cb: () => void) => { finished: Promise<void> };
+    }
+  ).startViewTransition;
+
+  if (typeof startViewTransition === 'function') {
+    const transition = startViewTransition.call(document, commit);
+    transition.finished.then(done, done);
+    return;
+  }
+
+  runScanlineFallback(commit);
+  window.setTimeout(done, SCANLINE_DURATION);
 };
 
 export const useThemeStore = create<ThemeState>()(
@@ -61,38 +120,26 @@ export const useThemeStore = create<ThemeState>()(
       resolvedTheme: 'dark',
 
       setTheme: (theme) => {
-        const resolved = resolveTheme(theme);
-        applyTheme(resolved);
-        set({
-          theme,
-          resolvedTheme: normalizeResolvedTheme(resolved),
+        if (get().theme === theme) return;
+        animateThemeChange(() => {
+          applyTheme(theme);
+          set({ theme, resolvedTheme: theme });
         });
       },
 
+      toggleTheme: () => {
+        const next: Theme = get().theme === 'dark' ? 'light' : 'dark';
+        get().setTheme(next);
+      },
+
       initializeTheme: () => {
-        const { theme, setTheme } = get();
-
-
-        setTheme(theme);
-
-
-        if (!window.matchMedia) {
-          return () => {};
-        }
-
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const listener = () => {
-          const { theme: currentTheme } = get();
-          if (currentTheme === 'auto') {
-            const resolved = resolveAutoTheme();
-            applyTheme(resolved);
-            set({ resolvedTheme: normalizeResolvedTheme(resolved) });
-          }
-        };
-
-        mediaQuery.addEventListener('change', listener);
-
-        return () => mediaQuery.removeEventListener('change', listener);
+        // Normalize any legacy persisted value ('auto'/'white') down to the
+        // two supported modes.
+        const stored = get().theme;
+        const theme: Theme = stored === 'dark' ? 'dark' : 'light';
+        applyTheme(theme);
+        set({ theme, resolvedTheme: theme });
+        return () => {};
       },
     }),
     {

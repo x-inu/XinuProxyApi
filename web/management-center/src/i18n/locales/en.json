@@ -1558,11 +1558,9 @@
     "link_copied": "Link copied to clipboard"
   },
   "theme": {
-    "switch": "Theme",
-    "light": "Wool Paper",
-    "white": "Pure White",
-    "dark": "Dark",
-    "auto": "Follow system"
+    "switch": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark"
   },
   "sidebar": {
     "toggle_expand": "Expand sidebar",

@@ -28,6 +28,57 @@ body {
   color: var(--text-tertiary);
 }
 
+// Theme switch: a hard-edged repaint that advances in discrete rows, the way a
+// terminal redraws a screen. Mirrors the scanline transition used across the
+// sibling projects (xinu-mail). Direction-agnostic on purpose: a repaint looks
+// the same either way. Uses the View Transitions API where available, with a
+// JS overlay fallback (.theme-scanline-fallback) driven from useThemeStore.
+:root {
+  --vt-duration: 260ms;
+  --vt-easing: steps(14, end);
+}
+
+.theme-scanline-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+// The incoming theme always sits on top and wipes over the old one.
+::view-transition-new(root) {
+  z-index: 2;
+  clip-path: inset(0 0 100% 0);
+  animation: vt-scanline var(--vt-duration) var(--vt-easing) forwards;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+@keyframes vt-scanline {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  // The theme change keeps its short scanline feedback so the control never
+  // appears broken, while all other interface motion stays reduced elsewhere.
+  ::view-transition-new(root) {
+    animation-duration: var(--vt-duration) !important;
+  }
+}
+
 
 html.modal-open,
 body.modal-open {

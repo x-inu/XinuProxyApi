@@ -1,6 +1,5 @@
 import {
   ReactNode,
-  RefObject,
   SVGProps,
   useCallback,
   useEffect,
@@ -46,7 +45,6 @@ import {
 } from '@/features/plugins/pluginResources';
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { getSidebarShortcutLabel, isSidebarToggleShortcut } from '@/utils/sidebarShortcut';
-import type { Theme } from '@/types';
 
 const sidebarIcons: Record<string, ReactNode> = {
   dashboard: <IconSidebarDashboard size={18} />,
@@ -96,38 +94,6 @@ interface SidebarNavGroup {
 const flattenNavItems = (items: SidebarNavItem[]): SidebarNavLinkItem[] =>
   items.flatMap((item) => (item.kind === 'drawer' ? item.children : [item]));
 
-
-function useMenuDismiss(
-  open: boolean,
-  menuRef: RefObject<HTMLDivElement | null>,
-  onClose: () => void
-) {
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [open, menuRef, onClose]);
-}
 
 function PluginSidebarIcon({ src }: { src: string }) {
   const [failed, setFailed] = useState(false);
@@ -202,37 +168,6 @@ const headerIcons = {
       <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z" />
     </svg>
   ),
-  whiteTheme: (
-    <svg {...headerIconProps}>
-      <circle cx="12" cy="12" r="7" />
-      <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
-    </svg>
-  ),
-  autoTheme: (
-    <svg {...headerIconProps}>
-      <defs>
-        <clipPath id="mainLayoutAutoThemeSunLeftHalf">
-          <rect x="0" y="0" width="12" height="24" />
-        </clipPath>
-      </defs>
-      <circle cx="12" cy="12" r="4" />
-      <circle
-        cx="12"
-        cy="12"
-        r="4"
-        clipPath="url(#mainLayoutAutoThemeSunLeftHalf)"
-        fill="currentColor"
-      />
-      <path d="M12 2v2" />
-      <path d="M12 20v2" />
-      <path d="M4.93 4.93l1.41 1.41" />
-      <path d="M17.66 17.66l1.41 1.41" />
-      <path d="M2 12h2" />
-      <path d="M20 12h2" />
-      <path d="M6.34 17.66l-1.41 1.41" />
-      <path d="M19.07 4.93l-1.41 1.41" />
-    </svg>
-  ),
   logout: (
     <svg {...headerIconProps}>
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -241,57 +176,6 @@ const headerIcons = {
     </svg>
   ),
 };
-
-const THEME_CARDS: Array<{
-  key: Theme;
-  labelKey: string;
-  colors: { bg: string; card: string; border: string; text: string; textMuted: string };
-}> = [
-  {
-    key: 'auto',
-    labelKey: 'theme.auto',
-    colors: {
-      bg: 'linear-gradient(135deg, #ffffff 0 50%, #111111 50% 100%)',
-      card: 'linear-gradient(135deg, #ffffff 0 50%, #1a1a1a 50% 100%)',
-      border: '#bdbdbd',
-      text: '#2d2a26',
-      textMuted: 'linear-gradient(135deg, #c9c9c9 0 50%, #5a5a5a 50% 100%)',
-    },
-  },
-  {
-    key: 'white',
-    labelKey: 'theme.white',
-    colors: {
-      bg: '#ffffff',
-      card: '#ffffff',
-      border: '#e5e5e5',
-      text: '#2d2a26',
-      textMuted: '#a29c95',
-    },
-  },
-  {
-    key: 'light',
-    labelKey: 'theme.light',
-    colors: {
-      bg: '#faf9f5',
-      card: '#f0eee8',
-      border: '#e3e1db',
-      text: '#2d2a26',
-      textMuted: '#a29c95',
-    },
-  },
-  {
-    key: 'dark',
-    labelKey: 'theme.dark',
-    colors: {
-      bg: '#151412',
-      card: '#1d1b18',
-      border: '#3a3530',
-      text: '#f6f4f1',
-      textMuted: '#9c958d',
-    },
-  },
-];
 
 export function MainLayout() {
   const { t } = useTranslation();
@@ -307,7 +191,7 @@ export function MainLayout() {
   const clearCache = useConfigStore((state) => state.clearCache);
 
   const theme = useThemeStore((state) => state.theme);
-  const setTheme = useThemeStore((state) => state.setTheme);
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -319,7 +203,6 @@ export function MainLayout() {
     anchorTop: number;
     top: number;
   } | null>(null);
-  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [pluginResources, setPluginResources] = useState<PluginResourceEntry[]>([]);
   const [expandedPluginResourceIDs, setExpandedPluginResourceIDs] = useState<Set<string>>(
     () => new Set()
@@ -328,7 +211,6 @@ export function MainLayout() {
   const authFilesCountRequestRef = useRef(0);
   const railTooltipRef = useRef<HTMLDivElement | null>(null);
   const focusedRailItemRef = useRef<HTMLElement | null>(null);
-  const themeMenuRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
 
   const fullBrandName = 'XinuProxyApi';
@@ -425,21 +307,6 @@ export function MainLayout() {
       document.documentElement.style.removeProperty('--content-center-x');
     };
   }, []);
-
-  const closeThemeMenu = useCallback(() => setThemeMenuOpen(false), []);
-  useMenuDismiss(themeMenuOpen, themeMenuRef, closeThemeMenu);
-
-  const toggleThemeMenu = useCallback(() => {
-    setThemeMenuOpen((prev) => !prev);
-  }, []);
-
-  const handleThemeSelect = useCallback(
-    (nextTheme: Theme) => {
-      setTheme(nextTheme);
-      setThemeMenuOpen(false);
-    },
-    [setTheme]
-  );
 
   useEffect(() => {
     fetchConfig().catch(() => {
@@ -976,78 +843,16 @@ export function MainLayout() {
           >
             {headerIcons.refresh}
           </Button>
-          <div className={`theme-menu ${themeMenuOpen ? 'open' : ''}`} ref={themeMenuRef}>
+          <div className="theme-menu">
             <Button
               variant="ghost"
               size="sm"
-              onClick={toggleThemeMenu}
+              onClick={toggleTheme}
               title={t('theme.switch')}
               aria-label={t('theme.switch')}
-              aria-haspopup="menu"
-              aria-expanded={themeMenuOpen}
             >
-              {theme === 'auto'
-                ? headerIcons.autoTheme
-                : theme === 'dark'
-                  ? headerIcons.moon
-                  : theme === 'white'
-                    ? headerIcons.whiteTheme
-                    : headerIcons.sun}
+              {theme === 'dark' ? headerIcons.sun : headerIcons.moon}
             </Button>
-            {themeMenuOpen && (
-              <div
-                className="notification entering theme-menu-popover"
-                role="menu"
-                aria-label={t('theme.switch')}
-              >
-                {THEME_CARDS.map((tc) => (
-                  <button
-                    key={tc.key}
-                    type="button"
-                    className={`theme-card ${theme === tc.key ? 'active' : ''}`}
-                    onClick={() => handleThemeSelect(tc.key)}
-                    role="menuitemradio"
-                    aria-checked={theme === tc.key}
-                  >
-                    <div
-                      className="theme-card-preview"
-                      style={{
-                        background: tc.colors.bg,
-                        border: `1px solid ${tc.colors.border}`,
-                      }}
-                    >
-                      <div
-                        className="theme-card-header"
-                        style={{
-                          background: tc.colors.card,
-                          borderBottom: `1px solid ${tc.colors.border}`,
-                        }}
-                      />
-                      <div className="theme-card-body">
-                        <div
-                          className="theme-card-sidebar"
-                          style={{
-                            background: tc.colors.card,
-                            borderRight: `1px solid ${tc.colors.border}`,
-                          }}
-                        />
-                        <div className="theme-card-content" style={{ background: tc.colors.bg }}>
-                          <div
-                            className="theme-card-line"
-                            style={{ background: tc.colors.textMuted }}
-                          />
-                          <div
-                            className="theme-card-line short"
-                            style={{ background: tc.colors.textMuted }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <span className="theme-card-label">{t(tc.labelKey)}</span>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
           <Button variant="ghost" size="sm" onClick={logout} title={t('header.logout')}>
             {headerIcons.logout}

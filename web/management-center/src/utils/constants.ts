@@ -23,6 +23,7 @@ export const MAX_AUTH_FILE_SIZE = 10 * 1024 * 1024;
 
 // Browser storage keys.
 export const STORAGE_KEY_AUTH = 'cli-proxy-auth';
+export const STORAGE_KEY_SESSION = 'cli-proxy-session';
 export const STORAGE_KEY_THEME = 'cli-proxy-theme';
 
 // Notification lifetime.

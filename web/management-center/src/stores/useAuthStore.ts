@@ -3,13 +3,45 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AuthState, LoginCredentials, ConnectionStatus } from '@/types';
-import { STORAGE_KEY_AUTH } from '@/utils/constants';
+import { STORAGE_KEY_AUTH, STORAGE_KEY_SESSION } from '@/utils/constants';
 import { obfuscatedStorage } from '@/services/storage/secureStorage';
 import { apiClient } from '@/services/api/client';
 import { useConfigStore } from './useConfigStore';
 import { useModelsStore } from './useModelsStore';
 import { useQuotaStore } from './useQuotaStore';
 import { detectApiBaseFromLocation, normalizeApiBase } from '@/utils/connection';
+
+/**
+ * Helpers to persist ephemeral session credentials into sessionStorage.
+ * When "Remember Password" is unchecked, the management key still survives
+ * page refreshes but is discarded once the browser/tab is closed.
+ */
+function saveSessionCredentials(apiBase: string, managementKey: string): void {
+  try {
+    sessionStorage.setItem(
+      STORAGE_KEY_SESSION,
+      JSON.stringify({ apiBase, managementKey }),
+    );
+  } catch { /* quota exceeded or private mode — ignore */ }
+}
+
+function loadSessionCredentials(): { apiBase: string; managementKey: string } | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY_SESSION);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.apiBase === 'string' && typeof parsed.managementKey === 'string') {
+      return parsed;
+    }
+  } catch { /* corrupted — ignore */ }
+  return null;
+}
+
+function clearSessionCredentials(): void {
+  try {
+    sessionStorage.removeItem(STORAGE_KEY_SESSION);
+  } catch { /* ignore */ }
+}
 
 interface AuthStoreState extends AuthState {
   connectionStatus: ConnectionStatus;
@@ -46,6 +78,7 @@ export const useAuthStore = create<AuthStoreState>()(
           obfuscatedStorage.migratePlaintextKeys(['apiBase', 'apiUrl', 'managementKey']);
 
           const wasLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+          const sessionCreds = loadSessionCredentials();
           const legacyBase =
             obfuscatedStorage.getItem<string>('apiBase') ||
             obfuscatedStorage.getItem<string>('apiUrl', { encrypt: true });
@@ -53,9 +86,10 @@ export const useAuthStore = create<AuthStoreState>()(
 
           const { apiBase, managementKey, rememberPassword } = get();
           const resolvedBase = normalizeApiBase(
-            apiBase || legacyBase || detectApiBaseFromLocation()
+            apiBase || sessionCreds?.apiBase || legacyBase || detectApiBaseFromLocation()
           );
-          const resolvedKey = managementKey || legacyKey || '';
+          const resolvedKey =
+            managementKey || sessionCreds?.managementKey || legacyKey || '';
           const resolvedRememberPassword =
             rememberPassword || Boolean(managementKey) || Boolean(legacyKey);
 
@@ -66,7 +100,8 @@ export const useAuthStore = create<AuthStoreState>()(
           });
           apiClient.setConfig({ apiBase: resolvedBase, managementKey: resolvedKey });
 
-          if (wasLoggedIn && resolvedBase && resolvedKey) {
+          const canRestore = (wasLoggedIn || sessionCreds) && resolvedBase && resolvedKey;
+          if (canRestore) {
             try {
               await get().login({
                 apiBase: resolvedBase,
@@ -76,6 +111,7 @@ export const useAuthStore = create<AuthStoreState>()(
               return true;
             } catch (error) {
               console.warn('Auto login failed:', error);
+              clearSessionCredentials();
               return false;
             }
           }
@@ -119,6 +155,7 @@ export const useAuthStore = create<AuthStoreState>()(
             rememberPassword,
             connectionStatus: 'connected',
           });
+          saveSessionCredentials(apiBase, managementKey);
           if (rememberPassword) {
             localStorage.setItem('isLoggedIn', 'true');
           } else {
@@ -145,6 +182,7 @@ export const useAuthStore = create<AuthStoreState>()(
           supportsPlugin: false,
           connectionStatus: 'disconnected',
         });
+        clearSessionCredentials();
         localStorage.removeItem('isLoggedIn');
       },
 

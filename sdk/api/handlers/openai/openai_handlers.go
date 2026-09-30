@@ -121,18 +121,7 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 		}
 	}
 
-	// Human-readable Display Name
-	name := ""
-	if dn, ok := model["display_name"].(string); ok && strings.TrimSpace(dn) != "" {
-		name = strings.TrimSpace(dn)
-	} else if n, ok := model["name"].(string); ok && strings.TrimSpace(n) != "" {
-		name = strings.TrimSpace(n)
-	} else if desc, ok := model["description"].(string); ok && strings.TrimSpace(desc) != "" {
-		name = strings.TrimSpace(desc)
-	}
-	name = formatModelDisplayName(root, name)
-
-	// Thinking / Reasoning capability
+	// Thinking / Reasoning capability (from registry metadata)
 	thinking := false
 	if model["thinking"] != nil {
 		thinking = true
@@ -148,16 +137,19 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 		thinking = true
 	}
 
-	// Vision capability
+	// Vision capability (from registry metadata)
+	hasExplicitModalities := false
 	vision := false
-	if inputMods, ok := model["supportedInputModalities"].([]string); ok {
+	if inputMods, ok := model["supportedInputModalities"].([]string); ok && len(inputMods) > 0 {
+		hasExplicitModalities = true
 		for _, m := range inputMods {
 			if strings.EqualFold(m, "image") || strings.EqualFold(m, "vision") {
 				vision = true
 				break
 			}
 		}
-	} else if inputModsAny, ok := model["supportedInputModalities"].([]any); ok {
+	} else if inputModsAny, ok := model["supportedInputModalities"].([]any); ok && len(inputModsAny) > 0 {
+		hasExplicitModalities = true
 		for _, m := range inputModsAny {
 			if str, ok := m.(string); ok && (strings.EqualFold(str, "image") || strings.EqualFold(str, "vision")) {
 				vision = true
@@ -165,9 +157,8 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 			}
 		}
 	}
-	if !vision {
+	if !vision && !hasExplicitModalities {
 		if strings.Contains(rootLower, "vision") ||
-			strings.Contains(rootLower, "image") ||
 			strings.Contains(rootLower, "flash") ||
 			strings.Contains(rootLower, "pro") ||
 			strings.Contains(rootLower, "omni") ||
@@ -175,61 +166,101 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 			strings.Contains(rootLower, "4.1") ||
 			strings.Contains(rootLower, "gemini") ||
 			strings.Contains(rootLower, "claude") ||
-			strings.Contains(rootLower, "codex") ||
-			strings.Contains(rootLower, "vl") {
+			strings.Contains(rootLower, "codex") {
 			vision = true
 		}
 	}
 
-	// Modalities
-	inputModalities := []string{"text"}
-	if vision {
-		inputModalities = []string{"text", "image"}
-	}
-	outputModalities := []string{"text"}
-
-	// Context length
-	contextLength := 128000
+	// Context length (only from registry, no blind fallback)
+	contextLength := 0
 	if cl, ok := model["context_length"].(int); ok && cl > 0 {
 		contextLength = cl
 	} else if mcl, ok := model["max_context_length"].(int); ok && mcl > 0 {
 		contextLength = mcl
 	} else if itl, ok := model["inputTokenLimit"].(int); ok && itl > 0 {
 		contextLength = itl
-	} else if strings.Contains(rootLower, "gemini") {
-		contextLength = 1048576
-	} else if strings.Contains(rootLower, "claude") {
-		contextLength = 200000
-	} else if strings.Contains(rootLower, "deepseek") || strings.Contains(rootLower, "qwen") {
-		contextLength = 65536
 	}
 
-	// Max output tokens
-	maxOutputTokens := 8192
+	// Max output tokens (only from registry)
+	maxOutputTokens := 0
 	if mot, ok := model["max_completion_tokens"].(int); ok && mot > 0 {
 		maxOutputTokens = mot
 	} else if otl, ok := model["outputTokenLimit"].(int); ok && otl > 0 {
 		maxOutputTokens = otl
-	} else if strings.Contains(rootLower, "gemini") || strings.Contains(rootLower, "claude") {
-		maxOutputTokens = 65536
-	} else if strings.HasPrefix(rootLower, "o1") || strings.HasPrefix(rootLower, "o3") || strings.HasPrefix(rootLower, "o4") {
-		maxOutputTokens = 65536
-	} else if strings.Contains(rootLower, "4o") {
-		maxOutputTokens = 16384
 	}
 
-	maxInputTokens := contextLength
+	// Human-readable Display Name
+	name := ""
+	if dn, ok := model["display_name"].(string); ok && strings.TrimSpace(dn) != "" {
+		name = strings.TrimSpace(dn)
+	} else if n, ok := model["name"].(string); ok && strings.TrimSpace(n) != "" {
+		name = strings.TrimSpace(n)
+	} else if desc, ok := model["description"].(string); ok && strings.TrimSpace(desc) != "" {
+		name = strings.TrimSpace(desc)
+	}
+	name = formatModelDisplayName(root, name)
 
-	// Pricing estimation
+	// Build base result (always present)
+	result := map[string]any{
+		"id":         id,
+		"object":     "model",
+		"owned_by":   ownedBy,
+		"permission": []any{},
+		"root":       root,
+		"parent":     nil,
+	}
+
+	// Capabilities: only include keys that are true (omit false values like OmniRoute)
+	caps := map[string]any{
+		"tool_calling": true,
+		"reasoning":    true,
+	}
+	if thinking {
+		caps["thinking"] = true
+		caps["supportsThinking"] = true
+	}
+	if vision {
+		caps["vision"] = true
+	}
+	result["capabilities"] = caps
+
+	// Context length (only when known)
+	if contextLength > 0 {
+		result["context_length"] = contextLength
+	}
+
+	// Token limits (only when known from registry)
+	if contextLength > 0 {
+		result["max_input_tokens"] = contextLength
+	}
+	if maxOutputTokens > 0 {
+		result["max_output_tokens"] = maxOutputTokens
+	}
+
+	// Modalities (only when model has explicit modality data)
+	if hasExplicitModalities || vision {
+		if vision {
+			result["input_modalities"] = []string{"text", "image"}
+		} else {
+			result["input_modalities"] = []string{"text"}
+		}
+		result["output_modalities"] = []string{"text"}
+	}
+
+	// Root-level thinking flags (only when true, like OmniRoute)
+	if thinking {
+		result["thinking"] = true
+		result["supportsThinking"] = true
+	}
+
+	// Name (only when meaningful, not just the raw ID)
+	if name != "" && name != root && name != id {
+		result["name"] = name
+	}
+
+	// Pricing (only when rate data exists and is non-zero)
 	rate, hasRate := usagehistory.RateFor(root)
-	pricing := map[string]any{
-		"input":          0.0,
-		"output":         0.0,
-		"cached":         0.0,
-		"reasoning":      0.0,
-		"cache_creation": 0.0,
-	}
-	if hasRate && !strings.Contains(rootLower, ":free") {
+	if hasRate && !strings.Contains(rootLower, ":free") && (rate.InputPerM > 0 || rate.OutputPerM > 0) {
 		cachedRate := rate.CacheReadPerM
 		if cachedRate == 0 {
 			cachedRate = rate.InputPerM * 0.1
@@ -238,37 +269,16 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 		if cacheWriteRate == 0 {
 			cacheWriteRate = rate.InputPerM
 		}
-		pricing["input"] = rate.InputPerM
-		pricing["output"] = rate.OutputPerM
-		pricing["cached"] = cachedRate
-		pricing["reasoning"] = rate.OutputPerM
-		pricing["cache_creation"] = cacheWriteRate
+		result["pricing"] = map[string]any{
+			"input":          rate.InputPerM,
+			"output":         rate.OutputPerM,
+			"cached":         cachedRate,
+			"reasoning":      rate.OutputPerM,
+			"cache_creation": cacheWriteRate,
+		}
 	}
 
-	return map[string]any{
-		"id":                id,
-		"object":            "model",
-		"owned_by":          ownedBy,
-		"permission":        []any{},
-		"root":              root,
-		"parent":            nil,
-		"name":              name,
-		"context_length":    contextLength,
-		"max_input_tokens":  maxInputTokens,
-		"max_output_tokens": maxOutputTokens,
-		"input_modalities":  inputModalities,
-		"output_modalities": outputModalities,
-		"thinking":          thinking,
-		"supportsThinking":  thinking,
-		"capabilities": map[string]any{
-			"thinking":         thinking,
-			"supportsThinking": thinking,
-			"vision":           vision,
-			"tool_calling":     true,
-			"reasoning":        thinking,
-		},
-		"pricing": pricing,
-	}
+	return result
 }
 
 func formatModelDisplayName(root, current string) string {

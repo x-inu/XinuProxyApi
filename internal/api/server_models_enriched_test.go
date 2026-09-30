@@ -123,3 +123,74 @@ func TestOpenAIModels_ReturnsEnrichedMetadata(t *testing.T) {
 		t.Fatalf("expected pricing.output to exist")
 	}
 }
+
+func TestOpenAIModels_OmitsUnknownFieldsLikeOmniRoute(t *testing.T) {
+	modelRegistry := registry.GetGlobalRegistry()
+	clientID := "test-client-omit-unknown"
+	modelRegistry.RegisterClient(clientID, "openai-compatible-unknown", []*registry.ModelInfo{
+		{
+			ID:      "unknown-provider/mystery-model",
+			OwnedBy: "unknown",
+		},
+	})
+	t.Cleanup(func() {
+		modelRegistry.UnregisterClient(clientID)
+	})
+
+	cfg := &proxyconfig.Config{
+		SDKConfig: proxyconfig.SDKConfig{
+			APIKeys: []string{"test-key"},
+		},
+		PublicModelsEndpoint: true,
+	}
+	server := newTestServerWithConfig(t, cfg)
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/models", nil)
+	rr := httptest.NewRecorder()
+	server.engine.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 body = %s", rr.Code, rr.Body.String())
+	}
+
+	var response struct {
+		Data []map[string]any `json:"data"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+
+	var target map[string]any
+	for _, m := range response.Data {
+		if m["id"] == "unknown-provider/mystery-model" {
+			target = m
+			break
+		}
+	}
+	if target == nil {
+		t.Fatalf("target model not found")
+	}
+
+	// Fields that should be OMITTED for unknown models (like OmniRoute)
+	for _, field := range []string{"name", "pricing", "thinking", "supportsThinking",
+		"max_input_tokens", "max_output_tokens", "context_length", "input_modalities"} {
+		if _, exists := target[field]; exists {
+			t.Errorf("expected field %q to be omitted for unknown model, but it exists: %v", field, target[field])
+		}
+	}
+
+	// Fields that should ALWAYS be present
+	for _, field := range []string{"id", "object", "owned_by", "permission", "root", "capabilities"} {
+		if _, exists := target[field]; !exists {
+			t.Errorf("expected field %q to always be present, but it is missing", field)
+		}
+	}
+
+	// Capabilities should only have true values
+	caps := target["capabilities"].(map[string]any)
+	for k, v := range caps {
+		if v != true {
+			t.Errorf("capabilities.%s = %v, want only true values in capabilities", k, v)
+		}
+	}
+}

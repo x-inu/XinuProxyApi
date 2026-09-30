@@ -56,7 +56,7 @@ Edit `config.yaml`:
 ```yaml
 # Bind address. Keep 127.0.0.1 when a reverse proxy sits in front.
 host: "127.0.0.1"
-port: 8317
+port: 20128
 
 remote-management:
   # Required. Any non-empty value enables the Management API and web UI login.
@@ -73,14 +73,14 @@ Leave `secret-key` empty only if you intentionally want to disable the Managemen
 ./cli-proxy-api --config config.yaml
 ```
 
-The server binds `port` (default `8317`). Verify it locally:
+The server binds `port` (default `20128`). Verify it locally:
 
 ```bash
-curl http://127.0.0.1:8317/healthz          # -> 200
-curl http://127.0.0.1:8317/v1/models        # -> 401 without a key (expected)
+curl http://127.0.0.1:20128/healthz          # -> 200
+curl http://127.0.0.1:20128/v1/models        # -> 401 without a key (expected)
 ```
 
-Open `http://127.0.0.1:8317/` in a browser to reach the Management Center.
+Open `http://127.0.0.1:20128/` in a browser to reach the Management Center.
 
 ### 4. Run as a systemd service (optional)
 
@@ -110,7 +110,7 @@ sudo systemctl status xinuproxyapi.service
 
 ### 5. Expose it (optional)
 
-To serve over HTTPS, put a reverse proxy (Nginx, Caddy, Cloudflare Tunnel, etc.) in front of `127.0.0.1:8317` and terminate TLS there. Because the app is same-origin, no extra frontend configuration is required — the web UI automatically talks to the backend on whatever host it is served from.
+To serve over HTTPS, put a reverse proxy (Nginx, Caddy, Cloudflare Tunnel, etc.) in front of `127.0.0.1:20128` and terminate TLS there. Because the app is same-origin, no extra frontend configuration is required — the web UI automatically talks to the backend on whatever host it is served from.
 
 When exposing the Management API beyond localhost, also set `remote-management.allow-remote: true` and use a long, random `secret-key`.
 

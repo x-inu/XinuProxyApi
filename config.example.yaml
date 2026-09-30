@@ -3,7 +3,7 @@
 host: ""
 
 # Server port
-port: 8317
+port: 20128
 
 # IP addresses or CIDRs of proxies allowed to supply forwarded client IP headers.
 # An empty list (the default) does not trust forwarded headers. Restart after changing this setting.

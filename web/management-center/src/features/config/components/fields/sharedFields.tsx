@@ -46,7 +46,7 @@ export function PortField({
       <Input
         label={t('config_management.visual.sections.server.port')}
         type="number"
-        placeholder="8317"
+        placeholder="20128"
         value={values.port}
         onChange={(e) => onChange({ port: e.target.value })}
         disabled={disabled}

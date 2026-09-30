@@ -41,7 +41,7 @@ func TestNewClientWithBaseURL(t *testing.T) {
 		{
 			name:        "empty url falls back to default localhost",
 			inputURL:    "",
-			expectedURL: "http://127.0.0.1:8317",
+			expectedURL: "http://127.0.0.1:20128",
 		},
 	}
 

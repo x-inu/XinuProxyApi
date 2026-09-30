@@ -50,10 +50,10 @@ Tip: opening `dist/index.html` via `file://` may be blocked by browser CORS; ser
 
 You can enter any of the following; the UI will normalize it:
 
-- `localhost:8317`
-- `http://192.168.1.10:8317`
-- `https://example.com:8317`
-- `http://example.com:8317/v0/management` (also accepted; the suffix is removed internally)
+- `localhost:20128`
+- `http://192.168.1.10:20128`
+- `https://example.com:20128`
+- `http://example.com:20128/v0/management` (also accepted; the suffix is removed internally)
 
 ### Management key (not the same as API keys)
 

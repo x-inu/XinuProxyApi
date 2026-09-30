@@ -22,10 +22,10 @@ type HomeTLSConfig struct {
 }
 
 // NormalizeHomePort ensures that the CPA server port received from Home is valid,
-// defaulting to 8317 when omitted or non-positive.
+// defaulting to 20128 when omitted or non-positive.
 func NormalizeHomePort(port int) int {
 	if port <= 0 {
-		return 8317
+		return 20128
 	}
 	return port
 }

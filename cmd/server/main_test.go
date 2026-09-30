@@ -183,14 +183,19 @@ func TestHomeConfigPayloadPortApplication(t *testing.T) {
 			wantPort: 8327,
 		},
 		{
-			name:     "missing port defaults to 8317",
+			name:     "missing port defaults to 20128",
 			yamlBody: "debug: true\n",
-			wantPort: 8317,
+			wantPort: 20128,
 		},
 		{
 			name:     "standard port 8317 preserved",
 			yamlBody: "port: 8317\n",
 			wantPort: 8317,
+		},
+		{
+			name:     "standard port 20128 preserved",
+			yamlBody: "port: 20128\n",
+			wantPort: 20128,
 		},
 	}
 
@@ -249,18 +254,18 @@ func TestResolveManagementBaseURL(t *testing.T) {
 			want: "http://127.0.0.1:9090",
 		},
 		{
-			name:    "nil config falls back to default port 8317",
+			name:    "nil config falls back to default port 20128",
 			flagURL: "",
 			cfg:     nil,
-			want:    "http://127.0.0.1:8317",
+			want:    "http://127.0.0.1:20128",
 		},
 		{
-			name:    "zero port falls back to default port 8317",
+			name:    "zero port falls back to default port 20128",
 			flagURL: "",
 			cfg: &config.Config{
 				Port: 0,
 			},
-			want: "http://127.0.0.1:8317",
+			want: "http://127.0.0.1:20128",
 		},
 	}
 

@@ -877,7 +877,7 @@ func resolveManagementBaseURL(flagURL string, cfg *config.Config) string {
 			return baseURL
 		}
 	}
-	port := 8317
+	port := 20128
 	if cfg != nil && cfg.Port > 0 {
 		port = cfg.Port
 	}

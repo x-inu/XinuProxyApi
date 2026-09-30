@@ -27,7 +27,7 @@ func NewClient(port int, secretKey string) *Client {
 func NewClientWithBaseURL(baseURL string, secretKey string) *Client {
 	baseURL = strings.TrimSpace(baseURL)
 	if baseURL == "" {
-		baseURL = "http://127.0.0.1:8317"
+		baseURL = "http://127.0.0.1:20128"
 	} else {
 		lower := strings.ToLower(baseURL)
 		if !strings.HasPrefix(lower, "http://") && !strings.HasPrefix(lower, "https://") {

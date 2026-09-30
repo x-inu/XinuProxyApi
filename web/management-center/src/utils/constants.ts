@@ -6,7 +6,7 @@
 export const CACHE_EXPIRY_MS = 30 * 1000;
 
 // Network and version metadata.
-export const DEFAULT_API_PORT = 8317;
+export const DEFAULT_API_PORT = 20128;
 export const MANAGEMENT_API_PREFIX = '/v0/management';
 export const REQUEST_TIMEOUT_MS = 30 * 1000;
 export const CPA_VERSION_HEADER_KEYS = ['x-cpa-version'];

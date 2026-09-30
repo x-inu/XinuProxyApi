@@ -101,7 +101,7 @@
     "plugin_store": "Plugin Store",
     "config_management": "Config Panel",
     "logs": "Logs Viewer",
-    "system_info": "Management Center Info"
+    "system_info": "About"
   },
   "nav_groups": {
     "operate": "Operate",
@@ -1542,7 +1542,7 @@
     "empty_src_desc": "This plugin menu does not provide an embeddable page URL."
   },
   "system_info": {
-    "title": "Management Center Info",
+    "title": "About",
     "about_title": "XinuProxyApi",
     "models_title": "Available Models",
     "models_desc": "Shows the /models response and uses saved API keys for auth automatically.",
@@ -1600,7 +1600,7 @@
     "toggle_collapse": "Collapse sidebar",
     "expand": "Expand",
     "collapse": "Collapse",
-    "subtitle": "CLI Proxy API Console",
+    "subtitle": "Xinu Proxy API Console",
     "auth_files_count": "Authentication files: {{count}}"
   },
   "footer": {

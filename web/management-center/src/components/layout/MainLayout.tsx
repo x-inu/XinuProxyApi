@@ -27,6 +27,7 @@ import {
   IconSidebarQuota,
   IconSidebarStore,
   IconSidebarSystem,
+  IconSidebarUsage,
   IconChevronDown,
 } from '@/components/ui/icons';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
@@ -48,6 +49,7 @@ import { getSidebarShortcutLabel, isSidebarToggleShortcut } from '@/utils/sideba
 
 const sidebarIcons: Record<string, ReactNode> = {
   dashboard: <IconSidebarDashboard size={18} />,
+  usage: <IconSidebarUsage size={18} />,
   aiProviders: <IconSidebarProviders size={18} />,
   authFiles: <IconSidebarAuthFiles size={18} />,
   oauth: <IconSidebarOauth size={18} />,
@@ -423,6 +425,12 @@ export function MainLayout() {
           labelKey: 'nav.dashboard',
           metaKey: 'nav_meta.dashboard',
           icon: sidebarIcons.dashboard,
+        },
+        {
+          path: '/usage',
+          labelKey: 'nav.usage',
+          metaKey: 'nav_meta.usage',
+          icon: sidebarIcons.usage,
         },
       ],
     },

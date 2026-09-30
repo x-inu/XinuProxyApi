@@ -435,6 +435,16 @@ export function IconSidebarDashboard({ size = 20, ...props }: IconProps) {
   );
 }
 
+export function IconSidebarUsage({ size = 20, ...props }: IconProps) {
+  return (
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
+      <path d="m12 14 4-4" />
+      <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+      <circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconSidebarQuickStart({ size = 20, ...props }: IconProps) {
   return (
     <svg {...baseSvgProps} width={size} height={size} {...props}>

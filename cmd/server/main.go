@@ -35,6 +35,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/store"
 	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/translator"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/tui"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/usagehistory"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
 	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
 	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
@@ -627,6 +628,7 @@ func main() {
 	}
 	redisqueue.SetUsageStatisticsEnabled(cfg.UsageStatisticsEnabled)
 	redisqueue.SetRetentionSeconds(cfg.RedisUsageQueueRetentionSeconds)
+	setupUsageHistory(cfg, configFilePath, writableBase)
 	coreauth.SetQuotaCooldownDisabled(cfg.DisableCooling)
 	coreauth.SetTransientErrorCooldownSeconds(cfg.TransientErrorCooldownSeconds)
 
@@ -831,6 +833,38 @@ func main() {
 }
 
 // resolveManagementBaseURL determines the management API base URL for TUI client mode.
+// setupUsageHistory configures the persistent usage/cost rollup store. It is
+// enabled whenever usage statistics are enabled, storing an hourly rollup file
+// beside the config (or under WRITABLE_PATH when set) and flushing periodically.
+func setupUsageHistory(cfg *config.Config, configFilePath, writableBase string) {
+	if cfg == nil || !cfg.UsageStatisticsEnabled {
+		usagehistory.SetGlobal(nil)
+		return
+	}
+	if usagehistory.Global() != nil {
+		return
+	}
+
+	dir := strings.TrimSpace(writableBase)
+	if dir == "" {
+		if trimmed := strings.TrimSpace(configFilePath); trimmed != "" {
+			dir = filepath.Dir(trimmed)
+		}
+	}
+	if dir == "" {
+		if wd, errWd := os.Getwd(); errWd == nil {
+			dir = wd
+		}
+	}
+	path := filepath.Join(dir, "usage-history.json")
+
+	store := usagehistory.NewStore(path, 0)
+	usagehistory.SetGlobal(store)
+	store.StartAutoFlush(30*time.Second, context.Background().Done())
+	log.Infof("usage history enabled: %s", path)
+}
+
+// resolveManagementBaseURL determines the management API base URL.
 // Priority: command-line flag > config file remote-management.base-url > default localhost.
 func resolveManagementBaseURL(flagURL string, cfg *config.Config) string {
 	baseURL := strings.TrimSpace(flagURL)

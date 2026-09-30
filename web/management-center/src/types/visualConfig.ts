@@ -95,6 +95,7 @@ export type VisualConfigValues = {
   rmPanelRepo: string;
   authDir: string;
   apiKeysText: string;
+  publicModelsEndpoint: boolean;
   pluginsEnabled: boolean;
   pluginStoreSources: string[];
   pluginStoreAuth: PluginStoreAuthRule[];
@@ -161,6 +162,7 @@ export const DEFAULT_VISUAL_VALUES: VisualConfigValues = {
   rmPanelRepo: '',
   authDir: '',
   apiKeysText: '',
+  publicModelsEndpoint: false,
   pluginsEnabled: false,
   pluginStoreSources: [],
   pluginStoreAuth: [],

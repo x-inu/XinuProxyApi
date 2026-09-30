@@ -54,6 +54,10 @@ api-keys:
   - "your-api-key-2"
   - "your-api-key-3"
 
+# Allow public model discovery (/v1/models and /v1beta/models without API key).
+# When false (default), /v1/models requires a valid API key.
+public-models-endpoint: false
+
 # Enable debug logging
 debug: false
 

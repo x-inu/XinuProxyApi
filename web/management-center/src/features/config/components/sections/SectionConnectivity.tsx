@@ -48,6 +48,18 @@ export function SectionConnectivity({
 
         <ApiKeysField values={values} disabled={disabled} onChange={onChange} />
 
+        <FieldAnchor fieldId="publicModelsEndpoint">
+          <ToggleRow
+            title={t('config_management.visual.sections.connectivity.public_models_endpoint')}
+            description={t(
+              'config_management.visual.sections.connectivity.public_models_endpoint_desc'
+            )}
+            checked={values.publicModelsEndpoint}
+            disabled={disabled}
+            onChange={(publicModelsEndpoint) => onChange({ publicModelsEndpoint })}
+          />
+        </FieldAnchor>
+
         <Collapsible
           label={t('config_management.visual.sections.tls.title')}
           hint={t('config_management.visual.sections.tls.description')}

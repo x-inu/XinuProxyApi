@@ -1051,7 +1051,9 @@
         },
         "connectivity": {
           "title": "Access & Authentication",
-          "description": "Server address, port, auth directory, and API keys"
+          "description": "Server address, port, auth directory, and API keys",
+          "public_models_endpoint": "Allow Public Model Discovery",
+          "public_models_endpoint_desc": "Allow reading /v1/models and /v1beta/models without an API key. Model execution and chat completion still require a valid API key."
         },
         "logging": {
           "title": "Logging & Diagnostics",

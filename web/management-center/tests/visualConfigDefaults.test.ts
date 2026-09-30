@@ -29,6 +29,23 @@ quota-exceeded:
     });
   }
 
+  test('writes public-models-endpoint when toggled', () => {
+    const yaml = 'port: 20128\n';
+    const config = runVisualConfig(yaml, [{ publicModelsEndpoint: true }]);
+    expect([...config.visualDirtyFields]).toEqual(['publicModelsEndpoint']);
+    expect(parseYaml(config.applyVisualChangesToYaml(yaml))).toEqual({
+      port: 20128,
+      'public-models-endpoint': true,
+    });
+  });
+
+  test('parses and preserves existing public-models-endpoint: true', () => {
+    const yaml = 'port: 20128\npublic-models-endpoint: true\n';
+    const config = runVisualConfig(yaml);
+    expect(config.visualValues.publicModelsEndpoint).toBe(true);
+    expect(config.visualDirty).toBe(false);
+  });
+
   test('writes explicit false when disabling omitted ws-auth', () => {
     const yaml = 'port: 8317\n';
     const config = runVisualConfig(yaml, [{ wsAuth: false }]);

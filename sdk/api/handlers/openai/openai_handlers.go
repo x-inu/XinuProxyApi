@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +19,6 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
 	responsesconverter "github.com/router-for-me/CLIProxyAPI/v7/internal/translator/openai/openai/responses"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/usagehistory"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -78,265 +76,34 @@ func (h *OpenAIAPIHandler) OpenAIModels(c *gin.Context) {
 		return
 	}
 
-	// Get all available models and enrich with capabilities, modalities, context limits, and pricing
+	// Get all available models
 	allModels := h.Models()
-	enrichedModels := make([]map[string]any, len(allModels))
+
+	// Filter to only include the 4 required fields: id, object, created, owned_by
+	filteredModels := make([]map[string]any, len(allModels))
 	for i, model := range allModels {
-		enrichedModels[i] = enrichOpenAIModel(model)
+		filteredModel := map[string]any{
+			"id":     model["id"],
+			"object": model["object"],
+		}
+
+		// Add created field if it exists
+		if created, exists := model["created"]; exists {
+			filteredModel["created"] = created
+		}
+
+		// Add owned_by field if it exists
+		if ownedBy, exists := model["owned_by"]; exists {
+			filteredModel["owned_by"] = ownedBy
+		}
+
+		filteredModels[i] = filteredModel
 	}
 
 	h.WriteModelListResponse(c, h.HandlerType(), gin.H{
 		"object": "list",
-		"data":   enrichedModels,
+		"data":   filteredModels,
 	})
-}
-
-func enrichOpenAIModel(model map[string]any) map[string]any {
-	id, _ := model["id"].(string)
-	id = strings.TrimSpace(id)
-	root := id
-	if idx := strings.LastIndex(id, "/"); idx != -1 && idx+1 < len(id) {
-		root = id[idx+1:]
-	}
-	rootLower := strings.ToLower(root)
-
-	// Determine owned_by
-	ownedBy, _ := model["owned_by"].(string)
-	ownedBy = strings.TrimSpace(ownedBy)
-	if ownedBy == "" {
-		if idx := strings.Index(id, "/"); idx != -1 {
-			ownedBy = id[:idx]
-		} else if strings.Contains(rootLower, "gemini") {
-			ownedBy = "google"
-		} else if strings.Contains(rootLower, "claude") {
-			ownedBy = "anthropic"
-		} else if strings.Contains(rootLower, "grok") {
-			ownedBy = "xai"
-		} else if strings.Contains(rootLower, "deepseek") {
-			ownedBy = "deepseek"
-		} else if strings.Contains(rootLower, "qwen") {
-			ownedBy = "qwen"
-		} else {
-			ownedBy = "openai"
-		}
-	}
-
-	// Thinking / Reasoning capability (from registry metadata)
-	thinking := false
-	if model["thinking"] != nil {
-		thinking = true
-	} else if strings.Contains(rootLower, "thinking") ||
-		strings.Contains(rootLower, "reasoning") ||
-		strings.Contains(rootLower, "-high") ||
-		strings.Contains(rootLower, "-medium") ||
-		strings.Contains(rootLower, "-low") ||
-		strings.HasPrefix(rootLower, "o1") ||
-		strings.HasPrefix(rootLower, "o3") ||
-		strings.HasPrefix(rootLower, "o4") ||
-		strings.Contains(rootLower, "r1") {
-		thinking = true
-	}
-
-	// Vision capability (from registry metadata)
-	hasExplicitModalities := false
-	vision := false
-	if inputMods, ok := model["supportedInputModalities"].([]string); ok && len(inputMods) > 0 {
-		hasExplicitModalities = true
-		for _, m := range inputMods {
-			if strings.EqualFold(m, "image") || strings.EqualFold(m, "vision") {
-				vision = true
-				break
-			}
-		}
-	} else if inputModsAny, ok := model["supportedInputModalities"].([]any); ok && len(inputModsAny) > 0 {
-		hasExplicitModalities = true
-		for _, m := range inputModsAny {
-			if str, ok := m.(string); ok && (strings.EqualFold(str, "image") || strings.EqualFold(str, "vision")) {
-				vision = true
-				break
-			}
-		}
-	}
-	if !vision && !hasExplicitModalities {
-		if strings.Contains(rootLower, "vision") ||
-			strings.Contains(rootLower, "flash") ||
-			strings.Contains(rootLower, "pro") ||
-			strings.Contains(rootLower, "omni") ||
-			strings.Contains(rootLower, "4o") ||
-			strings.Contains(rootLower, "4.1") ||
-			strings.Contains(rootLower, "gemini") ||
-			strings.Contains(rootLower, "claude") ||
-			strings.Contains(rootLower, "codex") {
-			vision = true
-		}
-	}
-
-	// Context length (only from registry, no blind fallback)
-	contextLength := 0
-	if cl, ok := model["context_length"].(int); ok && cl > 0 {
-		contextLength = cl
-	} else if mcl, ok := model["max_context_length"].(int); ok && mcl > 0 {
-		contextLength = mcl
-	} else if itl, ok := model["inputTokenLimit"].(int); ok && itl > 0 {
-		contextLength = itl
-	}
-
-	// Max output tokens (only from registry)
-	maxOutputTokens := 0
-	if mot, ok := model["max_completion_tokens"].(int); ok && mot > 0 {
-		maxOutputTokens = mot
-	} else if otl, ok := model["outputTokenLimit"].(int); ok && otl > 0 {
-		maxOutputTokens = otl
-	}
-
-	// Human-readable Display Name
-	name := ""
-	if dn, ok := model["display_name"].(string); ok && strings.TrimSpace(dn) != "" {
-		name = strings.TrimSpace(dn)
-	} else if n, ok := model["name"].(string); ok && strings.TrimSpace(n) != "" {
-		name = strings.TrimSpace(n)
-	} else if desc, ok := model["description"].(string); ok && strings.TrimSpace(desc) != "" {
-		name = strings.TrimSpace(desc)
-	}
-	name = formatModelDisplayName(root, name)
-
-	// Build base result (always present)
-	result := map[string]any{
-		"id":         id,
-		"object":     "model",
-		"owned_by":   ownedBy,
-		"permission": []any{},
-		"root":       root,
-		"parent":     nil,
-	}
-
-	// Capabilities: only include keys that are true (omit false values like OmniRoute)
-	caps := map[string]any{
-		"tool_calling": true,
-		"reasoning":    true,
-	}
-	if thinking {
-		caps["thinking"] = true
-		caps["supportsThinking"] = true
-	}
-	if vision {
-		caps["vision"] = true
-	}
-	result["capabilities"] = caps
-
-	// Context length (only when known)
-	if contextLength > 0 {
-		result["context_length"] = contextLength
-	}
-
-	// Token limits (only when known from registry)
-	if contextLength > 0 {
-		result["max_input_tokens"] = contextLength
-	}
-	if maxOutputTokens > 0 {
-		result["max_output_tokens"] = maxOutputTokens
-	}
-
-	// Modalities (only when model has explicit modality data)
-	if hasExplicitModalities || vision {
-		if vision {
-			result["input_modalities"] = []string{"text", "image"}
-		} else {
-			result["input_modalities"] = []string{"text"}
-		}
-		result["output_modalities"] = []string{"text"}
-	}
-
-	// Root-level thinking flags (only when true, like OmniRoute)
-	if thinking {
-		result["thinking"] = true
-		result["supportsThinking"] = true
-	}
-
-	// Name (only when meaningful, not just the raw ID)
-	if name != "" && name != root && name != id {
-		result["name"] = name
-	}
-
-	// Pricing (only when rate data exists and is non-zero)
-	rate, hasRate := usagehistory.RateFor(root)
-	if hasRate && !strings.Contains(rootLower, ":free") && (rate.InputPerM > 0 || rate.OutputPerM > 0) {
-		cachedRate := rate.CacheReadPerM
-		if cachedRate == 0 {
-			cachedRate = rate.InputPerM * 0.1
-		}
-		cacheWriteRate := rate.CacheWritePerM
-		if cacheWriteRate == 0 {
-			cacheWriteRate = rate.InputPerM
-		}
-		result["pricing"] = map[string]any{
-			"input":          rate.InputPerM,
-			"output":         rate.OutputPerM,
-			"cached":         cachedRate,
-			"reasoning":      rate.OutputPerM,
-			"cache_creation": cacheWriteRate,
-		}
-	}
-
-	return result
-}
-
-func formatModelDisplayName(root, current string) string {
-	current = strings.TrimSpace(current)
-	lowerRoot := strings.ToLower(root)
-
-	switch {
-	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-high"):
-		return "Gemini 3.7 Flash (High)"
-	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-medium"):
-		return "Gemini 3.7 Flash (Medium)"
-	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-low"):
-		return "Gemini 3.7 Flash (Low)"
-	case strings.HasPrefix(lowerRoot, "gemini-3.5-flash-lite"):
-		return "Gemini 3.5 Flash Lite"
-	case strings.HasPrefix(lowerRoot, "gemini-3.5-flash"):
-		return "Gemini 3.5 Flash"
-	case strings.HasPrefix(lowerRoot, "gemini-3-flash"):
-		return "Gemini 3 Flash"
-	case strings.HasPrefix(lowerRoot, "gemini-2.5-pro"):
-		return "Gemini 2.5 Pro"
-	case strings.HasPrefix(lowerRoot, "gemini-2.5-flash"):
-		return "Gemini 2.5 Flash"
-	case strings.HasPrefix(lowerRoot, "claude-opus-4-8"):
-		return "Claude Opus 4.8"
-	case strings.HasPrefix(lowerRoot, "claude-sonnet-4-6-thinking"):
-		return "Claude Sonnet 4.6 (Thinking)"
-	case strings.HasPrefix(lowerRoot, "claude-sonnet-4-6"):
-		return "Claude Sonnet 4.6"
-	case strings.HasPrefix(lowerRoot, "gpt-4o-mini"):
-		return "GPT-4o Mini"
-	case strings.HasPrefix(lowerRoot, "gpt-4o"):
-		return "GPT-4o"
-	case strings.HasPrefix(lowerRoot, "o3-mini"):
-		return "o3-mini"
-	case strings.HasPrefix(lowerRoot, "o1-mini"):
-		return "o1-mini"
-	case strings.HasPrefix(lowerRoot, "o1"):
-		return "o1"
-	}
-
-	if current != "" && current != root && strings.Contains(current, " ") {
-		if strings.HasSuffix(lowerRoot, "-high") && !strings.Contains(current, "High") {
-			return current + " (High)"
-		}
-		if strings.HasSuffix(lowerRoot, "-medium") && !strings.Contains(current, "Medium") {
-			return current + " (Medium)"
-		}
-		if strings.HasSuffix(lowerRoot, "-low") && !strings.Contains(current, "Low") {
-			return current + " (Low)"
-		}
-		return current
-	}
-
-	if current != "" {
-		return current
-	}
-	return root
 }
 
 // ChatCompletions handles the /v1/chat/completions endpoint.

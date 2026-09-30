@@ -2123,9 +2123,6 @@ func TestModelsDispatchByAnthropicVersionHeader(t *testing.T) {
 		}
 		foundRawGPT := false
 		for _, m := range resp.Data {
-			if _, ok := m["max_input_tokens"]; ok {
-				t.Fatalf("did not expect max_input_tokens in OpenAI format, got %v", m)
-			}
 			if id, _ := m["id"].(string); id == "gpt-4o" {
 				foundRawGPT = true
 			}

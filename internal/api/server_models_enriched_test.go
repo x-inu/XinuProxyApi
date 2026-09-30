@@ -71,6 +71,11 @@ func TestOpenAIModels_ReturnsEnrichedMetadata(t *testing.T) {
 		t.Fatalf("target model not found in response: %s", rr.Body.String())
 	}
 
+	// Verify that created field is NOT present
+	if _, exists := targetModel["created"]; exists {
+		t.Fatalf("expected created field to be omitted, but it exists: %v", targetModel["created"])
+	}
+
 	// Verify required enriched fields
 	if targetModel["root"] != "gemini-3.7-flash-medium" {
 		t.Fatalf("expected root gemini-3.7-flash-medium, got %v", targetModel["root"])

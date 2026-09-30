@@ -121,16 +121,6 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 		}
 	}
 
-	// Created timestamp (default to 1700000000 if not set)
-	created := int64(1700000000)
-	if c, ok := model["created"].(int64); ok && c > 0 {
-		created = c
-	} else if cFloat, ok := model["created"].(float64); ok && cFloat > 0 {
-		created = int64(cFloat)
-	} else if cInt, ok := model["created"].(int); ok && cInt > 0 {
-		created = int64(cInt)
-	}
-
 	// Human-readable Display Name
 	name := ""
 	if dn, ok := model["display_name"].(string); ok && strings.TrimSpace(dn) != "" {
@@ -139,9 +129,8 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 		name = strings.TrimSpace(n)
 	} else if desc, ok := model["description"].(string); ok && strings.TrimSpace(desc) != "" {
 		name = strings.TrimSpace(desc)
-	} else {
-		name = root
 	}
+	name = formatModelDisplayName(root, name)
 
 	// Thinking / Reasoning capability
 	thinking := false
@@ -257,13 +246,20 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 	}
 
 	return map[string]any{
-		"id":       id,
-		"object":   "model",
-		"created":  created,
-		"owned_by": ownedBy,
-		"permission": []any{},
-		"root":     root,
-		"parent":   nil,
+		"id":                id,
+		"object":            "model",
+		"owned_by":          ownedBy,
+		"permission":        []any{},
+		"root":              root,
+		"parent":            nil,
+		"name":              name,
+		"context_length":    contextLength,
+		"max_input_tokens":  maxInputTokens,
+		"max_output_tokens": maxOutputTokens,
+		"input_modalities":  inputModalities,
+		"output_modalities": outputModalities,
+		"thinking":          thinking,
+		"supportsThinking":  thinking,
 		"capabilities": map[string]any{
 			"thinking":         thinking,
 			"supportsThinking": thinking,
@@ -271,16 +267,66 @@ func enrichOpenAIModel(model map[string]any) map[string]any {
 			"tool_calling":     true,
 			"reasoning":        thinking,
 		},
-		"input_modalities":  inputModalities,
-		"output_modalities": outputModalities,
-		"thinking":          thinking,
-		"supportsThinking":  thinking,
-		"context_length":    contextLength,
-		"max_output_tokens": maxOutputTokens,
-		"max_input_tokens":  maxInputTokens,
-		"name":              name,
-		"pricing":           pricing,
+		"pricing": pricing,
 	}
+}
+
+func formatModelDisplayName(root, current string) string {
+	current = strings.TrimSpace(current)
+	lowerRoot := strings.ToLower(root)
+
+	switch {
+	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-high"):
+		return "Gemini 3.7 Flash (High)"
+	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-medium"):
+		return "Gemini 3.7 Flash (Medium)"
+	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-low"):
+		return "Gemini 3.7 Flash (Low)"
+	case strings.HasPrefix(lowerRoot, "gemini-3.5-flash-lite"):
+		return "Gemini 3.5 Flash Lite"
+	case strings.HasPrefix(lowerRoot, "gemini-3.5-flash"):
+		return "Gemini 3.5 Flash"
+	case strings.HasPrefix(lowerRoot, "gemini-3-flash"):
+		return "Gemini 3 Flash"
+	case strings.HasPrefix(lowerRoot, "gemini-2.5-pro"):
+		return "Gemini 2.5 Pro"
+	case strings.HasPrefix(lowerRoot, "gemini-2.5-flash"):
+		return "Gemini 2.5 Flash"
+	case strings.HasPrefix(lowerRoot, "claude-opus-4-8"):
+		return "Claude Opus 4.8"
+	case strings.HasPrefix(lowerRoot, "claude-sonnet-4-6-thinking"):
+		return "Claude Sonnet 4.6 (Thinking)"
+	case strings.HasPrefix(lowerRoot, "claude-sonnet-4-6"):
+		return "Claude Sonnet 4.6"
+	case strings.HasPrefix(lowerRoot, "gpt-4o-mini"):
+		return "GPT-4o Mini"
+	case strings.HasPrefix(lowerRoot, "gpt-4o"):
+		return "GPT-4o"
+	case strings.HasPrefix(lowerRoot, "o3-mini"):
+		return "o3-mini"
+	case strings.HasPrefix(lowerRoot, "o1-mini"):
+		return "o1-mini"
+	case strings.HasPrefix(lowerRoot, "o1"):
+		return "o1"
+	}
+
+	if current != "" && current != root && strings.Contains(current, " ") {
+		if strings.HasSuffix(lowerRoot, "-high") && !strings.Contains(current, "High") {
+			return current + " (High)"
+		}
+		if strings.HasSuffix(lowerRoot, "-medium") && !strings.Contains(current, "Medium") {
+			return current + " (Medium)"
+		}
+		if strings.HasSuffix(lowerRoot, "-low") && !strings.Contains(current, "Low") {
+			return current + " (Low)"
+		}
+		return current
+	}
+
+	if current != "" {
+		return current
+	}
+	return root
 }
 
 // ChatCompletions handles the /v1/chat/completions endpoint.

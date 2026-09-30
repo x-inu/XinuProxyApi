@@ -1690,6 +1690,18 @@ func (r *ModelRegistry) convertModelToMap(model *ModelInfo, handlerType string) 
 		if len(model.SupportedParameters) > 0 {
 			result["supported_parameters"] = append([]string(nil), model.SupportedParameters...)
 		}
+		if model.Name != "" {
+			result["name"] = model.Name
+		}
+		if model.Thinking != nil {
+			result["thinking"] = model.Thinking
+		}
+		if len(model.SupportedInputModalities) > 0 {
+			result["supportedInputModalities"] = append([]string(nil), model.SupportedInputModalities...)
+		}
+		if len(model.SupportedOutputModalities) > 0 {
+			result["supportedOutputModalities"] = append([]string(nil), model.SupportedOutputModalities...)
+		}
 		return result
 
 	case "claude":

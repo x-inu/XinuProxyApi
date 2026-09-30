@@ -73,6 +73,12 @@ var defaultRates = []ratePrefix{
 	{"qwen", ModelRate{InputPerM: 0.4, OutputPerM: 1.2}},
 }
 
+// RateFor returns the estimated pricing for a model, selecting the longest
+// matching known prefix. Unknown models return a zero rate so their cost is 0.
+func RateFor(model string) (ModelRate, bool) {
+	return rateFor(model)
+}
+
 // rateFor returns the estimated pricing for a model, selecting the longest
 // matching known prefix. Unknown models return a zero rate so their cost is 0.
 func rateFor(model string) (ModelRate, bool) {

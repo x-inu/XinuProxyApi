@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
 	responsesconverter "github.com/router-for-me/CLIProxyAPI/v7/internal/translator/openai/openai/responses"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/usagehistory"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -76,34 +78,209 @@ func (h *OpenAIAPIHandler) OpenAIModels(c *gin.Context) {
 		return
 	}
 
-	// Get all available models
+	// Get all available models and enrich with capabilities, modalities, context limits, and pricing
 	allModels := h.Models()
-
-	// Filter to only include the 4 required fields: id, object, created, owned_by
-	filteredModels := make([]map[string]any, len(allModels))
+	enrichedModels := make([]map[string]any, len(allModels))
 	for i, model := range allModels {
-		filteredModel := map[string]any{
-			"id":     model["id"],
-			"object": model["object"],
-		}
-
-		// Add created field if it exists
-		if created, exists := model["created"]; exists {
-			filteredModel["created"] = created
-		}
-
-		// Add owned_by field if it exists
-		if ownedBy, exists := model["owned_by"]; exists {
-			filteredModel["owned_by"] = ownedBy
-		}
-
-		filteredModels[i] = filteredModel
+		enrichedModels[i] = enrichOpenAIModel(model)
 	}
 
 	h.WriteModelListResponse(c, h.HandlerType(), gin.H{
 		"object": "list",
-		"data":   filteredModels,
+		"data":   enrichedModels,
 	})
+}
+
+func enrichOpenAIModel(model map[string]any) map[string]any {
+	id, _ := model["id"].(string)
+	id = strings.TrimSpace(id)
+	root := id
+	if idx := strings.LastIndex(id, "/"); idx != -1 && idx+1 < len(id) {
+		root = id[idx+1:]
+	}
+	rootLower := strings.ToLower(root)
+
+	// Determine owned_by
+	ownedBy, _ := model["owned_by"].(string)
+	ownedBy = strings.TrimSpace(ownedBy)
+	if ownedBy == "" {
+		if idx := strings.Index(id, "/"); idx != -1 {
+			ownedBy = id[:idx]
+		} else if strings.Contains(rootLower, "gemini") {
+			ownedBy = "google"
+		} else if strings.Contains(rootLower, "claude") {
+			ownedBy = "anthropic"
+		} else if strings.Contains(rootLower, "grok") {
+			ownedBy = "xai"
+		} else if strings.Contains(rootLower, "deepseek") {
+			ownedBy = "deepseek"
+		} else if strings.Contains(rootLower, "qwen") {
+			ownedBy = "qwen"
+		} else {
+			ownedBy = "openai"
+		}
+	}
+
+	// Created timestamp (default to 1700000000 if not set)
+	created := int64(1700000000)
+	if c, ok := model["created"].(int64); ok && c > 0 {
+		created = c
+	} else if cFloat, ok := model["created"].(float64); ok && cFloat > 0 {
+		created = int64(cFloat)
+	} else if cInt, ok := model["created"].(int); ok && cInt > 0 {
+		created = int64(cInt)
+	}
+
+	// Human-readable Display Name
+	name := ""
+	if dn, ok := model["display_name"].(string); ok && strings.TrimSpace(dn) != "" {
+		name = strings.TrimSpace(dn)
+	} else if n, ok := model["name"].(string); ok && strings.TrimSpace(n) != "" {
+		name = strings.TrimSpace(n)
+	} else if desc, ok := model["description"].(string); ok && strings.TrimSpace(desc) != "" {
+		name = strings.TrimSpace(desc)
+	} else {
+		name = root
+	}
+
+	// Thinking / Reasoning capability
+	thinking := false
+	if model["thinking"] != nil {
+		thinking = true
+	} else if strings.Contains(rootLower, "thinking") ||
+		strings.Contains(rootLower, "reasoning") ||
+		strings.Contains(rootLower, "-high") ||
+		strings.Contains(rootLower, "-medium") ||
+		strings.Contains(rootLower, "-low") ||
+		strings.HasPrefix(rootLower, "o1") ||
+		strings.HasPrefix(rootLower, "o3") ||
+		strings.HasPrefix(rootLower, "o4") ||
+		strings.Contains(rootLower, "r1") {
+		thinking = true
+	}
+
+	// Vision capability
+	vision := false
+	if inputMods, ok := model["supportedInputModalities"].([]string); ok {
+		for _, m := range inputMods {
+			if strings.EqualFold(m, "image") || strings.EqualFold(m, "vision") {
+				vision = true
+				break
+			}
+		}
+	} else if inputModsAny, ok := model["supportedInputModalities"].([]any); ok {
+		for _, m := range inputModsAny {
+			if str, ok := m.(string); ok && (strings.EqualFold(str, "image") || strings.EqualFold(str, "vision")) {
+				vision = true
+				break
+			}
+		}
+	}
+	if !vision {
+		if strings.Contains(rootLower, "vision") ||
+			strings.Contains(rootLower, "image") ||
+			strings.Contains(rootLower, "flash") ||
+			strings.Contains(rootLower, "pro") ||
+			strings.Contains(rootLower, "omni") ||
+			strings.Contains(rootLower, "4o") ||
+			strings.Contains(rootLower, "4.1") ||
+			strings.Contains(rootLower, "gemini") ||
+			strings.Contains(rootLower, "claude") ||
+			strings.Contains(rootLower, "codex") ||
+			strings.Contains(rootLower, "vl") {
+			vision = true
+		}
+	}
+
+	// Modalities
+	inputModalities := []string{"text"}
+	if vision {
+		inputModalities = []string{"text", "image"}
+	}
+	outputModalities := []string{"text"}
+
+	// Context length
+	contextLength := 128000
+	if cl, ok := model["context_length"].(int); ok && cl > 0 {
+		contextLength = cl
+	} else if mcl, ok := model["max_context_length"].(int); ok && mcl > 0 {
+		contextLength = mcl
+	} else if itl, ok := model["inputTokenLimit"].(int); ok && itl > 0 {
+		contextLength = itl
+	} else if strings.Contains(rootLower, "gemini") {
+		contextLength = 1048576
+	} else if strings.Contains(rootLower, "claude") {
+		contextLength = 200000
+	} else if strings.Contains(rootLower, "deepseek") || strings.Contains(rootLower, "qwen") {
+		contextLength = 65536
+	}
+
+	// Max output tokens
+	maxOutputTokens := 8192
+	if mot, ok := model["max_completion_tokens"].(int); ok && mot > 0 {
+		maxOutputTokens = mot
+	} else if otl, ok := model["outputTokenLimit"].(int); ok && otl > 0 {
+		maxOutputTokens = otl
+	} else if strings.Contains(rootLower, "gemini") || strings.Contains(rootLower, "claude") {
+		maxOutputTokens = 65536
+	} else if strings.HasPrefix(rootLower, "o1") || strings.HasPrefix(rootLower, "o3") || strings.HasPrefix(rootLower, "o4") {
+		maxOutputTokens = 65536
+	} else if strings.Contains(rootLower, "4o") {
+		maxOutputTokens = 16384
+	}
+
+	maxInputTokens := contextLength
+
+	// Pricing estimation
+	rate, hasRate := usagehistory.RateFor(root)
+	pricing := map[string]any{
+		"input":          0.0,
+		"output":         0.0,
+		"cached":         0.0,
+		"reasoning":      0.0,
+		"cache_creation": 0.0,
+	}
+	if hasRate && !strings.Contains(rootLower, ":free") {
+		cachedRate := rate.CacheReadPerM
+		if cachedRate == 0 {
+			cachedRate = rate.InputPerM * 0.1
+		}
+		cacheWriteRate := rate.CacheWritePerM
+		if cacheWriteRate == 0 {
+			cacheWriteRate = rate.InputPerM
+		}
+		pricing["input"] = rate.InputPerM
+		pricing["output"] = rate.OutputPerM
+		pricing["cached"] = cachedRate
+		pricing["reasoning"] = rate.OutputPerM
+		pricing["cache_creation"] = cacheWriteRate
+	}
+
+	return map[string]any{
+		"id":       id,
+		"object":   "model",
+		"created":  created,
+		"owned_by": ownedBy,
+		"permission": []any{},
+		"root":     root,
+		"parent":   nil,
+		"capabilities": map[string]any{
+			"thinking":         thinking,
+			"supportsThinking": thinking,
+			"vision":           vision,
+			"tool_calling":     true,
+			"reasoning":        thinking,
+		},
+		"input_modalities":  inputModalities,
+		"output_modalities": outputModalities,
+		"thinking":          thinking,
+		"supportsThinking":  thinking,
+		"context_length":    contextLength,
+		"max_output_tokens": maxOutputTokens,
+		"max_input_tokens":  maxInputTokens,
+		"name":              name,
+		"pricing":           pricing,
+	}
 }
 
 // ChatCompletions handles the /v1/chat/completions endpoint.

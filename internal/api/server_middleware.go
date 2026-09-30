@@ -145,18 +145,37 @@ func corsMiddleware() gin.HandlerFunc {
 	}
 }
 
+// isPublicModelsEndpointRequest reports whether the request targets a models
+// discovery endpoint eligible for unauthenticated access when configured.
+func isPublicModelsEndpointRequest(c *gin.Context) bool {
+	if c == nil || c.Request == nil {
+		return false
+	}
+	if c.Request.Method != http.MethodGet && c.Request.Method != http.MethodHead {
+		return false
+	}
+	path := strings.TrimRight(c.Request.URL.Path, "/")
+	return path == "/v1/models" || path == "/v1beta/models"
+}
+
 // AuthMiddleware returns a Gin middleware handler that authenticates requests
 // using the configured authentication providers. When no providers are available,
 // it allows all requests (legacy behaviour).
 func AuthMiddleware(manager *sdkaccess.Manager) gin.HandlerFunc {
-	return accessAuthMiddleware(manager, false)
+	return accessAuthMiddleware(manager, false, nil)
+}
+
+// AuthMiddlewareWithPublicModels returns an AuthMiddleware that permits unauthenticated
+// GET /v1/models and /v1beta/models requests when allowPublicModels returns true.
+func AuthMiddlewareWithPublicModels(manager *sdkaccess.Manager, allowPublicModels func() bool) gin.HandlerFunc {
+	return accessAuthMiddleware(manager, false, allowPublicModels)
 }
 
 func realtimeStandardAuthMiddleware(manager *sdkaccess.Manager) gin.HandlerFunc {
-	return accessAuthMiddleware(manager, true)
+	return accessAuthMiddleware(manager, true, nil)
 }
 
-func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool) gin.HandlerFunc {
+func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool, allowPublicModels func() bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if manager == nil {
 			c.Next()
@@ -174,6 +193,15 @@ func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool) gin.Ha
 			}
 			c.Next()
 			return
+		}
+
+		// When public models discovery is enabled, permit unauthenticated GET requests to /v1/models and /v1beta/models.
+		// Only bypass when credentials were truly missing (not when an invalid key was explicitly provided).
+		if allowPublicModels != nil && allowPublicModels() && isPublicModelsEndpointRequest(c) {
+			if sdkaccess.IsAuthErrorCode(err, sdkaccess.AuthErrorCodeNoCredentials) {
+				c.Next()
+				return
+			}
 		}
 
 		statusCode := err.HTTPStatusCode()

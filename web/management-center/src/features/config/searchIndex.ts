@@ -65,6 +65,14 @@ export const CONFIG_FIELD_SEARCH_INDEX: ConfigFieldSearchEntry[] = [
     keywords: ['api key', 'apikey', 'token'],
   },
   {
+    fieldId: 'publicModelsEndpoint',
+    sectionId: 'connectivity',
+    labelKey: L('sections.connectivity.public_models_endpoint'),
+    hintKey: L('sections.connectivity.public_models_endpoint_desc'),
+    yamlKeys: ['public-models-endpoint'],
+    keywords: ['models', 'public', 'unauthenticated', 'discovery', 'no key'],
+  },
+  {
     fieldId: 'tlsEnable',
     sectionId: 'connectivity',
     labelKey: L('sections.tls.enable'),

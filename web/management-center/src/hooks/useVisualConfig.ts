@@ -1102,6 +1102,7 @@ function getNextDirtyFields(
       'rmPanelRepo',
       'authDir',
       'apiKeysText',
+      'publicModelsEndpoint',
       'debug',
       'commercialMode',
       'loggingToFile',
@@ -1316,6 +1317,7 @@ export function useVisualConfig() {
 
         authDir: typeof parsed['auth-dir'] === 'string' ? parsed['auth-dir'] : '',
         apiKeysText: resolveApiKeysText(parsed),
+        publicModelsEndpoint: Boolean(parsed['public-models-endpoint']),
         pluginsEnabled: Boolean(plugins?.enabled),
         pluginStoreSources: parseStringList(plugins?.['store-sources']),
         pluginStoreAuth: parsePluginStoreAuthRules(plugins?.['store-auth']),
@@ -1502,6 +1504,10 @@ export function useVisualConfig() {
             doc.deleteIn(['api-keys']);
           }
           deleteLegacyApiKeysProvider(doc);
+        }
+
+        if (dirtyFields.has('publicModelsEndpoint')) {
+          setBooleanInDoc(doc, ['public-models-endpoint'], values.publicModelsEndpoint);
         }
 
         const pluginsDirty =

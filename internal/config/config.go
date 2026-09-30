@@ -105,6 +105,9 @@ type Config struct {
 	// WebsocketAuth enables or disables authentication for the WebSocket API.
 	WebsocketAuth bool `yaml:"ws-auth" json:"ws-auth"`
 
+	// PublicModelsEndpoint allows unauthenticated GET access to /v1/models and /v1beta/models when true.
+	PublicModelsEndpoint bool `yaml:"public-models-endpoint" json:"public-models-endpoint"`
+
 	// AntigravitySignatureCacheEnabled controls whether signature cache validation is enabled for thinking blocks.
 	// When true (default), cached signatures are preferred and validated.
 	// When false, client signatures are used directly after normalization (bypass mode).

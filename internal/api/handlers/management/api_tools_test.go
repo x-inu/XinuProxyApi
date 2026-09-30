@@ -64,6 +64,65 @@ func TestAPICallUsesRequestProxyURL(t *testing.T) {
 	}
 }
 
+func TestAPICallSetsDefaultUserAgentWhenMissing(t *testing.T) {
+	t.Parallel()
+
+	var receivedUA string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedUA = r.Header.Get("User-Agent")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	}))
+	defer upstream.Close()
+
+	h := &Handler{cfg: &config.Config{}}
+	router := gin.New()
+	router.POST("/", h.APICall)
+
+	body := `{"method":"GET","url":"` + upstream.URL + `/test"}`
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(recorder, req)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status code = %d, want %d; body = %s", recorder.Code, http.StatusOK, recorder.Body.String())
+	}
+	if receivedUA != defaultAPICallUserAgent {
+		t.Fatalf("upstream User-Agent = %q, want default %q", receivedUA, defaultAPICallUserAgent)
+	}
+}
+
+func TestAPICallPreservesCallerUserAgent(t *testing.T) {
+	t.Parallel()
+
+	const customUA = "custom-agent/1.2"
+	var receivedUA string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedUA = r.Header.Get("User-Agent")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	}))
+	defer upstream.Close()
+
+	h := &Handler{cfg: &config.Config{}}
+	router := gin.New()
+	router.POST("/", h.APICall)
+
+	body := `{"method":"GET","url":"` + upstream.URL + `/test","header":{"User-Agent":"` + customUA + `"}}`
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(recorder, req)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status code = %d, want %d; body = %s", recorder.Code, http.StatusOK, recorder.Body.String())
+	}
+	if receivedUA != customUA {
+		t.Fatalf("upstream User-Agent = %q, want caller value %q", receivedUA, customUA)
+	}
+}
+
 func TestAPICallTransportDirectBypassesGlobalProxy(t *testing.T) {
 	t.Parallel()
 

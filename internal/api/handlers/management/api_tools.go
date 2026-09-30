@@ -22,6 +22,14 @@ import (
 
 const defaultAPICallTimeout = 60 * time.Second
 
+// defaultAPICallUserAgent is applied when the caller does not provide a
+// User-Agent header. Without it, Go's http.Client sends "Go-http-client/1.1",
+// which some upstream WAFs (e.g. Cloudflare in front of certain OpenAI-compatible
+// providers) reject with HTTP 403. This matches the User-Agent used by the
+// OpenAI-compatible runtime executor so management tools (connectivity tests and
+// model discovery) reach the same upstreams as production traffic.
+const defaultAPICallUserAgent = "cli-proxy-openai-compat"
+
 const (
 	antigravityOAuthClientID     = "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com"
 	antigravityOAuthClientSecret = "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"
@@ -198,12 +206,19 @@ func (h *Handler) APICall(c *gin.Context) {
 		return
 	}
 
+	hasUserAgent := false
 	for key, value := range reqHeaders {
 		if strings.EqualFold(key, "host") {
 			hostOverride = strings.TrimSpace(value)
 			continue
 		}
+		if strings.EqualFold(key, "user-agent") {
+			hasUserAgent = true
+		}
 		req.Header.Set(key, value)
+	}
+	if !hasUserAgent {
+		req.Header.Set("User-Agent", defaultAPICallUserAgent)
 	}
 	if hostOverride != "" {
 		req.Host = hostOverride

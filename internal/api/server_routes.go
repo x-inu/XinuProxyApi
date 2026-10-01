@@ -799,23 +799,25 @@ func (s *Server) handleHomeModels(c *gin.Context) {
 		return
 	}
 
-	filtered := make([]map[string]any, 0, len(entries))
+	enriched := make([]openai.OpenAIModelResponse, 0, len(entries))
 	for _, entry := range entries {
-		model := map[string]any{
-			"id":     entry.id,
-			"object": "model",
+		modelMap := map[string]any{
+			"id":                    entry.id,
+			"object":                "model",
+			"created":               entry.created,
+			"owned_by":              entry.ownedBy,
+			"display_name":          entry.displayName,
+			"context_length":        entry.contextLength,
+			"max_completion_tokens": entry.maxCompletionTokens,
 		}
-		if entry.created > 0 {
-			model["created"] = entry.created
+		if entry.thinking != nil {
+			modelMap["thinking"] = entry.thinking
 		}
-		if entry.ownedBy != "" {
-			model["owned_by"] = entry.ownedBy
-		}
-		filtered = append(filtered, model)
+		enriched = append(enriched, openai.EnrichOpenAIModel(modelMap))
 	}
-	s.writeModelListResponse(c, "openai", gin.H{
-		"object": "list",
-		"data":   filtered,
+	s.writeModelListResponse(c, "openai", openai.OpenAIModelListResponse{
+		Object: "list",
+		Data:   enriched,
 	})
 }
 

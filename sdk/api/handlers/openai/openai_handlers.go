@@ -11,7 +11,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	codexmodels "github.com/router-for-me/CLIProxyAPI/v7/internal/client/codex/models"
@@ -19,6 +21,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
 	responsesconverter "github.com/router-for-me/CLIProxyAPI/v7/internal/translator/openai/openai/responses"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/usagehistory"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -56,9 +59,76 @@ func (h *OpenAIAPIHandler) Models() []map[string]any {
 	return modelRegistry.GetAvailableModels("openai")
 }
 
+// OpenAIModelResponse represents a single model item in GET /v1/models.
+// The field order in this struct is EXACT and matches OmniRoute's response format:
+//  1. id
+//  2. object
+//  3. created
+//  4. owned_by
+//  5. permission
+//  6. root
+//  7. parent
+//  8. capabilities
+//  9. input_modalities
+//
+// 10. output_modalities
+// 11. thinking
+// 12. supportsThinking
+// 13. context_length
+// 14. max_output_tokens
+// 15. max_input_tokens
+// 16. name
+// 17. pricing
+type OpenAIModelResponse struct {
+	ID               string              `json:"id"`
+	Object           string              `json:"object"`
+	Created          int64               `json:"created"`
+	OwnedBy          string              `json:"owned_by"`
+	Permission       []any               `json:"permission"`
+	Root             string              `json:"root"`
+	Parent           *string             `json:"parent"`
+	Capabilities     OpenAICapabilities  `json:"capabilities"`
+	InputModalities  []string            `json:"input_modalities,omitempty"`
+	OutputModalities []string            `json:"output_modalities,omitempty"`
+	Thinking         *bool               `json:"thinking,omitempty"`
+	SupportsThinking *bool               `json:"supportsThinking,omitempty"`
+	ContextLength    *int                `json:"context_length,omitempty"`
+	MaxOutputTokens  *int                `json:"max_output_tokens,omitempty"`
+	MaxInputTokens   *int                `json:"max_input_tokens,omitempty"`
+	Name             string              `json:"name,omitempty"`
+	Pricing          *OpenAIModelPricing `json:"pricing,omitempty"`
+}
+
+// OpenAICapabilities represents model capabilities in OmniRoute format.
+// Serialized in order: thinking, supportsThinking, vision, tool_calling, reasoning.
+// Fields with nil values are omitted.
+type OpenAICapabilities struct {
+	Thinking         *bool `json:"thinking,omitempty"`
+	SupportsThinking *bool `json:"supportsThinking,omitempty"`
+	Vision           *bool `json:"vision,omitempty"`
+	ToolCalling      *bool `json:"tool_calling,omitempty"`
+	Reasoning        *bool `json:"reasoning,omitempty"`
+}
+
+// OpenAIModelPricing holds estimated per-model token prices in USD per 1M tokens.
+// Serialized in order: input, output, cached, reasoning, cache_creation.
+type OpenAIModelPricing struct {
+	Input         float64 `json:"input"`
+	Output        float64 `json:"output"`
+	Cached        float64 `json:"cached"`
+	Reasoning     float64 `json:"reasoning"`
+	CacheCreation float64 `json:"cache_creation"`
+}
+
+// OpenAIModelListResponse is the top-level response envelope for GET /v1/models.
+type OpenAIModelListResponse struct {
+	Object string                `json:"object"`
+	Data   []OpenAIModelResponse `json:"data"`
+}
+
 // OpenAIModels handles the /v1/models endpoint.
 // It returns a list of available AI models with their capabilities
-// and specifications in OpenAI-compatible format.
+// and specifications in OpenAI-compatible format matching OmniRoute.
 func (h *OpenAIAPIHandler) OpenAIModels(c *gin.Context) {
 	if _, ok := c.Request.URL.Query()["client_version"]; ok {
 		clientVersion := c.Query("client_version")
@@ -78,32 +148,339 @@ func (h *OpenAIAPIHandler) OpenAIModels(c *gin.Context) {
 
 	// Get all available models
 	allModels := h.Models()
-
-	// Filter to only include the 4 required fields: id, object, created, owned_by
-	filteredModels := make([]map[string]any, len(allModels))
+	enrichedModels := make([]OpenAIModelResponse, len(allModels))
 	for i, model := range allModels {
-		filteredModel := map[string]any{
-			"id":     model["id"],
-			"object": model["object"],
-		}
-
-		// Add created field if it exists
-		if created, exists := model["created"]; exists {
-			filteredModel["created"] = created
-		}
-
-		// Add owned_by field if it exists
-		if ownedBy, exists := model["owned_by"]; exists {
-			filteredModel["owned_by"] = ownedBy
-		}
-
-		filteredModels[i] = filteredModel
+		enrichedModels[i] = EnrichOpenAIModel(model)
 	}
 
-	h.WriteModelListResponse(c, h.HandlerType(), gin.H{
-		"object": "list",
-		"data":   filteredModels,
+	h.WriteModelListResponse(c, h.HandlerType(), OpenAIModelListResponse{
+		Object: "list",
+		Data:   enrichedModels,
 	})
+}
+
+// EnrichOpenAIModel transforms raw model metadata into the exact OmniRoute model format.
+func EnrichOpenAIModel(model map[string]any) OpenAIModelResponse {
+	id, _ := model["id"].(string)
+	id = strings.TrimSpace(id)
+	root := id
+	if idx := strings.LastIndex(id, "/"); idx != -1 && idx+1 < len(id) {
+		root = id[idx+1:]
+	}
+	rootLower := strings.ToLower(root)
+
+	info := registry.LookupModelInfo(id)
+	if info == nil && root != id {
+		info = registry.LookupModelInfo(root)
+	}
+
+	// Determine owned_by
+	ownedBy, _ := model["owned_by"].(string)
+	ownedBy = strings.TrimSpace(ownedBy)
+	if ownedBy == "" && info != nil && info.OwnedBy != "" {
+		ownedBy = strings.TrimSpace(info.OwnedBy)
+	}
+	if ownedBy == "" {
+		if idx := strings.Index(id, "/"); idx != -1 {
+			ownedBy = id[:idx]
+		} else if strings.Contains(rootLower, "moonshot") || strings.HasPrefix(rootLower, "kimi") {
+			ownedBy = "moonshot"
+		} else if strings.Contains(rootLower, "gemini") {
+			ownedBy = "google"
+		} else if strings.Contains(rootLower, "claude") {
+			ownedBy = "anthropic"
+		} else if strings.Contains(rootLower, "grok") {
+			ownedBy = "xai"
+		} else if strings.Contains(rootLower, "deepseek") {
+			ownedBy = "deepseek"
+		} else if strings.Contains(rootLower, "qwen") {
+			ownedBy = "qwen"
+		} else {
+			ownedBy = "openai"
+		}
+	}
+
+	// Created timestamp
+	var created int64
+	if c, ok := model["created"].(int64); ok && c > 0 {
+		created = c
+	} else if cFloat, ok := model["created"].(float64); ok && cFloat > 0 {
+		created = int64(cFloat)
+	} else if cInt, ok := model["created"].(int); ok && cInt > 0 {
+		created = int64(cInt)
+	} else if info != nil && info.Created > 0 {
+		created = info.Created
+	} else {
+		created = time.Now().Unix()
+	}
+
+	// Thinking / Reasoning capability
+	thinking := false
+	if info != nil && (info.Thinking != nil || info.ExplicitThinking) {
+		thinking = true
+	} else if model["thinking"] != nil {
+		thinking = true
+	} else if strings.Contains(rootLower, "-thinking") ||
+		strings.Contains(rootLower, "-reasoning") ||
+		strings.Contains(rootLower, "-high") ||
+		strings.Contains(rootLower, "-medium") ||
+		strings.Contains(rootLower, "-low") ||
+		strings.HasPrefix(rootLower, "o1") ||
+		strings.HasPrefix(rootLower, "o3") ||
+		strings.HasPrefix(rootLower, "o4") ||
+		strings.Contains(rootLower, "r1") {
+		thinking = true
+	}
+
+	// Vision capability
+	hasExplicitModalities := false
+	vision := false
+	checkModalities := func(mods []string) {
+		if len(mods) > 0 {
+			hasExplicitModalities = true
+			for _, m := range mods {
+				if strings.EqualFold(m, "image") || strings.EqualFold(m, "vision") {
+					vision = true
+					break
+				}
+			}
+		}
+	}
+	if info != nil {
+		checkModalities(info.SupportedInputModalities)
+	}
+	if !hasExplicitModalities {
+		if inputMods, ok := model["supportedInputModalities"].([]string); ok {
+			checkModalities(inputMods)
+		} else if inputModsAny, ok := model["supportedInputModalities"].([]any); ok {
+			if len(inputModsAny) > 0 {
+				hasExplicitModalities = true
+				for _, m := range inputModsAny {
+					if str, ok := m.(string); ok && (strings.EqualFold(str, "image") || strings.EqualFold(str, "vision")) {
+						vision = true
+						break
+					}
+				}
+			}
+		}
+	}
+	if !vision && !hasExplicitModalities {
+		if strings.Contains(rootLower, "vision") ||
+			strings.Contains(rootLower, "image") ||
+			strings.Contains(rootLower, "flash") ||
+			strings.Contains(rootLower, "pro") ||
+			strings.Contains(rootLower, "omni") ||
+			strings.Contains(rootLower, "4o") ||
+			strings.Contains(rootLower, "4.1") ||
+			strings.Contains(rootLower, "gemini") ||
+			strings.Contains(rootLower, "claude") ||
+			strings.Contains(rootLower, "codex") ||
+			strings.Contains(rootLower, "vl") {
+			vision = true
+		}
+	}
+
+	// Build capabilities
+	trueVal := true
+	caps := OpenAICapabilities{
+		ToolCalling: &trueVal,
+	}
+	if thinking {
+		caps.Thinking = &trueVal
+		caps.SupportsThinking = &trueVal
+		caps.Reasoning = &trueVal
+	}
+	if vision {
+		caps.Vision = &trueVal
+	}
+
+	// Modalities
+	inputModalities := []string{"text"}
+	if vision {
+		inputModalities = []string{"text", "image"}
+	}
+	outputModalities := []string{"text"}
+
+	// Root-level thinking flags (only when true)
+	var thinkingPtr, supportsThinkingPtr *bool
+	if thinking {
+		thinkingPtr = &trueVal
+		supportsThinkingPtr = &trueVal
+	}
+
+	// Context length & token limits
+	contextLength := 0
+	if info != nil && info.ContextLength > 0 {
+		contextLength = info.ContextLength
+	} else if info != nil && info.MaxContextLength > 0 {
+		contextLength = info.MaxContextLength
+	} else if info != nil && info.InputTokenLimit > 0 {
+		contextLength = info.InputTokenLimit
+	} else if cl, ok := model["context_length"].(int); ok && cl > 0 {
+		contextLength = cl
+	} else if mcl, ok := model["max_context_length"].(int); ok && mcl > 0 {
+		contextLength = mcl
+	} else if itl, ok := model["inputTokenLimit"].(int); ok && itl > 0 {
+		contextLength = itl
+	} else if strings.Contains(rootLower, "gemini") {
+		contextLength = 1048576
+	} else if strings.Contains(rootLower, "claude") {
+		contextLength = 200000
+	} else if strings.Contains(rootLower, "deepseek") || strings.Contains(rootLower, "qwen") {
+		contextLength = 65536
+	}
+
+	maxOutputTokens := 0
+	if info != nil && info.MaxCompletionTokens > 0 {
+		maxOutputTokens = info.MaxCompletionTokens
+	} else if info != nil && info.OutputTokenLimit > 0 {
+		maxOutputTokens = info.OutputTokenLimit
+	} else if mot, ok := model["max_completion_tokens"].(int); ok && mot > 0 {
+		maxOutputTokens = mot
+	} else if otl, ok := model["outputTokenLimit"].(int); ok && otl > 0 {
+		maxOutputTokens = otl
+	} else if strings.Contains(rootLower, "gemini") || strings.Contains(rootLower, "claude") {
+		maxOutputTokens = 65536
+	} else if strings.HasPrefix(rootLower, "o1") || strings.HasPrefix(rootLower, "o3") || strings.HasPrefix(rootLower, "o4") {
+		maxOutputTokens = 65536
+	} else if strings.Contains(rootLower, "4o") {
+		maxOutputTokens = 16384
+	}
+
+	var ctxLenPtr, maxInPtr, maxOutPtr *int
+	if contextLength > 0 {
+		ctxLenPtr = &contextLength
+		maxInPtr = &contextLength
+	}
+	if maxOutputTokens > 0 {
+		maxOutPtr = &maxOutputTokens
+	}
+
+	// Human-readable Display Name
+	name := ""
+	if dn, ok := model["display_name"].(string); ok && strings.TrimSpace(dn) != "" {
+		name = strings.TrimSpace(dn)
+	} else if info != nil && strings.TrimSpace(info.DisplayName) != "" {
+		name = strings.TrimSpace(info.DisplayName)
+	} else if n, ok := model["name"].(string); ok && strings.TrimSpace(n) != "" {
+		name = strings.TrimSpace(n)
+	} else if info != nil && strings.TrimSpace(info.Name) != "" {
+		name = strings.TrimSpace(info.Name)
+	} else if desc, ok := model["description"].(string); ok && strings.TrimSpace(desc) != "" {
+		name = strings.TrimSpace(desc)
+	} else if info != nil && strings.TrimSpace(info.Description) != "" {
+		name = strings.TrimSpace(info.Description)
+	}
+	name = formatModelDisplayName(root, name)
+
+	// Pricing estimation
+	var pricing *OpenAIModelPricing
+	rate, hasRate := usagehistory.RateFor(root)
+	if hasRate && (rate.InputPerM > 0 || rate.OutputPerM > 0) && !strings.Contains(rootLower, ":free") {
+		cachedRate := rate.CacheReadPerM
+		if cachedRate == 0 {
+			cachedRate = rate.InputPerM * 0.1
+		}
+		cacheWriteRate := rate.CacheWritePerM
+		if cacheWriteRate == 0 {
+			cacheWriteRate = rate.InputPerM
+		}
+		pricing = &OpenAIModelPricing{
+			Input:         rate.InputPerM,
+			Output:        rate.OutputPerM,
+			Cached:        cachedRate,
+			Reasoning:     rate.OutputPerM,
+			CacheCreation: cacheWriteRate,
+		}
+	} else if hasRate && strings.Contains(rootLower, ":free") {
+		pricing = &OpenAIModelPricing{
+			Input:         0,
+			Output:        0,
+			Cached:        0,
+			Reasoning:     0,
+			CacheCreation: 0,
+		}
+	}
+
+	return OpenAIModelResponse{
+		ID:               id,
+		Object:           "model",
+		Created:          created,
+		OwnedBy:          ownedBy,
+		Permission:       make([]any, 0),
+		Root:             root,
+		Parent:           nil,
+		Capabilities:     caps,
+		InputModalities:  inputModalities,
+		OutputModalities: outputModalities,
+		Thinking:         thinkingPtr,
+		SupportsThinking: supportsThinkingPtr,
+		ContextLength:    ctxLenPtr,
+		MaxOutputTokens:  maxOutPtr,
+		MaxInputTokens:   maxInPtr,
+		Name:             name,
+		Pricing:          pricing,
+	}
+}
+
+func formatModelDisplayName(root, current string) string {
+	current = strings.TrimSpace(current)
+	lowerRoot := strings.ToLower(root)
+
+	switch {
+	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-high"):
+		return "Gemini 3.7 Flash (High)"
+	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-medium"):
+		return "Gemini 3.7 Flash (Medium)"
+	case strings.HasPrefix(lowerRoot, "gemini-3.7-flash-low"):
+		return "Gemini 3.7 Flash (Low)"
+	case strings.HasPrefix(lowerRoot, "gemini-3.5-flash-lite"):
+		return "Gemini 3.5 Flash Lite"
+	case strings.HasPrefix(lowerRoot, "gemini-3.5-flash"):
+		return "Gemini 3.5 Flash"
+	case strings.HasPrefix(lowerRoot, "gemini-3-flash"):
+		return "Gemini 3 Flash"
+	case strings.HasPrefix(lowerRoot, "gemini-2.5-pro"):
+		return "Gemini 2.5 Pro"
+	case strings.HasPrefix(lowerRoot, "gemini-2.5-flash"):
+		return "Gemini 2.5 Flash"
+	case strings.HasPrefix(lowerRoot, "claude-opus-4-8"):
+		return "Claude Opus 4.8"
+	case strings.HasPrefix(lowerRoot, "claude-sonnet-4-6-thinking"):
+		return "Claude Sonnet 4.6 (Thinking)"
+	case strings.HasPrefix(lowerRoot, "claude-sonnet-4-6"):
+		return "Claude Sonnet 4.6"
+	case strings.HasPrefix(lowerRoot, "gpt-4o-mini"):
+		return "GPT-4o Mini"
+	case strings.HasPrefix(lowerRoot, "gpt-4o"):
+		return "GPT-4o"
+	case strings.HasPrefix(lowerRoot, "o3-mini"):
+		return "o3-mini"
+	case strings.HasPrefix(lowerRoot, "o1-mini"):
+		return "o1-mini"
+	case strings.HasPrefix(lowerRoot, "o1"):
+		return "o1"
+	case lowerRoot == "kimi-k3":
+		return "Kimi K3"
+	}
+
+	if current != "" && current != root && strings.Contains(current, " ") {
+		if strings.HasSuffix(lowerRoot, "-high") && !strings.Contains(current, "High") {
+			return current + " (High)"
+		}
+		if strings.HasSuffix(lowerRoot, "-medium") && !strings.Contains(current, "Medium") {
+			return current + " (Medium)"
+		}
+		if strings.HasSuffix(lowerRoot, "-low") && !strings.Contains(current, "Low") {
+			return current + " (Low)"
+		}
+		return current
+	}
+
+	if current != "" {
+		return current
+	}
+	return root
 }
 
 // ChatCompletions handles the /v1/chat/completions endpoint.

@@ -47,6 +47,10 @@ var defaultRates = []ratePrefix{
 	{"claude", ModelRate{InputPerM: 3.0, OutputPerM: 15.0}},
 
 	// Google / Gemini
+	{"gemini-3.7-flash", ModelRate{InputPerM: 0.75, OutputPerM: 3.75}},
+	{"gemini-3.5-flash-lite", ModelRate{InputPerM: 0.1, OutputPerM: 0.4}},
+	{"gemini-3.5-flash", ModelRate{InputPerM: 0.3, OutputPerM: 2.5}},
+	{"gemini-3-flash", ModelRate{InputPerM: 0.3, OutputPerM: 2.5}},
 	{"gemini-2.5-pro", ModelRate{InputPerM: 1.25, OutputPerM: 10.0}},
 	{"gemini-2.5-flash-lite", ModelRate{InputPerM: 0.1, OutputPerM: 0.4}},
 	{"gemini-2.5-flash", ModelRate{InputPerM: 0.3, OutputPerM: 2.5}},
@@ -92,6 +96,12 @@ func rateFor(model string) (ModelRate, bool) {
 		return ModelRate{}, false
 	}
 	return bestRate, true
+}
+
+// RateFor returns the estimated pricing for a model, selecting the longest
+// matching known prefix. Unknown models return a zero rate so their cost is 0.
+func RateFor(model string) (ModelRate, bool) {
+	return rateFor(model)
 }
 
 // estimateCost computes an estimated USD cost from non-overlapping token counts.

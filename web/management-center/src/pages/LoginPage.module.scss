@@ -8,19 +8,32 @@
 .container {
   position: relative;
   min-height: 100vh;
-  padding: 84px 24px 40px;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   background: var(--bg-secondary);
   color: var(--text-primary);
   font-family: $font-family;
+  padding: calc(60px + 24px) 24px 32px;
+
+  @media (max-width: $breakpoint-mobile) {
+    padding: calc(52px + env(safe-area-inset-top, 0px) + 12px)
+      clamp(14px, 4vw, 20px)
+      calc(14px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 // Dotted wallpaper behind the card, masked to a soft vignette.
 .grid {
   pointer-events: none;
-  position: absolute;
+  position: fixed;
   inset: 0;
   opacity: 0.56;
   background-image: radial-gradient(
@@ -47,12 +60,19 @@
   filter: blur(2px);
   user-select: none;
   pointer-events: none;
+
+  @media (max-width: $breakpoint-mobile) {
+    font-size: min(44vh, 260px);
+    right: -10px;
+    opacity: 0.035;
+    filter: blur(1.5px);
+  }
 }
 
 // Fixed top bar.
 .header {
-  position: absolute;
-  z-index: 3;
+  position: fixed;
+  z-index: 10;
   top: 0;
   left: 0;
   right: 0;
@@ -65,6 +85,12 @@
   background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  box-sizing: border-box;
+
+  @media (max-width: $breakpoint-mobile) {
+    height: calc(52px + env(safe-area-inset-top, 0px));
+    padding: env(safe-area-inset-top, 0px) clamp(14px, 4vw, 24px) 0;
+  }
 }
 
 .headerLogo {
@@ -74,18 +100,32 @@
   color: var(--text-primary);
   font-size: 15px;
   font-weight: 500;
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+    gap: 7px;
+  }
 }
 
 .headerGlyph {
   width: 24px;
   height: 24px;
   border-radius: 4px;
+
+  @media (max-width: 480px) {
+    width: 22px;
+    height: 22px;
+  }
 }
 
 .headerRight {
   display: flex;
   align-items: center;
   gap: 12px;
+
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
 }
 
 .themeToggle {
@@ -107,6 +147,11 @@
     color: var(--text-primary);
     border-color: var(--text-primary);
   }
+
+  @media (max-width: 480px) {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .status {
@@ -117,6 +162,12 @@
   font-family: $font-mono;
   font-size: 8px;
   letter-spacing: 0.16em;
+
+  @media (max-width: 480px) {
+    gap: 6px;
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+  }
 }
 
 .status i {
@@ -130,6 +181,9 @@
   position: relative;
   z-index: 2;
   width: min(520px, 100%);
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .formKicker {
@@ -148,6 +202,16 @@
     height: 1px;
     background: var(--text-tertiary);
   }
+
+  @media (max-width: 480px) {
+    margin-bottom: 8px;
+    font-size: 7.5px;
+    gap: 8px;
+
+    &::before {
+      width: 14px;
+    }
+  }
 }
 
 .card {
@@ -160,9 +224,10 @@
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+  box-sizing: border-box;
 
   @media (max-width: 480px) {
-    padding: 28px 20px 22px;
+    padding: 22px 18px 18px;
   }
 }
 
@@ -178,7 +243,8 @@
   letter-spacing: -0.02em;
 
   @media (max-width: 480px) {
-    font-size: 34px;
+    font-size: clamp(22px, 6.2vw, 26px);
+    line-height: 1.15;
   }
 }
 
@@ -197,6 +263,12 @@
   color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.62;
+
+  @media (max-width: 480px) {
+    margin: 6px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
 }
 
 .formBody {
@@ -205,6 +277,17 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+
+  @media (max-width: 480px) {
+    margin-top: 18px;
+    gap: 12px;
+  }
+
+  :global(.input) {
+    @media (max-width: $breakpoint-mobile) {
+      font-size: 16px; // Prevents iOS Safari auto-zoom on focus
+    }
+  }
 }
 
 .toggleAdvanced {
@@ -217,6 +300,10 @@
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+  }
 }
 
 .errorBox {
@@ -226,6 +313,11 @@
   padding: $spacing-sm $spacing-md;
   color: $error-color;
   font-size: 14px;
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
 }
 
 .formMeta {
@@ -236,6 +328,11 @@
   font-family: $font-mono;
   font-size: 8px;
   letter-spacing: 0.16em;
+
+  @media (max-width: 480px) {
+    margin-top: 8px;
+    font-size: 7.5px;
+  }
 }
 
 .marginal {
@@ -268,18 +365,26 @@
 
 // Splash screen shown during automatic login.
 .splashScreen {
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
   width: 100%;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-secondary);
+  z-index: 100;
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+  box-sizing: border-box;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+    env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
 }
-
 
 @keyframes splashEnter {
   from {
-
     opacity: 0;
     transform: scale(0.9) translateY(20px);
   }
@@ -288,7 +393,6 @@
     transform: scale(1) translateY(0);
   }
 }
-
 
 @keyframes splashLogoPulse {
   0%,
@@ -299,7 +403,6 @@
     transform: scale(1.05);
   }
 }
-
 
 @keyframes splashLoading {
   0% {
@@ -319,23 +422,32 @@
   }
 }
 
-
 .splashContent {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: $spacing-md;
   animation: splashEnter 0.6s ease-out;
-}
+  padding: 0 24px;
+  text-align: center;
+  box-sizing: border-box;
 
+  @media (max-width: 480px) {
+    gap: 12px;
+    padding: 0 16px;
+  }
+}
 
 .splashLogo {
   height: 72px;
   width: auto;
   border-radius: $radius-md;
   animation: splashLogoPulse 1.5s ease-in-out infinite;
-}
 
+  @media (max-width: 480px) {
+    height: 58px;
+  }
+}
 
 .splashTitle {
   font-family: $font-serif;
@@ -344,8 +456,11 @@
   color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.01em;
-}
 
+  @media (max-width: 480px) {
+    font-size: 22px;
+  }
+}
 
 .splashSubtitle {
   font-size: 16px;
@@ -353,8 +468,12 @@
   color: var(--text-secondary);
   margin: 0;
   margin-top: -8px;
-}
 
+  @media (max-width: 480px) {
+    font-size: 13px;
+    margin-top: -4px;
+  }
+}
 
 .splashLoader {
   width: 120px;
@@ -363,8 +482,13 @@
   border-radius: $radius-full;
   overflow: hidden;
   margin-top: $spacing-md;
-}
 
+  @media (max-width: 480px) {
+    width: 96px;
+    height: 2.5px;
+    margin-top: 10px;
+  }
+}
 
 .splashLoaderBar {
   width: 100%;

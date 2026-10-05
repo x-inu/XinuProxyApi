@@ -49,7 +49,7 @@ var enStrings = map[string]string{
 	"not_set":      "(not set)",
 	"error_prefix": "⚠ Error: ",
 
-	"status_left":                 " CLIProxyAPI Management TUI",
+	"status_left":                 " XinuProxyApi Management TUI",
 	"status_right":                "Tab/Shift+Tab: switch • q/Ctrl+C: quit ",
 	"initializing_tui":            "Initializing...",
 	"auth_gate_title":             "🔐 Connect Management API",

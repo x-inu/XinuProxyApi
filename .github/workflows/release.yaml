@@ -196,9 +196,9 @@ jobs:
           ARCHIVE_FORMAT: ${{ matrix.archive_format }}
         run: |
           set -euo pipefail
-          binary_name="cli-proxy-api"
+          binary_name="xinu-proxy-api"
           if [[ "$GOOS" == "windows" ]]; then
-            binary_name="cli-proxy-api.exe"
+            binary_name="xinu-proxy-api.exe"
           fi
 
           archive_dir="dist/${TARGET}/archive"
@@ -348,9 +348,9 @@ jobs:
 
               CGO_ENABLED=1 GOOS=linux GOARCH="${GOARCH}" go build -buildvcs=false \
                 -ldflags="-s -w -X main.Version=${RELEASE_VERSION} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
-                -o "'"$archive_dir"'/cli-proxy-api" ./cmd/server/
+                -o "'"$archive_dir"'/xinu-proxy-api" ./cmd/server/
 
-              glibc_versions="$(readelf --version-info "'"$archive_dir"'/cli-proxy-api" | sed -n "s/.*Name: GLIBC_\([0-9.]*\).*/\1/p" | sort -Vu)"
+              glibc_versions="$(readelf --version-info "'"$archive_dir"'/xinu-proxy-api" | sed -n "s/.*Name: GLIBC_\([0-9.]*\).*/\1/p" | sort -Vu)"
               if [[ -n "${glibc_versions}" ]]; then
                 printf "GLIBC versions:\n%s\n" "${glibc_versions}"
                 max_glibc="$(printf "%s\n" "${glibc_versions}" | sort -V | tail -n 1)"
@@ -364,7 +364,7 @@ jobs:
           cp LICENSE README.md config.example.yaml "$archive_dir/"
           mkdir -p "$archive_dir/static"
           cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" cli-proxy-api LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinu-proxy-api LICENSE README.md config.example.yaml static/management.html
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
@@ -483,10 +483,10 @@ jobs:
 
           CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -buildvcs=false \
             -ldflags="-s -w -X main.Version=${RELEASE_VERSION} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
-            -o "$archive_dir/cli-proxy-api" ./cmd/server/
+            -o "$archive_dir/xinu-proxy-api" ./cmd/server/
 
-          if readelf -l "$archive_dir/cli-proxy-api" | grep -q 'Requesting program interpreter'; then
-            readelf -l "$archive_dir/cli-proxy-api" >&2
+          if readelf -l "$archive_dir/xinu-proxy-api" | grep -q 'Requesting program interpreter'; then
+            readelf -l "$archive_dir/xinu-proxy-api" >&2
             echo "no-plugin linux binary must not require a dynamic interpreter" >&2
             exit 1
           fi
@@ -494,7 +494,7 @@ jobs:
           cp LICENSE README.md config.example.yaml "$archive_dir/"
           mkdir -p "$archive_dir/static"
           cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" cli-proxy-api LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinu-proxy-api LICENSE README.md config.example.yaml static/management.html
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
@@ -682,7 +682,7 @@ jobs:
           CC="clang --target=${clang_target} --sysroot=${sysroot_dir}" \
           go build -buildvcs=false \
             -ldflags="-s -w -X main.Version=${RELEASE_VERSION} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
-            -o "dist/${TARGET}/bin/cli-proxy-api" ./cmd/server/
+            -o "dist/${TARGET}/bin/xinu-proxy-api" ./cmd/server/
       - name: Build FreeBSD no-plugin binary
         if: ${{ !matrix.cgo_enabled }}
         shell: bash
@@ -691,7 +691,7 @@ jobs:
           mkdir -p "dist/${TARGET}/bin"
           CGO_ENABLED=0 GOOS=freebsd GOARCH="$TARGET_GOARCH" go build -buildvcs=false \
             -ldflags="-s -w -X main.Version=${RELEASE_VERSION} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
-            -o "dist/${TARGET}/bin/cli-proxy-api" ./cmd/server/
+            -o "dist/${TARGET}/bin/xinu-proxy-api" ./cmd/server/
       - name: Package FreeBSD archive
         shell: bash
         run: |
@@ -702,11 +702,11 @@ jobs:
           mkdir -p "$archive_dir"
 
           echo "Packaging ${archive_name}"
-          cp "dist/${TARGET}/bin/cli-proxy-api" "$archive_dir/cli-proxy-api"
+          cp "dist/${TARGET}/bin/xinu-proxy-api" "$archive_dir/xinu-proxy-api"
           cp LICENSE README.md config.example.yaml "$archive_dir/"
           mkdir -p "$archive_dir/static"
           cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" cli-proxy-api LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinu-proxy-api LICENSE README.md config.example.yaml static/management.html
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}

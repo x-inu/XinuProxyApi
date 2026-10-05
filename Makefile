@@ -11,7 +11,7 @@ management:
 	VERSION=$(VERSION) ./scripts/build-management.sh
 
 backend:
-	go build -ldflags "$(LDFLAGS)" -o cli-proxy-api ./cmd/server
+	go build -ldflags "$(LDFLAGS)" -o xinu-proxy-api ./cmd/server
 
 build: management backend
 
@@ -23,4 +23,4 @@ verify:
 	./scripts/verify.sh
 
 clean:
-	rm -rf static/management.html web/management-center/dist cli-proxy-api test-output
+	rm -rf static/management.html web/management-center/dist xinu-proxy-api test-output

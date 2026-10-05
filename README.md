@@ -41,7 +41,7 @@ mkdir -p ~/xinuproxyapi && cd ~/xinuproxyapi
 tar -xzf CLIProxyAPI_<version>_linux_amd64.tar.gz
 ```
 
-Each archive contains the `cli-proxy-api` binary, `static/management.html`, `config.example.yaml`, `README.md`, and `LICENSE`.
+Each archive contains the `xinu-proxy-api` binary, `static/management.html`, `config.example.yaml`, `README.md`, and `LICENSE`.
 
 ### 2. Create your config
 
@@ -70,7 +70,7 @@ Leave `secret-key` empty only if you intentionally want to disable the Managemen
 ### 3. Run it
 
 ```bash
-./cli-proxy-api --config config.yaml
+./xinu-proxy-api --config config.yaml
 ```
 
 The server binds `port` (default `20128`). Verify it locally:
@@ -94,7 +94,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/xinuproxyapi
-ExecStart=/opt/xinuproxyapi/cli-proxy-api --config /opt/xinuproxyapi/config.yaml
+ExecStart=/opt/xinuproxyapi/xinu-proxy-api --config /opt/xinuproxyapi/config.yaml
 Restart=on-failure
 RestartSec=3
 
@@ -124,7 +124,7 @@ make build VERSION=dev
 
 # Equivalent explicit steps
 VERSION=dev ./scripts/build-management.sh   # writes static/management.html
-go build -o cli-proxy-api ./cmd/server
+go build -o xinu-proxy-api ./cmd/server
 ```
 
 Frontend development server:

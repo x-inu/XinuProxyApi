@@ -227,121 +227,120 @@ export function LoginPage() {
   // Show the splash while automatic login runs or succeeds.
   const showSplash = autoLoading || autoLoginSuccess;
 
-  return (
-    <div className={styles.container}>
-      {showSplash ? (
-        /* Splash animation. */
-        <div className={styles.splashScreen}>
-          <div className={styles.splashContent}>
-            <img src={INLINE_LOGO_JPEG} alt="XinuProxyApi" className={styles.splashLogo} />
-            <h1 className={styles.splashTitle}>{t('splash.title')}</h1>
-            <p className={styles.splashSubtitle}>{t('splash.subtitle')}</p>
-            <div className={styles.splashLoader}>
-              <div className={styles.splashLoaderBar} />
-            </div>
+  if (showSplash) {
+    return (
+      <div className={styles.splashScreen} role="status" aria-live="polite">
+        <div className={styles.splashContent}>
+          <img src={INLINE_LOGO_JPEG} alt="XinuProxyApi" className={styles.splashLogo} />
+          <h1 className={styles.splashTitle}>{t('splash.title')}</h1>
+          <p className={styles.splashSubtitle}>{t('splash.subtitle')}</p>
+          <div className={styles.splashLoader}>
+            <div className={styles.splashLoaderBar} />
           </div>
         </div>
-      ) : (
-        <>
-          {/* Dotted wallpaper + oversized watermark glyph. */}
-          <div className={styles.grid} aria-hidden="true" />
-          <div className={styles.watermark} aria-hidden="true">
-            源
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      {/* Dotted wallpaper + oversized watermark glyph. */}
+      <div className={styles.grid} aria-hidden="true" />
+      <div className={styles.watermark} aria-hidden="true">
+        源
+      </div>
+
+      {/* Fixed header: brand + theme toggle + status. */}
+      <header className={styles.header}>
+        <div className={styles.headerLogo}>
+          <img src={INLINE_LOGO_JPEG} alt="" className={styles.headerGlyph} />
+          <span>XinuProxyApi</span>
+        </div>
+        <div className={styles.headerRight}>
+          <button
+            type="button"
+            className={styles.themeToggle}
+            onClick={toggleTheme}
+            aria-label={t('theme.switch')}
+            title={t('theme.switch')}
+          >
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          </button>
+          <div className={styles.status}>
+            <i />
+            SECURE SESSION
           </div>
+        </div>
+      </header>
 
-          {/* Fixed header: brand + theme toggle + status. */}
-          <header className={styles.header}>
-            <div className={styles.headerLogo}>
-              <img src={INLINE_LOGO_JPEG} alt="" className={styles.headerGlyph} />
-              <span>XinuProxyApi</span>
-            </div>
-            <div className={styles.headerRight}>
-              <button
-                type="button"
-                className={styles.themeToggle}
-                onClick={toggleTheme}
-                aria-label={t('theme.switch')}
-                title={t('theme.switch')}
-              >
-                {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-              </button>
-              <div className={styles.status}>
-                <i />
-                SECURE SESSION
-              </div>
-            </div>
-          </header>
+      {/* Centered form dossier. */}
+      <main className={styles.formWrapper}>
+        <div className={styles.formKicker}>PROXY / ACCESS TERMINAL</div>
+        <div className={styles.card}>
+          <h1 className={styles.formTitle}>
+            <span className={styles.titleLead}>Routed intelligence,</span>
+            <span className={styles.titleAccent}>quietly governed.</span>
+          </h1>
+          <p className={styles.formDesc}>{t('login.subtitle')}</p>
 
-          {/* Centered form dossier. */}
-          <div className={styles.formWrapper}>
-            <div className={styles.formKicker}>PROXY / ACCESS TERMINAL</div>
-            <div className={styles.card}>
-              <h1 className={styles.formTitle}>
-                <span className={styles.titleLead}>Routed intelligence,</span>
-                <span className={styles.titleAccent}>quietly governed.</span>
-              </h1>
-              <p className={styles.formDesc}>{t('login.subtitle')}</p>
-
-              <div className={styles.formBody}>
-                <Input
-                  autoFocus
-                  label={t('login.management_key_label')}
-                  placeholder={t('login.management_key_placeholder')}
-                  type={showKey ? 'text' : 'password'}
-                  name="cpa-management-key"
-                  autoComplete="current-password"
-                  value={managementKey}
-                  onChange={(e) => setManagementKey(e.target.value)}
-                  onKeyDown={handleSubmitKeyDown}
-                  rightElement={
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => setShowKey((prev) => !prev)}
-                      aria-label={
-                        showKey
-                          ? t('login.hide_key', { defaultValue: 'Hide key' })
-                          : t('login.show_key', { defaultValue: 'Show key' })
-                      }
-                      title={
-                        showKey
-                          ? t('login.hide_key', { defaultValue: 'Hide key' })
-                          : t('login.show_key', { defaultValue: 'Show key' })
-                      }
-                    >
-                      {showKey ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-                    </button>
+          <div className={styles.formBody}>
+            <Input
+              autoFocus
+              label={t('login.management_key_label')}
+              placeholder={t('login.management_key_placeholder')}
+              type={showKey ? 'text' : 'password'}
+              name="cpa-management-key"
+              autoComplete="current-password"
+              value={managementKey}
+              onChange={(e) => setManagementKey(e.target.value)}
+              onKeyDown={handleSubmitKeyDown}
+              rightElement={
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => setShowKey((prev) => !prev)}
+                  aria-label={
+                    showKey
+                      ? t('login.hide_key', { defaultValue: 'Hide key' })
+                      : t('login.show_key', { defaultValue: 'Show key' })
                   }
-                />
+                  title={
+                    showKey
+                      ? t('login.hide_key', { defaultValue: 'Hide key' })
+                      : t('login.show_key', { defaultValue: 'Show key' })
+                  }
+                >
+                  {showKey ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                </button>
+              }
+            />
 
-                <div className={styles.toggleAdvanced}>
-                  <SelectionCheckbox
-                    checked={rememberPassword}
-                    onChange={setRememberPassword}
-                    ariaLabel={t('login.remember_password_label')}
-                    label={t('login.remember_password_label')}
-                    labelClassName={styles.toggleLabel}
-                  />
-                </div>
-
-                <Button fullWidth onClick={handleSubmit} loading={loading}>
-                  {loading ? t('login.submitting') : t('login.submit_button')}
-                </Button>
-
-                {error && <div className={styles.errorBox}>{error}</div>}
-              </div>
+            <div className={styles.toggleAdvanced}>
+              <SelectionCheckbox
+                checked={rememberPassword}
+                onChange={setRememberPassword}
+                ariaLabel={t('login.remember_password_label')}
+                label={t('login.remember_password_label')}
+                labelClassName={styles.toggleLabel}
+              />
             </div>
-            <div className={styles.formMeta}>
-              <span>PAPER {theme === 'dark' ? '#11100E' : '#F4F1EA'}</span>
-              <span>INK {theme === 'dark' ? '#E6DED2' : '#1C1A17'}</span>
-            </div>
-          </div>
 
-          <div className={styles.marginal} aria-hidden="true">
-            XINUPROXYAPI / UNIFIED GATEWAY / EST. 2026
+            <Button fullWidth onClick={handleSubmit} loading={loading}>
+              {loading ? t('login.submitting') : t('login.submit_button')}
+            </Button>
+
+            {error && <div className={styles.errorBox}>{error}</div>}
           </div>
-        </>
-      )}
+        </div>
+        <div className={styles.formMeta}>
+          <span>PAPER {theme === 'dark' ? '#11100E' : '#F4F1EA'}</span>
+          <span>INK {theme === 'dark' ? '#E6DED2' : '#1C1A17'}</span>
+        </div>
+      </main>
+
+      <div className={styles.marginal} aria-hidden="true">
+        XINUPROXYAPI / UNIFIED GATEWAY / EST. 2026
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # XinuProxyApi
 
-XinuProxyApi combines CLIProxyAPI and its browser Management Center in one repository and release pipeline.
+XinuProxyApi combines a multi-provider proxy backend and its browser Management Center in one repository and release pipeline.
 
 ## Layout
 
@@ -30,7 +30,7 @@ Equivalent commands:
 
 ```bash
 VERSION=dev ./scripts/build-management.sh
-go build -o cli-proxy-api ./cmd/server
+go build -o xinu-proxy-api ./cmd/server
 ```
 
 The server resolves the generated panel from `static/management.html` when `config.yaml` is in the project directory. Set `MANAGEMENT_STATIC_PATH` when the runtime config or static file lives elsewhere.

@@ -39,12 +39,12 @@ jobs:
           <!-- cliproxyapi-linux-release-assets:start -->
           ## Linux release assets
 
-          - `CLIProxyAPI_<version>_linux_<arch>.tar.gz` is the default Linux build. It supports dynamic library plugins and is built against a GLIBC 2.17 baseline.
-          - `CLIProxyAPI_<version>_linux_<arch>_no-plugin.tar.gz` is the portable Linux build for musl-based or older systems such as OpenWrt. It does not support dynamic library plugins.
+          - `XinuProxyApi_<version>_linux_<arch>.tar.gz` is the default Linux build. It supports dynamic library plugins and is built against a GLIBC 2.17 baseline.
+          - `XinuProxyApi_<version>_linux_<arch>_no-plugin.tar.gz` is the portable Linux build for musl-based or older systems such as OpenWrt. It does not support dynamic library plugins.
 
           ## FreeBSD release assets
 
-          - `CLIProxyAPI_<version>_freebsd_aarch64_no-plugin.tar.gz` is the FreeBSD arm64 build. It is built without CGO and does not support dynamic library plugins.
+          - `XinuProxyApi_<version>_freebsd_aarch64_no-plugin.tar.gz` is the FreeBSD arm64 build. It is built without CGO and does not support dynamic library plugins.
 
           <!-- cliproxyapi-linux-release-assets:end -->
           EOF
@@ -196,13 +196,13 @@ jobs:
           ARCHIVE_FORMAT: ${{ matrix.archive_format }}
         run: |
           set -euo pipefail
-          binary_name="cli-proxy-api"
+          binary_name="xinu-proxy-api"
           if [[ "$GOOS" == "windows" ]]; then
-            binary_name="cli-proxy-api.exe"
+            binary_name="xinu-proxy-api.exe"
           fi
 
           archive_dir="dist/${TARGET}/archive"
-          archive_name="CLIProxyAPI_${RELEASE_VERSION}_${GOOS}_${ASSET_ARCH}.${ARCHIVE_FORMAT}"
+          archive_name="XinuProxyApi_${RELEASE_VERSION}_${GOOS}_${ASSET_ARCH}.${ARCHIVE_FORMAT}"
           rm -rf "dist/${TARGET}"
           mkdir -p "$archive_dir"
 
@@ -221,7 +221,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
-          path: dist/CLIProxyAPI_*
+          path: dist/XinuProxyApi_*
           if-no-files-found: error
       - name: Upload release assets
         shell: bash
@@ -230,7 +230,7 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          assets=(dist/CLIProxyAPI_*.tar.gz dist/CLIProxyAPI_*.zip)
+          assets=(dist/XinuProxyApi_*.tar.gz dist/XinuProxyApi_*.zip)
           if [[ ${#assets[@]} -eq 0 ]]; then
             printf 'expected archive assets, found %s\n' "${#assets[@]}" >&2
             printf '%s\n' "${assets[@]}" >&2
@@ -247,14 +247,14 @@ jobs:
           tmp_dir="$(mktemp -d)"
           trap 'rm -rf "$tmp_dir"' EXIT
           gh release download "$GITHUB_REF_NAME" \
-            --pattern 'CLIProxyAPI_*.tar.gz' \
-            --pattern 'CLIProxyAPI_*.zip' \
+            --pattern 'XinuProxyApi_*.tar.gz' \
+            --pattern 'XinuProxyApi_*.zip' \
             --dir "$tmp_dir" \
             --clobber
           (
             cd "$tmp_dir"
             shopt -s nullglob
-            archives=(CLIProxyAPI_*.tar.gz CLIProxyAPI_*.zip)
+            archives=(XinuProxyApi_*.tar.gz XinuProxyApi_*.zip)
             if [[ ${#archives[@]} -eq 0 ]]; then
               echo "No release archives found"
               exit 0
@@ -326,7 +326,7 @@ jobs:
           set -euo pipefail
 
           archive_dir="dist/${TARGET}/archive"
-          archive_name="CLIProxyAPI_${RELEASE_VERSION}_linux_${ASSET_ARCH}.tar.gz"
+          archive_name="XinuProxyApi_${RELEASE_VERSION}_linux_${ASSET_ARCH}.tar.gz"
           rm -rf "dist/${TARGET}"
           mkdir -p "$archive_dir"
 
@@ -348,9 +348,9 @@ jobs:
 
               CGO_ENABLED=1 GOOS=linux GOARCH="${GOARCH}" go build -buildvcs=false \
                 -ldflags="-s -w -X main.Version=${RELEASE_VERSION} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
-                -o "'"$archive_dir"'/cli-proxy-api" ./cmd/server/
+                -o "'"$archive_dir"'/xinu-proxy-api" ./cmd/server/
 
-              glibc_versions="$(readelf --version-info "'"$archive_dir"'/cli-proxy-api" | sed -n "s/.*Name: GLIBC_\([0-9.]*\).*/\1/p" | sort -Vu)"
+              glibc_versions="$(readelf --version-info "'"$archive_dir"'/xinu-proxy-api" | sed -n "s/.*Name: GLIBC_\([0-9.]*\).*/\1/p" | sort -Vu)"
               if [[ -n "${glibc_versions}" ]]; then
                 printf "GLIBC versions:\n%s\n" "${glibc_versions}"
                 max_glibc="$(printf "%s\n" "${glibc_versions}" | sort -V | tail -n 1)"
@@ -364,11 +364,11 @@ jobs:
           cp LICENSE README.md config.example.yaml "$archive_dir/"
           mkdir -p "$archive_dir/static"
           cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" cli-proxy-api LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinu-proxy-api LICENSE README.md config.example.yaml static/management.html
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
-          path: dist/CLIProxyAPI_*
+          path: dist/XinuProxyApi_*
           if-no-files-found: error
       - name: Upload release assets
         shell: bash
@@ -377,7 +377,7 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          assets=(dist/CLIProxyAPI_*.tar.gz)
+          assets=(dist/XinuProxyApi_*.tar.gz)
           if [[ ${#assets[@]} -eq 0 ]]; then
             printf 'expected archive assets, found %s\n' "${#assets[@]}" >&2
             printf '%s\n' "${assets[@]}" >&2
@@ -394,14 +394,14 @@ jobs:
           tmp_dir="$(mktemp -d)"
           trap 'rm -rf "$tmp_dir"' EXIT
           gh release download "$GITHUB_REF_NAME" \
-            --pattern 'CLIProxyAPI_*.tar.gz' \
-            --pattern 'CLIProxyAPI_*.zip' \
+            --pattern 'XinuProxyApi_*.tar.gz' \
+            --pattern 'XinuProxyApi_*.zip' \
             --dir "$tmp_dir" \
             --clobber
           (
             cd "$tmp_dir"
             shopt -s nullglob
-            archives=(CLIProxyAPI_*.tar.gz CLIProxyAPI_*.zip)
+            archives=(XinuProxyApi_*.tar.gz XinuProxyApi_*.zip)
             if [[ ${#archives[@]} -eq 0 ]]; then
               echo "No release archives found"
               exit 0
@@ -477,16 +477,16 @@ jobs:
           set -euo pipefail
 
           archive_dir="dist/${TARGET}/archive"
-          archive_name="CLIProxyAPI_${RELEASE_VERSION}_linux_${ASSET_ARCH}_no-plugin.tar.gz"
+          archive_name="XinuProxyApi_${RELEASE_VERSION}_linux_${ASSET_ARCH}_no-plugin.tar.gz"
           rm -rf "dist/${TARGET}"
           mkdir -p "$archive_dir"
 
           CGO_ENABLED=0 GOOS=linux GOARCH="$GOARCH" go build -buildvcs=false \
             -ldflags="-s -w -X main.Version=${RELEASE_VERSION} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
-            -o "$archive_dir/cli-proxy-api" ./cmd/server/
+            -o "$archive_dir/xinu-proxy-api" ./cmd/server/
 
-          if readelf -l "$archive_dir/cli-proxy-api" | grep -q 'Requesting program interpreter'; then
-            readelf -l "$archive_dir/cli-proxy-api" >&2
+          if readelf -l "$archive_dir/xinu-proxy-api" | grep -q 'Requesting program interpreter'; then
+            readelf -l "$archive_dir/xinu-proxy-api" >&2
             echo "no-plugin linux binary must not require a dynamic interpreter" >&2
             exit 1
           fi
@@ -494,11 +494,11 @@ jobs:
           cp LICENSE README.md config.example.yaml "$archive_dir/"
           mkdir -p "$archive_dir/static"
           cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" cli-proxy-api LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinu-proxy-api LICENSE README.md config.example.yaml static/management.html
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
-          path: dist/CLIProxyAPI_*
+          path: dist/XinuProxyApi_*
           if-no-files-found: error
       - name: Upload release assets
         shell: bash
@@ -507,7 +507,7 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          assets=(dist/CLIProxyAPI_*.tar.gz)
+          assets=(dist/XinuProxyApi_*.tar.gz)
           if [[ ${#assets[@]} -eq 0 ]]; then
             printf 'expected archive assets, found %s\n' "${#assets[@]}" >&2
             printf '%s\n' "${assets[@]}" >&2
@@ -524,14 +524,14 @@ jobs:
           tmp_dir="$(mktemp -d)"
           trap 'rm -rf "$tmp_dir"' EXIT
           gh release download "$GITHUB_REF_NAME" \
-            --pattern 'CLIProxyAPI_*.tar.gz' \
-            --pattern 'CLIProxyAPI_*.zip' \
+            --pattern 'XinuProxyApi_*.tar.gz' \
+            --pattern 'XinuProxyApi_*.zip' \
             --dir "$tmp_dir" \
             --clobber
           (
             cd "$tmp_dir"
             shopt -s nullglob
-            archives=(CLIProxyAPI_*.tar.gz CLIProxyAPI_*.zip)
+            archives=(XinuProxyApi_*.tar.gz XinuProxyApi_*.zip)
             if [[ ${#archives[@]} -eq 0 ]]; then
               echo "No release archives found"
               exit 0
@@ -682,7 +682,7 @@ jobs:
           CC="clang --target=${clang_target} --sysroot=${sysroot_dir}" \
           go build -buildvcs=false \
             -ldflags="-s -w -X main.Version=${RELEASE_VERSION} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
-            -o "dist/${TARGET}/bin/cli-proxy-api" ./cmd/server/
+            -o "dist/${TARGET}/bin/xinu-proxy-api" ./cmd/server/
       - name: Build FreeBSD no-plugin binary
         if: ${{ !matrix.cgo_enabled }}
         shell: bash
@@ -691,26 +691,26 @@ jobs:
           mkdir -p "dist/${TARGET}/bin"
           CGO_ENABLED=0 GOOS=freebsd GOARCH="$TARGET_GOARCH" go build -buildvcs=false \
             -ldflags="-s -w -X main.Version=${RELEASE_VERSION} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
-            -o "dist/${TARGET}/bin/cli-proxy-api" ./cmd/server/
+            -o "dist/${TARGET}/bin/xinu-proxy-api" ./cmd/server/
       - name: Package FreeBSD archive
         shell: bash
         run: |
           set -euo pipefail
 
           archive_dir="dist/${TARGET}/archive"
-          archive_name="CLIProxyAPI_${RELEASE_VERSION}_freebsd_${ASSET_ARCH}${ASSET_SUFFIX}.tar.gz"
+          archive_name="XinuProxyApi_${RELEASE_VERSION}_freebsd_${ASSET_ARCH}${ASSET_SUFFIX}.tar.gz"
           mkdir -p "$archive_dir"
 
           echo "Packaging ${archive_name}"
-          cp "dist/${TARGET}/bin/cli-proxy-api" "$archive_dir/cli-proxy-api"
+          cp "dist/${TARGET}/bin/xinu-proxy-api" "$archive_dir/xinu-proxy-api"
           cp LICENSE README.md config.example.yaml "$archive_dir/"
           mkdir -p "$archive_dir/static"
           cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" cli-proxy-api LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinu-proxy-api LICENSE README.md config.example.yaml static/management.html
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
-          path: dist/CLIProxyAPI_*
+          path: dist/XinuProxyApi_*
           if-no-files-found: error
       - name: Upload release assets
         shell: bash
@@ -719,7 +719,7 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          assets=(dist/CLIProxyAPI_*.tar.gz)
+          assets=(dist/XinuProxyApi_*.tar.gz)
           if [[ ${#assets[@]} -eq 0 ]]; then
             printf 'expected archive assets, found %s\n' "${#assets[@]}" >&2
             printf '%s\n' "${assets[@]}" >&2
@@ -736,14 +736,14 @@ jobs:
           tmp_dir="$(mktemp -d)"
           trap 'rm -rf "$tmp_dir"' EXIT
           gh release download "$GITHUB_REF_NAME" \
-            --pattern 'CLIProxyAPI_*.tar.gz' \
-            --pattern 'CLIProxyAPI_*.zip' \
+            --pattern 'XinuProxyApi_*.tar.gz' \
+            --pattern 'XinuProxyApi_*.zip' \
             --dir "$tmp_dir" \
             --clobber
           (
             cd "$tmp_dir"
             shopt -s nullglob
-            archives=(CLIProxyAPI_*.tar.gz CLIProxyAPI_*.zip)
+            archives=(XinuProxyApi_*.tar.gz XinuProxyApi_*.zip)
             if [[ ${#archives[@]} -eq 0 ]]; then
               echo "No release archives found"
               exit 0
@@ -776,7 +776,7 @@ jobs:
           set -euo pipefail
           cd dist
           shopt -s nullglob
-          archives=(CLIProxyAPI_*.tar.gz CLIProxyAPI_*.zip)
+          archives=(XinuProxyApi_*.tar.gz XinuProxyApi_*.zip)
           if [[ ${#archives[@]} -eq 0 ]]; then
             echo "No release archives found"
             exit 0

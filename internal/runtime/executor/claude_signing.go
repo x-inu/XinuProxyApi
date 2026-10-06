@@ -165,6 +165,43 @@ func isKimiMessagesUpstream(auth *cliproxyauth.Auth, endpoint string) bool {
 	return isKimiAPIEndpoint(endpoint)
 }
 
+func isJustwokerAPIEndpoint(endpoint string) bool {
+	parsed, err := url.Parse(strings.TrimSpace(endpoint))
+	if err != nil {
+		return false
+	}
+	host := strings.ToLower(parsed.Hostname())
+	return strings.Contains(host, "justwoker") || strings.EqualFold(host, "api.justwoker.icu")
+}
+
+func isJustwokerMessagesUpstream(auth *cliproxyauth.Auth, endpoint string) bool {
+	if auth != nil {
+		if strings.EqualFold(strings.TrimSpace(auth.Prefix), "jdw") {
+			return true
+		}
+		if auth.Attributes != nil {
+			if strings.EqualFold(strings.TrimSpace(auth.Attributes["prefix"]), "jdw") {
+				return true
+			}
+		}
+	}
+	return isJustwokerAPIEndpoint(endpoint)
+}
+
+func shouldForceClaudeNonStream(cfg *config.Config, auth *cliproxyauth.Auth, endpoint string) bool {
+	if auth != nil && auth.Attributes != nil {
+		if strings.EqualFold(strings.TrimSpace(auth.Attributes["force_non_stream"]), "true") ||
+			strings.EqualFold(strings.TrimSpace(auth.Attributes["disable_streaming"]), "true") {
+			return true
+		}
+	}
+	entry := resolveClaudeKeyConfig(cfg, auth)
+	if entry != nil && entry.ForceNonStream {
+		return true
+	}
+	return isJustwokerMessagesUpstream(auth, endpoint)
+}
+
 // stripDefaultKimiClaudeCodeAttribution removes the Claude Code billing/CCH
 // attribution block from a Kimi Messages body when the caller did not opt into
 // the full CLI profile. Kimi treats the block as prompt text, so forwarding it

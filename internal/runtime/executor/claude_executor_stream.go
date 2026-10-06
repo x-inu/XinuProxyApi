@@ -286,6 +286,13 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	if errMidSystem := validateClaudeMidSystemMessageModel(bodyForUpstream, confirmedClaudeCode, isAnthropicUpstreamBase(baseURL)); errMidSystem != nil {
 		return nil, errMidSystem
 	}
+	// Third-party Claude-compatible upstreams (e.g. Justwoker/JDW) may have
+	// broken streaming implementations that omit content_block events. Force
+	// stream:false for these upstreams and convert the JSON response to synthetic SSE.
+	forceNonStream := shouldForceClaudeNonStream(e.cfg, auth, url)
+	if forceNonStream {
+		bodyForUpstream = helps.SetBoolIfDifferent(bodyForUpstream, "stream", false)
+	}
 	reporter.SetTranslatedReasoningEffort(bodyForUpstream, to.String())
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyForUpstream))
 	if err != nil {
@@ -295,7 +302,7 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		httpReq,
 		auth,
 		apiKey,
-		true,
+		!forceNonStream,
 		extraBetas,
 		bodyForUpstream,
 		e.cfg,
@@ -399,6 +406,98 @@ func (e *ClaudeExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			case out <- cliproxyexecutor.StreamChunk{Err: errResponse}:
 			case <-ctx.Done():
 			}
+		}
+
+		// Third-party non-stream fallback: the upstream returned a complete JSON
+		// response (stream:false). Read it fully, convert to synthetic SSE, then
+		// process the SSE lines through the normal translation path.
+		if forceNonStream {
+			data, errRead := io.ReadAll(decodedBody)
+			if errRead != nil {
+				emitResponseError(errRead)
+				return
+			}
+			helps.AppendAPIResponseChunk(ctx, e.cfg, data)
+			reporter.ObserveResponseModel(data)
+			reporter.Publish(ctx, helps.ParseClaudeUsage(data))
+			data, errRestore := restoreClaudeOAuthToolNamesFromResponse(data, oauthToolNamesReverseMap)
+			if errRestore != nil {
+				emitResponseError(fmt.Errorf("restore Claude OAuth tool name from response: %w", errRestore))
+				return
+			}
+			data = e.restoreResponseModel(data, req.Model)
+			sseData := helps.ClaudeNativeJSONToSSE(data)
+
+			// Extract message ID for continuity.
+			if msgID := claudeMessageIDFromSSE(sseData); msgID != "" {
+				commitClaudeContinuity(diagnosticsState, msgID, helps.HeaderValueCaseInsensitive(httpResp.Header, "request-id"))
+			}
+
+			// If the downstream client expects native Claude SSE, forward SSE events directly.
+			if responseFormat == to {
+				scanner := bufio.NewScanner(bytes.NewReader(sseData))
+				scanner.Buffer(nil, 52_428_800)
+				var event bytes.Buffer
+				flushEvent := func() bool {
+					if event.Len() == 0 {
+						return true
+					}
+					cloned := bytes.Clone(event.Bytes())
+					event.Reset()
+					select {
+					case out <- cliproxyexecutor.StreamChunk{Payload: cloned}:
+						return true
+					case <-ctx.Done():
+						return false
+					}
+				}
+				for scanner.Scan() {
+					line := scanner.Bytes()
+					event.Write(line)
+					event.WriteByte('\n')
+					if len(bytes.TrimSpace(line)) == 0 {
+						if !flushEvent() {
+							emitCancellation(ctx.Err())
+							return
+						}
+					}
+				}
+				flushEvent()
+				return
+			}
+
+			// Process synthetic SSE lines through the translator.
+			scanner := bufio.NewScanner(bytes.NewReader(sseData))
+			scanner.Buffer(nil, 52_428_800)
+			var param any
+			for scanner.Scan() {
+				line := scanner.Bytes()
+				streamUsage.ObserveClaudeStream(line)
+				chunks := sdktranslator.TranslateStream(
+					ctx,
+					to,
+					responseFormat,
+					req.Model,
+					opts.OriginalRequest,
+					bodyForTranslation,
+					bytes.Clone(line),
+					&param,
+				)
+				if responseFormat == sdktranslator.FormatOpenAIResponse {
+					for i, chunk := range chunks {
+						chunks[i] = helps.EnsureResponsesUsageDetails(chunk)
+					}
+				}
+				for i := range chunks {
+					select {
+					case out <- cliproxyexecutor.StreamChunk{Payload: chunks[i]}:
+					case <-ctx.Done():
+						emitCancellation(ctx.Err())
+						return
+					}
+				}
+			}
+			return
 		}
 
 		// If the response target is Claude, directly forward complete SSE events without translation.

@@ -516,6 +516,11 @@ type ClaudeKey struct {
 	// Cloak configures request cloaking for non-Claude-Code clients.
 	Cloak *CloakConfig `yaml:"cloak,omitempty" json:"cloak,omitempty"`
 
+	// ForceNonStream forces non-streaming requests to the upstream, synthesizing
+	// SSE streams downstream if needed. Useful for third-party upstreams whose
+	// streaming implementation is broken (e.g. omitting content_block events).
+	ForceNonStream bool `yaml:"force-non-stream,omitempty" json:"force-non-stream,omitempty"`
+
 	// FingerprintProfile selects the Claude Code request fingerprint for this
 	// credential on Anthropic Messages. Empty/default keeps the caller request
 	// fingerprint and headers, including first-party api.anthropic.com API keys.

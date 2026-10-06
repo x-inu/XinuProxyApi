@@ -55,7 +55,13 @@ func (e *ClaudeExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, r
 	}()
 	// Use an upstream stream whenever the downstream response needs translation
 	// from Claude events. Native Claude responses use the JSON response path.
-	upstreamStream := responseFormat != to
+	//
+	// Some third-party Claude-compatible upstreams (e.g. Justwoker/JDW) have broken
+	// streaming implementations that emit message_delta but omit content_block
+	// events. For these upstreams, force non-streaming and convert the well-formed
+	// JSON response to synthetic SSE for the translator.
+	forceNonStream := shouldForceClaudeNonStream(e.cfg, auth, url)
+	upstreamStream := responseFormat != to && !forceNonStream
 	originalPayloadSource := req.Payload
 	if len(opts.OriginalRequest) > 0 {
 		originalPayloadSource = opts.OriginalRequest
@@ -422,6 +428,11 @@ func (e *ClaudeExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, r
 		}
 	}
 	data = e.restoreResponseModel(data, req.Model)
+	// Third-party upstreams returned native JSON. Convert it to synthetic SSE
+	// so the downstream Claude→OpenAI translator can process it uniformly.
+	if forceNonStream && responseFormat != to {
+		data = helps.ClaudeNativeJSONToSSE(data)
+	}
 	cacheClaudeThinkingReplayResponse(ctx, replayScope, data)
 	var param any
 	out := sdktranslator.TranslateNonStream(

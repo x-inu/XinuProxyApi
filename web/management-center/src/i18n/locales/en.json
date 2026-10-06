@@ -1664,6 +1664,7 @@
       "websocketsTag": "WebSockets",
       "cloakTag": "Cloak",
       "cliProfileTag": "CLI Profile",
+      "forceNonStreamTag": "Non-stream",
       "empty": "No resources yet, click \"New\" to add.",
       "filterPlaceholder": "Search keys, URLs, prefixes…",
       "description": "Manage resources under {{route}}"
@@ -1797,6 +1798,8 @@
       "hideApiKey": "Hide API key",
       "disableCooling": "Disable cooling",
       "disableCoolingHint": "Disable failure cooldown windows only for this credential or provider",
+      "forceNonStream": "Force non-streaming",
+      "forceNonStreamHint": "Force upstream requests to use stream:false and synthesize SSE chunks downstream. Fixes broken streaming on third-party upstreams (e.g. JDW).",
       "modelImage": "Allow image endpoints",
       "modelImageHint": "Allow this model on /v1/images/generations and /v1/images/edits",
       "showAllEntries": "Show all ({{count}})",

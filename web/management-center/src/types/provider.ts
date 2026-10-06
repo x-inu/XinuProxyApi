@@ -51,6 +51,7 @@ export interface ProviderKeyConfig {
   disableCooling?: boolean;
   cloak?: CloakConfig;
   fingerprintProfile?: string;
+  forceNonStream?: boolean;
   authIndex?: string;
 }
 

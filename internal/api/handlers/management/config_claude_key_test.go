@@ -905,3 +905,43 @@ func TestPatchClaudeKeyPriority(t *testing.T) {
 		t.Fatalf("status = %d, want 400; body=%s", rec.Code, rec.Body.String())
 	}
 }
+
+func TestPatchClaudeKey_ForceNonStream(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	cfg := &config.Config{
+		ClaudeKey: []config.ClaudeKey{
+			{APIKey: "key-one", ForceNonStream: false},
+			{APIKey: "key-two"},
+		},
+	}
+	h := &Handler{cfg: cfg, configFilePath: writeTestConfigFile(t)}
+
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = httptest.NewRequest(http.MethodPatch, "/v0/management/claude-api-key",
+		strings.NewReader(`{"index":1,"value":{"force-non-stream":true}}`))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	h.PatchClaudeKey(ctx)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body=%s", rec.Code, rec.Body.String())
+	}
+	if !cfg.ClaudeKey[1].ForceNonStream {
+		t.Fatalf("ClaudeKey[1].ForceNonStream = false, want true")
+	}
+
+	// Disable it again
+	rec = httptest.NewRecorder()
+	ctx, _ = gin.CreateTestContext(rec)
+	ctx.Request = httptest.NewRequest(http.MethodPatch, "/v0/management/claude-api-key",
+		strings.NewReader(`{"index":1,"value":{"force-non-stream":false}}`))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	h.PatchClaudeKey(ctx)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body=%s", rec.Code, rec.Body.String())
+	}
+	if cfg.ClaudeKey[1].ForceNonStream {
+		t.Fatalf("ClaudeKey[1].ForceNonStream = true, want false")
+	}
+}

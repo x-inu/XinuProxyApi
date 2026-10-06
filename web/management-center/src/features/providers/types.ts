@@ -66,6 +66,7 @@ export type ProviderResourceSelector =
 export interface ProviderResourceFlags {
   cloakEnabled?: boolean;
   claudeCodeCliProfile?: boolean;
+  forceNonStream?: boolean;
   websockets?: boolean;
   protocols?: string[];
 }
@@ -191,6 +192,7 @@ export interface ProviderEntryFormInput {
 
   cloak?: CloakInput;
   fingerprintProfile?: string;
+  forceNonStream?: boolean;
   /** OpenAI persists this; Gemini/Claude use it for one-off connectivity tests. */
   testModel?: string;
   apiKeyEntries?: ApiKeyEntryInput[];

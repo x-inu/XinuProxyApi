@@ -95,6 +95,7 @@ function buildInitialForm(
         ? { mode: '', strictMode: false, sensitiveWordsText: '', cacheUserId: false }
         : undefined,
       fingerprintProfile: isClaudeLikeBrand(brand) ? '' : undefined,
+      forceNonStream: isClaudeLikeBrand(brand) ? false : undefined,
       testModel:
         brand === 'openaiCompatibility' ||
         brand === 'codex' ||
@@ -194,6 +195,9 @@ function buildInitialForm(
       : undefined,
     fingerprintProfile: isClaudeLikeBrand(brand)
       ? ((cfg as ProviderKeyConfig).fingerprintProfile ?? '')
+      : undefined,
+    forceNonStream: isClaudeLikeBrand(brand)
+      ? ((cfg as ProviderKeyConfig).forceNonStream === true)
       : undefined,
     testModel:
       brand === 'codex' ||
@@ -761,6 +765,22 @@ export function BaseProviderForm({
             <span className={styles.checkboxText}>
               <span>{t('providersPage.form.disableCooling')}</span>
               <small>{t('providersPage.form.disableCoolingHint')}</small>
+            </span>
+          </label>
+        ) : null}
+
+        {isClaudeLikeBrand(brand) ? (
+          <label className={styles.checkboxRow}>
+            <input
+              type="checkbox"
+              className={styles.checkboxBox}
+              checked={form.forceNonStream ?? false}
+              disabled={mutating}
+              onChange={(e) => updateField('forceNonStream', e.target.checked)}
+            />
+            <span className={styles.checkboxText}>
+              <span>{t('providersPage.form.forceNonStream')}</span>
+              <small>{t('providersPage.form.forceNonStreamHint')}</small>
             </span>
           </label>
         ) : null}

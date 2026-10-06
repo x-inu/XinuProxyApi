@@ -650,6 +650,7 @@ func (h *Handler) PatchClaudeKey(c *gin.Context) {
 		ExcludedModels          *[]string                        `json:"excluded-models"`
 		RebuildMidSystemMessage *bool                            `json:"rebuild-mid-system-message"`
 		DisableCooling          json.RawMessage                  `json:"disable-cooling"`
+		ForceNonStream          *bool                            `json:"force-non-stream"`
 		RequestRetry            *int                             `json:"request-retry"`
 		RequestScopedErrors     *[]config.RequestScopedErrorRule `json:"request-scoped-errors"`
 		Cloak                   json.RawMessage                  `json:"cloak"`
@@ -730,6 +731,9 @@ func (h *Handler) PatchClaudeKey(c *gin.Context) {
 	}
 	if body.Value.RebuildMidSystemMessage != nil {
 		entry.RebuildMidSystemMessage = *body.Value.RebuildMidSystemMessage
+	}
+	if body.Value.ForceNonStream != nil {
+		entry.ForceNonStream = *body.Value.ForceNonStream
 	}
 	if !applyDisableCoolingPatch(c, body.Value.DisableCooling, &entry.DisableCooling) {
 		return

@@ -38,6 +38,7 @@ const CLAUDE_KEY_FIELDS = [
   ...PROVIDER_COMMON_KEY_FIELDS,
   'cloak',
   'fingerprint-profile',
+  'force-non-stream',
   // Keep stripping the deprecated field when a Claude entry is saved.
   'experimental-cch-signing',
 ] as const;
@@ -355,6 +356,9 @@ const serializeProviderKey = (config: ProviderKeyConfig) => {
   }
   if (config.fingerprintProfile?.trim()) {
     payload['fingerprint-profile'] = config.fingerprintProfile.trim();
+  }
+  if (config.forceNonStream) {
+    payload['force-non-stream'] = true;
   }
   return payload;
 };

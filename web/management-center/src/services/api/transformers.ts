@@ -185,6 +185,8 @@ const normalizeProviderKeyConfig = (item: unknown): ProviderKeyConfig | null => 
   if (typeof fingerprintProfile === 'string' && fingerprintProfile.trim()) {
     config.fingerprintProfile = fingerprintProfile.trim();
   }
+  const forceNonStream = normalizeBoolean(record?.['force-non-stream']);
+  if (forceNonStream !== undefined) config.forceNonStream = forceNonStream;
 
   return config;
 };

@@ -186,6 +186,9 @@ const buildProviderKeyConfig = (
   }
   if (brand === 'claude') {
     next.fingerprintProfile = input.fingerprintProfile?.trim() || undefined;
+    if (input.forceNonStream) {
+      next.forceNonStream = true;
+    }
   }
   return next;
 };

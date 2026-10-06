@@ -136,6 +136,9 @@ export function ProviderResourceTable({
       if (r.brand === 'claude' && r.flags.claudeCodeCliProfile) {
         items.push(renderFlagTag('cli-profile', t('providersPage.table.cliProfileTag')));
       }
+      if (r.brand === 'claude' && r.flags.forceNonStream) {
+        items.push(renderFlagTag('non-stream', t('providersPage.table.forceNonStreamTag')));
+      }
     }
     return <div className={styles.metricsCell}>{items}</div>;
   };

@@ -73,6 +73,7 @@ function providerKeyToResource(
     const claudeConfig = config as ProviderKeyConfig;
     flags.cloakEnabled = Boolean(claudeConfig.cloak?.mode?.trim());
     flags.claudeCodeCliProfile = claudeConfig.fingerprintProfile === 'claude-code-cli';
+    flags.forceNonStream = claudeConfig.forceNonStream === true;
   }
 
   const selector: ProviderResourceSelector = {

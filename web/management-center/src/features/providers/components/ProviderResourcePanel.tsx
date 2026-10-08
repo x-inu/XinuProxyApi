@@ -32,6 +32,9 @@ interface ProviderResourcePanelProps {
   onDelete: (resource: ProviderResource) => void;
   onToggleDisabled?: (resource: ProviderResource, disabled: boolean) => void;
   onCreate: () => void;
+  /** Brand-specific quick action (OpenCode Free: append a rotation slot). */
+  onAddAccount?: () => void;
+  addAccountLabel?: string;
 }
 
 export function ProviderResourcePanel({
@@ -48,6 +51,8 @@ export function ProviderResourcePanel({
   onDelete,
   onToggleDisabled,
   onCreate,
+  onAddAccount,
+  addAccountLabel,
 }: ProviderResourcePanelProps) {
   const { t } = useTranslation();
   const logo = PROVIDER_LOGOS[group.id];
@@ -97,6 +102,17 @@ export function ProviderResourcePanel({
               placeholder={t('providersPage.table.filterPlaceholder')}
             />
           </div>
+          {onAddAccount ? (
+            <button
+              type="button"
+              className={styles.emptyActionButton}
+              onClick={onAddAccount}
+              disabled={disableMutations}
+            >
+              <IconPlus size={16} />
+              <span>{addAccountLabel ?? t('providersPage.sponsor.addAccount')}</span>
+            </button>
+          ) : null}
         </div>
         {toolbarControls ? (
           <div className={styles.headerToolbarRow}>

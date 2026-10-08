@@ -1681,6 +1681,7 @@
       "groupedKeysHint": "Platform keys may be bound to a group when created. Each grouped key here manages one protocol, and model discovery only uses that protocol.",
       "groupedKey": "Grouped key #{{index}}",
       "addGroupedKey": "Add grouped key",
+      "addAccount": "Add account",
       "removeGroupedKey": "Remove grouped key",
       "protocol": "Group/protocol",
       "protocolHint": "Select the group/protocol for this key.",
@@ -1839,7 +1840,8 @@
       "deleted": "Deleted",
       "enabled": "Enabled",
       "disabled": "Disabled",
-      "toggleFailed": "Failed to update status"
+      "toggleFailed": "Failed to update status",
+      "accountAdded": "Account added"
     },
     "unsavedChanges": {
       "title": "Discard unsaved changes?",

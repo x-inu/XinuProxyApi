@@ -336,6 +336,24 @@ export function ProvidersWorkbenchPage() {
     [showNotification, t, workbench]
   );
 
+  const handleAddAccount = useCallback(async () => {
+    try {
+      const added = await workbench.addOpencodeFreeSlot();
+      if (!added) {
+        openCreate();
+        return;
+      }
+      showNotification(t('providersPage.toast.accountAdded'), 'success');
+    } catch (err) {
+      if (isSponsorPartialMutationError(err)) {
+        showNotification(t('providersPage.sponsor.partialMutationWarning'), 'warning');
+        return;
+      }
+      const msg = err instanceof Error ? err.message : String(err);
+      showNotification(`${t('notification.add_failed')}: ${msg}`, 'error');
+    }
+  }, [openCreate, showNotification, t, workbench]);
+
   const handleCreated = useCallback(() => {
     showNotification(t('providersPage.toast.created'), 'success');
     closeSheet();
@@ -429,6 +447,11 @@ export function ProvidersWorkbenchPage() {
           onDelete={handleDelete}
           onToggleDisabled={handleToggleDisabled}
           onCreate={openCreate}
+          onAddAccount={
+            activeGroup.id === 'opencodeFree' && visibleResources.length > 0
+              ? handleAddAccount
+              : undefined
+          }
         />
       </div>
 

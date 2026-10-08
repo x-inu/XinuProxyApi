@@ -2,7 +2,11 @@ import { afterEach, describe, expect, test } from 'bun:test';
 import { apiClient } from '../src/services/api/client';
 import { providersApi } from '../src/services/api/providers';
 import { normalizeOpenAIProvider } from '../src/services/api/transformers';
-import { opencodeFreeToResource, opencodeFreeToResources } from '../src/features/providers/adapters';
+import {
+  appendOpencodeFreeSlot,
+  opencodeFreeToResource,
+  opencodeFreeToResources,
+} from '../src/features/providers/adapters';
 import {
   buildOpencodeFreeRaw,
   OPENCODE_FREE_OPENAI_BASE_URL,
@@ -145,6 +149,19 @@ describe('opencodeFree phase 2', () => {
       'api-key-entries': [{}, { 'api-key': '  ' }],
     });
     expect(provider?.apiKeyEntries).toEqual([]);
+  });
+
+  test('appends one keyless slot per click', () => {
+    const once = appendOpencodeFreeSlot({
+      name: OPENCODE_FREE_PROVIDER_NAME,
+      baseUrl: OPENCODE_FREE_OPENAI_BASE_URL,
+      apiKeyEntries: [{ apiKey: '' }],
+    });
+    expect(once.apiKeyEntries).toHaveLength(2);
+    expect(once.apiKeyEntries[1]).toMatchObject({ apiKey: '' });
+    expect(once.baseUrl).toBe(OPENCODE_FREE_OPENAI_BASE_URL);
+    const twice = appendOpencodeFreeSlot(once);
+    expect(twice.apiKeyEntries).toHaveLength(3);
   });
 
   test('writes the flag and keyless slots with proxy and weight', async () => {

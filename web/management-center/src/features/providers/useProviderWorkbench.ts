@@ -15,6 +15,7 @@ import type {
   ProviderKeyConfig,
 } from '@/types';
 import {
+  appendOpencodeFreeSlot,
   opencodeFreeToResources,
   claudeToResource,
   codexToResource,
@@ -71,6 +72,8 @@ export interface UseProviderWorkbenchResult {
   updateProvider: (resource: ProviderResource, input: ProviderEntryFormInput) => Promise<void>;
   deleteProvider: (resource: ProviderResource) => Promise<void>;
   toggleDisabled: (resource: ProviderResource, disabled: boolean) => Promise<void>;
+  /** Append one keyless rotation slot to the OpenCode Free entry. */
+  addOpencodeFreeSlot: () => Promise<boolean>;
   mutating: boolean;
   refreshSnapshot: () => void;
 }
@@ -923,6 +926,32 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
     [refetch]
   );
 
+  /**
+   * One-click "add account", OmniRoute-style: appends a keyless rotation
+   * slot to the existing OpenCode Free entry. Returns false when there is
+   * no entry yet (the caller should open the create sheet instead).
+   */
+  const addOpencodeFreeSlot = useCallback(async (): Promise<boolean> => {
+    const current = buildOpencodeFreeRaw(config).openai[0];
+    if (!current) return false;
+    setMutating(true);
+    try {
+      await runSponsorMutationWithRecovery(
+        () =>
+          providersApi.updateOpenAIProvider(
+            current.config.name,
+            current.index,
+            appendOpencodeFreeSlot(current.config)
+          ),
+        refetch
+      );
+      await refetch();
+      return true;
+    } finally {
+      setMutating(false);
+    }
+  }, [config, refetch]);
+
   return {
     connected,
     isPending,
@@ -935,6 +964,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
     updateProvider,
     deleteProvider,
     toggleDisabled,
+    addOpencodeFreeSlot,
     mutating,
     refreshSnapshot,
   };

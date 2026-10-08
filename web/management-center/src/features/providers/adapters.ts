@@ -364,6 +364,20 @@ export function opencodeFreeToResources(raw: SponsorProviderRaw): ProviderResour
   );
 }
 
+/**
+ * Append one keyless rotation slot, OmniRoute "add account"-style. Each slot
+ * is an empty-key api-key-entry the backend synthesizes into its own auth so
+ * the existing scheduler rotates across them.
+ */
+export function appendOpencodeFreeSlot(
+  entry: OpenAIProviderConfig
+): OpenAIProviderConfig {
+  return {
+    ...entry,
+    apiKeyEntries: [...(entry.apiKeyEntries ?? []), { apiKey: '' }],
+  };
+}
+
 export function fennoAIToResource(raw: SponsorProviderRaw): ProviderResource | null {
   return sponsorRawToResource('fennoAI', raw, {
     displayName: FENNO_AI_DISPLAY_NAME,

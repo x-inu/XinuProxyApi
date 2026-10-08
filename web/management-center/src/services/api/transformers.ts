@@ -107,11 +107,14 @@ const normalizeApiKeyEntry = (entry: unknown): ApiKeyEntry | null => {
   const record = isRecord(entry) ? entry : null;
   const apiKey = record?.['api-key'] ?? (typeof entry === 'string' ? entry : '');
   const trimmed = String(apiKey || '').trim();
-  if (!trimmed) return null;
 
   const proxyUrl = record?.['proxy-url'];
   const weight = readCredentialWeight(record?.weight);
   const authIndex = normalizeAuthIndex(record?.['auth-index']);
+
+  // Keyless slots (empty key with proxy/weight/auth-index) are rotation
+  // slots for keyless upstreams — keep them. Fully empty entries are dropped.
+  if (!trimmed && !proxyUrl && weight === undefined && !authIndex) return null;
 
   const result: ApiKeyEntry = {
     apiKey: trimmed,
@@ -260,6 +263,10 @@ const normalizeOpenAIProvider = (
   if (disabled !== undefined) result.disabled = disabled;
   const disableCooling = normalizeBoolean(provider['disable-cooling']);
   if (disableCooling !== undefined) result.disableCooling = disableCooling;
+  const synthesizeOpencodeIdentity = normalizeBoolean(provider['synthesize-opencode-identity']);
+  if (synthesizeOpencodeIdentity !== undefined) {
+    result.synthesizeOpencodeIdentity = synthesizeOpencodeIdentity;
+  }
   const prefix = normalizePrefix(provider.prefix);
   if (prefix) result.prefix = prefix;
   if (headers) result.headers = headers;

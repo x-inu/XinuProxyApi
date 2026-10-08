@@ -226,35 +226,43 @@ const buildOpenAIConfig = (
 const sponsorEntryApiKey = (entry: SponsorKeyEntryInput): string =>
   entry.apiKey.trim() || entry.existingApiKey?.trim() || '';
 
+const buildSponsorOpenAIApiKeyEntries = (
+  entries: SponsorKeyEntryInput[],
+  existing?: OpenAIProviderConfig
+) =>
+  entries.map((entry, index) => {
+    const apiKey = sponsorEntryApiKey(entry);
+    const existingEntry = existing?.apiKeyEntries?.[index];
+    return {
+      ...(existingEntry ?? {}),
+      apiKey,
+      proxyUrl: entry.proxyUrl.trim() || undefined,
+      weight: entry.weight,
+    };
+  });
+
 const buildSponsorOpenAIConfig = (
-  entry: SponsorKeyEntryInput,
+  entries: SponsorKeyEntryInput[],
   providerName: string,
   getProtocolUrls: (value: string | undefined | null) => SponsorProtocolUrls,
   existing?: OpenAIProviderConfig
 ): OpenAIProviderConfig => {
-  const urls = getProtocolUrls(entry.baseUrl);
-  const models = buildModelAliases(entry.models, true);
-  const apiKey = sponsorEntryApiKey(entry);
-  const firstExistingEntry = existing?.apiKeyEntries?.[0];
-  const apiKeyEntries = apiKey
-    ? [
-        {
-          ...(firstExistingEntry ?? {}),
-          apiKey,
-          proxyUrl: entry.proxyUrl.trim() || undefined,
-          weight: entry.weight,
-        },
-      ]
-    : [];
+  const primary = entries[0];
+  const urls = getProtocolUrls(primary.baseUrl);
+  const models = buildModelAliases(
+    entries.find((entry) => entry.models.length > 0)?.models ?? [],
+    true
+  );
+  const apiKeyEntries = buildSponsorOpenAIApiKeyEntries(entries, existing);
 
   return {
     ...(existing ?? {}),
     name: providerName,
     baseUrl: urls.openai,
-    prefix: entry.prefix.trim() || undefined,
-    disabled: entry.disabled,
-    disableCooling: entry.disableCooling === true,
-    priority: entry.priority,
+    prefix: primary.prefix.trim() || undefined,
+    disabled: primary.disabled,
+    disableCooling: primary.disableCooling === true,
+    priority: primary.priority,
     apiKeyEntries,
     models: models.length ? models : undefined,
   };
@@ -533,7 +541,6 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
               : buildKimiRaw(config);
       // OpenCode Free is keyless: empty API keys persist as a keyless entry.
       const entries = normalizeSponsorKeyEntries(input.sponsorKeyEntries, brand === 'opencodeFree');
-      const openaiEntry = entries.find((entry) => entry.protocol === 'openai');
       const claudeEntry = entries.find((entry) => entry.protocol === 'claude');
       const codexEntry = entries.find((entry) => entry.protocol === 'codex');
       const geminiEntry = entries.find((entry) => entry.protocol === 'gemini');
@@ -605,13 +612,19 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       }
 
       const currentOpenAI = raw.openai[0];
-      if (openaiEntry) {
+      const openaiEntries = entries.filter((entry) => entry.protocol === 'openai');
+      if (openaiEntries.length > 0) {
         const next = buildSponsorOpenAIConfig(
-          openaiEntry,
+          openaiEntries,
           definition.providerName,
           definition.getProtocolUrls,
           currentOpenAI?.config
         );
+        if (brand === 'opencodeFree') {
+          // The brand itself is the toggle: OpenCode Free entries always
+          // carry synthesized CLI identity plus the free-tier model gate.
+          next.synthesizeOpencodeIdentity = true;
+        }
         if (currentOpenAI) {
           await providersApi.updateOpenAIProvider(
             currentOpenAI.config.name,

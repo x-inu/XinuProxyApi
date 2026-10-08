@@ -713,7 +713,9 @@ export function SponsorProviderForm({
   };
 
   const addEntry = () => {
-    const protocol = missingProtocols[0];
+    // OpenCode Free stacks multiple OpenAI entries as account slots.
+    const protocol =
+      brand === 'opencodeFree' ? definition.defaultProtocol : missingProtocols[0];
     if (!protocol) return;
     updateEntries([...entries, emptySponsorKeyEntry(definition, protocol)]);
   };
@@ -728,9 +730,14 @@ export function SponsorProviderForm({
       brand !== 'opencodeFree' &&
       entries.some((entry) => !entry.apiKey.trim() && !entry.existingApiKey?.trim());
     if (missingKey) return t('providersPage.sponsor.validation.keyRequired');
-    const protocolSet = new Set(entries.map((entry) => entry.protocol));
-    if (protocolSet.size !== entries.length) {
-      return t('providersPage.sponsor.validation.protocolDuplicate');
+    // OpenCode Free allows multiple OpenAI entries: each one is an account
+    // slot (optional proxy/weight) rotating through the existing scheduler.
+    // Other brands keep one entry per protocol.
+    if (brand !== 'opencodeFree') {
+      const protocolSet = new Set(entries.map((entry) => entry.protocol));
+      if (protocolSet.size !== entries.length) {
+        return t('providersPage.sponsor.validation.protocolDuplicate');
+      }
     }
     if (
       entries.some((entry) => entry.weight !== undefined && !Number.isSafeInteger(entry.weight))
@@ -804,7 +811,7 @@ export function SponsorProviderForm({
         <button
           type="button"
           className={styles.addBtn}
-          disabled={mutating || !missingProtocols.length}
+          disabled={mutating || (!missingProtocols.length && brand !== 'opencodeFree')}
           onClick={addEntry}
         >
           <IconPlus size={12} />

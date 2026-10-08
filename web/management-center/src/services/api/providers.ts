@@ -65,6 +65,7 @@ const OPENAI_PROVIDER_FIELDS = [
   'models',
   'test-model',
   'disable-cooling',
+  'synthesize-opencode-identity',
 ] as const;
 
 const MODEL_ALIAS_FIELDS = ['name', 'alias', 'priority', 'test-model', 'thinking'] as const;
@@ -431,6 +432,9 @@ const serializeOpenAIProvider = (provider: OpenAIProviderConfig) => {
   if (provider.priority !== undefined) payload.priority = provider.priority;
   if (provider.testModel) payload['test-model'] = provider.testModel;
   if (provider.disableCooling) payload['disable-cooling'] = true;
+  if (provider.synthesizeOpencodeIdentity !== undefined) {
+    payload['synthesize-opencode-identity'] = provider.synthesizeOpencodeIdentity;
+  }
   return payload;
 };
 

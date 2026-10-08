@@ -823,6 +823,15 @@ type OpenAICompatibility struct {
 	// SupportPromptCacheKey enables derived prompt_cache_key injection for supported requests.
 	SupportPromptCacheKey bool `yaml:"support-prompt-cache-key,omitempty" json:"support-prompt-cache-key,omitempty"`
 
+	// SynthesizeOpencodeIdentity marks this entry as an OpenCode free-tier
+	// upstream. When true, every chat request synthesizes OpenCode CLI
+	// identity headers (User-Agent plus x-opencode-client/project/session/
+	// request, with a per-request UUID and a body-derived stable session id)
+	// before custom headers are applied, and keyless requests to models
+	// outside the free tier are rejected locally with 402 instead of
+	// reaching the upstream. Nil (omitted) disables both behaviors.
+	SynthesizeOpencodeIdentity *bool `yaml:"synthesize-opencode-identity,omitempty" json:"synthesize-opencode-identity,omitempty"`
+
 	// DisableCooling overrides the global cooling policy for this provider when set.
 	// True disables auth/model cooldowns; false explicitly enables them.
 	DisableCooling *bool `yaml:"disable-cooling,omitempty" json:"disable-cooling,omitempty"`

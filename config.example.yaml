@@ -760,6 +760,12 @@ nonstream-keepalive-interval: 0
 #     prefix: "test" # optional: require calls like "test/kimi-k2" to target this provider's credentials
 #     base-url: "https://openrouter.ai/api/v1" # The base URL of the provider.
 #     support-prompt-cache-key: false # optional: derive prompt_cache_key for requests from all input protocols
+#     synthesize-opencode-identity: false # optional: for OpenCode free-tier upstreams (https://opencode.ai/zen/v1).
+#       # When true, every chat request carries synthesized OpenCode CLI identity headers
+#       # (User-Agent plus x-opencode-client/project/session/request with a per-request UUID
+#       # and a body-derived stable session id; explicit headers: entries still win).
+#       # Keyless requests to non-free models (anything not ending in "-free") are
+#       # rejected locally with 402 instead of reaching the upstream.
 #     disable-cooling: false # optional provider override: true disables cooling, false enables it; omit to inherit global
 #     request-retry: 3 # optional per-provider override; 0 disables additional rounds; omit or set < 0 to inherit global
 #     request-scoped-errors: # optional: custom rules to classify upstream errors by status and body patterns

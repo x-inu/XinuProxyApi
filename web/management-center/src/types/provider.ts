@@ -67,6 +67,8 @@ export interface OpenAIProviderConfig {
   testModel?: string;
   disableCooling?: boolean;
   authIndex?: string;
+  /** Synthesize OpenCode CLI identity headers per request (free-tier upstreams). */
+  synthesizeOpencodeIdentity?: boolean;
   /** Original index in the backend openai-compatibility array. */
   sourceIndex?: number;
   [key: string]: unknown;

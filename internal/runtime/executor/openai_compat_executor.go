@@ -101,6 +101,10 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 		err = statusErr{code: http.StatusUnauthorized, msg: "missing provider baseURL"}
 		return
 	}
+	if msg, rejected := helps.OpencodeFreeTierRejection(e.resolveCompatConfig(auth), baseModel, apiKey); rejected {
+		err = statusErr{code: http.StatusPaymentRequired, msg: msg}
+		return
+	}
 
 	from := opts.SourceFormat
 	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
@@ -159,6 +163,7 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 	if auth != nil {
 		attrs = auth.Attributes
 	}
+	helps.ApplyOpencodeIdentity(httpReq, e.resolveCompatConfig(auth), translated)
 	util.ApplyCustomHeadersFromAttrs(httpReq, attrs, opts.Headers)
 	var authID, authLabel, authType, authValue string
 	if auth != nil {
@@ -254,6 +259,7 @@ func (e *OpenAICompatExecutor) executeImages(ctx context.Context, auth *cliproxy
 	if auth != nil {
 		attrs = auth.Attributes
 	}
+	helps.ApplyOpencodeIdentity(httpReq, e.resolveCompatConfig(auth), payload)
 	util.ApplyCustomHeadersFromAttrs(httpReq, attrs, opts.Headers)
 	var authID, authLabel, authType, authValue string
 	if auth != nil {
@@ -324,6 +330,10 @@ func (e *OpenAICompatExecutor) ExecuteStream(ctx context.Context, auth *cliproxy
 		err = statusErr{code: http.StatusUnauthorized, msg: "missing provider baseURL"}
 		return nil, err
 	}
+	if msg, rejected := helps.OpencodeFreeTierRejection(e.resolveCompatConfig(auth), baseModel, apiKey); rejected {
+		err = statusErr{code: http.StatusPaymentRequired, msg: msg}
+		return nil, err
+	}
 
 	from := opts.SourceFormat
 	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
@@ -375,6 +385,7 @@ func (e *OpenAICompatExecutor) ExecuteStream(ctx context.Context, auth *cliproxy
 	if auth != nil {
 		attrs = auth.Attributes
 	}
+	helps.ApplyOpencodeIdentity(httpReq, e.resolveCompatConfig(auth), translated)
 	util.ApplyCustomHeadersFromAttrs(httpReq, attrs, opts.Headers)
 	httpReq.Header.Set("Accept", "text/event-stream")
 	httpReq.Header.Set("Cache-Control", "no-cache")
@@ -615,6 +626,7 @@ func (e *OpenAICompatExecutor) executeImagesStream(ctx context.Context, auth *cl
 	if auth != nil {
 		attrs = auth.Attributes
 	}
+	helps.ApplyOpencodeIdentity(httpReq, e.resolveCompatConfig(auth), payload)
 	util.ApplyCustomHeadersFromAttrs(httpReq, attrs, opts.Headers)
 	var authID, authLabel, authType, authValue string
 	if auth != nil {

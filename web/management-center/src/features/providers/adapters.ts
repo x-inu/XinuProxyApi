@@ -2,11 +2,11 @@ import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@
 import { hasDisableAllModelsRule, stripDisableAllModelsRule } from '@/components/providers/utils';
 import { maskApiKey } from '@/utils/format';
 import {
-  APIKEY_FUN_DISPLAY_NAME,
-  APIKEY_FUN_PROTOCOLS,
-  getApiKeyFunProtocolUrls,
-  resolveApiKeyFunBaseUrl,
-} from './sponsor';
+  getOpencodeFreeProtocolUrls,
+  OPENCODE_FREE_DISPLAY_NAME,
+  OPENCODE_FREE_PROTOCOLS,
+  resolveOpencodeFreeBaseUrl,
+} from './opencodeFree';
 import {
   FENNO_AI_DISPLAY_NAME,
   FENNO_AI_PROTOCOL_LABELS,
@@ -312,12 +312,12 @@ function sponsorRawToResource(
   };
 }
 
-export function apiKeyFunToResource(raw: SponsorProviderRaw): ProviderResource | null {
-  return sponsorRawToResource('apikeyFun', raw, {
-    displayName: APIKEY_FUN_DISPLAY_NAME,
-    protocolLabels: APIKEY_FUN_PROTOCOLS,
-    resolveBaseUrl: resolveApiKeyFunBaseUrl,
-    getProtocolUrls: getApiKeyFunProtocolUrls,
+export function opencodeFreeToResource(raw: SponsorProviderRaw): ProviderResource | null {
+  return sponsorRawToResource('opencodeFree', raw, {
+    displayName: OPENCODE_FREE_DISPLAY_NAME,
+    protocolLabels: OPENCODE_FREE_PROTOCOLS,
+    resolveBaseUrl: resolveOpencodeFreeBaseUrl,
+    getProtocolUrls: getOpencodeFreeProtocolUrls,
   });
 }
 

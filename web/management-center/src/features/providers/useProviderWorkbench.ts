@@ -15,7 +15,7 @@ import type {
   ProviderKeyConfig,
 } from '@/types';
 import {
-  apiKeyFunToResource,
+  opencodeFreeToResource,
   claudeToResource,
   codexToResource,
   fennoAIToResource,
@@ -40,12 +40,7 @@ import type {
   SponsorProviderBrand,
   SponsorProviderRaw,
 } from './types';
-import {
-  buildApiKeyFunRaw,
-  isApiKeyFunClaudeProvider,
-  isApiKeyFunCodexProvider,
-  isApiKeyFunOpenAIProvider,
-} from './sponsor';
+import { buildOpencodeFreeRaw, isOpencodeFreeOpenAIProvider } from './opencodeFree';
 import { buildFennoAIRaw, isFennoAIClaudeProvider, isFennoAICodexProvider } from './fennoAI';
 import {
   buildQiniuCloudRaw,
@@ -319,8 +314,10 @@ const buildSponsorGeminiConfig = (
 };
 
 const normalizeSponsorKeyEntries = (
-  entries: SponsorKeyEntryInput[] | undefined
-): SponsorKeyEntryInput[] => (entries ?? []).filter((entry) => sponsorEntryApiKey(entry));
+  entries: SponsorKeyEntryInput[] | undefined,
+  allowEmptyKey = false
+): SponsorKeyEntryInput[] =>
+  (entries ?? []).filter((entry) => allowEmptyKey || sponsorEntryApiKey(entry));
 
 const toggleSponsorConfig = async (raw: SponsorProviderRaw, disabled: boolean) => {
   for (const item of raw.gemini) {
@@ -375,7 +372,6 @@ export const buildProviderGroups = (config: Config): ProviderGroup[] =>
       case 'codex':
         resources = (config.codexApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
           if (
-            !isApiKeyFunCodexProvider(item) &&
             !isFennoAICodexProvider(item) &&
             !isQiniuCloudCodexProvider(item) &&
             !isKimiCodexProvider(item)
@@ -394,7 +390,6 @@ export const buildProviderGroups = (config: Config): ProviderGroup[] =>
       case 'claude':
         resources = (config.claudeApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
           if (
-            !isApiKeyFunClaudeProvider(item) &&
             !isFennoAIClaudeProvider(item) &&
             !isQiniuCloudClaudeProvider(item) &&
             !isKimiClaudeProvider(item)
@@ -413,7 +408,7 @@ export const buildProviderGroups = (config: Config): ProviderGroup[] =>
         resources = (config.openaiCompatibility ?? []).reduce<ProviderResource[]>(
           (out, item, index) => {
             if (
-              !isApiKeyFunOpenAIProvider(item) &&
+              !isOpencodeFreeOpenAIProvider(item) &&
               !isQiniuCloudOpenAIProvider(item) &&
               !isKimiOpenAIProvider(item)
             ) {
@@ -424,8 +419,8 @@ export const buildProviderGroups = (config: Config): ProviderGroup[] =>
           []
         );
         break;
-      case 'apikeyFun': {
-        const sponsorResource = apiKeyFunToResource(buildApiKeyFunRaw(config));
+      case 'opencodeFree': {
+        const sponsorResource = opencodeFreeToResource(buildOpencodeFreeRaw(config));
         resources = sponsorResource ? [sponsorResource] : [];
         break;
       }
@@ -529,14 +524,15 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
     async (brand: SponsorProviderBrand, input: ProviderEntryFormInput) => {
       const definition = getSponsorProviderDefinition(brand);
       const raw =
-        brand === 'apikeyFun'
-          ? buildApiKeyFunRaw(config)
+        brand === 'opencodeFree'
+          ? buildOpencodeFreeRaw(config)
           : brand === 'fennoAI'
             ? buildFennoAIRaw(config)
             : brand === 'qiniuCloud'
               ? buildQiniuCloudRaw(config)
               : buildKimiRaw(config);
-      const entries = normalizeSponsorKeyEntries(input.sponsorKeyEntries);
+      // OpenCode Free is keyless: empty API keys persist as a keyless entry.
+      const entries = normalizeSponsorKeyEntries(input.sponsorKeyEntries, brand === 'opencodeFree');
       const openaiEntry = entries.find((entry) => entry.protocol === 'openai');
       const claudeEntry = entries.find((entry) => entry.protocol === 'claude');
       const codexEntry = entries.find((entry) => entry.protocol === 'codex');
@@ -563,7 +559,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       }
 
       const currentCodex = raw.codex[0];
-      if (codexEntry) {
+      if (definition.protocols.includes('codex') && codexEntry) {
         const next = buildSponsorProviderKeyConfig(
           codexEntry,
           'codex',
@@ -579,14 +575,14 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         } else {
           await providersApi.createCodexConfig(next);
         }
-      } else {
+      } else if (definition.protocols.includes('codex')) {
         for (const item of raw.codex) {
           await providersApi.deleteCodexConfig(item.config.apiKey, item.config.baseUrl);
         }
       }
 
       const currentClaude = raw.claude[0];
-      if (claudeEntry) {
+      if (definition.protocols.includes('claude') && claudeEntry) {
         const next = buildSponsorProviderKeyConfig(
           claudeEntry,
           'claude',
@@ -602,7 +598,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         } else {
           await providersApi.createClaudeConfig(next);
         }
-      } else {
+      } else if (definition.protocols.includes('claude')) {
         for (const item of raw.claude) {
           await providersApi.deleteClaudeConfig(item.config.apiKey, item.config.baseUrl);
         }
@@ -667,7 +663,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         } else if (brand === 'openaiCompatibility') {
           await providersApi.createOpenAIProvider(buildOpenAIConfig(input));
         } else if (
-          brand === 'apikeyFun' ||
+          brand === 'opencodeFree' ||
           brand === 'fennoAI' ||
           brand === 'qiniuCloud' ||
           brand === 'kimi'
@@ -744,7 +740,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
             buildOpenAIConfig(input, resource.raw as OpenAIProviderConfig)
           );
         } else if (
-          brand === 'apikeyFun' ||
+          brand === 'opencodeFree' ||
           brand === 'fennoAI' ||
           brand === 'qiniuCloud' ||
           brand === 'kimi'
@@ -799,7 +795,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           );
           updateConfigValue('openai-compatibility', next);
         } else if (
-          sel.brand === 'apikeyFun' ||
+          sel.brand === 'opencodeFree' ||
           sel.brand === 'fennoAI' ||
           sel.brand === 'qiniuCloud' ||
           sel.brand === 'kimi'
@@ -881,7 +877,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         } else if (brand === 'openaiCompatibility' && selector.brand === 'openaiCompatibility') {
           await providersApi.updateOpenAIProviderDisabled(selector.index, disabled);
         } else if (
-          brand === 'apikeyFun' ||
+          brand === 'opencodeFree' ||
           brand === 'fennoAI' ||
           brand === 'qiniuCloud' ||
           brand === 'kimi'

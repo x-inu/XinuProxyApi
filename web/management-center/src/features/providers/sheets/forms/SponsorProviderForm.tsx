@@ -3,14 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Collapsible } from '@/components/ui/Collapsible';
 import { Select } from '@/components/ui/Select';
 import {
-  IconAlertTriangle,
   IconChevronDown,
-  IconCheckCircle2,
-  IconDollarSign,
   IconDownload,
   IconEye,
   IconEyeOff,
-  IconLoader2,
   IconPlus,
   IconX,
 } from '@/components/ui/icons';
@@ -18,7 +14,6 @@ import { hasDisableAllModelsRule } from '@/components/providers/utils';
 import { maskApiKey } from '@/utils/format';
 import { MAX_CREDENTIAL_WEIGHT } from '@/utils/credentialWeight';
 import type { ModelInfo } from '@/utils/models';
-import type { ApiKeyFunUsageSummary } from '../../sponsor';
 import { readThinkingLevels } from '../../thinkingLevels';
 import { isSponsorPartialMutationError } from '../../sponsorMutationRecovery';
 import {
@@ -42,7 +37,6 @@ import type {
 import { ModelDiscoveryPanel } from './ModelDiscoveryPanel';
 import { ModelEntriesEditor } from './ModelEntriesEditor';
 import { useModelDiscovery, type UseModelDiscoveryResult } from './useModelDiscovery';
-import { useSponsorUsageCheck, type SponsorUsageMessages } from './useSponsorUsageCheck';
 import styles from './sharedForm.module.scss';
 
 interface SponsorProviderFormProps {
@@ -126,21 +120,6 @@ const protocolUrlForEntry = (
   entry: SponsorKeyEntryInput,
   definition: SponsorProviderDefinition
 ): string => sponsorProtocolUrl(definition.getProtocolUrls(entry.baseUrl), entry.protocol);
-
-const formatUsageAmount = (value: ApiKeyFunUsageSummary['remaining'], locale: string): string => {
-  if (value === null) return '--';
-  if (typeof value === 'number') {
-    return new Intl.NumberFormat(locale, {
-      maximumFractionDigits: 6,
-    }).format(value);
-  }
-  return value;
-};
-
-const isHealthyUsageSummary = (summary: ApiKeyFunUsageSummary): boolean => {
-  const normalizedStatus = (summary.status ?? '').trim().toLowerCase();
-  return summary.isValid && (!normalizedStatus || normalizedStatus === 'active');
-};
 
 const modelsFromConfig = (
   models:
@@ -349,7 +328,7 @@ function SponsorKeyEntryCard({
   onChange,
   onRemove,
 }: SponsorKeyEntryCardProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [showApiKey, setShowApiKey] = useState(false);
   const [expanded, setExpanded] = useState(
     () => mode === 'create' || !entry.existingApiKey?.trim()
@@ -364,30 +343,6 @@ function SponsorKeyEntryCard({
     ? maskApiKey(summaryKey)
     : t('providersPage.status.notConfigured');
   const modelKey = sponsorProtocolModelI18nKey(entry.protocol);
-  const usageMessages = useMemo<SponsorUsageMessages>(
-    () => ({
-      apiKeyRequired: t('providersPage.sponsor.usageApiKeyRequired'),
-      emptyResponse: t('providersPage.sponsor.usageEmpty'),
-      requestFailed: t('providersPage.connectivity.requestFailed'),
-    }),
-    [t]
-  );
-  const usageCheck = useSponsorUsageCheck(
-    {
-      baseUrl: entry.baseUrl,
-      apiKey: entry.apiKey,
-      fallbackApiKey: entry.existingApiKey,
-    },
-    usageMessages
-  );
-  const usageSummary = usageCheck.status.summary;
-  const usageHealthy = usageSummary ? isHealthyUsageSummary(usageSummary) : true;
-  const usageRemaining =
-    usageSummary !== null ? formatUsageAmount(usageSummary.remaining, i18n.language) : '';
-  const usageUsed =
-    usageSummary !== null ? formatUsageAmount(usageSummary.used, i18n.language) : '';
-  const usageLimit =
-    usageSummary !== null ? formatUsageAmount(usageSummary.limit, i18n.language) : '';
   const discoveryHeaders = useMemo<Array<{ key: string; value: string }>>(() => [], []);
   const openaiDiscoveryEntries = useMemo(
     () => [
@@ -575,77 +530,10 @@ function SponsorKeyEntryCard({
               </button>
             </div>
             <span className={styles.labelHint}>{t('providersPage.sponsor.apiKeyHint')}</span>
+            {definition.brand === 'opencodeFree' ? (
+              <span className={styles.labelHint}>{t('providersPage.sponsor.keylessHint')}</span>
+            ) : null}
           </div>
-
-          {definition.supportsUsageCheck ? (
-            <div className={styles.sponsorUsageSection}>
-              <button
-                type="button"
-                className={styles.connectivityBtn}
-                onClick={() => void usageCheck.run()}
-                disabled={mutating || usageCheck.isLoading}
-              >
-                {usageCheck.isLoading ? (
-                  <IconLoader2 className={styles.statusIconLoading} size={14} />
-                ) : (
-                  <IconDollarSign size={14} />
-                )}
-                <span>
-                  {usageCheck.isLoading
-                    ? t('providersPage.sponsor.usageChecking')
-                    : t('providersPage.sponsor.usageCheck')}
-                </span>
-              </button>
-              {usageCheck.status.state === 'success' && usageSummary ? (
-                <div
-                  className={[
-                    styles.sponsorUsageResult,
-                    usageHealthy ? '' : styles.sponsorUsageResultWarning,
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <div className={styles.sponsorUsageMain}>
-                    {usageHealthy ? (
-                      <IconCheckCircle2
-                        className={`${styles.statusIcon} ${styles.statusIconSuccess}`}
-                        size={14}
-                      />
-                    ) : (
-                      <IconAlertTriangle
-                        className={`${styles.statusIcon} ${styles.statusIconError}`}
-                        size={14}
-                      />
-                    )}
-                    <span>
-                      {t('providersPage.sponsor.usageRemaining', {
-                        amount: usageRemaining,
-                        unit: usageSummary.unit,
-                      })}
-                    </span>
-                  </div>
-                  {usageSummary.used !== null || usageSummary.limit !== null ? (
-                    <span className={styles.sponsorUsageMeta}>
-                      {t('providersPage.sponsor.usageBreakdown', {
-                        used: usageUsed,
-                        limit: usageLimit,
-                      })}
-                    </span>
-                  ) : null}
-                  {!usageHealthy ? (
-                    <span className={styles.sponsorUsageMeta}>
-                      {t('providersPage.sponsor.usageStatus', {
-                        status: usageSummary.status || t('providersPage.sponsor.usageInvalid'),
-                      })}
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
-              {usageCheck.status.state === 'error' ? (
-                <div className={styles.connectivityError}>{usageCheck.status.message}</div>
-              ) : null}
-            </div>
-          ) : null}
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor={`${formId}-group-${index}-proxy`}>
@@ -772,7 +660,7 @@ const buildInitialForm = (
 };
 
 export function SponsorProviderForm({
-  brand = 'apikeyFun',
+  brand = 'opencodeFree',
   resource,
   mode,
   mutating,
@@ -834,9 +722,11 @@ export function SponsorProviderForm({
     if (!entries.length) {
       return mode === 'edit' ? null : t('providersPage.sponsor.validation.keyRequired');
     }
-    const missingKey = entries.some(
-      (entry) => !entry.apiKey.trim() && !entry.existingApiKey?.trim()
-    );
+    // OpenCode Free is keyless: an empty API key is valid and persists as a
+    // keyless OpenAI-compatible entry on the backend.
+    const missingKey =
+      brand !== 'opencodeFree' &&
+      entries.some((entry) => !entry.apiKey.trim() && !entry.existingApiKey?.trim());
     if (missingKey) return t('providersPage.sponsor.validation.keyRequired');
     const protocolSet = new Set(entries.map((entry) => entry.protocol));
     if (protocolSet.size !== entries.length) {

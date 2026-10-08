@@ -174,8 +174,8 @@ export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
     supportsApiKeyEntries: true,
     sheetSize: 'lg',
   },
-  apikeyFun: {
-    id: 'apikeyFun',
+  opencodeFree: {
+    id: 'opencodeFree',
     supportsName: false,
     supportsApiKey: true,
     supportsDisabled: true,
@@ -262,7 +262,7 @@ export const PROVIDER_BRAND_ORDER: ProviderBrand[] = [
   'claude',
   'vertex',
   'openaiCompatibility',
-  'apikeyFun',
+  'opencodeFree',
   'fennoAI',
   'qiniuCloud',
 ];

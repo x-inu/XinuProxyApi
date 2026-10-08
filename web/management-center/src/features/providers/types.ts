@@ -12,12 +12,12 @@ export type ProviderBrand =
   | 'claude'
   | 'vertex'
   | 'openaiCompatibility'
-  | 'apikeyFun'
+  | 'opencodeFree'
   | 'fennoAI'
   | 'qiniuCloud'
   | 'kimi';
 
-export type SponsorProviderBrand = 'apikeyFun' | 'fennoAI' | 'qiniuCloud' | 'kimi';
+export type SponsorProviderBrand = 'opencodeFree' | 'fennoAI' | 'qiniuCloud' | 'kimi';
 
 export const PROVIDER_SORT_BY_VALUES = ['name', 'priority', 'recent-success'] as const;
 export type ProviderSortBy = (typeof PROVIDER_SORT_BY_VALUES)[number];
@@ -35,7 +35,7 @@ export type ProviderResourceSelector =
   | { brand: 'vertex'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'openaiCompatibility'; name: string; index: number }
   | {
-      brand: 'apikeyFun';
+      brand: 'opencodeFree';
       openaiIndices: number[];
       claudeIndices: number[];
       codexIndices: number[];

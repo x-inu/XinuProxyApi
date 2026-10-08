@@ -17,9 +17,24 @@ describe('removed quick-access providers', () => {
     for (const [brand] of retiredEndpoints) {
       expect(ids).not.toContain(brand);
     }
-    for (const brand of ['apikeyFun', 'fennoAI', 'qiniuCloud', 'kimi']) {
+    for (const brand of ['opencodeFree', 'fennoAI', 'qiniuCloud', 'kimi']) {
       expect(ids).toContain(brand);
     }
+  });
+
+  test('keeps legacy APIKEY.FUN endpoints editable in generic protocol groups', () => {
+    const openai = {
+      name: 'apikeyFun',
+      baseUrl: 'https://api.apikey.fan/v1',
+      apiKeyEntries: [{ apiKey: 'test-legacy-key' }],
+      sourceIndex: 3,
+    };
+    const config: Config = { openaiCompatibility: [openai] };
+    const groups = buildProviderGroups(config);
+    expect(groups.find((group) => group.id === 'opencodeFree')!.resources).toHaveLength(0);
+    const resources = groups.find((group) => group.id === 'openaiCompatibility')!.resources;
+    expect(resources).toHaveLength(1);
+    expect(resources[0].brand).toBe('openaiCompatibility');
   });
 
   for (const [name, baseUrl] of retiredEndpoints) {

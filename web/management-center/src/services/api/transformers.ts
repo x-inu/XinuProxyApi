@@ -102,7 +102,7 @@ const normalizeAuthIndex = (value: unknown): string | undefined => {
   return trimmed ? trimmed : undefined;
 };
 
-const normalizeApiKeyEntry = (entry: unknown): ApiKeyEntry | null => {
+const normalizeApiKeyEntry = (entry: unknown, allowEmptyKey = false): ApiKeyEntry | null => {
   if (entry === undefined || entry === null) return null;
   const record = isRecord(entry) ? entry : null;
   const apiKey = record?.['api-key'] ?? (typeof entry === 'string' ? entry : '');
@@ -112,9 +112,10 @@ const normalizeApiKeyEntry = (entry: unknown): ApiKeyEntry | null => {
   const weight = readCredentialWeight(record?.weight);
   const authIndex = normalizeAuthIndex(record?.['auth-index']);
 
-  // Keyless slots (empty key with proxy/weight/auth-index) are rotation
-  // slots for keyless upstreams — keep them. Fully empty entries are dropped.
-  if (!trimmed && !proxyUrl && weight === undefined && !authIndex) return null;
+  // Keyless slots (empty key with proxy/weight/auth-index, or when explicitly allowed
+  // such as for keyless rotation pools) are rotation slots — keep them.
+  // Fully empty entries are dropped only for standard keyed providers.
+  if (!allowEmptyKey && !trimmed && !proxyUrl && weight === undefined && !authIndex) return null;
 
   const result: ApiKeyEntry = {
     apiKey: trimmed,
@@ -242,9 +243,14 @@ const normalizeOpenAIProvider = (
   const baseUrl = provider['base-url'];
   if (!name || !baseUrl) return null;
 
+  const synthesizeOpencodeIdentity = normalizeBoolean(provider['synthesize-opencode-identity']);
+  const allowEmptyKey =
+    synthesizeOpencodeIdentity === true ||
+    String(baseUrl).toLowerCase().includes('opencode.ai/zen');
+
   const apiKeyEntries = Array.isArray(provider['api-key-entries'])
     ? (provider['api-key-entries']
-        .map((entry) => normalizeApiKeyEntry(entry))
+        .map((entry) => normalizeApiKeyEntry(entry, allowEmptyKey))
         .filter(Boolean) as ApiKeyEntry[])
     : [];
 
@@ -263,7 +269,6 @@ const normalizeOpenAIProvider = (
   if (disabled !== undefined) result.disabled = disabled;
   const disableCooling = normalizeBoolean(provider['disable-cooling']);
   if (disableCooling !== undefined) result.disableCooling = disableCooling;
-  const synthesizeOpencodeIdentity = normalizeBoolean(provider['synthesize-opencode-identity']);
   if (synthesizeOpencodeIdentity !== undefined) {
     result.synthesizeOpencodeIdentity = synthesizeOpencodeIdentity;
   }

@@ -131,24 +131,42 @@ describe('opencodeFree phase 2', () => {
 
   test('keeps keyless slots that carry proxy or weight', () => {
     const entry = backendEntry('http://127.0.0.1:7890', 2);
+    // backendEntry already includes one proxy slot and one pure keyless slot.
     entry['api-key-entries'].push({ 'api-key': '', 'proxy-url': 'http://127.0.0.1:7891' });
     const provider = normalizeOpenAIProvider(entry);
-    expect(provider?.apiKeyEntries).toHaveLength(2);
+    expect(provider?.apiKeyEntries).toHaveLength(3);
     expect(provider?.apiKeyEntries[0]).toMatchObject({
       apiKey: '',
       proxyUrl: 'http://127.0.0.1:7890',
       weight: 2,
     });
+    expect(provider?.apiKeyEntries[1]).toMatchObject({ apiKey: '' });
+    expect(provider?.apiKeyEntries[2]).toMatchObject({
+      apiKey: '',
+      proxyUrl: 'http://127.0.0.1:7891',
+    });
     expect(provider?.synthesizeOpencodeIdentity).toBe(true);
   });
 
-  test('drops fully empty key entries', () => {
+  test('drops fully empty key entries for standard keyed providers', () => {
     const provider = normalizeOpenAIProvider({
       name: 'x',
       'base-url': 'https://example.com/v1',
       'api-key-entries': [{}, { 'api-key': '  ' }],
     });
     expect(provider?.apiKeyEntries).toEqual([]);
+  });
+
+  test('keeps empty key entries for keyless rotation pools', () => {
+    const provider = normalizeOpenAIProvider({
+      name: OPENCODE_FREE_PROVIDER_NAME,
+      'base-url': OPENCODE_FREE_OPENAI_BASE_URL,
+      'synthesize-opencode-identity': true,
+      'api-key-entries': [{}, { 'api-key': '' }],
+    });
+    expect(provider?.apiKeyEntries).toHaveLength(2);
+    expect(provider?.apiKeyEntries[0]).toMatchObject({ apiKey: '' });
+    expect(provider?.apiKeyEntries[1]).toMatchObject({ apiKey: '' });
   });
 
   test('appends one keyless slot per click', () => {

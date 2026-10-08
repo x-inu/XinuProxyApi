@@ -130,6 +130,18 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 	requestedModel := helps.PayloadRequestedModel(opts, req.Model)
 	requestPath := helps.PayloadRequestPath(opts)
 	translated = helps.ApplyPayloadConfigWithRequest(e.cfg, baseModel, to.String(), from.String(), "", translated, originalTranslated, requestedModel, requestPath, opts.Headers)
+	// Locked OpenCode free-tier models only serve streaming requests carrying
+	// read+shell tool definitions. Force upstream streaming and fold the SSE
+	// chunks back into a single completion below for non-stream clients.
+	forceOpencodeDestream := false
+	if opts.Alt != "responses/compact" {
+		if compat := e.resolveCompatConfig(auth); helps.NeedsOpencodeFullRecipe(compat, helps.OpencodeUpstreamModel(translated), apiKey) {
+			translated = helps.EnsureOpencodeMarkerTools(translated)
+			translated = helps.SetBoolIfDifferent(translated, "stream", true)
+			translated = helps.SetBoolIfDifferent(translated, "stream_options.include_usage", true)
+			forceOpencodeDestream = true
+		}
+	}
 	if helps.ShouldNormalizeOpenAIToolResultsForModel(e.resolveCompatConfig(auth), baseModel, requestedModel) {
 		translated = helps.NormalizeOpenAIToolResultsTextOnly(translated)
 	}
@@ -207,6 +219,9 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 	if err != nil {
 		helps.RecordAPIResponseError(ctx, e.cfg, err)
 		return resp, err
+	}
+	if forceOpencodeDestream {
+		body = helps.AssembleOpencodeStreamCompletion(body, helps.OpencodeUpstreamModel(translated))
 	}
 	helps.AppendAPIResponseChunk(ctx, e.cfg, body)
 	reporter.ObserveResponseModel(body)
@@ -369,6 +384,11 @@ func (e *OpenAICompatExecutor) ExecuteStream(ctx context.Context, auth *cliproxy
 	// Request usage data in the final streaming chunk so that token statistics
 	// are captured even when the upstream is an OpenAI-compatible provider.
 	translated = helps.SetBoolIfDifferent(translated, "stream_options.include_usage", true)
+	// Locked OpenCode free-tier models only serve requests carrying read+shell
+	// tool definitions; inject markers when the client sent none.
+	if compat := e.resolveCompatConfig(auth); helps.NeedsOpencodeFullRecipe(compat, helps.OpencodeUpstreamModel(translated), apiKey) {
+		translated = helps.EnsureOpencodeMarkerTools(translated)
+	}
 	reporter.SetTranslatedReasoningEffort(translated, to.String())
 
 	url := strings.TrimSuffix(baseURL, "/") + "/chat/completions"

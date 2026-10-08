@@ -2,10 +2,13 @@ package helps
 
 import (
 	"net/http"
+	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
+	"github.com/tidwall/gjson"
 )
 
 func opencodeTestCompat(enabled bool) *config.OpenAICompatibility {
@@ -44,6 +47,47 @@ func TestIsOpencodeFreeModel(t *testing.T) {
 	}
 }
 
+func TestIsOpencodeLegacyOpenModel(t *testing.T) {
+	for _, model := range []string{"space-bunny-free", "oc/space-bunny-free"} {
+		if !IsOpencodeLegacyOpenModel(model) {
+			t.Fatalf("model %q must be legacy-open", model)
+		}
+	}
+	for _, model := range []string{"mimo-v2.6-flash-free", "big-pickle", ""} {
+		if IsOpencodeLegacyOpenModel(model) {
+			t.Fatalf("model %q must not be legacy-open", model)
+		}
+	}
+}
+
+func TestNeedsOpencodeFullRecipe(t *testing.T) {
+	enabled := opencodeTestCompat(true)
+	if NeedsOpencodeFullRecipe(nil, "mimo-v2.6-flash-free", "") {
+		t.Fatal("nil compat must not need the recipe")
+	}
+	if NeedsOpencodeFullRecipe(enabled, "mimo-v2.6-flash-free", "sk-zen") {
+		t.Fatal("keyed credential must not need the recipe")
+	}
+	if NeedsOpencodeFullRecipe(enabled, "space-bunny-free", "") {
+		t.Fatal("legacy-open model must not need the recipe")
+	}
+	if NeedsOpencodeFullRecipe(enabled, "oc/space-bunny-free", "") {
+		t.Fatal("prefixed legacy-open model must not need the recipe")
+	}
+	if NeedsOpencodeFullRecipe(enabled, "big-pickle", "") {
+		t.Fatal("premium model must not need the recipe")
+	}
+	if !NeedsOpencodeFullRecipe(enabled, "mimo-v2.6-flash-free", "") {
+		t.Fatal("keyless locked free model must need the recipe")
+	}
+	if !NeedsOpencodeFullRecipe(enabled, "oc/longcat-2.5-preview-free", "") {
+		t.Fatal("prefixed keyless locked free model must need the recipe")
+	}
+	if NeedsOpencodeFullRecipe(opencodeTestCompat(false), "mimo-v2.6-flash-free", "") {
+		t.Fatal("disabled flag must not need the recipe")
+	}
+}
+
 func TestOpencodeFreeTierRejection(t *testing.T) {
 	enabled := opencodeTestCompat(true)
 	if _, rejected := OpencodeFreeTierRejection(nil, "gpt-5.4", ""); rejected {
@@ -65,31 +109,81 @@ func TestOpencodeFreeTierRejection(t *testing.T) {
 	}
 }
 
+var opencodeSessionPattern = regexp.MustCompile(`^ses_[0-9A-Za-z]{26}$`)
+
+func TestMintOpencodeSessionID(t *testing.T) {
+	seen := map[string]struct{}{}
+	for i := 0; i < 50; i++ {
+		id := MintOpencodeSessionID()
+		if !opencodeSessionPattern.MatchString(id) {
+			t.Fatalf("minted session %q must match ses_ + 26 alnum", id)
+		}
+		if _, dup := seen[id]; dup {
+			t.Fatalf("minted session %q must be unique", id)
+		}
+		seen[id] = struct{}{}
+		// The first 12 chars encode the mint timestamp window; a random id
+		// outside the window is rejected upstream.
+		stamp := decodeOpencodeSessionForTest(t, id)
+		if delta := time.Since(stamp); delta < 0 || delta > time.Hour {
+			t.Fatalf("minted session %q must embed the current time, got %v ago", id, delta)
+		}
+	}
+}
+
+// decodeOpencodeSessionForTest inverts the 48-bit complement encoding so the
+// test can assert the embedded timestamp is fresh.
+func decodeOpencodeSessionForTest(t *testing.T, id string) time.Time {
+	t.Helper()
+	var head uint64
+	for _, c := range id[len("ses_") : len("ses_")+12] {
+		head <<= 4
+		switch {
+		case c >= '0' && c <= '9':
+			head |= uint64(c - '0')
+		case c >= 'a' && c <= 'f':
+			head |= uint64(c-'a') + 10
+		case c >= 'A' && c <= 'F':
+			head |= uint64(c-'A') + 10
+		default:
+			t.Fatalf("session head %q must be hex", id)
+		}
+	}
+	n := (uint64(1)<<48 - 1 - head) >> 12
+	now := uint64(time.Now().UnixMilli())
+	window := uint64(1) << 36
+	// Rebuild the wall clock from the 36-bit windowed value.
+	candidate := now&^(window-1) | n
+	for candidate > now+uint64(time.Hour.Milliseconds()) {
+		candidate -= window
+	}
+	return time.UnixMilli(int64(candidate))
+}
+
 func TestApplyOpencodeIdentity(t *testing.T) {
 	compat := opencodeTestCompat(true)
-	payload := []byte(`{"model":"space-bunny-free","messages":[{"role":"user","content":"hi"}]}`)
+	payload := []byte(`{"model":"mimo-v2.6-flash-free","messages":[{"role":"user","content":"hi"}]}`)
 
 	first, err := http.NewRequest(http.MethodPost, "https://opencode.ai/zen/v1/chat/completions", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ApplyOpencodeIdentity(first, compat, payload)
-	if got := first.Header.Get("User-Agent"); got != "opencode" {
-		t.Fatalf("User-Agent = %q, want opencode", got)
+	if got := first.Header.Get("User-Agent"); got != "opencode/latest/2.0.25/cli" {
+		t.Fatalf("User-Agent = %q, want versioned CLI agent", got)
 	}
-	if got := first.Header.Get("x-opencode-client"); got != "desktop" {
-		t.Fatalf("x-opencode-client = %q, want desktop", got)
+	if got := first.Header.Get("x-opencode-client"); got != "cli" {
+		t.Fatalf("x-opencode-client = %q, want cli", got)
 	}
 	if got := first.Header.Get("x-opencode-project"); got != "global" {
 		t.Fatalf("x-opencode-project = %q, want global", got)
 	}
-	requestID := first.Header.Get("x-opencode-request")
-	if requestID == "" {
+	if requestID := first.Header.Get("x-opencode-request"); requestID == "" {
 		t.Fatal("x-opencode-request must be set")
 	}
 	sessionID := first.Header.Get("x-opencode-session")
-	if sessionID == "" {
-		t.Fatal("x-opencode-session must be derived from payload")
+	if !opencodeSessionPattern.MatchString(sessionID) {
+		t.Fatalf("x-opencode-session = %q, want minted ses_ id", sessionID)
 	}
 
 	second, err := http.NewRequest(http.MethodPost, "https://opencode.ai/zen/v1/chat/completions", nil)
@@ -97,11 +191,11 @@ func TestApplyOpencodeIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 	ApplyOpencodeIdentity(second, compat, payload)
-	if second.Header.Get("x-opencode-request") == requestID {
+	if second.Header.Get("x-opencode-request") == first.Header.Get("x-opencode-request") {
 		t.Fatal("x-opencode-request must be unique per request")
 	}
-	if second.Header.Get("x-opencode-session") != sessionID {
-		t.Fatal("x-opencode-session must be stable for the same body")
+	if second.Header.Get("x-opencode-session") == sessionID {
+		t.Fatal("x-opencode-session must be minted fresh per request")
 	}
 
 	// Existing values win, except the per-request id.
@@ -130,20 +224,76 @@ func TestApplyOpencodeIdentity(t *testing.T) {
 	}
 }
 
-func TestOpencodeSessionID(t *testing.T) {
-	if got := OpencodeSessionID(nil); got != "" {
-		t.Fatalf("nil payload must yield empty session, got %q", got)
+func opencodeToolNames(payload []byte) []string {
+	var names []string
+	for _, tool := range gjson.GetBytes(payload, "tools").Array() {
+		name := tool.Get("function.name").String()
+		if name == "" {
+			name = tool.Get("name").String()
+		}
+		names = append(names, name)
 	}
-	if got := OpencodeSessionID([]byte(`{}`)); got != "" {
-		t.Fatalf("empty object must yield empty session, got %q", got)
+	return names
+}
+
+func TestEnsureOpencodeMarkerTools(t *testing.T) {
+	bare := []byte(`{"model":"mimo-v2.6-flash-free","messages":[{"role":"user","content":"hi"}]}`)
+	filled := EnsureOpencodeMarkerTools(bare)
+	names := opencodeToolNames(filled)
+	if len(names) != 2 || names[0] != "read" || names[1] != "shell" {
+		t.Fatalf("bare payload must gain read+shell markers, got %v", names)
 	}
-	a := OpencodeSessionID([]byte(`{"model":"m","messages":[{"role":"user","content":"hello"}]}`))
-	b := OpencodeSessionID([]byte(`{"model":"m","messages":[{"role":"user","content":"hello"}]}`))
-	if a == "" || a != b {
-		t.Fatalf("same body must yield same non-empty session, got %q vs %q", a, b)
+	if gjson.GetBytes(filled, "model").String() != "mimo-v2.6-flash-free" {
+		t.Fatal("marker injection must preserve the model")
 	}
-	c := OpencodeSessionID([]byte(`{"model":"m","messages":[{"role":"user","content":"different"}]}`))
-	if c == a {
-		t.Fatal("different bodies must yield different sessions")
+
+	again := EnsureOpencodeMarkerTools(filled)
+	if len(opencodeToolNames(again)) != 2 {
+		t.Fatal("marker injection must be idempotent")
+	}
+
+	partial := []byte(`{"model":"m","tools":[{"type":"function","function":{"name":"shell","description":"x","parameters":{"type":"object","properties":{}}}}]}`)
+	names = opencodeToolNames(EnsureOpencodeMarkerTools(partial))
+	if len(names) != 2 || names[0] != "shell" || names[1] != "read" {
+		t.Fatalf("partial tools must gain only the missing marker, got %v", names)
+	}
+
+	weird := []byte(`{"model":"m","tools":"nope"}`)
+	if out := EnsureOpencodeMarkerTools(weird); string(out) != string(weird) {
+		t.Fatal("non-array tools must be left untouched")
+	}
+}
+
+func TestAssembleOpencodeStreamCompletion(t *testing.T) {
+	sse := "data: {\"id\":\"a\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hel\"}}]}\n" +
+		"data: {\"id\":\"a\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"lo\"},\"finish_reason\":\"stop\"}]}\n" +
+		"data: {\"id\":\"a\",\"choices\":[],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5}}\n" +
+		"data: [DONE]\n"
+	out := AssembleOpencodeStreamCompletion([]byte(sse), "mimo-v2.6-flash-free")
+	if gjson.GetBytes(out, "object").String() != "chat.completion" {
+		t.Fatalf("assembled body must be a completion, got %s", out)
+	}
+	if got := gjson.GetBytes(out, "choices.0.message.content").String(); got != "Hello" {
+		t.Fatalf("assembled content = %q, want Hello", got)
+	}
+	if got := gjson.GetBytes(out, "choices.0.finish_reason").String(); got != "stop" {
+		t.Fatalf("assembled finish_reason = %q, want stop", got)
+	}
+	if got := gjson.GetBytes(out, "usage.total_tokens").Int(); got != 5 {
+		t.Fatalf("assembled usage must be preserved, got total_tokens=%d", got)
+	}
+
+	plain := []byte(`{"error":"nope"}`)
+	if out := AssembleOpencodeStreamCompletion(plain, "m"); string(out) != string(plain) {
+		t.Fatal("non-SSE bodies must be returned untouched")
+	}
+}
+
+func TestOpencodeUpstreamModel(t *testing.T) {
+	if got := OpencodeUpstreamModel([]byte(`{"model":"  mimo-v2.6-flash-free "}`)); got != "mimo-v2.6-flash-free" {
+		t.Fatalf("upstream model = %q", got)
+	}
+	if got := OpencodeUpstreamModel([]byte(`{}`)); got != "" {
+		t.Fatalf("missing model must yield empty string, got %q", got)
 	}
 }

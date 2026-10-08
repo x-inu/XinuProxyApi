@@ -1,31 +1,45 @@
 package helps
 
 import (
-	"encoding/hex"
-	"hash/fnv"
+	"crypto/rand"
+	"encoding/json"
+	"fmt"
+	"math/big"
 	"net/http"
-	"sort"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
-// OpenCode free-tier identity synthesis. Mirrors the behavior of OmniRoute's
-// opencode executor: keyless requests carry OpenCode CLI identity headers so
-// the upstream free tier accepts them, with a per-request UUID and a
-// body-derived stable session id. Explicit custom headers configured on the
-// provider still win because they are applied after this helper.
+// OpenCode free-tier identity synthesis. Mirrors the traffic shape of the
+// genuine OpenCode CLI (reverse-engineered from the open-source client):
+// keyless free-tier requests carry a versioned CLI User-Agent, a minted
+// ses_ session id, and read+shell tool definitions so the upstream free
+// tier accepts them, plus streaming (locked models are served on SSE only).
+// Explicit custom headers configured on the provider still win because they
+// are applied after this helper.
 const (
-	opencodeUserAgent       = "opencode"
-	opencodeClientDefault   = "desktop"
+	opencodeUserAgent       = "opencode/latest/2.0.25/cli"
+	opencodeClientDefault   = "cli"
 	opencodeProjectDefault  = "global"
 	opencodeRequestHeader   = "x-opencode-request"
 	opencodeSessionHeader   = "x-opencode-session"
 	opencodeClientHeader    = "x-opencode-client"
 	opencodeProjectHeader   = "x-opencode-project"
 	opencodeFreeModelSuffix = "-free"
+
+	// opencodeLegacyOpenModel is served upstream without the recipe
+	// (no tools, no streaming required). Keep its legacy shape untouched.
+	opencodeLegacyOpenModel = "space-bunny-free"
+
+	opencodeSessionPrefix = "ses_"
+	opencodeSessionTail   = 14
+	opencodeSessionAlpha  = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 )
 
 // OpencodeIdentityEnabled reports whether the resolved OpenAI compatibility
@@ -38,6 +52,36 @@ func OpencodeIdentityEnabled(compat *config.OpenAICompatibility) bool {
 // The upstream convention is a "-free" suffix; anything else is premium.
 func IsOpencodeFreeModel(model string) bool {
 	return strings.HasSuffix(strings.TrimSpace(model), opencodeFreeModelSuffix)
+}
+
+// IsOpencodeLegacyOpenModel reports whether a model id is served upstream
+// without the unlock recipe (plain keyless requests already succeed).
+func IsOpencodeLegacyOpenModel(model string) bool {
+	trimmed := strings.TrimSpace(model)
+	return trimmed == opencodeLegacyOpenModel || strings.HasSuffix(trimmed, "/"+opencodeLegacyOpenModel)
+}
+
+// NeedsOpencodeFullRecipe reports whether a keyless free-tier request needs
+// the full unlock recipe (versioned identity + minted session + marker
+// tools + forced streaming). Keyed entries and the legacy-open model pass
+// through untouched.
+func NeedsOpencodeFullRecipe(compat *config.OpenAICompatibility, upstreamModel, apiKey string) bool {
+	if !OpencodeIdentityEnabled(compat) {
+		return false
+	}
+	if strings.TrimSpace(apiKey) != "" {
+		return false
+	}
+	if !IsOpencodeFreeModel(upstreamModel) {
+		return false
+	}
+	return !IsOpencodeLegacyOpenModel(upstreamModel)
+}
+
+// OpencodeUpstreamModel extracts the upstream model id from a translated
+// OpenAI chat payload.
+func OpencodeUpstreamModel(payload []byte) string {
+	return strings.TrimSpace(gjson.GetBytes(payload, "model").String())
 }
 
 // OpencodeFreeTierRejection returns a rejection message when a keyless request
@@ -59,8 +103,8 @@ func OpencodeFreeTierRejection(compat *config.OpenAICompatibility, upstreamModel
 // ApplyOpencodeIdentity synthesizes OpenCode CLI identity headers on the
 // outgoing upstream request. Existing header values are preserved except for
 // x-opencode-request, which is always refreshed with a new UUID. The payload
-// is only used to derive a stable session id and may be nil.
-func ApplyOpencodeIdentity(r *http.Request, compat *config.OpenAICompatibility, payload []byte) {
+// is retained for signature compatibility and currently unused.
+func ApplyOpencodeIdentity(r *http.Request, compat *config.OpenAICompatibility, _ []byte) {
 	if !OpencodeIdentityEnabled(compat) || r == nil {
 		return
 	}
@@ -73,100 +117,168 @@ func ApplyOpencodeIdentity(r *http.Request, compat *config.OpenAICompatibility, 
 	}
 	r.Header.Set(opencodeRequestHeader, uuid.NewString())
 	if r.Header.Get(opencodeSessionHeader) == "" {
-		if sessionID := OpencodeSessionID(payload); sessionID != "" {
-			r.Header.Set(opencodeSessionHeader, sessionID)
-		}
+		r.Header.Set(opencodeSessionHeader, MintOpencodeSessionID())
 	}
 }
 
-// OpencodeSessionID derives a stable session fingerprint from the request body
-// (model, system prompt, first user message, tool names) so requests from one
-// conversation share an upstream session. Returns "" when the body carries no
-// usable signal.
-func OpencodeSessionID(payload []byte) string {
-	if len(payload) == 0 {
-		return ""
+var (
+	opencodeSessionMu      sync.Mutex
+	opencodeSessionLastMs  int64
+	opencodeSessionCounter uint32
+)
+
+// MintOpencodeSessionID mints a fresh ses_ session id with the same shape as
+// the genuine CLI (12 hex chars encoding ~(now_ms*4096+counter) in 48 bits,
+// plus 14 alphanumeric chars). The upstream free tier validates the embedded
+// timestamp window, so ids must be minted fresh, never random.
+func MintOpencodeSessionID() string {
+	now := time.Now().UnixMilli()
+	opencodeSessionMu.Lock()
+	if now != opencodeSessionLastMs {
+		opencodeSessionLastMs = now
+		opencodeSessionCounter = 0
 	}
-	var parts []string
-	if model := strings.TrimSpace(gjson.GetBytes(payload, "model").String()); model != "" {
-		parts = append(parts, "model:"+model)
-	}
-	if system := opencodeTextContent(gjson.GetBytes(payload, "system")); system != "" {
-		parts = append(parts, "sys:"+shortHash(system))
-	}
-	messages := gjson.GetBytes(payload, "messages")
-	if messages.IsArray() {
-		for _, msg := range messages.Array() {
-			if strings.TrimSpace(msg.Get("role").String()) != "user" {
-				continue
-			}
-			if text := opencodeTextContent(msg.Get("content")); text != "" {
-				parts = append(parts, "user0:"+shortHash(text))
-				break
-			}
+	opencodeSessionCounter++
+	counter := opencodeSessionCounter & 0xFFF
+	opencodeSessionMu.Unlock()
+
+	n := new(big.Int).SetInt64(now)
+	n.Lsh(n, 12)
+	n.Or(n, big.NewInt(int64(counter)))
+	mask := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 48), big.NewInt(1))
+	head := new(big.Int).AndNot(mask, n)
+	prefix := fmt.Sprintf("%012x", head)
+
+	tail := make([]byte, opencodeSessionTail)
+	var buf [1]byte
+	for i := range tail {
+		if _, err := rand.Read(buf[:]); err != nil {
+			tail[i] = opencodeSessionAlpha[i%len(opencodeSessionAlpha)]
+			continue
 		}
+		tail[i] = opencodeSessionAlpha[int(buf[0])%len(opencodeSessionAlpha)]
 	}
-	var tools []string
-	for _, tool := range gjson.GetBytes(payload, "tools").Array() {
+	return opencodeSessionPrefix + prefix + string(tail)
+}
+
+// Marker tool definitions injected when a keyless free-tier request carries
+// no read+shell tools. The upstream gate only inspects tool names.
+const (
+	opencodeMarkerReadTool  = `{"type":"function","function":{"name":"read","description":"read a file","parameters":{"type":"object","properties":{"p":{"type":"string"}}}}}`
+	opencodeMarkerShellTool = `{"type":"function","function":{"name":"shell","description":"run a command","parameters":{"type":"object","properties":{"q":{"type":"string"}}}}}`
+)
+
+// EnsureOpencodeMarkerTools appends read+shell marker tool definitions to an
+// OpenAI chat payload when either name is missing. Payloads that already
+// carry both, or whose tools field is not an array, are returned untouched.
+func EnsureOpencodeMarkerTools(payload []byte) []byte {
+	tools := gjson.GetBytes(payload, "tools")
+	if tools.Exists() && !tools.IsArray() {
+		return payload
+	}
+	var hasRead, hasShell bool
+	for _, tool := range tools.Array() {
 		name := strings.TrimSpace(tool.Get("function.name").String())
 		if name == "" {
 			name = strings.TrimSpace(tool.Get("name").String())
 		}
-		if name != "" {
-			tools = append(tools, name)
+		switch name {
+		case "read":
+			hasRead = true
+		case "shell":
+			hasShell = true
 		}
 	}
-	if len(tools) > 0 {
-		sort.Strings(tools)
-		parts = append(parts, "tools:"+shortHash(strings.Join(tools, ",")))
+	if hasRead && hasShell {
+		return payload
 	}
-	if len(parts) == 0 {
-		return ""
-	}
-	h := fnv.New64a()
-	_, _ = h.Write([]byte(strings.Join(parts, "|")))
-	return hex.EncodeToString(h.Sum(nil))
-}
-
-// opencodeTextContent extracts plain text from an OpenAI content value, which
-// may be a string or an array of parts with type "text".
-func opencodeTextContent(node gjson.Result) string {
-	if node.Type == gjson.String {
-		return firstN(node.String(), 256)
-	}
-	if node.IsArray() {
-		var sb strings.Builder
-		for _, part := range node.Array() {
-			if strings.TrimSpace(part.Get("type").String()) != "text" {
-				continue
-			}
-			text := part.Get("text").String()
-			if text == "" {
-				continue
-			}
-			if sb.Len() > 0 {
-				sb.WriteString("\n")
-			}
-			sb.WriteString(text)
-			if sb.Len() >= 256 {
-				break
-			}
+	out := payload
+	if !hasRead {
+		updated, err := sjson.SetRawBytes(out, "tools.-1", []byte(opencodeMarkerReadTool))
+		if err != nil {
+			return payload
 		}
-		return firstN(sb.String(), 256)
+		out = updated
 	}
-	return ""
+	if !hasShell {
+		updated, err := sjson.SetRawBytes(out, "tools.-1", []byte(opencodeMarkerShellTool))
+		if err != nil {
+			return payload
+		}
+		out = updated
+	}
+	return out
 }
 
-func firstN(s string, n int) string {
-	if len(s) <= n {
-		return s
+// AssembleOpencodeStreamCompletion folds SSE chat-completion chunks into a
+// single non-streaming completion body for clients that did not request a
+// stream. Bodies without SSE frames are returned untouched.
+func AssembleOpencodeStreamCompletion(body []byte, model string) []byte {
+	lines := strings.Split(string(body), "\n")
+	var frames int
+	var content, reasoning strings.Builder
+	finish := "stop"
+	var usageRaw string
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "data:") {
+			continue
+		}
+		data := strings.TrimSpace(strings.TrimPrefix(trimmed, "data:"))
+		if data == "" || data == "[DONE]" {
+			continue
+		}
+		frames++
+		chunk := gjson.Parse(data)
+		if text := chunk.Get("choices.0.delta.content").String(); text != "" {
+			content.WriteString(text)
+		}
+		if text := chunk.Get("choices.0.delta.reasoning_content").String(); text != "" {
+			reasoning.WriteString(text)
+		}
+		if reason := strings.TrimSpace(chunk.Get("choices.0.finish_reason").String()); reason != "" && reason != "null" {
+			finish = reason
+		}
+		if usage := chunk.Get("usage"); usage.Exists() && usage.IsObject() {
+			usageRaw = usage.Raw
+		}
 	}
-	return s[:n]
-}
-
-func shortHash(s string) string {
-	h := fnv.New64a()
-	_, _ = h.Write([]byte(s))
-	sum := h.Sum(nil)
-	return hex.EncodeToString(sum[:4])
+	if frames == 0 {
+		return body
+	}
+	text := content.String()
+	if text == "" {
+		text = reasoning.String()
+	}
+	out := []byte(`{"object":"chat.completion"}`)
+	var err error
+	if out, err = sjson.SetBytes(out, "id", "chatcmpl-opencode-"+uuid.NewString()[:8]); err != nil {
+		return body
+	}
+	if out, err = sjson.SetBytes(out, "created", time.Now().Unix()); err != nil {
+		return body
+	}
+	if out, err = sjson.SetBytes(out, "model", model); err != nil {
+		return body
+	}
+	choice := `{"index":0,"message":{"role":"assistant","content":""},"finish_reason":"stop"}`
+	if out, err = sjson.SetRawBytes(out, "choices", []byte("["+choice+"]")); err != nil {
+		return body
+	}
+	quoted, err := json.Marshal(text)
+	if err != nil {
+		return body
+	}
+	if out, err = sjson.SetRawBytes(out, "choices.0.message.content", quoted); err != nil {
+		return body
+	}
+	if out, err = sjson.SetBytes(out, "choices.0.finish_reason", finish); err != nil {
+		return body
+	}
+	if usageRaw != "" {
+		if out, err = sjson.SetRawBytes(out, "usage", []byte(usageRaw)); err != nil {
+			return body
+		}
+	}
+	return out
 }

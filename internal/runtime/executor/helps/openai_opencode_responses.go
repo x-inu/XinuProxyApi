@@ -2,6 +2,7 @@ package helps
 
 import (
 	"bufio"
+	"context"
 	"io"
 	"strings"
 	"time"
@@ -541,34 +542,58 @@ func quoteRaw(s string) string {
 }
 
 // NewOpencodeResponsesChatStream wraps an upstream responses SSE body so
-// readers observe chat SSE frames.
-func NewOpencodeResponsesChatStream(body io.ReadCloser, model string) io.ReadCloser {
+// readers observe chat SSE frames. The wrapper aborts promptly when ctx is
+// done so abandoned streams cannot wedge the translating goroutine.
+func NewOpencodeResponsesChatStream(ctx context.Context, body io.ReadCloser, model string) io.ReadCloser {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	pr, pw := io.Pipe()
+	go func() {
+		<-ctx.Done()
+		pw.CloseWithError(ctx.Err())
+	}()
 	go func() {
 		scanner := bufio.NewScanner(body)
 		scanner.Buffer(nil, 52_428_800)
 		state := &opencodeResponsesChatState{}
 		var event string
 		var dataLines []string
-		flush := func() {
+		// flush translates one buffered frame; false stops the loop.
+		flush := func() bool {
 			if len(dataLines) == 0 {
 				event = ""
-				return
+				return true
 			}
 			data := strings.Join(dataLines, "\n")
 			dataLines = nil
 			current := event
 			event = ""
 			for _, frame := range TranslateOpencodeResponsesStream(model, state, current, data) {
+				select {
+				case <-ctx.Done():
+					return false
+				default:
+				}
 				if _, err := pw.Write(append(append([]byte("data: "), frame...), '\n', '\n')); err != nil {
-					return
+					return false
 				}
 			}
+			return true
 		}
-		for scanner.Scan() {
+		running := true
+		for running && scanner.Scan() {
+			select {
+			case <-ctx.Done():
+				running = false
+			default:
+			}
+			if !running {
+				break
+			}
 			line := scanner.Text()
 			if strings.TrimSpace(line) == "" {
-				flush()
+				running = flush()
 				continue
 			}
 			if strings.HasPrefix(line, "event:") {
@@ -578,9 +603,11 @@ func NewOpencodeResponsesChatStream(body io.ReadCloser, model string) io.ReadClo
 			if strings.HasPrefix(line, "data:") {
 				data := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
 				if data == "[DONE]" {
-					flush()
-					if _, err := pw.Write([]byte("data: [DONE]\n\n")); err != nil {
-						break
+					running = flush()
+					if running {
+						if _, err := pw.Write([]byte("data: [DONE]\n\n")); err != nil {
+							running = false
+						}
 					}
 					continue
 				}

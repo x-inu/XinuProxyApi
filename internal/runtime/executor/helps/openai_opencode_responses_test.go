@@ -1,6 +1,7 @@
 package helps
 
 import (
+	"context"
 	"io"
 	"strings"
 	"testing"
@@ -183,7 +184,7 @@ func TestNewOpencodeResponsesChatStream(t *testing.T) {
 	upstream := "event: response.output_text.delta\ndata: " + opencodeResponsesTextDelta + "\n\n" +
 		"event: response.completed\ndata: " + opencodeResponsesCompleted + "\n\n" +
 		"data: [DONE]\n"
-	stream := NewOpencodeResponsesChatStream(io.NopCloser(strings.NewReader(upstream)), "muse-spark-1.3-contributor-free")
+	stream := NewOpencodeResponsesChatStream(context.Background(), io.NopCloser(strings.NewReader(upstream)), "muse-spark-1.3-contributor-free")
 	raw, err := io.ReadAll(stream)
 	if err != nil {
 		t.Fatal(err)

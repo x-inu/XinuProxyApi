@@ -473,7 +473,7 @@ func (e *OpenAICompatExecutor) ExecuteStream(ctx context.Context, auth *cliproxy
 		return nil, err
 	}
 	if opencodeResponsesBridge {
-		httpResp.Body = helps.NewOpencodeResponsesChatStream(httpResp.Body, helps.OpencodeUpstreamModel(translated))
+		httpResp.Body = helps.NewOpencodeResponsesChatStream(ctx, httpResp.Body, helps.OpencodeUpstreamModel(translated))
 	}
 	out := make(chan cliproxyexecutor.StreamChunk)
 	go func() {

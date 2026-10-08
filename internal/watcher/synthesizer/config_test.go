@@ -926,6 +926,52 @@ func TestConfigSynthesizer_OpenAICompat_FallbackWithModels(t *testing.T) {
 	}
 }
 
+func TestConfigSynthesizer_OpenAICompat_KeylessPool(t *testing.T) {
+	synth := NewConfigSynthesizer()
+	weight := 2
+	ctx := &SynthesisContext{
+		Config: &config.Config{
+			OpenAICompatibility: []config.OpenAICompatibility{
+				{
+					Name:    "opencodeFree",
+					BaseURL: "https://opencode.ai/zen/v1",
+					Models: []config.OpenAICompatibilityModel{
+						{Name: "space-bunny-free", Alias: "space-bunny-free"},
+					},
+					APIKeyEntries: []config.OpenAICompatibilityAPIKey{
+						{ProxyURL: "http://127.0.0.1:7890", Weight: &weight},
+						{},
+					},
+				},
+			},
+		},
+		Now:         time.Now(),
+		IDGenerator: NewStableIDGenerator(),
+	}
+
+	auths, err := synth.Synthesize(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(auths) != 2 {
+		t.Fatalf("expected 2 rotation-slot auths, got %d", len(auths))
+	}
+	for _, a := range auths {
+		if _, ok := a.Attributes["api_key"]; ok {
+			t.Error("keyless slot must not carry an api_key attribute")
+		}
+		if a.Attributes["base_url"] != "https://opencode.ai/zen/v1" {
+			t.Errorf("unexpected base_url %q", a.Attributes["base_url"])
+		}
+	}
+	if auths[0].ProxyURL != "http://127.0.0.1:7890" {
+		t.Errorf("first slot must keep its proxy, got %q", auths[0].ProxyURL)
+	}
+	if auths[0].ID == auths[1].ID {
+		t.Error("slots must have distinct auth IDs for independent cooldown")
+	}
+}
+
 func TestConfigSynthesizer_VertexCompat_WithModels(t *testing.T) {
 	synth := NewConfigSynthesizer()
 	ctx := &SynthesisContext{

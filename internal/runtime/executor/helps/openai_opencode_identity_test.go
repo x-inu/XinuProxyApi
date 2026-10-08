@@ -289,6 +289,30 @@ func TestAssembleOpencodeStreamCompletion(t *testing.T) {
 	}
 }
 
+func TestAssembleOpencodeStreamCompletionToolCalls(t *testing.T) {
+	sse := "data: {\"id\":\"a\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"tool_calls\":[{\"index\":0,\"id\":\"call_1\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"\"}}]}}]}\n" +
+		"data: {\"id\":\"a\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"{\\\"city\\\":\\\"Jakarta\\\"}\"}}]}}]}\n" +
+		"data: {\"id\":\"a\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"tool_calls\"}]}\n" +
+		"data: [DONE]\n"
+	out := AssembleOpencodeStreamCompletion([]byte(sse), "mimo-v2.6-flash-free")
+	call := gjson.GetBytes(out, "choices.0.message.tool_calls.0")
+	if call.Get("id").String() != "call_1" {
+		t.Fatalf("assembled tool call id = %q, got %s", call.Get("id").String(), out)
+	}
+	if call.Get("function.name").String() != "get_weather" {
+		t.Fatalf("assembled tool name = %q, got %s", call.Get("function.name").String(), out)
+	}
+	if call.Get("function.arguments").String() != `{"city":"Jakarta"}` {
+		t.Fatalf("assembled tool arguments = %q, got %s", call.Get("function.arguments").String(), out)
+	}
+	if got := gjson.GetBytes(out, "choices.0.finish_reason").String(); got != "tool_calls" {
+		t.Fatalf("assembled finish_reason = %q, want tool_calls", got)
+	}
+	if gjson.GetBytes(out, "choices.0.message.tool_calls").String() == "" {
+		t.Fatalf("tool_calls must be present, got %s", out)
+	}
+}
+
 func TestOpencodeUpstreamModel(t *testing.T) {
 	if got := OpencodeUpstreamModel([]byte(`{"model":"  mimo-v2.6-flash-free "}`)); got != "mimo-v2.6-flash-free" {
 		t.Fatalf("upstream model = %q", got)

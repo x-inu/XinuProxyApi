@@ -212,14 +212,33 @@ func EnsureOpencodeMarkerTools(payload []byte) []byte {
 
 // AssembleOpencodeStreamCompletion folds SSE chat-completion chunks into a
 // single non-streaming completion body for clients that did not request a
-// stream. Bodies without SSE frames are returned untouched.
+// stream, preserving text, reasoning fallback, tool calls, finish reasons
+// and usage. Bodies without SSE frames are returned untouched.
 func AssembleOpencodeStreamCompletion(body []byte, model string) []byte {
-	lines := strings.Split(string(body), "\n")
+	type assembledTool struct {
+		id, callType, name string
+		args               strings.Builder
+	}
+	type assembledChoice struct {
+		content, reasoning strings.Builder
+		finish             string
+		tools              map[int]*assembledTool
+		toolOrder          []int
+	}
+	choices := map[int]*assembledChoice{}
+	var choiceOrder []int
+	choiceState := func(index int) *assembledChoice {
+		state, ok := choices[index]
+		if !ok {
+			state = &assembledChoice{tools: map[int]*assembledTool{}}
+			choices[index] = state
+			choiceOrder = append(choiceOrder, index)
+		}
+		return state
+	}
 	var frames int
-	var content, reasoning strings.Builder
-	finish := "stop"
 	var usageRaw string
-	for _, line := range lines {
+	for _, line := range strings.Split(string(body), "\n") {
 		trimmed := strings.TrimSpace(line)
 		if !strings.HasPrefix(trimmed, "data:") {
 			continue
@@ -230,14 +249,38 @@ func AssembleOpencodeStreamCompletion(body []byte, model string) []byte {
 		}
 		frames++
 		chunk := gjson.Parse(data)
-		if text := chunk.Get("choices.0.delta.content").String(); text != "" {
-			content.WriteString(text)
-		}
-		if text := chunk.Get("choices.0.delta.reasoning_content").String(); text != "" {
-			reasoning.WriteString(text)
-		}
-		if reason := strings.TrimSpace(chunk.Get("choices.0.finish_reason").String()); reason != "" && reason != "null" {
-			finish = reason
+		for _, choice := range chunk.Get("choices").Array() {
+			state := choiceState(int(choice.Get("index").Int()))
+			if text := choice.Get("delta.content").String(); text != "" {
+				state.content.WriteString(text)
+			}
+			if text := choice.Get("delta.reasoning_content").String(); text != "" {
+				state.reasoning.WriteString(text)
+			}
+			for _, call := range choice.Get("delta.tool_calls").Array() {
+				index := int(call.Get("index").Int())
+				tool, ok := state.tools[index]
+				if !ok {
+					tool = &assembledTool{}
+					state.tools[index] = tool
+					state.toolOrder = append(state.toolOrder, index)
+				}
+				if id := strings.TrimSpace(call.Get("id").String()); id != "" {
+					tool.id = id
+				}
+				callType := strings.TrimSpace(call.Get("type").String())
+				if callType == "" {
+					callType = "function"
+				}
+				tool.callType = callType
+				if name := strings.TrimSpace(call.Get("function.name").String()); name != "" {
+					tool.name = name
+				}
+				tool.args.WriteString(call.Get("function.arguments").String())
+			}
+			if reason := strings.TrimSpace(choice.Get("finish_reason").String()); reason != "" && reason != "null" {
+				state.finish = reason
+			}
 		}
 		if usage := chunk.Get("usage"); usage.Exists() && usage.IsObject() {
 			usageRaw = usage.Raw
@@ -245,10 +288,6 @@ func AssembleOpencodeStreamCompletion(body []byte, model string) []byte {
 	}
 	if frames == 0 {
 		return body
-	}
-	text := content.String()
-	if text == "" {
-		text = reasoning.String()
 	}
 	out := []byte(`{"object":"chat.completion"}`)
 	var err error
@@ -261,18 +300,86 @@ func AssembleOpencodeStreamCompletion(body []byte, model string) []byte {
 	if out, err = sjson.SetBytes(out, "model", model); err != nil {
 		return body
 	}
-	choice := `{"index":0,"message":{"role":"assistant","content":""},"finish_reason":"stop"}`
-	if out, err = sjson.SetRawBytes(out, "choices", []byte("["+choice+"]")); err != nil {
-		return body
+	var choicesJSON strings.Builder
+	choicesJSON.WriteByte('[')
+	for i, index := range choiceOrder {
+		state := choices[index]
+		if i > 0 {
+			choicesJSON.WriteByte(',')
+		}
+		text := state.content.String()
+		if text == "" {
+			text = state.reasoning.String()
+		}
+		message := []byte(`{"role":"assistant"}`)
+		quoted, err := json.Marshal(text)
+		if err != nil {
+			return body
+		}
+		if message, err = sjson.SetRawBytes(message, "content", quoted); err != nil {
+			return body
+		}
+		if len(state.toolOrder) > 0 {
+			var callsJSON strings.Builder
+			callsJSON.WriteByte('[')
+			for j, toolIndex := range state.toolOrder {
+				tool := state.tools[toolIndex]
+				if j > 0 {
+					callsJSON.WriteByte(',')
+				}
+				args, err := json.Marshal(tool.args.String())
+				if err != nil {
+					return body
+				}
+				call, err := sjson.SetBytes([]byte(`{"index":0,"type":"function"}`), "index", toolIndex)
+				if err != nil {
+					return body
+				}
+				if tool.id != "" {
+					if call, err = sjson.SetBytes(call, "id", tool.id); err != nil {
+						return body
+					}
+				}
+				if tool.callType != "" {
+					if call, err = sjson.SetBytes(call, "type", tool.callType); err != nil {
+						return body
+					}
+				}
+				fn, err := sjson.SetBytes([]byte(`{}`), "name", tool.name)
+				if err != nil {
+					return body
+				}
+				if fn, err = sjson.SetRawBytes(fn, "arguments", args); err != nil {
+					return body
+				}
+				if call, err = sjson.SetRawBytes(call, "function", fn); err != nil {
+					return body
+				}
+				callsJSON.Write(call)
+			}
+			callsJSON.WriteByte(']')
+			if message, err = sjson.SetRawBytes(message, "tool_calls", []byte(callsJSON.String())); err != nil {
+				return body
+			}
+		}
+		choiceJSON := []byte(`{"index":0}`)
+		if choiceJSON, err = sjson.SetBytes(choiceJSON, "index", index); err != nil {
+			return body
+		}
+		if choiceJSON, err = sjson.SetRawBytes(choiceJSON, "message", message); err != nil {
+			return body
+		}
+		finish := state.finish
+		if finish == "" {
+			finish = "stop"
+		}
+		if choiceJSON, err = sjson.SetBytes(choiceJSON, "finish_reason", finish); err != nil {
+			return body
+		}
+		choicesJSON.Write(choiceJSON)
 	}
-	quoted, err := json.Marshal(text)
-	if err != nil {
-		return body
-	}
-	if out, err = sjson.SetRawBytes(out, "choices.0.message.content", quoted); err != nil {
-		return body
-	}
-	if out, err = sjson.SetBytes(out, "choices.0.finish_reason", finish); err != nil {
+	choicesJSON.WriteByte(']')
+	if out, err = sjson.SetRawBytes(out, "choices", []byte(choicesJSON.String())); err != nil {
 		return body
 	}
 	if usageRaw != "" {

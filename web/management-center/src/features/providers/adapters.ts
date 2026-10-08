@@ -321,6 +321,49 @@ export function opencodeFreeToResource(raw: SponsorProviderRaw): ProviderResourc
   });
 }
 
+/**
+ * One table row per rotation slot, OmniRoute-style. Multiple backend configs
+ * fall back to a single aggregated row (the aggregation-conflict UI owns that
+ * case). Zero key entries still yield one row for the implicit keyless slot
+ * the backend synthesizes.
+ */
+export function opencodeFreeToResources(raw: SponsorProviderRaw): ProviderResource[] {
+  if (raw.openai.length !== 1) {
+    const single = opencodeFreeToResource(raw);
+    return single ? [single] : [];
+  }
+  const base = opencodeFreeToResource(raw);
+  if (!base) return [];
+  const item = raw.openai[0];
+  const entries = item.config.apiKeyEntries ?? [];
+  const slotResource = (slotIndex: number, apiKey: string, proxyUrl: string | null) => {
+    const label = `${OPENCODE_FREE_DISPLAY_NAME} #${slotIndex + 1}`;
+    return {
+      ...base,
+      id: buildId('opencodeFree', item.index, `slot-${slotIndex}`),
+      name: label,
+      identifier: label,
+      apiKeyPreview: apiKey ? maskApiKey(apiKey) : null,
+      apiKey: apiKey || null,
+      proxyUrl,
+      apiKeyEntryCount: 1,
+      selector: {
+        ...(base.selector as Extract<
+          ProviderResourceSelector,
+          { brand: 'opencodeFree' }
+        >),
+        slotIndex,
+      },
+    };
+  };
+  if (entries.length === 0) {
+    return [slotResource(0, '', base.proxyUrl)];
+  }
+  return entries.map((entry, slotIndex) =>
+    slotResource(slotIndex, entry.apiKey?.trim() ?? '', entry.proxyUrl ?? null)
+  );
+}
+
 export function fennoAIToResource(raw: SponsorProviderRaw): ProviderResource | null {
   return sponsorRawToResource('fennoAI', raw, {
     displayName: FENNO_AI_DISPLAY_NAME,

@@ -15,7 +15,7 @@ import type {
   ProviderKeyConfig,
 } from '@/types';
 import {
-  opencodeFreeToResource,
+  opencodeFreeToResources,
   claudeToResource,
   codexToResource,
   fennoAIToResource,
@@ -428,8 +428,7 @@ export const buildProviderGroups = (config: Config): ProviderGroup[] =>
         );
         break;
       case 'opencodeFree': {
-        const sponsorResource = opencodeFreeToResource(buildOpencodeFreeRaw(config));
-        resources = sponsorResource ? [sponsorResource] : [];
+        resources = opencodeFreeToResources(buildOpencodeFreeRaw(config));
         break;
       }
       case 'fennoAI': {
@@ -807,6 +806,22 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
             (item, index) => (item.sourceIndex ?? index) !== sel.index
           );
           updateConfigValue('openai-compatibility', next);
+        } else if (sel.brand === 'opencodeFree' && sel.slotIndex !== undefined) {
+          // One rotation slot: splice it out, or drop the whole entry when
+          // it was the last slot.
+          const raw = resource.raw as SponsorProviderRaw;
+          const current = raw.openai[0];
+          const remaining = (current?.config.apiKeyEntries ?? []).filter(
+            (_, index) => index !== sel.slotIndex
+          );
+          if (current && (current.config.apiKeyEntries ?? []).length <= 1) {
+            await providersApi.deleteOpenAIProvider(current.index);
+          } else if (current) {
+            await providersApi.updateOpenAIProvider(current.config.name, current.index, {
+              ...current.config,
+              apiKeyEntries: remaining,
+            });
+          }
         } else if (
           sel.brand === 'opencodeFree' ||
           sel.brand === 'fennoAI' ||

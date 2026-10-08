@@ -40,6 +40,8 @@ export type ProviderResourceSelector =
       claudeIndices: number[];
       codexIndices: number[];
       geminiIndices: number[];
+      /** Rotation slot within the entry; -1 is the implicit keyless slot. */
+      slotIndex: number;
     }
   | {
       brand: 'fennoAI';

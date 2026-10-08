@@ -161,6 +161,18 @@ export function ProviderResourceTable({
   };
 
   const renderPrimary = (r: ProviderResource) => {
+    if (r.brand === 'opencodeFree') {
+      return (
+        <div className={styles.primaryCell}>
+          <span className={styles.primaryName}>{r.name ?? r.identifier}</span>
+          <span className={styles.primarySub}>
+            {r.apiKeyPreview ??
+              r.proxyUrl ??
+              t('providersPage.sponsor.keylessTag')}
+          </span>
+        </div>
+      );
+    }
     if (isSponsorResource(r)) {
       return (
         <div className={styles.primaryCell}>

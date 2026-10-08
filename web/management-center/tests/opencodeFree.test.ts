@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from 'bun:test';
 import { apiClient } from '../src/services/api/client';
 import { providersApi } from '../src/services/api/providers';
 import { normalizeOpenAIProvider } from '../src/services/api/transformers';
-import { opencodeFreeToResource } from '../src/features/providers/adapters';
+import { opencodeFreeToResource, opencodeFreeToResources } from '../src/features/providers/adapters';
 import {
   buildOpencodeFreeRaw,
   OPENCODE_FREE_OPENAI_BASE_URL,
@@ -74,6 +74,39 @@ describe('opencodeFree phase 2', () => {
       openaiCompatibility: [normalizedEntry()],
     });
     expect(getSponsorAggregationConflict(raw)).toBeNull();
+  });
+
+  test('expands one row per rotation slot', () => {
+    const entry = normalizedEntry('http://127.0.0.1:7890', 2);
+    entry.apiKeyEntries[1] = { apiKey: '', proxyUrl: 'http://127.0.0.1:7891' };
+    const rows = opencodeFreeToResources(buildOpencodeFreeRaw({ openaiCompatibility: [entry] }));
+    expect(rows).toHaveLength(2);
+    expect(rows[0].identifier).toBe('OpenCode Free #1');
+    expect(rows[1].identifier).toBe('OpenCode Free #2');
+    expect(rows[0].proxyUrl).toBe('http://127.0.0.1:7890');
+    expect(rows[1].proxyUrl).toBe('http://127.0.0.1:7891');
+    expect(rows[0].id).not.toBe(rows[1].id);
+    const sel = rows[0].selector;
+    expect(sel.brand).toBe('opencodeFree');
+    if (sel.brand === 'opencodeFree') expect(sel.slotIndex).toBe(0);
+  });
+
+  test('shows one row for the implicit keyless slot', () => {
+    const entry = normalizedEntry();
+    delete entry.apiKeyEntries;
+    const rows = opencodeFreeToResources(
+      buildOpencodeFreeRaw({ openaiCompatibility: [entry] })
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].apiKey).toBeNull();
+    expect(rows[0].proxyUrl).toBeNull();
+  });
+
+  test('falls back to one row on multiple backend configs', () => {
+    const rows = opencodeFreeToResources(
+      buildOpencodeFreeRaw({ openaiCompatibility: [normalizedEntry(), normalizedEntry()] })
+    );
+    expect(rows).toHaveLength(1);
   });
 
   test('reads the identity synthesis flag', () => {

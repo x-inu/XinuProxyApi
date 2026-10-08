@@ -367,14 +367,18 @@ export function opencodeFreeToResources(raw: SponsorProviderRaw): ProviderResour
 /**
  * Append one keyless rotation slot, OmniRoute "add account"-style. Each slot
  * is an empty-key api-key-entry the backend synthesizes into its own auth so
- * the existing scheduler rotates across them.
+ * the existing scheduler rotates across them. Starting from the implicit
+ * single slot, the first click yields two explicit slots so the count
+ * visibly grows.
  */
 export function appendOpencodeFreeSlot(
   entry: OpenAIProviderConfig
 ): OpenAIProviderConfig {
+  const slots = entry.apiKeyEntries ?? [];
+  const next = [...slots, { apiKey: '' }];
   return {
     ...entry,
-    apiKeyEntries: [...(entry.apiKeyEntries ?? []), { apiKey: '' }],
+    apiKeyEntries: slots.length === 0 ? [...next, { apiKey: '' }] : next,
   };
 }
 

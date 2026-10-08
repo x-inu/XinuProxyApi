@@ -152,6 +152,13 @@ describe('opencodeFree phase 2', () => {
   });
 
   test('appends one keyless slot per click', () => {
+    const first = appendOpencodeFreeSlot({
+      name: OPENCODE_FREE_PROVIDER_NAME,
+      baseUrl: OPENCODE_FREE_OPENAI_BASE_URL,
+      apiKeyEntries: [],
+    });
+    // Implicit single slot becomes two explicit slots so the count grows.
+    expect(first.apiKeyEntries).toHaveLength(2);
     const once = appendOpencodeFreeSlot({
       name: OPENCODE_FREE_PROVIDER_NAME,
       baseUrl: OPENCODE_FREE_OPENAI_BASE_URL,

@@ -69,6 +69,8 @@ interface SponsorKeyEntryCardProps {
   usedProtocols: Set<SponsorProtocol>;
   canRemove: boolean;
   mutating: boolean;
+  /** Hide the shared models section (OpenCode Free shows it on slot #1 only). */
+  hideModels?: boolean;
   onChange: (entry: SponsorKeyEntryInput) => void;
   onRemove: () => void;
 }
@@ -192,12 +194,46 @@ const sponsorKeyEntriesFromRaw = (
   const entries = definition.protocols.flatMap((protocol): SponsorKeyEntryInput[] => {
     if (protocol === 'openai') {
       const openai = raw.openai[0]?.config;
-      return openai ? [sponsorEntryFromOpenAI(definition, openai)] : [];
+      if (!openai) return [];
+      // OpenCode Free edits one card per rotation slot.
+      if (definition.brand === 'opencodeFree') {
+        return openaiSlotEntriesFromConfig(definition, openai);
+      }
+      return [sponsorEntryFromOpenAI(definition, openai)];
     }
     const config = raw[protocol][0]?.config;
     return config ? [sponsorEntryFromProviderKey(definition, protocol, config)] : [];
   });
   return entries.length ? entries : [emptySponsorKeyEntry(definition)];
+};
+
+/**
+ * One form card per rotation slot. Models/prefix live on every card from the
+ * shared entry config; the persist step reads shared fields from the first
+ * card carrying them.
+ */
+const openaiSlotEntriesFromConfig = (
+  definition: SponsorProviderDefinition,
+  config: SponsorProviderRaw['openai'][number]['config']
+): SponsorKeyEntryInput[] => {
+  const shared = {
+    ...emptySponsorKeyEntry(definition, 'openai'),
+    baseUrl: definition.resolveBaseUrl(config.baseUrl),
+    prefix: config.prefix ?? '',
+    disabled: config.disabled === true,
+    disableCooling: config.disableCooling === true,
+    priority: config.priority,
+    models: modelsFromConfig(config.models),
+  };
+  const slots = config.apiKeyEntries ?? [];
+  if (!slots.length) return [{ ...shared }];
+  return slots.map((slot) => ({
+    ...shared,
+    apiKey: '',
+    existingApiKey: slot.apiKey ?? '',
+    proxyUrl: slot.proxyUrl ?? '',
+    weight: slot.weight,
+  }));
 };
 
 const applyDiscoveredModels = (
@@ -325,13 +361,14 @@ function SponsorKeyEntryCard({
   usedProtocols,
   canRemove,
   mutating,
+  hideModels = false,
   onChange,
   onRemove,
 }: SponsorKeyEntryCardProps) {
   const { t } = useTranslation();
   const [showApiKey, setShowApiKey] = useState(false);
   const [expanded, setExpanded] = useState(
-    () => mode === 'create' || !entry.existingApiKey?.trim()
+    () => mode === 'create' || (!entry.existingApiKey?.trim() && definition.brand !== 'opencodeFree')
   );
   const endpointUrl = protocolUrlForEntry(entry, definition);
   const protocolLabel = t(
@@ -341,7 +378,9 @@ function SponsorKeyEntryCard({
   const summaryKey = entry.apiKey.trim() || entry.existingApiKey?.trim() || '';
   const summaryKeyLabel = summaryKey
     ? maskApiKey(summaryKey)
-    : t('providersPage.status.notConfigured');
+    : definition.brand === 'opencodeFree'
+      ? entry.proxyUrl.trim() || t('providersPage.sponsor.keylessTag')
+      : t('providersPage.status.notConfigured');
   const modelKey = sponsorProtocolModelI18nKey(entry.protocol);
   const discoveryHeaders = useMemo<Array<{ key: string; value: string }>>(() => [], []);
   const openaiDiscoveryEntries = useMemo(
@@ -631,15 +670,17 @@ function SponsorKeyEntryCard({
             </span>
           </label>
 
-          <SponsorModelSection
-            label={t(`providersPage.sponsor.protocolModels.${modelKey}`)}
-            description={t(`providersPage.sponsor.protocolModelHints.${modelKey}`)}
-            protocol={entry.protocol}
-            models={entry.models}
-            discovery={discovery}
-            mutating={mutating}
-            onChange={(models) => updateEntry({ models })}
-          />
+          {hideModels ? null : (
+            <SponsorModelSection
+              label={t(`providersPage.sponsor.protocolModels.${modelKey}`)}
+              description={t(`providersPage.sponsor.protocolModelHints.${modelKey}`)}
+              protocol={entry.protocol}
+              models={entry.models}
+              discovery={discovery}
+              mutating={mutating}
+              onChange={(models) => updateEntry({ models })}
+            />
+          )}
         </div>
       ) : null}
     </div>
@@ -804,6 +845,7 @@ export function SponsorProviderForm({
             usedProtocols={usedProtocols}
             canRemove={mode === 'edit' || entries.length > 1}
             mutating={mutating}
+            hideModels={definition.brand === 'opencodeFree' && index > 0}
             onChange={(nextEntry) => updateEntry(index, nextEntry)}
             onRemove={() => removeEntry(index)}
           />

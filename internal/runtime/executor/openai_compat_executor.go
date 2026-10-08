@@ -134,12 +134,20 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 	// read+shell tool definitions. Force upstream streaming and fold the SSE
 	// chunks back into a single completion below for non-stream clients.
 	forceOpencodeDestream := false
+	opencodeResponsesBridge := false
 	if opts.Alt != "responses/compact" {
 		if compat := e.resolveCompatConfig(auth); helps.NeedsOpencodeFullRecipe(compat, helps.OpencodeUpstreamModel(translated), apiKey) {
-			translated = helps.EnsureOpencodeMarkerTools(translated)
-			translated = helps.SetBoolIfDifferent(translated, "stream", true)
-			translated = helps.SetBoolIfDifferent(translated, "stream_options.include_usage", true)
-			forceOpencodeDestream = true
+			if helps.OpencodeResponsesProtocolModel(helps.OpencodeUpstreamModel(translated)) {
+				translated = helps.BuildOpencodeResponsesRequest(translated)
+				translated = helps.EnsureOpencodeResponsesMarkerTools(translated)
+				opencodeResponsesBridge = true
+				forceOpencodeDestream = true
+			} else {
+				translated = helps.EnsureOpencodeMarkerTools(translated)
+				translated = helps.SetBoolIfDifferent(translated, "stream", true)
+				translated = helps.SetBoolIfDifferent(translated, "stream_options.include_usage", true)
+				forceOpencodeDestream = true
+			}
 		}
 	}
 	if helps.ShouldNormalizeOpenAIToolResultsForModel(e.resolveCompatConfig(auth), baseModel, requestedModel) {
@@ -162,6 +170,9 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 	reporter.SetTranslatedReasoningEffort(translated, to.String())
 
 	url := strings.TrimSuffix(baseURL, "/") + endpoint
+	if opencodeResponsesBridge {
+		url = strings.TrimSuffix(baseURL, "/") + helps.OpencodeResponsesEndpoint()
+	}
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(translated))
 	if err != nil {
 		return resp, err
@@ -221,7 +232,11 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 		return resp, err
 	}
 	if forceOpencodeDestream {
-		body = helps.AssembleOpencodeStreamCompletion(body, helps.OpencodeUpstreamModel(translated))
+		if opencodeResponsesBridge {
+			body = helps.AssembleOpencodeResponsesCompletion(body, helps.OpencodeUpstreamModel(translated))
+		} else {
+			body = helps.AssembleOpencodeStreamCompletion(body, helps.OpencodeUpstreamModel(translated))
+		}
 	}
 	helps.AppendAPIResponseChunk(ctx, e.cfg, body)
 	reporter.ObserveResponseModel(body)
@@ -386,12 +401,24 @@ func (e *OpenAICompatExecutor) ExecuteStream(ctx context.Context, auth *cliproxy
 	translated = helps.SetBoolIfDifferent(translated, "stream_options.include_usage", true)
 	// Locked OpenCode free-tier models only serve requests carrying read+shell
 	// tool definitions; inject markers when the client sent none.
+	// Responses-protocol models (muse-spark) are converted to a responses
+	// request served on the responses endpoint.
+	opencodeResponsesBridge := false
 	if compat := e.resolveCompatConfig(auth); helps.NeedsOpencodeFullRecipe(compat, helps.OpencodeUpstreamModel(translated), apiKey) {
-		translated = helps.EnsureOpencodeMarkerTools(translated)
+		if helps.OpencodeResponsesProtocolModel(helps.OpencodeUpstreamModel(translated)) {
+			translated = helps.BuildOpencodeResponsesRequest(translated)
+			translated = helps.EnsureOpencodeResponsesMarkerTools(translated)
+			opencodeResponsesBridge = true
+		} else {
+			translated = helps.EnsureOpencodeMarkerTools(translated)
+		}
 	}
 	reporter.SetTranslatedReasoningEffort(translated, to.String())
 
 	url := strings.TrimSuffix(baseURL, "/") + "/chat/completions"
+	if opencodeResponsesBridge {
+		url = strings.TrimSuffix(baseURL, "/") + helps.OpencodeResponsesEndpoint()
+	}
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(translated))
 	if err != nil {
 		return nil, err
@@ -444,6 +471,9 @@ func (e *OpenAICompatExecutor) ExecuteStream(ctx context.Context, auth *cliproxy
 		}
 		err = newOpenAICompatStatusError(httpResp.StatusCode, httpResp.Header, b)
 		return nil, err
+	}
+	if opencodeResponsesBridge {
+		httpResp.Body = helps.NewOpencodeResponsesChatStream(httpResp.Body, helps.OpencodeUpstreamModel(translated))
 	}
 	out := make(chan cliproxyexecutor.StreamChunk)
 	go func() {

@@ -56,6 +56,9 @@ func TestBuildOpencodeResponsesRequest(t *testing.T) {
 	if input[1].Get("type").String() != "function_call" || input[1].Get("name").String() != "shell" {
 		t.Fatalf("assistant tool call must become a function_call item, got %s", input[1].Raw)
 	}
+	if input[1].Get("arguments").Type != gjson.String {
+		t.Fatalf("function_call arguments must stay a JSON-encoded string, got %s", input[1].Get("arguments").Raw)
+	}
 	if input[2].Get("type").String() != "function_call_output" || input[2].Get("call_id").String() != "call_1" {
 		t.Fatalf("tool message must become function_call_output, got %s", input[2].Raw)
 	}

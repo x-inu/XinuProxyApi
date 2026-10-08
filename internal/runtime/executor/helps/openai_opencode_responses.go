@@ -187,7 +187,10 @@ func opencodeResponsesInput(chatPayload []byte) []byte {
 				if args == "" {
 					args = "{}"
 				}
-				if item, err = sjson.SetRawBytes(item, "arguments", []byte(args)); err != nil {
+				// The responses API requires arguments as a JSON-encoded
+				// string, never a raw object: quote it regardless of how the
+				// client shaped it (string or already-parsed object).
+				if item, err = sjson.SetBytes(item, "arguments", args); err != nil {
 					return nil
 				}
 				appendRaw(string(item))

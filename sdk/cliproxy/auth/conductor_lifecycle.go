@@ -429,7 +429,10 @@ func (m *Manager) persist(ctx context.Context, auth *Auth) error {
 	if errWeight := ValidateAuthWeight(auth); errWeight != nil {
 		return fmt.Errorf("persist auth: %w", errWeight)
 	}
-	if IsConfigAPIKeyAuth(auth) {
+	if IsConfigAPIKeyAuth(auth) || auth.AuthSourceKind() == AuthSourceConfig {
+		return nil
+	}
+	if strings.HasPrefix(auth.ID, "openai-compatibility:") {
 		return nil
 	}
 	if auth.Attributes != nil {

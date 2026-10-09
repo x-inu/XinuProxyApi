@@ -154,7 +154,7 @@ func (h *Handler) ListAuthFiles(c *gin.Context) {
 	}
 	files := make([]gin.H, 0, len(auths))
 	for _, auth := range auths {
-		if !matchesAuthFileLookup(auth, nameFilter, authIndexFilter) {
+		if !matchesAuthFileLookup(auth, nameFilter, authIndexFilter) || !isAuthFileListable(auth) {
 			continue
 		}
 		if entry := h.buildAuthFileEntry(auth, quotaSupportedProviders); entry != nil {
@@ -263,6 +263,9 @@ func compareAuthFileListOrder(left, right *coreauth.Auth) int {
 
 func isAuthFileListable(auth *coreauth.Auth) bool {
 	if auth == nil {
+		return false
+	}
+	if auth.AuthSourceKind() == coreauth.AuthSourceConfig || strings.HasPrefix(auth.ID, "openai-compatibility:") {
 		return false
 	}
 	runtimeOnly := isRuntimeOnlyAuth(auth)
@@ -636,6 +639,9 @@ func reconcileAuthFileCooldownState(auth *coreauth.Auth, now time.Time) (unavail
 
 func (h *Handler) buildAuthFileEntryLocked(auth *coreauth.Auth, quotaSupported ...map[string]struct{}) gin.H {
 	if auth == nil {
+		return nil
+	}
+	if auth.AuthSourceKind() == coreauth.AuthSourceConfig || strings.HasPrefix(auth.ID, "openai-compatibility:") {
 		return nil
 	}
 	auth.EnsureIndex()

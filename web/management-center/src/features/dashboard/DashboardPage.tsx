@@ -231,6 +231,10 @@ export function DashboardPage() {
       {/* ---------- Hero ---------- */}
       <section className={styles.hero} ref={heroRef}>
         <div className={styles.heroCopy}>
+          <span className={styles.eyebrow} data-reveal>
+            <span className={styles.panelNum}>00 //&nbsp;</span>
+            {t('dashboard.hero_requests_label')}
+          </span>
           <h1 className={styles.heroTitle} data-reveal>
             {t(`dashboard.${verdict.key}`)}
             <span
@@ -341,7 +345,10 @@ export function DashboardPage() {
       {/* ---------- Traffic ---------- */}
       <section className={styles.section} ref={trafficRef}>
         <header className={styles.sectionHead}>
-          <span className={styles.eyebrow}>{t('dashboard.traffic_eyebrow')}</span>
+          <span className={styles.eyebrow}>
+            <span className={styles.panelNum}>01 //&nbsp;</span>
+            {t('dashboard.traffic_eyebrow')}
+          </span>
           <h2 className={styles.sectionTitle}>{t('dashboard.traffic_title')}</h2>
           <p className={styles.sectionDescription}>
             {t('dashboard.traffic_description', { window: windowLabel })}
@@ -355,7 +362,10 @@ export function DashboardPage() {
       {/* ---------- Provider fleet ---------- */}
       <section className={styles.section} ref={fleetRef}>
         <header className={styles.sectionHead}>
-          <span className={styles.eyebrow}>{t('dashboard.fleet_eyebrow')}</span>
+          <span className={styles.eyebrow}>
+            <span className={styles.panelNum}>02 //&nbsp;</span>
+            {t('dashboard.fleet_eyebrow')}
+          </span>
           <h2 className={styles.sectionTitle}>{t('dashboard.fleet_title')}</h2>
           <p className={styles.sectionDescription}>{t('dashboard.fleet_description')}</p>
         </header>
@@ -409,7 +419,10 @@ export function DashboardPage() {
       <section className={styles.detailGrid} ref={detailRef}>
         <div className={styles.panel} data-reveal>
           <header className={styles.panelHead}>
-            <span className={styles.eyebrow}>{t('dashboard.health_eyebrow')}</span>
+            <span className={styles.eyebrow}>
+              <span className={styles.panelNum}>03 //&nbsp;</span>
+              {t('dashboard.health_eyebrow')}
+            </span>
             <h2 className={styles.panelTitle}>{t('dashboard.health_title')}</h2>
           </header>
           {!credentials || credentials.total === 0 ? (
@@ -482,7 +495,10 @@ export function DashboardPage() {
 
         <div className={styles.panel} data-reveal>
           <header className={styles.panelHead}>
-            <span className={styles.eyebrow}>{t('dashboard.runtime_eyebrow')}</span>
+            <span className={styles.eyebrow}>
+              <span className={styles.panelNum}>04 //&nbsp;</span>
+              {t('dashboard.runtime_eyebrow')}
+            </span>
             <h2 className={styles.panelTitle}>{t('dashboard.runtime_title')}</h2>
           </header>
           <dl className={styles.specList}>
@@ -520,7 +536,10 @@ export function DashboardPage() {
       {/* ---------- CTA ---------- */}
       <section className={styles.section} ref={ctaRef}>
         <header className={styles.sectionHead} data-reveal>
-          <span className={styles.eyebrow}>{t('dashboard.cta_eyebrow')}</span>
+          <span className={styles.eyebrow}>
+            <span className={styles.panelNum}>05 //&nbsp;</span>
+            {t('dashboard.cta_eyebrow')}
+          </span>
           <h2 className={styles.sectionTitle}>{t('dashboard.cta_title')}</h2>
         </header>
         <div className={styles.ctaGrid}>

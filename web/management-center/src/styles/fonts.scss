@@ -1,0 +1,45 @@
+/**
+ * Ryoku typeface bundle (local, no external requests).
+ *
+ * Latin subsets vendored from Google Fonts and inlined by vite-plugin-singlefile
+ * (assetsInlineLimit is 100MB, so these woff2 files become base64 data URIs in
+ * the single management.html artifact). Japanese glyphs (e.g. the 源 brand mark)
+ * intentionally fall back to system fonts to keep the bundle lean — Noto Sans JP
+ * full would add megabytes.
+ *
+ * - Fraunces 600: editorial serif for hero titles and dossier headings.
+ * - Space Grotesk 500/700: UI sans for body, nav, and buttons.
+ * - Space Mono 400/700: tracked uppercase eyebrows, figures, and metadata.
+ */
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/fraunces-600-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('../assets/fonts/spacegrotesk-var-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/spacemono-400-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/spacemono-700-latin.woff2') format('woff2');
+}

@@ -147,17 +147,19 @@
 .ghostAction {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 11px 20px;
-  border-radius: $radius-full;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 2px;
+  font-family: $font-mono;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   text-decoration: none;
   transition:
     transform var(--dur-press) var(--ease-out-strong),
     background-color $transition-fast,
     border-color $transition-fast,
-    box-shadow var(--dur-hover) var(--ease-out-strong),
     color $transition-fast;
 
 
@@ -178,13 +180,14 @@
 .primaryAction {
   background: var(--text-primary);
   color: var(--bg-secondary);
-  border: 1px solid transparent;
+  border: 1px solid var(--text-primary);
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       transform: translateY(-1px);
-      background: color-mix(in srgb, var(--text-primary) 86%, var(--bg-secondary));
-      box-shadow: 0 12px 26px color-mix(in srgb, var(--text-primary) 22%, transparent);
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      box-shadow: none;
     }
   }
 
@@ -235,24 +238,16 @@
 
 
 .heroPanel {
-  --glass-blur: 14px;
-
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
   padding: clamp($spacing-lg, 2.5vw, 28px);
-  border-radius: 6px;
-  border: 1px solid var(--glass-border);
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--bg-primary) 90%, transparent),
-    color-mix(in srgb, var(--bg-secondary) 74%, transparent)
-  );
-  backdrop-filter: var(--glass-backdrop-filter);
-  -webkit-backdrop-filter: var(--glass-backdrop-filter);
-  box-shadow: var(--shadow-lg);
+  border-radius: 2px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  box-shadow: none;
 }
 
 .heroPanelTop {
@@ -390,21 +385,11 @@
   flex-direction: column;
   gap: 6px;
   padding: $spacing-lg;
-  border-radius: 5px;
+  border-radius: 2px;
   border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  border-top: 2px solid var(--tile-accent, var(--border-primary));
+  background: var(--bg-primary);
   transition: border-color $transition-fast;
-
-
-  &::before {
-    content: '';
-    width: 28px;
-    height: 3px;
-    margin-bottom: 2px;
-    border-radius: $radius-full;
-    background: var(--tile-accent, var(--border-hover));
-  }
-
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
@@ -418,8 +403,11 @@
 }
 
 .statLabel {
-  font-size: 12px;
-  font-weight: 600;
+  font-family: $font-mono;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--text-secondary);
 }
 
@@ -463,28 +451,39 @@
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   font-family: $font-mono;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-tertiary);
 
   &::before {
-    content: '▍';
-    color: var(--viz-success);
-    font-size: 12px;
-    line-height: 1;
+    content: '//';
+    color: var(--text-quaternary);
+    font-weight: 400;
+    letter-spacing: 0.1em;
   }
+}
+
+.panelNum {
+  font-family: $font-mono;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--text-quaternary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .sectionTitle {
   margin: 0;
-  font-size: clamp(22px, 2.6vw, 30px);
-  line-height: 1.18;
-  font-weight: 650;
-  letter-spacing: -0.02em;
+  font-family: $font-serif;
+  font-size: clamp(24px, 2.6vw, 32px);
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
   text-wrap: balance;
 }
@@ -502,9 +501,9 @@
   flex-direction: column;
   gap: $spacing-md;
   padding: clamp($spacing-lg, 2.4vw, 28px);
-  border-radius: 5px;
+  border-radius: 2px;
   border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  background: var(--bg-primary);
 }
 
 .panelHead {
@@ -515,8 +514,9 @@
 
 .panelTitle {
   margin: 0;
-  font-size: 18px;
-  font-weight: 650;
+  font-family: $font-serif;
+  font-size: 19px;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text-primary);
 }
@@ -874,21 +874,20 @@
   flex-direction: column;
   gap: 6px;
   padding: $spacing-lg;
-  border-radius: 5px;
+  border-radius: 2px;
   border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-primary) 76%, transparent);
+  background: var(--bg-primary);
   text-decoration: none;
   overflow: hidden;
   transition:
     transform var(--dur-press) var(--ease-out-strong),
-    border-color $transition-fast,
-    box-shadow var(--dur-hover) var(--ease-out-strong);
+    border-color $transition-fast;
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       transform: translateY(-2px);
       border-color: var(--border-hover);
-      box-shadow: 0 14px 30px rgb(0 0 0 / 0.12);
+      box-shadow: none;
 
       .ctaArrow {
         transform: translateX(3px);

@@ -90,6 +90,7 @@ const NAV_TOOLTIP_VIEWPORT_MARGIN = 8;
 interface SidebarNavGroup {
   id: string;
   labelKey: string;
+  num: string;
   items: SidebarNavItem[];
 }
 
@@ -419,6 +420,7 @@ export function MainLayout() {
     {
       id: 'operate',
       labelKey: 'nav_groups.operate',
+      num: '00',
       items: [
         {
           path: '/',
@@ -437,6 +439,7 @@ export function MainLayout() {
     {
       id: 'gateway',
       labelKey: 'nav_groups.gateway',
+      num: '01',
       items: [
         {
           path: '/ai-providers',
@@ -466,6 +469,7 @@ export function MainLayout() {
     {
       id: 'observe',
       labelKey: 'nav_groups.observe',
+      num: '02',
       items: [
         {
           path: '/quota',
@@ -484,6 +488,7 @@ export function MainLayout() {
     {
       id: 'control',
       labelKey: 'nav_groups.control',
+      num: '03',
       items: [
         {
           path: '/config',
@@ -520,6 +525,7 @@ export function MainLayout() {
           {
             id: 'plugin-pages',
             labelKey: 'nav_groups.plugin_pages',
+            num: '04',
             items: pluginPageNavItems,
           },
         ]
@@ -897,7 +903,12 @@ export function MainLayout() {
             {navGroups.map((group, idx) => (
               <div className="nav-group" key={group.id}>
                 {showSidebarLabels ? (
-                  <div className="nav-group-label">{t(group.labelKey)}</div>
+                  <div className="nav-group-label">
+                    <span className="nav-group-num" aria-hidden="true">
+                      {group.num} //
+                    </span>
+                    <span>{t(group.labelKey)}</span>
+                  </div>
                 ) : (
                   idx > 0 && <div className="nav-group-divider" aria-hidden="true" />
                 )}

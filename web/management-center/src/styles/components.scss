@@ -8,21 +8,17 @@
   gap: $spacing-sm;
   border: 1px solid transparent;
   border-radius: $radius-md;
-  padding: 10px 16px;
-  font-family: $font-mono;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  padding: 10px 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: all $transition-fast;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
 
   &.btn-primary {
-    background-color: var(--text-primary);
-    color: var(--bg-secondary);
-    border-color: var(--text-primary);
+    background-color: var(--primary-color);
+    color: var(--primary-contrast, #fff);
+    border-color: var(--primary-color);
 
     &:hover {
       background-color: var(--primary-hover);
@@ -85,13 +81,14 @@ textarea {
   padding: 10px 12px;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  font-family: $font-family;
-  transition: border-color $transition-fast;
+  transition:
+    border-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:focus {
     outline: none;
-    border-color: var(--border-hover);
-    box-shadow: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 }
 
@@ -115,8 +112,8 @@ textarea {
 .card {
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  box-shadow: none;
+  border-radius: $radius-lg;
+  box-shadow: var(--shadow);
   padding: $spacing-lg;
 }
 
@@ -253,9 +250,9 @@ textarea {
 
 .modal {
   background: var(--bg-primary);
-  border-radius: $radius-md;
-  border: 1px solid var(--border-primary);
-  box-shadow: none;
+  border-radius: $radius-lg;
+  border: 1px solid var(--border-color);
+  box-shadow: $shadow-lg;
   max-width: 100%;
   max-height: 90vh;
   overflow: hidden;
@@ -427,8 +424,8 @@ textarea {
 }
 
 .empty-state {
-  border: 1px dashed var(--border-primary);
-  border-radius: $radius-md;
+  border: 1px dashed var(--border-color);
+  border-radius: $radius-lg;
   padding: $spacing-lg;
   background: var(--bg-secondary);
   display: flex;

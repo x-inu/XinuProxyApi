@@ -394,8 +394,7 @@
 
 // Brand block keeps full-strength bone in dark mode so it never reads as
 // faded against the pure-black canvas (dossier body text stays dimmer).
-// NOTE: nested under .sidebar, so the theme qualifier goes first via &.
-[data-theme='dark'] & {
+[data-theme='dark'] .sidebar {
   .sidebar-brand-title {
     color: #ece4d4;
   }

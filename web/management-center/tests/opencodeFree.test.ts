@@ -13,6 +13,7 @@ import {
   OPENCODE_FREE_PROVIDER_NAME,
 } from '../src/features/providers/opencodeFree';
 import { getSponsorAggregationConflict } from '../src/features/providers/sponsorDefinitions';
+import { PROVIDER_LOGOS } from '../src/features/providers/brandLogos';
 
 /** Backend (kebab-case) shape as served by the management API. */
 const backendEntry = (proxyUrl?: string, weight?: number) => ({
@@ -220,5 +221,14 @@ describe('opencodeFree phase 2', () => {
         ],
       },
     ]);
+  });
+
+  test('configures official OpenCode brand logo with dark mode variant', () => {
+    const logo = PROVIDER_LOGOS.opencodeFree;
+    expect(logo).toBeDefined();
+    expect(logo.src).toBeTruthy();
+    expect(logo.darkSrc).toBeTruthy();
+    expect(logo.darkSrc).not.toBe(logo.src);
+    expect(logo.transparent).toBe(true);
   });
 });

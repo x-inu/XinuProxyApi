@@ -100,20 +100,6 @@
   color: var(--text-secondary);
 }
 
-.tileHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: $spacing-sm;
-  min-height: 40px;
-}
-
-.tileAction {
-  flex-shrink: 0;
-  white-space: nowrap;
-  margin: -4px -8px 0 0;
-}
-
 .tileValue {
   font-size: 22px;
   font-weight: 700;

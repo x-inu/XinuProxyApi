@@ -1602,7 +1602,7 @@
     "auth_files_count": "Authentication files: {{count}}"
   },
   "footer": {
-    "api_version": "CLI Proxy API Version",
+    "api_version": "XinuProxyAPI Version",
     "build_date": "Build Time",
     "version": "Management UI Version"
   },

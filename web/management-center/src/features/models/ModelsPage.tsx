@@ -139,7 +139,6 @@ export function ModelsPage() {
 
   const oauthGroupSection = (group: OAuthGroup) => {
     const isOpen = openOauthGroups.has(group.providerKey);
-    const globalRules = catalog.globalRulesByProvider[group.providerKey] ?? [];
     const channelState = catalog.channelCatalogs[group.providerKey];
 
     return (
@@ -170,23 +169,6 @@ export function ModelsPage() {
         </div>
         {isOpen ? (
           <div className={styles.cardList}>
-            <div className={styles.globalRulesRow}>
-              <span className={styles.globalRulesTitle}>
-                {t('models_page.global_rules_title', { count: globalRules.length })}
-              </span>
-              {globalRules.map((rule) => (
-                <code key={rule} className={cardStyles.wildcardChip}>
-                  {rule}
-                </code>
-              ))}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/auth-files/oauth-excluded')}
-              >
-                {t('models_page.global_rules_open')}
-              </Button>
-            </div>
             {group.cards.map((card) => (
               <CredentialModelCard
                 key={card.id}
@@ -196,7 +178,6 @@ export function ModelsPage() {
                 togglingKeys={catalog.togglingKeys}
                 query={query}
                 channelState={channelState}
-                globalRules={globalRules}
                 globalRulesPending={!catalog.globalRulesLoaded}
                 onToggle={catalog.toggleModel}
                 onFetch={() => undefined}

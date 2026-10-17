@@ -23,7 +23,6 @@ interface CredentialModelCardProps {
   query: string;
   fileState?: FileRuleState;
   channelState?: ChannelCatalogState;
-  globalRules?: string[];
   globalRulesPending?: boolean;
   fetchingAll?: boolean;
   onToggle: (card: CredentialCard, row: ModelRow, nextEnabled: boolean) => void;
@@ -68,7 +67,6 @@ export function CredentialModelCard({
   query,
   fileState,
   channelState,
-  globalRules,
   globalRulesPending,
   fetchingAll,
   onToggle,
@@ -170,17 +168,6 @@ export function CredentialModelCard({
               {onRetryFile ? (
                 <Button variant="ghost" size="sm" onClick={() => onRetryFile(card)}>
                   {t('models_page.retry')}
-                </Button>
-              ) : null}
-            </span>
-          ) : null}
-          {globalRules && globalRules.length > 0 ? (
-            <span className={styles.globalRuleNote}>
-              <IconLock size={12} />
-              {t('models_page.global_rules_note', { count: globalRules.length })}
-              {onOpenGlobalRules ? (
-                <Button variant="ghost" size="sm" onClick={onOpenGlobalRules}>
-                  {t('models_page.global_rules_open')}
                 </Button>
               ) : null}
             </span>

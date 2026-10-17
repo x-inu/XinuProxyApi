@@ -1937,9 +1937,6 @@
       "per_account": "Excluded individually by some accounts ({{rule}}) — clear it in per-account rules, not here"
     },
     "wildcard_rules_label": "Wildcard rules (managed in the provider form):",
-    "global_rules_title": "Global OAuth rules: {{count}}",
-    "global_rules_open": "Open rules page",
-    "global_rules_note": "{{count}} global rule(s) apply to every account below.",
     "global_rules_checking": "Checking global rules…",
     "oauth_group_refresh": "Refresh",
     "file_rules_loading": "Reading auth file rules…",

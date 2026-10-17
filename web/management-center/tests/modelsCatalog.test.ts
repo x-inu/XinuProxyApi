@@ -179,8 +179,77 @@ describe('buildModelRows', () => {
   });
 });
 
-describe('toggleExactExclusion', () => {
-  test('adds and removes exact rules while keeping wildcards', () => {
+describe('merged oauth group cards', () => {
+  const groupCard: CredentialCard = {
+    id: 'auth-group:antigravity',
+    kind: 'oauth-group',
+    groupKey: 'oauth:antigravity',
+    brand: 'openaiCompatibility',
+    title: 'antigravity',
+    subtitle: '20 accounts · one rules set',
+    lockDisabled: false,
+    disableAll: false,
+    configuredIds: [],
+    excludedRules: [],
+    aliases: {},
+    discovery: null,
+    mutation: { type: 'oauth-group', providerKey: 'antigravity' },
+  };
+
+  test('global rules drive exclusion and stay lock-toggled via the group card', () => {
+    const rows = buildModelRows({
+      card: groupCard,
+      catalogNames: ['model-a', 'model-b'],
+      fileRules: [],
+      globalRulesByProvider: { antigravity: ['model-b'] },
+      oauthProviderKey: 'antigravity',
+    });
+
+    const byId = new Map<string, ModelRow>(rows.map((row) => [row.id, row]));
+    expect(byId.get('model-a')?.excluded).toBe(false);
+    expect(byId.get('model-a')?.locked).toBe(false);
+    expect(byId.get('model-b')?.excluded).toBe(true);
+    expect(byId.get('model-b')?.locked).toBe(true);
+    expect(byId.get('model-b')?.globalRule).toBe('model-b');
+    expect(byId.get('model-b')?.fileOnlyRule).toBeUndefined();
+  });
+
+  test('per-file-only rules lock the row with a dedicated hint', () => {
+    const rows = buildModelRows({
+      card: groupCard,
+      catalogNames: ['model-a', 'model-b', 'model-c'],
+      fileRules: ['old-invalid-model'],
+      globalRulesByProvider: { antigravity: ['model-b'] },
+      oauthProviderKey: 'antigravity',
+    });
+
+    const byId = new Map<string, ModelRow>(rows.map((row) => [row.id, row]));
+    expect(byId.get('old-invalid-model')?.excluded).toBe(true);
+    expect(byId.get('old-invalid-model')?.locked).toBe(true);
+    expect(byId.get('old-invalid-model')?.fileOnlyRule).toBe('old-invalid-model');
+    expect(byId.get('old-invalid-model')?.origin).toBe('rule');
+    expect(byId.get('model-b')?.fileOnlyRule).toBeUndefined();
+    expect(byId.get('model-c')?.excluded).toBe(false);
+  });
+
+  test('wildcard file rules stay locked and flagged separately', () => {
+    const rows = buildModelRows({
+      card: groupCard,
+      catalogNames: ['claude-x'],
+      fileRules: ['claude-*'],
+      globalRulesByProvider: {},
+      oauthProviderKey: 'antigravity',
+    });
+
+    const byId = new Map<string, ModelRow>(rows.map((row) => [row.id, row]));
+    expect(byId.get('claude-x')?.excluded).toBe(true);
+    expect(byId.get('claude-x')?.locked).toBe(true);
+    expect(byId.get('claude-x')?.wildcardRule).toBe('claude-*');
+    expect(byId.get('claude-x')?.fileOnlyRule).toBeUndefined();
+  });
+});
+
+describe('toggleExactExclusion', () => {  test('adds and removes exact rules while keeping wildcards', () => {
     const base = ['gpt-*', 'claude-opus'];
     const disabled = toggleExactExclusion(base, 'claude-sonnet', true);
     expect(disabled).toEqual(['gpt-*', 'claude-opus', 'claude-sonnet']);

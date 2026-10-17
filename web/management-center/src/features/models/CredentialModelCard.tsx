@@ -88,11 +88,13 @@ export function CredentialModelCard({
   const toggleKey = (row: ModelRow) => `${card.id}::${row.id}`;
 
   const wildcardRules = card.excludedRules.filter((rule) => isWildcardRule(rule));
+  const fileOnlyRuleCount = rows.filter((row) => row.fileOnlyRule).length;
 
   const lockHint = (row: ModelRow): string | null => {
     if (card.lockDisabled) return t('models_page.lock.credential_disabled');
     if (row.globalRule) return t('models_page.lock.global', { rule: row.globalRule });
     if (row.wildcardRule) return t('models_page.lock.wildcard', { rule: row.wildcardRule });
+    if (row.fileOnlyRule) return t('models_page.lock.per_account', { rule: row.fileOnlyRule });
     if (card.disableAll) return t('models_page.lock.disable_all', { rule: DISABLE_ALL_RULE });
     return null;
   };
@@ -154,7 +156,7 @@ export function CredentialModelCard({
         </div>
       )}
 
-      {card.kind === 'oauth-file' ? (
+      {card.kind === 'oauth-file' || card.kind === 'oauth-group' ? (
         <div className={styles.cardToolbar}>
           {fileState?.loading ? (
             <span className={styles.filePending}>
@@ -190,6 +192,17 @@ export function CredentialModelCard({
             <span className={styles.filePending}>
               <IconLoader2 size={14} className={styles.spin} />
               {t('models_page.catalog_loading')}
+            </span>
+          ) : null}
+          {fileOnlyRuleCount > 0 ? (
+            <span className={styles.globalRuleNote}>
+              <IconLock size={12} />
+              {t('models_page.per_account_rules_note', { count: fileOnlyRuleCount })}
+              {onOpenGlobalRules ? (
+                <Button variant="ghost" size="sm" onClick={onOpenGlobalRules}>
+                  {t('models_page.per_account_rules_open')}
+                </Button>
+              ) : null}
             </span>
           ) : null}
         </div>
@@ -270,7 +283,7 @@ export function CredentialModelCard({
         </button>
       ) : null}
 
-      {card.kind === 'oauth-file' ? null : (
+      {card.kind === 'oauth-file' || card.kind === 'oauth-group' ? null : (
         <div className={styles.cardFooter}>
           {card.discovery ? (
             <Button

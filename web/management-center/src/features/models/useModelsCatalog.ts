@@ -248,28 +248,29 @@ export function useModelsCatalog() {
     }
     return Array.from(byProvider.entries())
       .sort(([left], [right]) => left.localeCompare(right))
-      .map(([providerKey, files]) => ({
-        providerKey,
-        files,
-        cards: files.map(
-          (file): CredentialCard => ({
-            id: `auth:${file.name}`,
-            kind: 'oauth-file',
-            groupKey: `oauth:${providerKey}`,
-            brand: 'openaiCompatibility',
-            title: file.name,
-            subtitle: file.email ?? null,
-            lockDisabled: file.disabled === true,
-            disableAll: false,
-            configuredIds: [],
-            excludedRules: [],
-            aliases: {},
-            discovery: null,
-            mutation: { type: 'oauth-file', fileName: file.name },
-          })
-        ),
-      }));
-  }, [oauthFiles]);
+      .map(([providerKey, files]) => {
+        // One merged card per OAuth provider: the group's model exclusions live
+        // in the global oauth-excluded-models layer, so account names must not
+        // surface in operator-facing text on this card.
+        const allDisabled = files.length > 0 && files.every((file) => file.disabled === true);
+        const mergedCard: CredentialCard = {
+          id: `auth-group:${providerKey}`,
+          kind: 'oauth-group',
+          groupKey: `oauth:${providerKey}`,
+          brand: 'openaiCompatibility',
+          title: providerKey,
+          subtitle: t('models_page.oauth_group_subtitle', { count: files.length }),
+          lockDisabled: allDisabled,
+          disableAll: false,
+          configuredIds: [],
+          excludedRules: [],
+          aliases: {},
+          discovery: null,
+          mutation: { type: 'oauth-group', providerKey },
+        };
+        return { providerKey, files, cards: [mergedCard] };
+      });
+  }, [oauthFiles, t]);
 
   const oauthCards = useMemo<CredentialCard[]>(
     () => oauthGroups.flatMap((group) => group.cards),
@@ -565,6 +566,23 @@ export function useModelsCatalog() {
             }));
             break;
           }
+          case 'oauth-group': {
+            // Group toggle = one write to the global rules layer, affecting
+            // every account of the provider at once.
+            const providerKey = card.mutation.providerKey;
+            const currentRules = globalRulesByProvider[providerKey] ?? [];
+            const nextRules = toggleExactExclusion(currentRules, row.id, !nextEnabled);
+            await authFilesApi.saveOauthExcludedModels(providerKey, nextRules);
+            setGlobalRulesByProvider((prev) => ({
+              ...prev,
+              [providerKey]: nextRules,
+            }));
+            showNotification(
+              t('models_page.toast.group_rules_updated', { count: nextRules.length }),
+              'success'
+            );
+            break;
+          }
         }
       } catch (err) {
         showNotification(
@@ -582,7 +600,7 @@ export function useModelsCatalog() {
         });
       }
     },
-    [fileStates, refetchConfig, showNotification, t, togglingKeys]
+    [fileStates, globalRulesByProvider, refetchConfig, showNotification, t, togglingKeys]
   );
 
   /* --------------------------- row computation --------------------------- */
@@ -598,9 +616,43 @@ export function useModelsCatalog() {
         })
       );
     }
+    const fileNamesByProvider = new Map<string, string[]>(
+      oauthGroups.map((group) => [group.providerKey, group.files.map((file) => file.name)])
+    );
     for (const card of oauthCards) {
       const providerKey = card.groupKey.replace(/^oauth:/, '');
       const channelState = channelCatalogs[providerKey];
+      if (card.kind === 'oauth-group') {
+        // Merged group card: one row list fed by the channel catalog (or the
+        // union of per-account models when no static catalog exists) and the
+        // union of every account's own rules plus the provider's global rules.
+        const union = new Map<string, string>();
+        const fileRulesUnion: string[] = [];
+        for (const file of fileNamesByProvider.get(providerKey) ?? []) {
+          const state = fileStates[file];
+          (state?.catalogNames ?? []).forEach((name) => {
+            if (name && !union.has(name.toLowerCase())) union.set(name.toLowerCase(), name);
+          });
+          for (const rule of state?.rules ?? []) {
+            if (!fileRulesUnion.includes(rule)) fileRulesUnion.push(rule);
+          }
+        }
+        rows.set(
+          card.id,
+          buildModelRows({
+            card,
+            catalogNames: channelState?.names?.length
+              ? channelState.names
+              : union.size
+                ? Array.from(union.values())
+                : null,
+            fileRules: fileRulesUnion,
+            globalRulesByProvider,
+            oauthProviderKey: providerKey,
+          })
+        );
+        continue;
+      }
       const fileName = card.mutation.type === 'oauth-file' ? card.mutation.fileName : '';
       const fileState = fileName ? fileStates[fileName] : undefined;
       rows.set(
@@ -617,7 +669,7 @@ export function useModelsCatalog() {
       );
     }
     return rows;
-  }, [catalogs, channelCatalogs, fileStates, globalRulesByProvider, oauthCards, providerCards]);
+  }, [catalogs, channelCatalogs, fileStates, globalRulesByProvider, oauthCards, oauthGroups, providerCards]);
 
   return {
     connected,

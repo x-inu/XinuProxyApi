@@ -34,12 +34,14 @@ import { isKimiClaudeProvider, isKimiCodexProvider, isKimiOpenAIProvider } from 
 import type { ConfigKeyBrand } from '@/services/api/modelAvailability';
 import { isUpstreamDiscoveryBrand, type UpstreamDiscoveryInput } from './upstreamDiscovery';
 
-export type CredentialKind = 'config-key' | 'openai-compat' | 'oauth-file';
+export type CredentialKind = 'config-key' | 'openai-compat' | 'oauth-file' | 'oauth-group';
 
 export type CredentialMutation =
   | { type: 'config-key'; keyBrand: ConfigKeyBrand; index: number; apiKey: string | null }
   | { type: 'openai-compat'; name: string; index: number; models: ModelAlias[] }
-  | { type: 'oauth-file'; fileName: string };
+  | { type: 'oauth-file'; fileName: string }
+  /** Merged OAuth group card: every toggle writes the global rules layer. */
+  | { type: 'oauth-group'; providerKey: string };
 
 export interface CredentialCard {
   id: string;
@@ -83,6 +85,8 @@ export interface ModelRow {
   locked: boolean;
   wildcardRule?: string;
   globalRule?: string;
+  /** Merged OAuth group only: rule from individual auth files, not editable there. */
+  fileOnlyRule?: string;
 }
 
 export type RowLockReason = 'wildcard' | 'global' | 'unknown-catalog' | undefined;
@@ -281,7 +285,7 @@ export const buildModelRows = (args: BuildModelRowsArgs): ModelRow[] => {
 
   const rules = normalizeExcludedRules(args.fileRules ?? card.excludedRules);
   const globalRules =
-    card.kind === 'oauth-file'
+    card.kind === 'oauth-file' || card.kind === 'oauth-group'
       ? normalizeExcludedRules(
           args.globalRulesByProvider?.[(args.oauthProviderKey ?? '').trim()] ?? []
         )
@@ -299,15 +303,26 @@ export const buildModelRows = (args: BuildModelRowsArgs): ModelRow[] => {
     const excluded = hasExcludedRule(rules, name) || Boolean(wildcardRule) || Boolean(globalRule);
     const locked =
       card.lockDisabled || card.disableAll || Boolean(wildcardRule) || Boolean(globalRule);
+    // Merged OAuth group cards toggle the global rules layer. A model excluded
+    // only by individual author files stays off no matter what the group toggle
+    // writes, so it is locked with a dedicated hint instead of silently
+    // ignoring the request.
+    const fileOnlyRule =
+      card.kind === 'oauth-group' && excluded && !wildcardRule && !globalRule
+        ? hasExcludedRule(rules, name)
+          ? name
+          : undefined
+        : undefined;
     rows.set(key, {
       row: {
         id: name,
         alias: card.aliases[name],
         origin,
         excluded,
-        locked,
+        locked: locked || Boolean(fileOnlyRule),
         wildcardRule: wildcardRule || undefined,
         globalRule: globalRule || undefined,
+        fileOnlyRule: fileOnlyRule || undefined,
       },
       order: order++,
     });

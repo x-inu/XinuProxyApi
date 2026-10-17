@@ -195,7 +195,6 @@ export function ModelsPage() {
                 catalog={EMPTY_CATALOG}
                 togglingKeys={catalog.togglingKeys}
                 query={query}
-                fileState={catalog.fileStates[card.mutation.type === 'oauth-file' ? card.mutation.fileName : '']}
                 channelState={channelState}
                 globalRules={globalRules}
                 globalRulesPending={!catalog.globalRulesLoaded}

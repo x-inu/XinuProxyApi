@@ -1933,7 +1933,8 @@
       "credential_disabled": "Credential disabled — enable it in AI Providers first",
       "wildcard": "Excluded by wildcard rule {{rule}}",
       "global": "Excluded by a global OAuth rule ({{rule}})",
-      "disable_all": "The whole credential is disabled (rule {{rule}})"
+      "disable_all": "The whole credential is disabled (rule {{rule}})",
+      "per_account": "Excluded individually by some accounts ({{rule}}) — clear it in per-account rules, not here"
     },
     "wildcard_rules_label": "Wildcard rules (managed in the provider form):",
     "global_rules_title": "Global OAuth rules: {{count}}",
@@ -1946,7 +1947,11 @@
     "retry": "Retry",
     "toast": {
       "model_update_failed": "Could not update {{model}}: {{error}}",
-      "fetched": "Catalog updated"
-    }
+      "fetched": "Catalog updated",
+      "group_rules_updated": "Provider rules updated ({{count}} active rule(s))"
+    },
+    "oauth_group_subtitle": "{{count}} accounts · one rules set",
+    "per_account_rules_note": "{{count}} model(s) come with individual per-account rules",
+    "per_account_rules_open": "Open per-account rules"
   }
 }

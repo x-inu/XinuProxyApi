@@ -219,7 +219,20 @@ function buildInitialForm(
           weight: entry.weight,
           authIndex: entry.authIndex,
         }))
-      : undefined,
+      : isClaudeLikeBrand(brand)
+        ? // Multi-key editor is always offered on Claude accounts: prefill the
+          // first row with the existing single key so an operator can append
+          // more keys (the merge-to-multi-key flow) without re-typing it.
+          [
+            {
+              apiKey: '',
+              existingApiKey: (cfg as ProviderKeyConfig).apiKey ?? '',
+              proxyUrl: (cfg as ProviderKeyConfig).proxyUrl ?? '',
+              weight: (cfg as ProviderKeyConfig).weight,
+              authIndex: (cfg as ProviderKeyConfig).authIndex,
+            },
+          ]
+        : undefined,
   };
 }
 

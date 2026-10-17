@@ -12,7 +12,7 @@ import {
   IconSearch,
 } from '@/components/ui/icons';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
-import { getTypeLabel } from '@/features/authFiles/constants';
+import { AUTH_FILE_ICONS, getTypeLabel } from '@/features/authFiles/constants';
 import { PROVIDER_LOGOS } from '@/features/providers/brandLogos';
 import { CredentialModelCard } from './CredentialModelCard';
 import { useModelsCatalog, type OAuthGroup } from './useModelsCatalog';
@@ -23,6 +23,38 @@ const EMPTY_CATALOG = {
   error: null,
   models: [],
   fetchedAt: null,
+};
+
+type ThemeIconAsset =
+  | string
+  | { light: string; dark: string }
+  | { src: string; darkSrc?: string };
+
+/**
+ * Renders a provider/group icon that stays visible in both themes: paired
+ * light/dark variants switch via CSS, while single dark-stroke artworks
+ * (Claude, Antigravity) sit on a white chip in dark mode.
+ */
+const renderThemeIcon = (icon: ThemeIconAsset | null, lightClass: string, darkClass: string, chipClass: string) => {
+  if (!icon) return null;
+  const asset = typeof icon === 'string'
+    ? { src: icon }
+    : 'src' in icon
+      ? { src: icon.src, darkSrc: icon.darkSrc }
+      : { src: icon.light, darkSrc: icon.dark };
+  if (!asset.darkSrc) {
+    return (
+      <span className={chipClass}>
+        <img src={asset.src} alt="" aria-hidden="true" />
+      </span>
+    );
+  }
+  return (
+    <>
+      <img src={asset.src} alt="" aria-hidden="true" className={lightClass} />
+      <img src={asset.darkSrc} alt="" aria-hidden="true" className={darkClass} />
+    </>
+  );
 };
 
 export function ModelsPage() {
@@ -79,19 +111,7 @@ export function ModelsPage() {
           onClick={() => toggleProviderGroup(group.id)}
           aria-expanded={isOpen}
         >
-          {logo ? (
-            <>
-              <img src={logo.src} alt="" aria-hidden="true" className={styles.logoLight} />
-              {logo.darkSrc ? (
-                <img
-                  src={logo.darkSrc}
-                  alt=""
-                  aria-hidden="true"
-                  className={styles.logoDark}
-                />
-              ) : null}
-            </>
-          ) : null}
+          {logo ? renderThemeIcon(logo, styles.logoLight, styles.logoDark, styles.logoChip) : null}
           <span className={styles.groupTitle}>
             {t(`providersPage.providerNames.${group.brand}`)}
           </span>
@@ -136,6 +156,14 @@ export function ModelsPage() {
             onClick={() => toggleOauthGroup(group)}
             aria-expanded={isOpen}
           >
+            {AUTH_FILE_ICONS[group.providerKey]
+              ? renderThemeIcon(
+                  AUTH_FILE_ICONS[group.providerKey],
+                  styles.logoLight,
+                  styles.logoDark,
+                  styles.logoChip
+                )
+              : null}
             <span className={styles.groupTitle}>
               {getTypeLabel(t, group.providerKey)}
             </span>

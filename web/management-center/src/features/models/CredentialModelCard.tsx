@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import { AUTH_FILE_ICONS } from '@/features/authFiles/constants';
+import { PROVIDER_LOGOS, type ProviderBrandLogoKey } from '@/features/providers/brandLogos';
 import {
   IconAlertTriangle,
   IconLoader2,
@@ -81,6 +83,18 @@ export function CredentialModelCard({
   const { t } = useTranslation();
   const [expandedRows, setExpandedRows] = useState(false);
 
+  const cardIcon = useMemo<{
+    src: string;
+    darkSrc?: string;
+  } | null>(() => {
+    if (card.kind === 'oauth-group') {
+      const asset = card.mutation.type === 'oauth-group' ? AUTH_FILE_ICONS[card.mutation.providerKey] : undefined;
+      if (!asset) return null;
+      return typeof asset === 'string' ? { src: asset } : { src: asset.light, darkSrc: asset.dark };
+    }
+    return PROVIDER_LOGOS[card.brand as ProviderBrandLogoKey] ?? null;
+  }, [card]);
+
   const visibleRows = useMemo(() => rows.filter((row) => matchQuery(row, query)), [rows, query]);
   const onCount = rows.filter((row) => !row.excluded).length;
   const offCount = rows.length - onCount;
@@ -108,11 +122,35 @@ export function CredentialModelCard({
       className={[styles.card, card.lockDisabled ? styles.cardLocked : ''].filter(Boolean).join(' ')}
     >
       <div className={styles.cardHead}>
-        <div className={styles.cardTitleBlock}>
-          <span className={styles.cardTitle} title={card.mutation.type === 'oauth-file' ? card.title : undefined}>
-            {card.title}
-          </span>
-          {card.subtitle ? <span className={styles.cardSubtitle}>{card.subtitle}</span> : null}
+        <div className={styles.cardTitleRow}>
+          {cardIcon ? (
+            cardIcon.darkSrc ? (
+              <>
+                <img
+                  src={cardIcon.src}
+                  alt=""
+                  aria-hidden="true"
+                  className={styles.brandIconLight}
+                />
+                <img
+                  src={cardIcon.darkSrc}
+                  alt=""
+                  aria-hidden="true"
+                  className={styles.brandIconDark}
+                />
+              </>
+            ) : (
+              <span className={styles.brandIconChip}>
+                <img src={cardIcon.src} alt="" aria-hidden="true" />
+              </span>
+            )
+          ) : null}
+          <div className={styles.cardTitleBlock}>
+            <span className={styles.cardTitle} title={card.mutation.type === 'oauth-file' ? card.title : undefined}>
+              {card.title}
+            </span>
+            {card.subtitle ? <span className={styles.cardSubtitle}>{card.subtitle}</span> : null}
+          </div>
         </div>
         <div className={styles.cardMeta}>
           <span className={styles.counterOn}>

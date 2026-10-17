@@ -204,6 +204,31 @@
   }
 }
 
+/**
+ * Single-artwork logos (e.g. Claude, Antigravity) often draw dark strokes
+ * with no dark-theme variant. Give them a white surface in dark mode so the
+ * mark stays visible, mirroring the OAuth page treatment.
+ */
+.logoChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+
+  img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+  }
+}
+
+[data-theme='dark'] .logoChip {
+  background: #fff;
+  border-radius: 5px;
+}
+
 // ─── OAuth global rules ─────────────────────────────────
 
 .globalRulesRow {

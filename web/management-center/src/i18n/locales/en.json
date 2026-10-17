@@ -94,6 +94,7 @@
     "dashboard": "Dashboard",
     "usage": "Usage",
     "ai_providers": "AI Providers",
+    "models": "Models",
     "auth_files": "Auth Files",
     "oauth": "OAuth Login",
     "quota_management": "Quota Management",
@@ -114,6 +115,7 @@
     "dashboard": "Operations overview",
     "usage": "Tokens & estimated cost",
     "ai_providers": "Upstream model routing",
+    "models": "Shared model selector & availability",
     "auth_files": "Auth files & credentials",
     "oauth": "OAuth authorization",
     "quota_management": "API keys & limits",
@@ -1890,6 +1892,61 @@
     },
     "modelCatalog": {
       "notLoaded": "Not loaded"
+    }
+  },
+  "models_page": {
+    "title": "Models",
+    "description": "Shared model selector for every provider: fetch catalogs from upstream endpoints and enable or disable individual models.",
+    "section_providers": "Provider models",
+    "section_oauth": "OAuth accounts",
+    "no_providers": "No provider credentials are configured.",
+    "no_oauth_files": "No OAuth auth files found.",
+    "search_placeholder": "Search models",
+    "fetch_all_button": "Fetch all providers ({{count}})",
+    "fetch_all_progress": "Fetching {{done}}/{{total}}…",
+    "fetch": "Fetch",
+    "refetch": "Refresh catalog",
+    "reload_catalog": "Reload catalog",
+    "catalog_fetched": "{{count}} models · {{time}}",
+    "no_discovery": "Model discovery is not available for this provider.",
+    "catalog_loading": "Loading model catalog…",
+    "fetch_all": {
+      "none": "No provider supports model discovery.",
+      "done": "Fetched models for {{total}} providers",
+      "done_with_errors": "Fetched {{total}} providers — {{failed}} failed"
+    },
+    "count_on": "{{count}} on",
+    "count_off": "{{count}} off",
+    "origin": {
+      "configured": "configured",
+      "discovered": "discovered",
+      "catalog": "in endpoint catalog",
+      "rule": "by rule"
+    },
+    "rows_loading": "Loading models…",
+    "rows_no_match": "No model matches the search.",
+    "rows_empty": "No models yet — fetch the catalog or add models in the provider form.",
+    "show_more": "Show {{count}} more",
+    "action_disable": "Disable this model",
+    "action_enable": "Enable this model",
+    "lock": {
+      "credential_disabled": "Credential disabled — enable it in AI Providers first",
+      "wildcard": "Excluded by wildcard rule {{rule}}",
+      "global": "Excluded by a global OAuth rule ({{rule}})",
+      "disable_all": "The whole credential is disabled (rule {{rule}})"
+    },
+    "wildcard_rules_label": "Wildcard rules (managed in the provider form):",
+    "global_rules_title": "Global OAuth rules: {{count}}",
+    "global_rules_open": "Open rules page",
+    "global_rules_note": "{{count}} global rule(s) apply to every account below.",
+    "global_rules_checking": "Checking global rules…",
+    "oauth_group_refresh": "Refresh",
+    "file_rules_loading": "Reading auth file rules…",
+    "catalog_note": "OAuth catalogs come from the backend model registry; disabled models are tracked as per-account exclusion rules.",
+    "retry": "Retry",
+    "toast": {
+      "model_update_failed": "Could not update {{model}}: {{error}}",
+      "fetched": "Catalog updated"
     }
   }
 }

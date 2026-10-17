@@ -5,6 +5,7 @@ export * from './apiKeyUsage';
 export * from './usage';
 export * from './config';
 export * from './configFile';
+export * from './modelAvailability';
 export * from './apiKeys';
 export * from './providers';
 export * from './authFiles';

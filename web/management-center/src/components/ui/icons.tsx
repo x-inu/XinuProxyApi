@@ -319,6 +319,15 @@ export function IconCheck({ size = 20, ...props }: IconProps) {
   );
 }
 
+export function IconLock({ size = 20, ...props }: IconProps) {
+  return (
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
+      <rect x="3.5" y="11" width="17" height="10" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
 export function IconEye({ size = 20, ...props }: IconProps) {
   return (
     <svg {...baseSvgProps} width={size} height={size} {...props}>
@@ -454,6 +463,8 @@ export function IconSidebarQuickStart({ size = 20, ...props }: IconProps) {
 }
 
 export const IconSidebarConfig = IconSlidersHorizontal;
+
+export const IconSidebarModels = IconModelCluster;
 
 export const IconSidebarPlugins = IconPlug;
 

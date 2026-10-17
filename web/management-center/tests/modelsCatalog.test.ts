@@ -1,0 +1,199 @@
+import { describe, expect, test } from 'bun:test';
+import type { Config, OpenAIProviderConfig } from '../src/types';
+import {
+  buildModelRows,
+  groupConfigCredentials,
+  toggleExactExclusion,
+  type CredentialCard,
+  type ModelRow,
+} from '../src/features/models/modelsCatalog';
+import {
+  OPENCODE_FREE_PROVIDER_NAME,
+  OPENCODE_FREE_OPENAI_BASE_URL,
+} from '../src/features/providers/opencodeFree';
+import { FENNO_AI_ANTHROPIC_BASE_URL } from '../src/features/providers/fennoAI';
+
+describe('groupConfigCredentials', () => {
+  test('groups generic sections by brand and detects sponsor entries', () => {
+    const config: Config = {
+      claudeApiKeys: [
+        { apiKey: 'claude-key-1', baseUrl: 'https://api.anthropic.com' },
+        { apiKey: 'fenno-key', baseUrl: FENNO_AI_ANTHROPIC_BASE_URL },
+      ],
+      openaiCompatibility: [
+        {
+          name: OPENCODE_FREE_PROVIDER_NAME,
+          baseUrl: OPENCODE_FREE_OPENAI_BASE_URL,
+        } as OpenAIProviderConfig,
+        {
+          name: 'My Relay',
+          baseUrl: 'https://relay.example.com/v1',
+        },
+      ],
+    };
+
+    const groups = groupConfigCredentials(config);
+    const byId = new Map(groups.map((group) => [group.id, group]));
+
+    expect(byId.get('claude')?.cards).toHaveLength(1);
+    expect(byId.get('fennoAI')?.cards).toHaveLength(1);
+    expect(byId.get('opencodeFree')?.cards).toHaveLength(1);
+    expect(byId.get('openaiCompatibility')?.cards).toHaveLength(1);
+  });
+
+  test('key card titles mask api keys and keep the disable-all flag', () => {
+    const config: Config = {
+      geminiApiKeys: [
+        {
+          apiKey: 'AIzaSuperSecretKey123456',
+          excludedModels: ['*'],
+        },
+      ],
+    };
+
+    const [group] = groupConfigCredentials(config);
+    const card = group.cards[0];
+    expect(card.title.includes('AIzaSuperSecretKey123456')).toBe(false);
+    expect(card.disableAll).toBe(true);
+    expect(card.id).toBe('key:gemini:0');
+    expect(card.excludedRules).toEqual(['*']);
+  });
+});
+
+const configCard = (overrides: Partial<CredentialCard> = {}): CredentialCard => ({
+  id: 'key:claude:0',
+  kind: 'config-key',
+  groupKey: 'claude',
+  brand: 'claude',
+  title: 'sk-…abcd',
+  subtitle: null,
+  lockDisabled: false,
+  disableAll: false,
+  configuredIds: ['claude-sonnet-4-5'],
+  excludedRules: [],
+  aliases: {},
+  discovery: null,
+  mutation: {
+    type: 'config-key',
+    keyBrand: 'claude',
+    index: 0,
+    apiKey: 'sk-key',
+  },
+  ...overrides,
+});
+
+describe('buildModelRows', () => {
+  test('config-key cards merge configured, discovered, and rule-only models', () => {
+    const card = configCard({
+      excludedRules: ['legacy-model'],
+    });
+    const rows = buildModelRows({
+      card,
+      discoveredNames: ['claude-opus-4', 'claude-sonnet-4-5'],
+    });
+
+    const byId = new Map<string, ModelRow>(rows.map((row) => [row.id, row]));
+    expect(byId.get('claude-sonnet-4-5')?.excluded).toBe(false);
+    expect(byId.get('claude-sonnet-4-5')?.origin).toBe('configured');
+    expect(byId.get('claude-opus-4')?.origin).toBe('discovered');
+    expect(byId.get('legacy-model')?.origin).toBe('rule');
+    expect(byId.get('legacy-model')?.excluded).toBe(true);
+    expect(rows).toHaveLength(3);
+  });
+
+  test('wildcard rules exclude and lock matching rows', () => {
+    const card = configCard({
+      configuredIds: ['gemini-2.5-pro', 'gemini-2.5-flash'],
+      excludedRules: ['gemini-2.5-flash*'],
+    });
+    const rows = buildModelRows({ card });
+    const flash = rows.find((row) => row.id === 'gemini-2.5-flash');
+    expect(flash?.excluded).toBe(true);
+    expect(flash?.locked).toBe(true);
+    expect(flash?.wildcardRule).toBe('gemini-2.5-flash*');
+  });
+
+  test('disable-all rule locks every row', () => {
+    const card = configCard({
+      configuredIds: ['model-a'],
+      excludedRules: ['*'],
+      disableAll: true,
+    });
+    const rows = buildModelRows({ card });
+    expect(rows.every((row) => row.locked)).toBe(true);
+    expect(rows.every((row) => row.excluded)).toBe(true);
+  });
+
+  test('openai-compat rows are on exactly for configured names', () => {
+    const card = configCard({
+      kind: 'openai-compat',
+      id: 'openai:0',
+      groupKey: 'openaiCompatibility',
+      brand: 'openaiCompatibility',
+      configuredIds: ['model-a', 'model-b'],
+      aliases: { 'model-b': 'b-alias' },
+    });
+    const rows = buildModelRows({
+      card,
+      discoveredNames: ['model-c'],
+    });
+
+    const byId = new Map<string, ModelRow>(rows.map((row) => [row.id, row]));
+    expect(byId.get('model-a')?.excluded).toBe(false);
+    expect(byId.get('model-b')?.excluded).toBe(false);
+    expect(byId.get('model-b')?.alias).toBe('b-alias');
+    expect(byId.get('model-c')?.excluded).toBe(true);
+    expect(byId.get('model-c')?.origin).toBe('discovered');
+  });
+
+  test('oauth rows honor per-file and global rules and lock global-rule rows', () => {
+    const card: CredentialCard = {
+      id: 'auth:account.json',
+      kind: 'oauth-file',
+      groupKey: 'oauth:antigravity',
+      brand: 'openaiCompatibility',
+      title: 'account.json',
+      subtitle: null,
+      lockDisabled: false,
+      disableAll: false,
+      configuredIds: [],
+      excludedRules: [],
+      aliases: {},
+      discovery: null,
+      mutation: { type: 'oauth-file', fileName: 'account.json' },
+    };
+    const rows = buildModelRows({
+      card,
+      catalogNames: ['model-a', 'model-b'],
+      fileRules: ['old-invalid-model'],
+      globalRulesByProvider: { antigravity: ['model-b'] },
+      oauthProviderKey: 'antigravity',
+    });
+
+    const byId = new Map<string, ModelRow>(rows.map((row) => [row.id, row]));
+    expect(byId.get('model-a')?.excluded).toBe(false);
+    expect(byId.get('model-a')?.origin).toBe('catalog');
+    expect(byId.get('model-b')?.excluded).toBe(true);
+    expect(byId.get('model-b')?.locked).toBe(true);
+    expect(byId.get('old-invalid-model')?.origin).toBe('rule');
+  });
+});
+
+describe('toggleExactExclusion', () => {
+  test('adds and removes exact rules while keeping wildcards', () => {
+    const base = ['gpt-*', 'claude-opus'];
+    const disabled = toggleExactExclusion(base, 'claude-sonnet', true);
+    expect(disabled).toEqual(['gpt-*', 'claude-opus', 'claude-sonnet']);
+
+    const enabledAgain = toggleExactExclusion(disabled, 'claude-sonnet', false);
+    expect(enabledAgain).toEqual(base);
+
+    const removedExact = toggleExactExclusion(base, 'claude-opus', false);
+    expect(removedExact).toEqual(['gpt-*']);
+  });
+
+  test('never adds a wildcard model id as an exclusion rule', () => {
+    const next = toggleExactExclusion(['gpt-*'], 'kimi-*', true);
+    expect(next).toEqual(['gpt-*']);
+  });
+});

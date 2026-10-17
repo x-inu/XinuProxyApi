@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
@@ -7,8 +7,6 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import {
   IconAlertTriangle,
   IconChevronDown,
-  IconDownload,
-  IconLoader2,
   IconLock,
   IconRefreshCw,
   IconSearch,
@@ -19,7 +17,6 @@ import { PROVIDER_LOGOS } from '@/features/providers/brandLogos';
 import { CredentialModelCard } from './CredentialModelCard';
 import { useModelsCatalog, type OAuthGroup } from './useModelsCatalog';
 import styles from './ModelsPage.module.scss';
-import cardStyles from './CredentialModelCard.module.scss';
 
 const EMPTY_CATALOG = {
   loading: false,
@@ -37,19 +34,6 @@ export function ModelsPage() {
   const [query, setQuery] = useState('');
   const [openProviderGroups, setOpenProviderGroups] = useState<Set<string>>(new Set());
   const [openOauthGroups, setOpenOauthGroups] = useState<Set<string>>(new Set());
-
-  const providerCards = useMemo(
-    () => catalog.groups.flatMap((group) => group.cards),
-    [catalog.groups]
-  );
-
-  const fetchableCount = useMemo(
-    () =>
-      providerCards.filter(
-        (card) => card.discovery && card.discovery.brand !== 'vertex'
-      ).length,
-    [providerCards]
-  );
 
   const toggleProviderGroup = (groupKey: string) => {
     setOpenProviderGroups((prev) => {
@@ -212,25 +196,6 @@ export function ModelsPage() {
               className={styles.searchInput}
             />
           </div>
-          <Button
-            onClick={() => void catalog.fetchAllCatalogs(providerCards)}
-            disabled={catalog.fetchAllState.active || !catalog.connected}
-          >
-            {catalog.fetchAllState.active ? (
-              <>
-                <IconLoader2 size={16} className={cardStyles.spin} />
-                {t('models_page.fetch_all_progress', {
-                  done: catalog.fetchAllState.done,
-                  total: catalog.fetchAllState.total,
-                })}
-              </>
-            ) : (
-              <>
-                <IconDownload size={16} />
-                {t('models_page.fetch_all_button', { count: fetchableCount })}
-              </>
-            )}
-          </Button>
         </div>
       </header>
 

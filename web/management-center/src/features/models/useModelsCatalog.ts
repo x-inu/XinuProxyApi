@@ -18,6 +18,7 @@ import {
   getDiscoveryErrorMessage,
 } from './upstreamDiscovery';
 import {
+  applyFreeOnlyFilter,
   buildModelRows,
   groupConfigCredentials,
   toggleExactExclusion,
@@ -150,6 +151,8 @@ export function useModelsCatalog() {
   const [oauthFiles, setOauthFiles] = useState<AuthFileItem[] | null>(null);
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [globalRulesByProvider, setGlobalRulesByProvider] = useState<Record<string, string[]>>({});
+  /** Per-card "Free only" fetch filter; undefined = default for its group. */
+  const [freeOnlyByCard, setFreeOnlyByCard] = useState<Record<string, boolean>>({});
   const [globalRulesLoaded, setGlobalRulesLoaded] = useState(false);
   const [channelCatalogs, setChannelCatalogs] = useState<Record<string, ChannelCatalogState>>({});
   const [fileStates, setFileStates] = useState<Record<string, FileRuleState>>({});
@@ -605,6 +608,41 @@ export function useModelsCatalog() {
 
   /* --------------------------- row computation --------------------------- */
 
+  /**
+   * Free-only fetch choice per provider card, mirroring the AI Providers
+   * discovery panel. Defaults to ON for the OpenCode (free) group: its
+   * catalog fetch keeps free models only.
+   */
+  const isFreeOnlyCard = useCallback(
+    (card: CredentialCard): boolean =>
+      freeOnlyByCard[card.id] ?? card.groupKey === 'opencodeFree',
+    [freeOnlyByCard]
+  );
+
+  const displayCatalogs = useMemo(() => {
+    const out: Record<string, CatalogEntryState> = {};
+    for (const card of providerCards) {
+      const state = catalogs[card.id];
+      if (!state) continue;
+      const filtered = applyFreeOnlyFilter(state.models, isFreeOnlyCard(card));
+      out[card.id] =
+        filtered.length === state.models.length
+          ? state
+          : { ...state, models: filtered };
+    }
+    return out;
+  }, [catalogs, providerCards, isFreeOnlyCard]);
+
+  const freeOnlyFlags = useMemo(() => {
+    const out: Record<string, boolean> = {};
+    for (const card of providerCards) out[card.id] = isFreeOnlyCard(card);
+    return out;
+  }, [providerCards, isFreeOnlyCard]);
+
+  const setCardFreeOnly = useCallback((cardId: string, value: boolean) => {
+    setFreeOnlyByCard((prev) => ({ ...prev, [cardId]: value }));
+  }, []);
+
   const rowsByCard = useMemo(() => {
     const rows = new Map<string, ModelRow[]>();
     for (const card of providerCards) {
@@ -612,7 +650,7 @@ export function useModelsCatalog() {
         card.id,
         buildModelRows({
           card,
-          discoveredNames: catalogs[card.id]?.models.map((model) => model.name) ?? null,
+          discoveredNames: displayCatalogs[card.id]?.models.map((model) => model.name) ?? null,
         })
       );
     }
@@ -669,7 +707,7 @@ export function useModelsCatalog() {
       );
     }
     return rows;
-  }, [catalogs, channelCatalogs, fileStates, globalRulesByProvider, oauthCards, oauthGroups, providerCards]);
+  }, [channelCatalogs, displayCatalogs, fileStates, globalRulesByProvider, oauthCards, oauthGroups, providerCards]);
 
   return {
     connected,
@@ -679,6 +717,9 @@ export function useModelsCatalog() {
     groups,
     oauthGroups,
     catalogs,
+    displayCatalogs,
+    freeOnlyFlags,
+    setCardFreeOnly,
     fileStates,
     channelCatalogs,
     globalRulesLoaded,

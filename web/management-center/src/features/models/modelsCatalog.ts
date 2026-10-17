@@ -22,6 +22,7 @@ import type {
   ProviderKeyConfig,
 } from '@/types';
 import { maskApiKey } from '@/utils/format';
+import type { ModelInfo } from '@/utils/models';
 import { isOpencodeFreeOpenAIProvider } from '../providers/opencodeFree';
 import { isFennoAIClaudeProvider, isFennoAICodexProvider } from '../providers/fennoAI';
 import {
@@ -187,10 +188,25 @@ const groupForOpenAIEntry = (config: OpenAIProviderConfig): string => {
  * Builds provider credential cards from the normalized config state.
  * Sponsor providers stay grouped so their protocol entries share one card.
  */
+/**
+ * Sponsor groups must surface their own brand (provider name + logo) on the
+ * Models page. Their entries are discovered through generic key slots
+ * (openai/codex/claude), so the entry brand alone would mislabel the group —
+ * e.g. OpenCode (free) accounts show up as "OpenAI Compatible".
+ */
+const SPONSOR_GROUP_BRANDS: Readonly<Record<string, ProviderBrand>> = {
+  opencodeFree: 'opencodeFree',
+  fennoAI: 'fennoAI',
+  qiniuCloud: 'qiniuCloud',
+  kimi: 'kimi',
+};
+
 export const groupConfigCredentials = (config: Config): ProviderCardGroup[] => {
   const groups = new Map<string, { brand: ProviderBrand; cards: CredentialCard[] }>();
   const push = (card: CredentialCard, fallbackBrand: ProviderBrand) => {
-    const group = groups.get(card.groupKey) ?? { brand: fallbackBrand, cards: [] };
+    const group =
+      groups.get(card.groupKey) ??
+      { brand: SPONSOR_GROUP_BRANDS[card.groupKey] ?? fallbackBrand, cards: [] };
     groups.set(card.groupKey, group);
     group.cards.push(card);
   };
@@ -355,3 +371,12 @@ export const toggleExactExclusion = (
   if (exclude && isWildcardRule(modelId)) return normalizeExcludedRules(rules);
   return toggleExcludedRule(normalizeExcludedRules(rules), modelId, exclude);
 };
+
+/**
+ * Free-only discovery filter, mirroring the AI Providers fetch flow: when it
+ * is on, only models the endpoint reports as free are shown. Models without
+ * pricing info stay visible so an endpoint that never sends pricing does not
+ * produce an empty list.
+ */
+export const applyFreeOnlyFilter = (models: readonly ModelInfo[], freeOnly: boolean): ModelInfo[] =>
+  freeOnly ? models.filter((model) => model.isFree !== false) : [...models];

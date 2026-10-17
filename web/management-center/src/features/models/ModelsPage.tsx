@@ -122,10 +122,12 @@ export function ModelsPage() {
                   key={card.id}
                   card={card}
                   rows={catalog.rowsByCard.get(card.id) ?? []}
-                  catalog={catalog.catalogs[card.id] ?? EMPTY_CATALOG}
+                  catalog={catalog.displayCatalogs[card.id] ?? EMPTY_CATALOG}
                   togglingKeys={catalog.togglingKeys}
                   query={query}
                   fetchingAll={catalog.fetchAllState.active}
+                  freeOnly={catalog.freeOnlyFlags[card.id] ?? false}
+                  onFreeOnlyChange={(value) => catalog.setCardFreeOnly(card.id, value)}
                   onToggle={catalog.toggleModel}
                   onFetch={(target) => void catalog.fetchCatalog(target, true)}
                 />

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { Config, OpenAIProviderConfig } from '../src/types';
 import {
+  applyFreeOnlyFilter,
   buildModelRows,
   groupConfigCredentials,
   toggleExactExclusion,
@@ -39,6 +40,11 @@ describe('groupConfigCredentials', () => {
     expect(byId.get('fennoAI')?.cards).toHaveLength(1);
     expect(byId.get('opencodeFree')?.cards).toHaveLength(1);
     expect(byId.get('openaiCompatibility')?.cards).toHaveLength(1);
+    // Sponsor groups surface their own brand so the Models page shows the
+    // provider name and logo instead of the generic entry-type label.
+    expect(byId.get('opencodeFree')?.brand).toBe('opencodeFree');
+    expect(byId.get('fennoAI')?.brand).toBe('fennoAI');
+    expect(byId.get('openaiCompatibility')?.brand).toBe('openaiCompatibility');
   });
 
   test('key card titles mask api keys and keep the disable-all flag', () => {
@@ -246,6 +252,27 @@ describe('merged oauth group cards', () => {
     expect(byId.get('claude-x')?.locked).toBe(true);
     expect(byId.get('claude-x')?.wildcardRule).toBe('claude-*');
     expect(byId.get('claude-x')?.fileOnlyRule).toBeUndefined();
+  });
+});
+
+describe('applyFreeOnlyFilter', () => {
+  const catalog = [
+    { name: 'free-model-a', isFree: true },
+    { name: 'paid-model-b', isFree: false },
+    { name: 'unknown-pricing-c' },
+    { name: 'free-model-d', isFree: true },
+  ];
+
+  test('keeps explicit free models and unknown pricing, drops confirmed paid', () => {
+    expect(applyFreeOnlyFilter(catalog, true).map((model) => model.name)).toEqual([
+      'free-model-a',
+      'unknown-pricing-c',
+      'free-model-d',
+    ]);
+  });
+
+  test('off keeps every entry', () => {
+    expect(applyFreeOnlyFilter(catalog, false)).toHaveLength(4);
   });
 });
 

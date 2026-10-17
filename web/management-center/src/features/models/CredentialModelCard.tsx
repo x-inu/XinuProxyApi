@@ -25,6 +25,8 @@ interface CredentialModelCardProps {
   channelState?: ChannelCatalogState;
   globalRulesPending?: boolean;
   fetchingAll?: boolean;
+  freeOnly?: boolean;
+  onFreeOnlyChange?: (value: boolean) => void;
   onToggle: (card: CredentialCard, row: ModelRow, nextEnabled: boolean) => void;
   onFetch: (card: CredentialCard, force: boolean) => void;
   onRetryFile?: (card: CredentialCard) => void;
@@ -69,6 +71,8 @@ export function CredentialModelCard({
   channelState,
   globalRulesPending,
   fetchingAll,
+  freeOnly,
+  onFreeOnlyChange,
   onToggle,
   onFetch,
   onRetryFile,
@@ -137,6 +141,18 @@ export function CredentialModelCard({
           ) : (
             <span className={styles.noDiscoveryHint}>{t('models_page.no_discovery')}</span>
           )}
+          {card.discovery?.brand === 'openaiCompatibility' && onFreeOnlyChange ? (
+            <Button
+              variant={freeOnly ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => onFreeOnlyChange(!freeOnly)}
+              disabled={catalog.loading}
+              aria-pressed={freeOnly}
+              aria-label={t('providersPage.discovery.fetchFreeOnly')}
+            >
+              {t('providersPage.discovery.fetchFreeOnly')}
+            </Button>
+          ) : null}
           {catalog.error && !catalog.loading ? (
             <span className={styles.catalogError} role="status">
               <IconAlertTriangle size={14} />

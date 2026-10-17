@@ -205,9 +205,10 @@
 }
 
 /**
- * Single-artwork logos (e.g. Claude, Antigravity) often draw dark strokes
- * with no dark-theme variant. Give them a white surface in dark mode so the
- * mark stays visible, mirroring the OAuth page treatment.
+ * Single-artwork icons without a dark-theme variant render in a chip; the
+ * default is transparent so colored marks (Claude, Antigravity) sit straight
+ * on the background, and only dark-stroke artworks get the white surface
+ * (`.logoChipSurface`) so they stay visible in dark mode.
  */
 .logoChip {
   display: inline-flex;
@@ -224,7 +225,7 @@
   }
 }
 
-[data-theme='dark'] .logoChip {
+[data-theme='dark'] .logoChipSurface {
   background: #fff;
   border-radius: 5px;
 }

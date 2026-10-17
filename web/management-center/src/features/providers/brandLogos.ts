@@ -27,6 +27,14 @@ export interface ProviderBrandLogo {
 
 export type ProviderBrandLogoKey = ProviderBrand | 'devin';
 
+/**
+ * Single dark-stroke artworks (no fills at all → default SVG black) that stay
+ * invisible on dark backgrounds. Only these keep the white surface chip in
+ * dark mode; colored marks (Claude orange, Antigravity blue, Gemini, Meta)
+ * render straight on the background.
+ */
+export const NEEDS_DARK_SURFACE_ICONS = new Set(['vertex']);
+
 export const PROVIDER_LOGOS: Record<ProviderBrandLogoKey, ProviderBrandLogo> = {
   gemini: { src: geminiLogo },
   interactions: { src: geminiLogo },

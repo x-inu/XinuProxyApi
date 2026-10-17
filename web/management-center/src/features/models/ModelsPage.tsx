@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/icons';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { AUTH_FILE_ICONS, getTypeLabel } from '@/features/authFiles/constants';
-import { PROVIDER_LOGOS } from '@/features/providers/brandLogos';
+import { PROVIDER_LOGOS, NEEDS_DARK_SURFACE_ICONS } from '@/features/providers/brandLogos';
 import { CredentialModelCard } from './CredentialModelCard';
 import { useModelsCatalog, type OAuthGroup } from './useModelsCatalog';
 import styles from './ModelsPage.module.scss';
@@ -32,10 +32,11 @@ type ThemeIconAsset =
 
 /**
  * Renders a provider/group icon that stays visible in both themes: paired
- * light/dark variants switch via CSS, while single dark-stroke artworks
- * (Claude, Antigravity) sit on a white chip in dark mode.
+ * light/dark variants switch via CSS, while single dark-stroke artworks sit
+ * on a white chip in dark mode (`needsSurface`) and colored marks render
+ * straight on the background.
  */
-const renderThemeIcon = (icon: ThemeIconAsset | null, lightClass: string, darkClass: string, chipClass: string) => {
+const renderThemeIcon = (icon: ThemeIconAsset | null, lightClass: string, darkClass: string, chipClass: string, surfaceClass = '') => {
   if (!icon) return null;
   const asset = typeof icon === 'string'
     ? { src: icon }
@@ -44,7 +45,7 @@ const renderThemeIcon = (icon: ThemeIconAsset | null, lightClass: string, darkCl
       : { src: icon.light, darkSrc: icon.dark };
   if (!asset.darkSrc) {
     return (
-      <span className={chipClass}>
+      <span className={surfaceClass ? `${chipClass} ${surfaceClass}` : chipClass}>
         <img src={asset.src} alt="" aria-hidden="true" />
       </span>
     );
@@ -111,7 +112,15 @@ export function ModelsPage() {
           onClick={() => toggleProviderGroup(group.id)}
           aria-expanded={isOpen}
         >
-          {logo ? renderThemeIcon(logo, styles.logoLight, styles.logoDark, styles.logoChip) : null}
+          {logo
+            ? renderThemeIcon(
+                logo,
+                styles.logoLight,
+                styles.logoDark,
+                styles.logoChip,
+                NEEDS_DARK_SURFACE_ICONS.has(group.brand) ? styles.logoChipSurface : ''
+              )
+            : null}
           <span className={styles.groupTitle}>
             {t(`providersPage.providerNames.${group.brand}`)}
           </span>
@@ -161,7 +170,8 @@ export function ModelsPage() {
                   AUTH_FILE_ICONS[group.providerKey],
                   styles.logoLight,
                   styles.logoDark,
-                  styles.logoChip
+                  styles.logoChip,
+                  NEEDS_DARK_SURFACE_ICONS.has(group.providerKey) ? styles.logoChipSurface : ''
                 )
               : null}
             <span className={styles.groupTitle}>

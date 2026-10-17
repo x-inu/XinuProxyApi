@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { AUTH_FILE_ICONS } from '@/features/authFiles/constants';
-import { PROVIDER_LOGOS, type ProviderBrandLogoKey } from '@/features/providers/brandLogos';
+import {
+  PROVIDER_LOGOS,
+  NEEDS_DARK_SURFACE_ICONS,
+  type ProviderBrandLogoKey,
+} from '@/features/providers/brandLogos';
 import {
   IconAlertTriangle,
   IconLoader2,
@@ -95,6 +99,11 @@ export function CredentialModelCard({
     return PROVIDER_LOGOS[card.brand as ProviderBrandLogoKey] ?? null;
   }, [card]);
 
+  const cardIconOnDarkSurface =
+    card.kind === 'oauth-group'
+      ? card.mutation.type === 'oauth-group' && NEEDS_DARK_SURFACE_ICONS.has(card.mutation.providerKey)
+      : NEEDS_DARK_SURFACE_ICONS.has(card.brand);
+
   const visibleRows = useMemo(() => rows.filter((row) => matchQuery(row, query)), [rows, query]);
   const onCount = rows.filter((row) => !row.excluded).length;
   const offCount = rows.length - onCount;
@@ -140,7 +149,13 @@ export function CredentialModelCard({
                 />
               </>
             ) : (
-              <span className={styles.brandIconChip}>
+              <span
+                className={
+                  cardIconOnDarkSurface
+                    ? `${styles.brandIconChip} ${styles.brandIconChipSurface}`
+                    : styles.brandIconChip
+                }
+              >
                 <img src={cardIcon.src} alt="" aria-hidden="true" />
               </span>
             )

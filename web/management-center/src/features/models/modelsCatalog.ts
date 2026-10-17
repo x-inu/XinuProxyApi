@@ -14,24 +14,23 @@ import {
   toggleExcludedRule,
 } from '@/components/excludedModels/excludedModelRules';
 import type { ProviderBrand } from '@/features/providers/types';
-import type { Config, GeminiKeyConfig, ModelAlias, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
+import type {
+  Config,
+  GeminiKeyConfig,
+  ModelAlias,
+  OpenAIProviderConfig,
+  ProviderKeyConfig,
+} from '@/types';
 import { maskApiKey } from '@/utils/format';
 import { isOpencodeFreeOpenAIProvider } from '../providers/opencodeFree';
-import {
-  isFennoAIClaudeProvider,
-  isFennoAICodexProvider,
-} from '../providers/fennoAI';
+import { isFennoAIClaudeProvider, isFennoAICodexProvider } from '../providers/fennoAI';
 import {
   isQiniuCloudClaudeProvider,
   isQiniuCloudCodexProvider,
   isQiniuCloudGeminiProvider,
   isQiniuCloudOpenAIProvider,
 } from '../providers/qiniuCloud';
-import {
-  isKimiClaudeProvider,
-  isKimiCodexProvider,
-  isKimiOpenAIProvider,
-} from '../providers/kimi';
+import { isKimiClaudeProvider, isKimiCodexProvider, isKimiOpenAIProvider } from '../providers/kimi';
 import type { ConfigKeyBrand } from '@/services/api/modelAvailability';
 import { isUpstreamDiscoveryBrand, type UpstreamDiscoveryInput } from './upstreamDiscovery';
 
@@ -106,34 +105,43 @@ const buildConfigKeyCard = (
   groupKey: string,
   raw: GeminiKeyConfig | ProviderKeyConfig,
   index: number
-): CredentialCard => ({
-  id: `key:${brand}:${index}`,
-  kind: 'config-key',
-  groupKey,
-  brand,
-  title: maskApiKey(raw.apiKey) || '(keyless)',
-  subtitle: trimTrailingSlash(raw.baseUrl) || null,
-  lockDisabled: false,
-  disableAll: hasExcludedRule(normalizeExcludedRules(raw.excludedModels ?? []), DISABLE_ALL_RULE),
-  configuredIds: (raw.models ?? []).map((model) => model.name).filter(Boolean),
-  excludedRules: normalizeExcludedRules(raw.excludedModels ?? []),
-  aliases: aliasMap(raw.models),
-  discovery: isUpstreamDiscoveryBrand(brand)
-    ? {
-        brand,
-        baseUrl: raw.baseUrl,
-        apiKey: raw.apiKey,
-        authIndex: raw.authIndex,
-        headers: raw.headers,
-      }
-    : null,
-  mutation: {
-    type: 'config-key',
-    keyBrand: brand,
-    index,
-    apiKey: (raw.apiKey ?? '').trim() || null,
-  },
-});
+): CredentialCard => {
+  // Multi-key credentials (Claude) share one model configuration; the plain
+  // api-key is empty and discovery uses the first key entry instead.
+  const keyEntries = (raw as ProviderKeyConfig).apiKeyEntries ?? [];
+  const firstEntryKey = keyEntries.find((entry) => entry.apiKey.trim())?.apiKey;
+  const title =
+    maskApiKey(raw.apiKey) ||
+    (firstEntryKey ? `${maskApiKey(firstEntryKey)} +${keyEntries.length - 1}` : '(keyless)');
+  return {
+    id: `key:${brand}:${index}`,
+    kind: 'config-key',
+    groupKey,
+    brand,
+    title,
+    subtitle: trimTrailingSlash(raw.baseUrl) || null,
+    lockDisabled: false,
+    disableAll: hasExcludedRule(normalizeExcludedRules(raw.excludedModels ?? []), DISABLE_ALL_RULE),
+    configuredIds: (raw.models ?? []).map((model) => model.name).filter(Boolean),
+    excludedRules: normalizeExcludedRules(raw.excludedModels ?? []),
+    aliases: aliasMap(raw.models),
+    discovery: isUpstreamDiscoveryBrand(brand)
+      ? {
+          brand,
+          baseUrl: raw.baseUrl,
+          apiKey: raw.apiKey || firstEntryKey,
+          authIndex: raw.authIndex,
+          headers: raw.headers,
+        }
+      : null,
+    mutation: {
+      type: 'config-key',
+      keyBrand: brand,
+      index,
+      apiKey: (raw.apiKey ?? '').trim() || null,
+    },
+  };
+};
 
 const buildOpenAICompatCard = (
   groupKey: string,
@@ -271,12 +279,12 @@ export const buildModelRows = (args: BuildModelRowsArgs): ModelRow[] => {
     return Array.from(rows.values());
   }
 
-  const rules = normalizeExcludedRules(
-    args.fileRules ?? card.excludedRules
-  );
+  const rules = normalizeExcludedRules(args.fileRules ?? card.excludedRules);
   const globalRules =
     card.kind === 'oauth-file'
-      ? normalizeExcludedRules(args.globalRulesByProvider?.[(args.oauthProviderKey ?? '').trim()] ?? [])
+      ? normalizeExcludedRules(
+          args.globalRulesByProvider?.[(args.oauthProviderKey ?? '').trim()] ?? []
+        )
       : [];
 
   let order = 0;
@@ -288,13 +296,9 @@ export const buildModelRows = (args: BuildModelRowsArgs): ModelRow[] => {
       ? rules.find((rule) => isWildcardRule(rule) && matchesExcludedRule(rule, name))
       : undefined;
     const globalRule = globalRules.find((rule) => matchesExcludedRule(rule, name));
-    const excluded =
-      hasExcludedRule(rules, name) || Boolean(wildcardRule) || Boolean(globalRule);
+    const excluded = hasExcludedRule(rules, name) || Boolean(wildcardRule) || Boolean(globalRule);
     const locked =
-      card.lockDisabled ||
-      card.disableAll ||
-      Boolean(wildcardRule) ||
-      Boolean(globalRule);
+      card.lockDisabled || card.disableAll || Boolean(wildcardRule) || Boolean(globalRule);
     rows.set(key, {
       row: {
         id: name,

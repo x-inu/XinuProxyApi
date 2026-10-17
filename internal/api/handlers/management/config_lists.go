@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -588,7 +589,42 @@ func (h *Handler) findExistingClaudeKey(existing []config.ClaudeKey, item config
 		return matches[0]
 	}
 
+	// Fallback for multi-key entries: the plain APIKey is empty there, so
+	// match by the sorted api-key-entries signature instead.
+	if signature := claudeEntriesSignature(item.APIKeyEntries); signature != "" {
+		var byEntries []*config.ClaudeKey
+		for i := range existing {
+			if claudeEntriesSignature(existing[i].APIKeyEntries) == signature {
+				byEntries = append(byEntries, &existing[i])
+			}
+		}
+		if len(byEntries) == 1 {
+			return byEntries[0]
+		}
+	}
+
 	return nil
+}
+
+// claudeEntriesSignature builds a comparable signature of a multi-key entry's
+// key list (key, proxy URL pairs). Empty for single-key or empty lists.
+func claudeEntriesSignature(entries []config.ClaudeAPIKeyEntry) string {
+	if len(entries) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(entries))
+	for i := range entries {
+		key := strings.TrimSpace(entries[i].APIKey)
+		if key == "" {
+			continue
+		}
+		parts = append(parts, key+"|"+strings.TrimSpace(entries[i].ProxyURL))
+	}
+	if len(parts) == 0 {
+		return ""
+	}
+	sort.Strings(parts)
+	return strings.Join(parts, "\n")
 }
 
 // claude-api-key: []ClaudeKey
@@ -648,6 +684,7 @@ func (h *Handler) PatchClaudeKey(c *gin.Context) {
 		Models                  *[]config.ClaudeModel            `json:"models"`
 		Headers                 *map[string]string               `json:"headers"`
 		ExcludedModels          *[]string                        `json:"excluded-models"`
+		APIKeyEntries           *[]config.ClaudeAPIKeyEntry      `json:"api-key-entries"`
 		RebuildMidSystemMessage *bool                            `json:"rebuild-mid-system-message"`
 		DisableCooling          json.RawMessage                  `json:"disable-cooling"`
 		ForceNonStream          *bool                            `json:"force-non-stream"`
@@ -728,6 +765,9 @@ func (h *Handler) PatchClaudeKey(c *gin.Context) {
 	}
 	if body.Value.ExcludedModels != nil {
 		entry.ExcludedModels = config.NormalizeExcludedModels(*body.Value.ExcludedModels)
+	}
+	if body.Value.APIKeyEntries != nil {
+		entry.APIKeyEntries = config.NormalizeClaudeAPIKeyEntries(*body.Value.APIKeyEntries)
 	}
 	if body.Value.RebuildMidSystemMessage != nil {
 		entry.RebuildMidSystemMessage = *body.Value.RebuildMidSystemMessage
@@ -2166,6 +2206,22 @@ func normalizeClaudeKey(entry *config.ClaudeKey) {
 	entry.Headers = config.NormalizeHeaders(entry.Headers)
 	entry.ExcludedModels = config.NormalizeExcludedModels(entry.ExcludedModels)
 	entry.Cloak = config.NormalizeCloakConfig(entry.Cloak)
+	for i := range entry.APIKeyEntries {
+		entry.APIKeyEntries[i].APIKey = strings.TrimSpace(entry.APIKeyEntries[i].APIKey)
+		entry.APIKeyEntries[i].ProxyURL = strings.TrimSpace(entry.APIKeyEntries[i].ProxyURL)
+	}
+	cleanedEntries := entry.APIKeyEntries[:0]
+	for i := range entry.APIKeyEntries {
+		if entry.APIKeyEntries[i].APIKey == "" {
+			continue
+		}
+		cleanedEntries = append(cleanedEntries, entry.APIKeyEntries[i])
+	}
+	if len(cleanedEntries) == 0 {
+		entry.APIKeyEntries = nil
+	} else {
+		entry.APIKeyEntries = cleanedEntries
+	}
 	if len(entry.Models) == 0 {
 		return
 	}

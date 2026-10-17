@@ -83,13 +83,23 @@ function providerKeyToResource(
     index,
   } as ProviderResourceSelector;
 
+  // Multi-key entries (Claude api-key-entries) show how many keys rotate
+  // instead of the "(keyless)" fallback.
+  const claudeKeyEntries = (config as ProviderKeyConfig).apiKeyEntries ?? [];
+  const identifier =
+    (apiKey && maskApiKey(apiKey)) ||
+    (claudeKeyEntries.length
+      ? `${maskApiKey(claudeKeyEntries[0].apiKey)} +${claudeKeyEntries.length - 1}`
+      : null) ||
+    `#${index + 1}`;
+
   return {
     id: buildId(brand, index, truncateForId(apiKey)),
     brand,
     originalIndex: index,
     name: null,
-    identifier: maskApiKey(apiKey) || `#${index + 1}`,
-    apiKeyPreview: apiKey ? maskApiKey(apiKey) : null,
+    identifier,
+    apiKeyPreview: apiKey ? maskApiKey(apiKey) : claudeKeyEntries.length ? `${claudeKeyEntries.length} keys` : null,
     apiKey: apiKey || null,
     authIndex: config.authIndex ?? null,
     baseUrl: config.baseUrl ?? null,

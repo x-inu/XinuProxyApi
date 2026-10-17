@@ -106,7 +106,10 @@ function buildInitialForm(
         brand === 'interactions'
           ? ''
           : undefined,
-      apiKeyEntries: brand === 'openaiCompatibility' ? [emptyApiKeyEntry()] : undefined,
+      apiKeyEntries:
+        brand === 'openaiCompatibility' || isClaudeLikeBrand(brand)
+          ? [emptyApiKeyEntry()]
+          : undefined,
     };
   }
 
@@ -208,6 +211,15 @@ function buildInitialForm(
       brand === 'interactions'
         ? ''
         : undefined,
+    apiKeyEntries: (cfg as ProviderKeyConfig).apiKeyEntries?.length
+      ? (cfg as ProviderKeyConfig).apiKeyEntries!.map((entry) => ({
+          apiKey: '',
+          existingApiKey: entry.apiKey,
+          proxyUrl: entry.proxyUrl ?? '',
+          weight: entry.weight,
+          authIndex: entry.authIndex,
+        }))
+      : undefined,
   };
 }
 

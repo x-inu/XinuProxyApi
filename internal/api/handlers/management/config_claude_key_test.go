@@ -906,6 +906,58 @@ func TestPatchClaudeKeyPriority(t *testing.T) {
 	}
 }
 
+func TestPatchClaudeKey_APIKeyEntries(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	cfg := &config.Config{
+		ClaudeKey: []config.ClaudeKey{
+			{APIKey: "legacy-key", BaseURL: "https://gateway.example.com"},
+		},
+	}
+	h := &Handler{cfg: cfg, configFilePath: writeTestConfigFile(t)}
+
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = httptest.NewRequest(http.MethodPatch, "/v0/management/claude-api-key",
+		strings.NewReader(`{"index":0,"value":{"api-key-entries":[{"api-key":" key-a "},{"api-key":"key-b","weight":3,"proxy-url":"http://proxy:8080"},{"api-key":""}]}}`))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	h.PatchClaudeKey(ctx)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body=%s", rec.Code, rec.Body.String())
+	}
+	entries := cfg.ClaudeKey[0].APIKeyEntries
+	if len(entries) != 2 {
+		t.Fatalf("entries = %d, want 2 (empty key dropped)", len(entries))
+	}
+	if entries[0].APIKey != "key-a" {
+		t.Fatalf("entries[0].APIKey = %q, want trimmed key-a", entries[0].APIKey)
+	}
+	if entries[1].APIKey != "key-b" || entries[1].ProxyURL != "http://proxy:8080" {
+		t.Fatalf("entries[1] = %+v", entries[1])
+	}
+	if entries[1].Weight == nil || *entries[1].Weight != 3 {
+		t.Fatalf("entries[1].Weight = %v, want 3", entries[1].Weight)
+	}
+	if cfg.ClaudeKey[0].APIKey != "legacy-key" {
+		t.Fatalf("plain api-key must survive an api-key-entries patch, got %q", cfg.ClaudeKey[0].APIKey)
+	}
+
+	// An empty entries list replaces the multi-key list with nothing.
+	rec = httptest.NewRecorder()
+	ctx, _ = gin.CreateTestContext(rec)
+	ctx.Request = httptest.NewRequest(http.MethodPatch, "/v0/management/claude-api-key",
+		strings.NewReader(`{"index":0,"value":{"api-key-entries":[]}}`))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	h.PatchClaudeKey(ctx)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body=%s", rec.Code, rec.Body.String())
+	}
+	if cfg.ClaudeKey[0].APIKeyEntries != nil {
+		t.Fatalf("APIKeyEntries = %v, want nil", cfg.ClaudeKey[0].APIKeyEntries)
+	}
+}
+
 func TestPatchClaudeKey_ForceNonStream(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	cfg := &config.Config{

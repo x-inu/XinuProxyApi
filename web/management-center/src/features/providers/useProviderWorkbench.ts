@@ -187,6 +187,31 @@ const buildProviderKeyConfig = (
     if (input.forceNonStream) {
       next.forceNonStream = true;
     }
+    // Multi-key mode: each entry becomes its own rotating credential sharing
+    // this entry's base URL / models / exclusion rules. When entries exist the
+    // plain api-key is cleared (backend ignores it in multi-key mode); a key
+    // typed into the single api-key field is folded in instead of being lost.
+    const claudeEntries = (input.apiKeyEntries ?? [])
+      .map((entry, index) => {
+        const fallbackApiKey =
+          entry.existingApiKey?.trim() ||
+          (existing as ProviderKeyConfig | undefined)?.apiKeyEntries?.[index]?.apiKey?.trim() ||
+          '';
+        return {
+          apiKey: entry.apiKey.trim() || fallbackApiKey,
+          proxyUrl: entry.proxyUrl.trim() || undefined,
+          weight: entry.weight,
+        };
+      })
+      .filter((entry) => entry.apiKey);
+    if (claudeEntries.length) {
+      const typedKey = input.apiKey.trim();
+      if (typedKey && !claudeEntries.some((entry) => entry.apiKey === typedKey)) {
+        claudeEntries.unshift({ apiKey: typedKey, proxyUrl: next.proxyUrl, weight: undefined });
+      }
+      next.apiKeyEntries = claudeEntries;
+      next.apiKey = '';
+    }
   }
   return next;
 };
@@ -356,7 +381,7 @@ const toggleSponsorConfig = async (raw: SponsorProviderRaw, disabled: boolean) =
     await providersApi.updateClaudeConfig(item.config.apiKey, item.config.baseUrl, {
       ...item.config,
       excludedModels,
-    });
+    }, item.config.apiKeyEntries);
   }
   for (const item of raw.openai) {
     await providersApi.updateOpenAIProviderDisabled(item.index, disabled);
@@ -602,14 +627,15 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           await providersApi.updateClaudeConfig(
             currentClaude.config.apiKey,
             currentClaude.config.baseUrl,
-            next
+            next,
+            currentClaude.config.apiKeyEntries
           );
         } else {
           await providersApi.createClaudeConfig(next);
         }
       } else if (definition.protocols.includes('claude')) {
         for (const item of raw.claude) {
-          await providersApi.deleteClaudeConfig(item.config.apiKey, item.config.baseUrl);
+          await providersApi.deleteClaudeConfig(item.config.apiKey, item.config.baseUrl, item.index);
         }
       }
 
@@ -739,7 +765,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           await providersApi.updateClaudeConfig(
             selector.apiKey,
             selector.baseUrl,
-            buildProviderKeyConfig('claude', input, existing) as ProviderKeyConfig
+            buildProviderKeyConfig('claude', input, existing) as ProviderKeyConfig,
+            existing.apiKeyEntries
           );
         } else if (brand === 'vertex' && selector.brand === 'vertex') {
           const existing = resource.raw as ProviderKeyConfig;
@@ -796,7 +823,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           const next = (config?.xaiApiKeys ?? []).filter((_, i) => i !== sel.index);
           updateConfigValue('xai-api-key', next);
         } else if (sel.brand === 'claude') {
-          await providersApi.deleteClaudeConfig(sel.apiKey, sel.baseUrl);
+          await providersApi.deleteClaudeConfig(sel.apiKey, sel.baseUrl, sel.index);
           const next = (config?.claudeApiKeys ?? []).filter((_, i) => i !== sel.index);
           updateConfigValue('claude-api-key', next);
         } else if (sel.brand === 'vertex') {
@@ -840,7 +867,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
               await providersApi.deleteCodexConfig(item.config.apiKey, item.config.baseUrl);
             }
             for (const item of raw.claude) {
-              await providersApi.deleteClaudeConfig(item.config.apiKey, item.config.baseUrl);
+              await providersApi.deleteClaudeConfig(item.config.apiKey, item.config.baseUrl, item.index);
             }
             const openAIIndices = raw.openai
               .map((item) => item.index)
@@ -901,7 +928,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           } else if (selector.brand === 'xai') {
             await providersApi.updateXAIConfig(selector.apiKey, selector.baseUrl, next);
           } else if (selector.brand === 'claude') {
-            await providersApi.updateClaudeConfig(selector.apiKey, selector.baseUrl, next);
+            await providersApi.updateClaudeConfig(selector.apiKey, selector.baseUrl, next, current.apiKeyEntries);
           } else if (selector.brand === 'vertex') {
             await providersApi.updateVertexConfig(selector.apiKey, selector.baseUrl, next);
           }

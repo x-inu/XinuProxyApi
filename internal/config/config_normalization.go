@@ -289,7 +289,31 @@ func (cfg *Config) SanitizeClaudeKeys() {
 		} else {
 			entry.FingerprintProfile = strings.TrimSpace(entry.FingerprintProfile)
 		}
+		entry.APIKeyEntries = NormalizeClaudeAPIKeyEntries(entry.APIKeyEntries)
 	}
+}
+
+// NormalizeClaudeAPIKeyEntries trims whitespace of multi-key Claude entries and
+// drops keys without an API key value. Order is preserved and blank proxy URLs
+// are cleared.
+func NormalizeClaudeAPIKeyEntries(entries []ClaudeAPIKeyEntry) []ClaudeAPIKeyEntry {
+	if len(entries) == 0 {
+		return nil
+	}
+	normalized := make([]ClaudeAPIKeyEntry, 0, len(entries))
+	for i := range entries {
+		entry := entries[i]
+		entry.APIKey = strings.TrimSpace(entry.APIKey)
+		entry.ProxyURL = strings.TrimSpace(entry.ProxyURL)
+		if entry.APIKey == "" {
+			continue
+		}
+		normalized = append(normalized, entry)
+	}
+	if len(normalized) == 0 {
+		return nil
+	}
+	return normalized
 }
 
 func sanitizeGeminiKeyEntries(entries []GeminiKey) []GeminiKey {

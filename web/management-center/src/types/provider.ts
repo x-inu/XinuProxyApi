@@ -39,6 +39,12 @@ export interface GeminiKeyConfig {
 
 export interface ProviderKeyConfig {
   apiKey: string;
+  /**
+   * Multi-key support (Claude only for now): when present, each key becomes
+   * its own rotating credential sharing this entry's base URL / models /
+   * exclusion rules, and the plain apiKey field stays empty.
+   */
+  apiKeyEntries?: ApiKeyEntry[];
   priority?: number;
   weight?: number;
   prefix?: string;

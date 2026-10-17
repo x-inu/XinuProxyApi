@@ -131,9 +131,17 @@ const normalizeProviderKeyConfig = (item: unknown): ProviderKeyConfig | null => 
   const record = isRecord(item) ? item : null;
   const apiKey = record?.['api-key'] ?? (typeof item === 'string' ? item : '');
   const trimmed = String(apiKey || '').trim();
-  if (!trimmed) return null;
+  // Multi-key Claude credentials: api-key may be empty while the keys live in
+  // api-key-entries (each becoming its own rotating credential).
+  const apiKeyEntries = Array.isArray(record?.['api-key-entries'])
+    ? (record?.['api-key-entries'] as unknown[])
+        .map((entry) => normalizeApiKeyEntry(entry))
+        .filter(Boolean) as ApiKeyEntry[]
+    : [];
+  if (!trimmed && apiKeyEntries.length === 0) return null;
 
   const config: ProviderKeyConfig = { apiKey: trimmed };
+  if (apiKeyEntries.length) config.apiKeyEntries = apiKeyEntries;
   const weight = readCredentialWeight(record?.weight);
   if (weight !== undefined) config.weight = weight;
   const priority = record?.priority;

@@ -18,6 +18,7 @@ const RESPONSE_ONLY_FIELDS = ['auth-index'] as const;
 
 const PROVIDER_COMMON_KEY_FIELDS = [
   'api-key',
+  'api-key-entries',
   'priority',
   'weight',
   'prefix',
@@ -224,6 +225,33 @@ const matchesProviderKey = (record: Record<string, unknown>, apiKey: string, bas
   getStringField(record, ['api-key']) === apiKey.trim() &&
   getStringField(record, ['base-url']) === (baseUrl ?? '').trim();
 
+// Multi-key records share an empty plain api-key, so they are matched by their
+// api-key-entries signature (sorted key|proxy pairs) to read-modify-write the
+// exact record that was edited.
+const providerEntriesSignature = (entries?: ApiKeyEntry[] | unknown[]) =>
+  entries?.length
+    ? entries
+        .filter(isRecord)
+        .map((entry) => {
+          const key = String(isRecord(entry) ? entry['api-key'] ?? '' : '').trim();
+          const proxyUrl = String(isRecord(entry) ? entry['proxy-url'] ?? '' : '').trim();
+          return key ? `${key}|${proxyUrl}` : '';
+        })
+        .filter(Boolean)
+        .sort()
+        .join('\n')
+    : '';
+
+const matchesClaudeEntries = (
+  record: Record<string, unknown>,
+  existingEntries: ApiKeyEntry[] | undefined
+) => {
+  const existingSig = providerEntriesSignature(existingEntries);
+  if (!existingSig) return false;
+  const recordEntries = isRecord(record) ? record['api-key-entries'] : undefined;
+  return providerEntriesSignature(Array.isArray(recordEntries) ? recordEntries : []) === existingSig;
+};
+
 const matchesOpenAIProvider = (record: Record<string, unknown>, name: string) =>
   openAIProviderIdentity(record) === name.trim();
 
@@ -324,7 +352,15 @@ const serializeApiKeyEntry = (entry: ApiKeyEntry) => {
 };
 
 const serializeProviderKey = (config: ProviderKeyConfig) => {
-  const payload: Record<string, unknown> = { 'api-key': config.apiKey };
+  // Multi-key mode (Claude): the plain api-key is cleared so the backend
+  // synthesizes one credential per entry instead of keeping a duplicate.
+  const entries = config.apiKeyEntries ?? [];
+  const payload: Record<string, unknown> = {
+    'api-key': entries.length ? '' : config.apiKey,
+  };
+  if (entries.length) {
+    payload['api-key-entries'] = entries.map(serializeApiKeyEntry);
+  }
   if (config.priority !== undefined) payload.priority = config.priority;
   if (config.weight !== undefined) payload.weight = config.weight;
   if (config.prefix?.trim()) payload.prefix = config.prefix.trim();
@@ -554,18 +590,32 @@ export const providersApi = {
       )
     ),
 
-  updateClaudeConfig: (apiKey: string, baseUrl: string | undefined, config: ProviderKeyConfig) =>
+  updateClaudeConfig: (
+    apiKey: string,
+    baseUrl: string | undefined,
+    config: ProviderKeyConfig,
+    existingEntries?: ApiKeyEntry[]
+  ) =>
     mutateLatestProviderList('claude-api-key', (latestItems) =>
       replaceLatestProviderRecord(
         latestItems,
-        (record) => matchesProviderKey(record, apiKey, baseUrl),
+        (record) =>
+          existingEntries?.length && !apiKey.trim()
+            ? matchesClaudeEntries(record, existingEntries)
+            : matchesProviderKey(record, apiKey, baseUrl),
         serializeProviderKey(config),
         (raw, payload) => mergeProviderKeyPayload(raw, payload, CLAUDE_KEY_FIELDS)
       )
     ),
 
-  deleteClaudeConfig: (apiKey: string, baseUrl?: string) =>
-    apiClient.delete(`/claude-api-key${buildProviderDeleteQuery(apiKey, baseUrl)}`),
+  deleteClaudeConfig: (apiKey: string, baseUrl?: string, index?: number) => {
+    // Multi-key entries carry an empty plain api-key; delete by section index
+    // because the backend matches empty keys ambiguously.
+    if (!apiKey.trim() && typeof index === 'number' && index >= 0) {
+      return apiClient.delete(`/claude-api-key?index=${index}`);
+    }
+    return apiClient.delete(`/claude-api-key${buildProviderDeleteQuery(apiKey, baseUrl)}`);
+  },
 
   async getVertexConfigs(): Promise<ProviderKeyConfig[]> {
     const data = await apiClient.get('/vertex-api-key');

@@ -136,69 +136,114 @@ func (s *ConfigSynthesizer) synthesizeGeminiKeyEntries(ctx *SynthesisContext, en
 // synthesizeClaudeKeys creates Auth entries for Claude API keys.
 func (s *ConfigSynthesizer) synthesizeClaudeKeys(ctx *SynthesisContext) []*coreauth.Auth {
 	cfg := ctx.Config
-	now := ctx.Now
-	idGen := ctx.IDGenerator
-
 	out := make([]*coreauth.Auth, 0, len(cfg.ClaudeKey))
 	for i := range cfg.ClaudeKey {
 		ck := cfg.ClaudeKey[i]
-		key := strings.TrimSpace(ck.APIKey)
 		base := strings.TrimSpace(ck.BaseURL)
-		if key == "" && base == "" {
+		prefix := strings.TrimSpace(ck.Prefix)
+		if len(ck.APIKeyEntries) == 0 {
+			out = append(out, s.synthesizeClaudeKeyEntry(ctx, i, ck, base, prefix, strings.TrimSpace(ck.APIKey), strings.TrimSpace(ck.ProxyURL), ck.Weight, "")...)
 			continue
 		}
-		prefix := strings.TrimSpace(ck.Prefix)
-		proxyURL := strings.TrimSpace(ck.ProxyURL)
-		id, token := idGen.Next("claude:apikey", key, base, proxyURL, prefix, config.FormatSortedHeaders(ck.Headers))
-		attrs := map[string]string{
-			"source":       fmt.Sprintf("config:claude[%s]", token),
-			"config_index": strconv.Itoa(i),
+		// Multi-key mode: each key becomes its own credential sharing the
+		// entry's base URL, models, headers, and exclusion rules. The single
+		// APIKey field is ignored so no duplicate credential is registered.
+		for j := range ck.APIKeyEntries {
+			entry := ck.APIKeyEntries[j]
+			key := strings.TrimSpace(entry.APIKey)
+			if key == "" {
+				continue
+			}
+			proxyURL := strings.TrimSpace(entry.ProxyURL)
+			if proxyURL == "" {
+				proxyURL = strings.TrimSpace(ck.ProxyURL)
+			}
+			weight := entry.Weight
+			if weight == nil {
+				weight = ck.Weight
+			}
+			slot := strconv.Itoa(j)
+			out = append(out, s.synthesizeClaudeKeyEntry(ctx, i, ck, base, prefix, key, proxyURL, weight, slot)...)
 		}
-		if key != "" {
-			attrs["api_key"] = key
-		}
-		metadata := map[string]any{}
-		if ck.DisableCooling != nil {
-			metadata["disable_cooling"] = *ck.DisableCooling
-		}
-		addRequestRetryToMetadata(ck.RequestRetry, metadata)
-		addRequestScopedErrorsToMetadata(ck.RequestScopedErrors, metadata)
-		if ck.Priority != 0 {
-			attrs["priority"] = strconv.Itoa(ck.Priority)
-		}
-		addWeightToAttrs(ck.Weight, attrs)
-		if base != "" {
-			attrs["base_url"] = base
-		}
-		if ck.RebuildMidSystemMessage {
-			attrs["rebuild_mid_system_message"] = "true"
-		}
-		if profile := strings.ToLower(strings.TrimSpace(ck.FingerprintProfile)); profile != "" {
-			attrs["fingerprint_profile"] = profile
-		}
-		if hash := diff.ComputeClaudeModelsHash(ck.Models); hash != "" {
-			attrs["models_hash"] = hash
-		}
-		addConfigHeadersToAttrs(ck.Headers, attrs)
-		a := &coreauth.Auth{
-			ID:         id,
-			Provider:   "claude",
-			Label:      "claude-apikey",
-			Prefix:     prefix,
-			Status:     coreauth.StatusActive,
-			ProxyURL:   proxyURL,
-			Attributes: attrs,
-			Metadata:   metadata,
-			CreatedAt:  now,
-			UpdatedAt:  now,
-		}
-		ApplyAuthExcludedModelsMeta(a, cfg, ck.ExcludedModels, "apikey")
-		if len(a.Metadata) == 0 {
-			a.Metadata = nil
-		}
-		out = append(out, a)
 	}
 	return out
+}
+
+// synthesizeClaudeKeyEntry synthesizes one Claude auth credential. The slot
+// parameter identifies the key inside a multi-key entry; it is empty for the
+// legacy single-key form so existing credential IDs stay stable.
+func (s *ConfigSynthesizer) synthesizeClaudeKeyEntry(
+	ctx *SynthesisContext,
+	index int,
+	ck config.ClaudeKey,
+	base string,
+	prefix string,
+	key string,
+	proxyURL string,
+	weight *int,
+	slot string,
+) []*coreauth.Auth {
+	if key == "" && base == "" {
+		return nil
+	}
+	cfg := ctx.Config
+	now := ctx.Now
+	idGen := ctx.IDGenerator
+	idParts := []string{key, base, proxyURL, prefix, config.FormatSortedHeaders(ck.Headers)}
+	if slot != "" {
+		idParts = append(idParts, slot)
+	}
+	id, token := idGen.Next("claude:apikey", idParts...)
+	attrs := map[string]string{
+		"source":       fmt.Sprintf("config:claude[%s]", token),
+		"config_index": strconv.Itoa(index),
+	}
+	if key != "" {
+		attrs["api_key"] = key
+	}
+	if slot != "" {
+		attrs["key_slot"] = slot
+	}
+	metadata := map[string]any{}
+	if ck.DisableCooling != nil {
+		metadata["disable_cooling"] = *ck.DisableCooling
+	}
+	addRequestRetryToMetadata(ck.RequestRetry, metadata)
+	addRequestScopedErrorsToMetadata(ck.RequestScopedErrors, metadata)
+	if ck.Priority != 0 {
+		attrs["priority"] = strconv.Itoa(ck.Priority)
+	}
+	addWeightToAttrs(weight, attrs)
+	if base != "" {
+		attrs["base_url"] = base
+	}
+	if ck.RebuildMidSystemMessage {
+		attrs["rebuild_mid_system_message"] = "true"
+	}
+	if profile := strings.ToLower(strings.TrimSpace(ck.FingerprintProfile)); profile != "" {
+		attrs["fingerprint_profile"] = profile
+	}
+	if hash := diff.ComputeClaudeModelsHash(ck.Models); hash != "" {
+		attrs["models_hash"] = hash
+	}
+	addConfigHeadersToAttrs(ck.Headers, attrs)
+	a := &coreauth.Auth{
+		ID:         id,
+		Provider:   "claude",
+		Label:      "claude-apikey",
+		Prefix:     prefix,
+		Status:     coreauth.StatusActive,
+		ProxyURL:   proxyURL,
+		Attributes: attrs,
+		Metadata:   metadata,
+		CreatedAt:  now,
+		UpdatedAt:  now,
+	}
+	ApplyAuthExcludedModelsMeta(a, cfg, ck.ExcludedModels, "apikey")
+	if len(a.Metadata) == 0 {
+		a.Metadata = nil
+	}
+	return []*coreauth.Auth{a}
 }
 
 // synthesizeCodexKeys creates Auth entries for Codex API keys.

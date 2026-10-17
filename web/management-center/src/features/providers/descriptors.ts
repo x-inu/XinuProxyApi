@@ -133,7 +133,7 @@ export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
     supportsTestModel: true,
     supportsWebsockets: false,
     supportsCloak: true,
-    supportsApiKeyEntries: false,
+    supportsApiKeyEntries: true,
     sheetSize: 'md',
   },
   vertex: {

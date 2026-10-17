@@ -182,17 +182,26 @@ export function useConnectivityTest(
 
   const runOpenAIKey = useCallback(
     async (idx: number): Promise<boolean> => {
-      if (brand !== 'openaiCompatibility') return false;
+      // Drives the per-key connectivity tests inside ApiKeyEntriesEditor for
+      // OpenAI-compatible providers and for multi-key Claude credentials.
+      if (brand !== 'openaiCompatibility' && brand !== 'claude') return false;
 
+      const isClaude = brand === 'claude';
       const trimmedBase = baseUrl.trim();
-      if (!trimmedBase) {
-        updateOpenaiStatus(idx, {
-          state: 'error',
-          message: messages.baseUrlRequired,
-        });
-        return false;
+      let endpoint: string | null;
+      if (isClaude) {
+        // Claude works without a custom base URL (falls back to the official API).
+        endpoint = buildClaudeMessagesEndpoint(trimmedBase);
+      } else {
+        if (!trimmedBase) {
+          updateOpenaiStatus(idx, {
+            state: 'error',
+            message: messages.baseUrlRequired,
+          });
+          return false;
+        }
+        endpoint = buildOpenAIChatCompletionsEndpoint(trimmedBase);
       }
-      const endpoint = buildOpenAIChatCompletionsEndpoint(trimmedBase);
       if (!endpoint) {
         updateOpenaiStatus(idx, {
           state: 'error',
@@ -224,12 +233,33 @@ export function useConnectivityTest(
         'Content-Type': 'application/json',
         ...buildHeaderObject(formHeaders),
       };
-      if (!hasHeader(headerObj, 'authorization')) {
-        if (entryKey) {
-          headerObj.Authorization = `Bearer ${entryKey}`;
-        } else if (resolvedAuthIndex) {
-          headerObj.Authorization = 'Bearer $TOKEN$';
+      let data: string;
+      if (isClaude) {
+        if (!hasHeader(headerObj, 'anthropic-version')) {
+          headerObj['anthropic-version'] = DEFAULT_ANTHROPIC_VERSION;
         }
+        if (!hasHeader(headerObj, 'x-api-key')) {
+          headerObj['x-api-key'] = entryKey || '$TOKEN$';
+        }
+        data = JSON.stringify({
+          model,
+          max_tokens: 8,
+          messages: [{ role: 'user', content: 'Hi' }],
+        });
+      } else {
+        if (!hasHeader(headerObj, 'authorization')) {
+          if (entryKey) {
+            headerObj.Authorization = `Bearer ${entryKey}`;
+          } else if (resolvedAuthIndex) {
+            headerObj.Authorization = 'Bearer $TOKEN$';
+          }
+        }
+        data = JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: 'Hi' }],
+          stream: false,
+          max_tokens: 5,
+        });
       }
 
       updateOpenaiStatus(idx, { state: 'loading', message: '' });
@@ -241,12 +271,7 @@ export function useConnectivityTest(
             method: 'POST',
             url: endpoint,
             header: headerObj,
-            data: JSON.stringify({
-              model,
-              messages: [{ role: 'user', content: 'Hi' }],
-              stream: false,
-              max_tokens: 5,
-            }),
+            data,
           },
           { timeout: DEFAULT_TIMEOUT_MS }
         );
@@ -279,7 +304,7 @@ export function useConnectivityTest(
   );
 
   const runOpenAIAllKeys = useCallback(async (): Promise<void> => {
-    if (brand !== 'openaiCompatibility') return;
+    if (brand !== 'openaiCompatibility' && brand !== 'claude') return;
     const entries = apiKeyEntries ?? [];
     if (!entries.length) return;
     await Promise.all(entries.map((_, idx) => runOpenAIKey(idx)));

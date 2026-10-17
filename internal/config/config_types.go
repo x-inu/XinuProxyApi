@@ -472,6 +472,12 @@ type ClaudeKey struct {
 	// APIKey is the authentication key for accessing Claude API services.
 	APIKey string `yaml:"api-key" json:"api-key"`
 
+	// APIKeyEntries optionally lists multiple Claude API keys sharing this
+	// entry's base URL, models, headers, and exclusion rules. When set, each
+	// key becomes its own registered credential that the shared scheduler
+	// rotates, and the plain APIKey field is ignored.
+	APIKeyEntries []ClaudeAPIKeyEntry `yaml:"api-key-entries,omitempty" json:"api-key-entries,omitempty"`
+
 	// Priority controls selection preference when multiple credentials match.
 	// Higher values are preferred; defaults to 0.
 	Priority int `yaml:"priority,omitempty" json:"priority,omitempty"`
@@ -842,6 +848,23 @@ type OpenAICompatibility struct {
 
 	// RequestScopedErrors configures custom classification rules for upstream errors.
 	RequestScopedErrors []RequestScopedErrorRule `yaml:"request-scoped-errors,omitempty" json:"request-scoped-errors,omitempty"`
+}
+
+// ClaudeAPIKeyEntry defines one Claude API key inside a multi-key credential
+// (the api-key-entries list). Every key is registered as its own credential
+// that the shared scheduler rotates; per-key proxy URL and weight are honored
+// and default to the entry-level settings when omitted.
+type ClaudeAPIKeyEntry struct {
+	// APIKey is the authentication key for accessing Claude API services.
+	APIKey string `yaml:"api-key" json:"api-key"`
+
+	// Weight controls proportional selection under weighted-round-robin.
+	// An omitted value defaults to the entry weight (or 1); non-positive
+	// values exclude this key; maximum 1,000,000.
+	Weight *int `yaml:"weight,omitempty" json:"weight,omitempty"`
+
+	// ProxyURL overrides the entry-level proxy URL for this key if provided.
+	ProxyURL string `yaml:"proxy-url,omitempty" json:"proxy-url,omitempty"`
 }
 
 // OpenAICompatibilityAPIKey represents an API key configuration with optional proxy setting.

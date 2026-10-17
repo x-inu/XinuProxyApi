@@ -64,6 +64,13 @@ export const isOpencodeFreeOpenAIProvider = (
   );
 };
 
+/**
+ * Free models on the OpenCode catalog carry a `-free` id suffix; the
+ * endpoint does not report pricing, so the suffix is the only marker.
+ */
+export const isOpenCodeFreeModelId = (name: string | undefined | null): boolean =>
+  /-free$/i.test(String(name ?? '').trim());
+
 export const buildOpencodeFreeRaw = (config: Config | null | undefined): SponsorProviderRaw => ({
   openai: (config?.openaiCompatibility ?? [])
     .map((item, index) => ({ config: item, index: item.sourceIndex ?? index }))

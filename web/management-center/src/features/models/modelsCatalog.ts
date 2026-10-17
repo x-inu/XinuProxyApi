@@ -23,7 +23,7 @@ import type {
 } from '@/types';
 import { maskApiKey } from '@/utils/format';
 import type { ModelInfo } from '@/utils/models';
-import { isOpencodeFreeOpenAIProvider } from '../providers/opencodeFree';
+import { isOpencodeFreeOpenAIProvider, isOpenCodeFreeModelId } from '../providers/opencodeFree';
 import { isFennoAIClaudeProvider, isFennoAICodexProvider } from '../providers/fennoAI';
 import {
   isQiniuCloudClaudeProvider,
@@ -376,7 +376,17 @@ export const toggleExactExclusion = (
  * Free-only discovery filter, mirroring the AI Providers fetch flow: when it
  * is on, only models the endpoint reports as free are shown. Models without
  * pricing info stay visible so an endpoint that never sends pricing does not
- * produce an empty list.
+ * produce an empty list — unless `inferSuffixFree` narrows them to ids with
+ * a `-free` suffix (OpenCode marks its free models only by the id).
  */
-export const applyFreeOnlyFilter = (models: readonly ModelInfo[], freeOnly: boolean): ModelInfo[] =>
-  freeOnly ? models.filter((model) => model.isFree !== false) : [...models];
+export const applyFreeOnlyFilter = (
+  models: readonly ModelInfo[],
+  freeOnly: boolean,
+  { inferSuffixFree = false }: { inferSuffixFree?: boolean } = {}
+): ModelInfo[] => {
+  if (!freeOnly) return [...models];
+  return models.filter((model) => {
+    if (model.isFree !== undefined) return model.isFree;
+    return inferSuffixFree ? isOpenCodeFreeModelId(model.name) : true;
+  });
+};

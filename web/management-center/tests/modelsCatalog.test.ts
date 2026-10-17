@@ -274,6 +274,20 @@ describe('applyFreeOnlyFilter', () => {
   test('off keeps every entry', () => {
     expect(applyFreeOnlyFilter(catalog, false)).toHaveLength(4);
   });
+
+  test('suffix fallback narrows unpriced ids for OpenCode', () => {
+    const opencode = [
+      { name: 'glm-5.3-flash-free' },
+      { name: 'claude-opus-5-5' },
+      { name: 'beam-free' },
+      { name: 'test' },
+      { name: 'priced-free', isFree: true },
+      { name: 'priced-paid', isFree: false },
+    ];
+    expect(
+      applyFreeOnlyFilter(opencode, true, { inferSuffixFree: true }).map((model) => model.name)
+    ).toEqual(['glm-5.3-flash-free', 'beam-free', 'priced-free']);
+  });
 });
 
 describe('toggleExactExclusion', () => {  test('adds and removes exact rules while keeping wildcards', () => {

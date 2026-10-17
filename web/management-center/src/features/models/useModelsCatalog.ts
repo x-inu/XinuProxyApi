@@ -624,7 +624,11 @@ export function useModelsCatalog() {
     for (const card of providerCards) {
       const state = catalogs[card.id];
       if (!state) continue;
-      const filtered = applyFreeOnlyFilter(state.models, isFreeOnlyCard(card));
+      const filtered = applyFreeOnlyFilter(state.models, isFreeOnlyCard(card), {
+        // OpenCode's catalog carries no pricing info, so "free only" falls
+        // back to its `-free` id suffix instead of the pricing flag.
+        inferSuffixFree: card.groupKey === 'opencodeFree',
+      });
       out[card.id] =
         filtered.length === state.models.length
           ? state

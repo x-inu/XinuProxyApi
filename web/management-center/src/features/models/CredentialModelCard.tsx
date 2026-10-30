@@ -116,10 +116,11 @@ export function CredentialModelCard({
   const fileOnlyRuleCount = rows.filter((row) => row.fileOnlyRule).length;
 
   const lockHint = (row: ModelRow): string | null => {
+    if (!row.locked) return null;
     if (card.lockDisabled) return t('models_page.lock.credential_disabled');
-    if (row.globalRule) return t('models_page.lock.global', { rule: row.globalRule });
     if (row.wildcardRule) return t('models_page.lock.wildcard', { rule: row.wildcardRule });
     if (row.fileOnlyRule) return t('models_page.lock.per_account', { rule: row.fileOnlyRule });
+    if (row.globalRule) return t('models_page.lock.global', { rule: row.globalRule });
     if (card.disableAll) return t('models_page.lock.disable_all', { rule: DISABLE_ALL_RULE });
     return null;
   };

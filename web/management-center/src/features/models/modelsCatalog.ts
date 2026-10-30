@@ -317,18 +317,19 @@ export const buildModelRows = (args: BuildModelRowsArgs): ModelRow[] => {
       : undefined;
     const globalRule = globalRules.find((rule) => matchesExcludedRule(rule, name));
     const excluded = hasExcludedRule(rules, name) || Boolean(wildcardRule) || Boolean(globalRule);
-    const locked =
-      card.lockDisabled || card.disableAll || Boolean(wildcardRule) || Boolean(globalRule);
-    // Merged OAuth group cards toggle the global rules layer. A model excluded
-    // only by individual author files stays off no matter what the group toggle
-    // writes, so it is locked with a dedicated hint instead of silently
-    // ignoring the request.
+    // Merged OAuth group cards toggle the global rules layer, so a global rule
+    // alone must stay editable there; locking it would make a model impossible
+    // to re-enable from the card that turned it off. A per-account rule keeps
+    // the model off no matter what the group toggle writes, so that row stays
+    // locked with a dedicated hint instead of silently ignoring the request.
     const fileOnlyRule =
-      card.kind === 'oauth-group' && excluded && !wildcardRule && !globalRule
-        ? hasExcludedRule(rules, name)
-          ? name
-          : undefined
-        : undefined;
+      card.kind === 'oauth-group' && excluded && hasExcludedRule(rules, name) ? name : undefined;
+    const locked =
+      card.lockDisabled ||
+      card.disableAll ||
+      Boolean(wildcardRule) ||
+      Boolean(fileOnlyRule) ||
+      (Boolean(globalRule) && card.kind !== 'oauth-group');
     rows.set(key, {
       row: {
         id: name,

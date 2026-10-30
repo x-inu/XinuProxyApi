@@ -202,7 +202,7 @@ describe('merged oauth group cards', () => {
     mutation: { type: 'oauth-group', providerKey: 'antigravity' },
   };
 
-  test('global rules drive exclusion and stay lock-toggled via the group card', () => {
+  test('global rules drive exclusion and stay toggleable via the group card', () => {
     const rows = buildModelRows({
       card: groupCard,
       catalogNames: ['model-a', 'model-b'],
@@ -215,9 +215,29 @@ describe('merged oauth group cards', () => {
     expect(byId.get('model-a')?.excluded).toBe(false);
     expect(byId.get('model-a')?.locked).toBe(false);
     expect(byId.get('model-b')?.excluded).toBe(true);
-    expect(byId.get('model-b')?.locked).toBe(true);
+    // The group card owns the global layer, so the row must stay editable:
+    // locking it would make a model disabled here impossible to re-enable.
+    expect(byId.get('model-b')?.locked).toBe(false);
     expect(byId.get('model-b')?.globalRule).toBe('model-b');
     expect(byId.get('model-b')?.fileOnlyRule).toBeUndefined();
+  });
+
+  test('a global rule combined with a per-account rule stays locked', () => {
+    const rows = buildModelRows({
+      card: groupCard,
+      catalogNames: ['model-a', 'model-b'],
+      fileRules: ['model-b'],
+      globalRulesByProvider: { antigravity: ['model-b'] },
+      oauthProviderKey: 'antigravity',
+    });
+
+    const byId = new Map<string, ModelRow>(rows.map((row) => [row.id, row]));
+    expect(byId.get('model-b')?.excluded).toBe(true);
+    // Clearing the global rule would not enable it: the per-account rule
+    // still applies, so the toggle stays locked with the per-account hint.
+    expect(byId.get('model-b')?.locked).toBe(true);
+    expect(byId.get('model-b')?.fileOnlyRule).toBe('model-b');
+    expect(byId.get('model-b')?.globalRule).toBe('model-b');
   });
 
   test('per-file-only rules lock the row with a dedicated hint', () => {

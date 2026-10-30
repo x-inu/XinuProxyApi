@@ -74,7 +74,10 @@ export const ANTIGRAVITY_QUOTA_URLS = [
 export const ANTIGRAVITY_CODE_ASSIST_URL =
   'https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist';
 
-export const ANTIGRAVITY_CLI_VERSION = '1.0.13';
+// Google gates the "Gemini Models" quota group on this client version: clients
+// below 2.9.0 only receive "Claude and GPT models" from retrieveUserQuotaSummary.
+// Keep it at or above the backend floor in internal/misc/antigravity_version.go.
+export const ANTIGRAVITY_CLI_VERSION = '2.24.0';
 export const ANTIGRAVITY_CLIENT_NAME = 'aidev_client';
 export const ANTIGRAVITY_CLIENT_PLATFORM = {
   osType: 'darwin',

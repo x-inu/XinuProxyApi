@@ -34,11 +34,32 @@ const matchCategory = (text: string) => {
 
 const isFreeByPricing = (entry: Record<string, unknown>): boolean | undefined => {
   const pricing = entry.pricing;
-  if (!isRecord(pricing)) return undefined;
-  const prompt = String(pricing.prompt ?? '').trim();
-  const completion = String(pricing.completion ?? '').trim();
-  if (!prompt && !completion) return undefined;
-  return prompt === '0' && completion === '0';
+  if (isRecord(pricing)) {
+    const prompt = String(pricing.prompt ?? '').trim();
+    const completion = String(pricing.completion ?? '').trim();
+    if (prompt || completion) return prompt === '0' && completion === '0';
+  }
+  return isFreeByCost(entry);
+};
+
+/**
+ * Console-style pricing v2: `cost: { text: { input: { price }, output: {
+ * price } } }` as served by the OpenCode (zen/console) catalog. Observing
+ * both prices is required; anything else stays unknown so the suffix
+ * fallback can still decide.
+ */
+const isFreeByCost = (entry: Record<string, unknown>): boolean | undefined => {
+  const cost = entry.cost;
+  if (!isRecord(cost)) return undefined;
+  const text = cost.text;
+  if (!isRecord(text)) return undefined;
+  const input = text.input;
+  const output = text.output;
+  if (!isRecord(input) || !isRecord(output)) return undefined;
+  const inputPrice = String(input.price ?? '').trim();
+  const outputPrice = String(output.price ?? '').trim();
+  if (!inputPrice && !outputPrice) return undefined;
+  return inputPrice === '0' && inputPrice === outputPrice;
 };
 
 export function normalizeModelList(payload: unknown, { dedupe = false } = {}): ModelInfo[] {

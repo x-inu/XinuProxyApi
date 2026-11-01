@@ -23,7 +23,11 @@ import type {
 } from '@/types';
 import { maskApiKey } from '@/utils/format';
 import type { ModelInfo } from '@/utils/models';
-import { isOpencodeFreeOpenAIProvider, isOpenCodeFreeModelId } from '../providers/opencodeFree';
+import {
+  isOpencodeFreeOpenAIProvider,
+  isOpenCodeFreeModelId,
+  OPENCODE_CONSOLE_FREE_MODEL_IDS,
+} from '../providers/opencodeFree';
 import { isFennoAIClaudeProvider, isFennoAICodexProvider } from '../providers/fennoAI';
 import {
   isQiniuCloudClaudeProvider,
@@ -88,6 +92,11 @@ export interface ModelRow {
   globalRule?: string;
   /** Merged OAuth group only: rule from individual auth files, not editable there. */
   fileOnlyRule?: string;
+  /**
+   * OpenCode (free) pinned free model that the upstream catalog does not
+   * serve yet (docs-listed but missing from the live `/v1/models` list).
+   */
+  pendingUpstream?: boolean;
 }
 
 export type RowLockReason = 'wildcard' | 'global' | 'unknown-catalog' | undefined;
@@ -265,6 +274,11 @@ export interface BuildModelRowsArgs {
   oauthProviderKey?: string;
   /** Config key entry prefixes its models — allowlist-aware hint row state. */
   catalogPending?: boolean;
+  /**
+   * OpenCode (free) only: pinned free ids missing from the fetched upstream
+   * list; they surface as rows flagged `pendingUpstream`.
+   */
+  pendingUpstreamNames?: string[] | null;
 }
 
 /**
@@ -282,6 +296,7 @@ export const buildModelRows = (args: BuildModelRowsArgs): ModelRow[] => {
 
   if (card.kind === 'openai-compat') {
     const configured = new Set(card.configuredIds.map((id) => id.toLowerCase()));
+    const pending = new Set((args.pendingUpstreamNames ?? []).map((name) => name.toLowerCase()));
     const rows = new Map<string, ModelRow>();
     const addRow = (name: string, origin: ModelRowOrigin) => {
       const key = name.toLowerCase();
@@ -292,10 +307,12 @@ export const buildModelRows = (args: BuildModelRowsArgs): ModelRow[] => {
         origin,
         excluded: !configured.has(key),
         locked: false,
+        pendingUpstream: pending.has(key) || undefined,
       });
     };
     card.configuredIds.forEach((name) => addRow(name, 'configured'));
     (args.discoveredNames ?? []).forEach((name) => addRow(name, 'discovered'));
+    (args.pendingUpstreamNames ?? []).forEach((name) => addRow(name, 'discovered'));
     return Array.from(rows.values());
   }
 
@@ -390,4 +407,24 @@ export const applyFreeOnlyFilter = (
     if (model.isFree !== undefined) return model.isFree;
     return inferSuffixFree ? isOpenCodeFreeModelId(model.name) : true;
   });
+};
+
+/**
+ * Pinned free catalog for the OpenCode (free) card: fetch is always free
+ * there, so the raw catalog is narrowed to models the endpoint prices as
+ * free (`cost == 0`, with the `-free` suffix as no-pricing fallback) and
+ * unioned with the Console docs free list. Documented ids that are not
+ * served upstream yet are appended so they still surface — flagged pending
+ * downstream. Confirmed paid models never appear, whatever their id says.
+ */
+export const buildOpencodeFreeCatalog = (models: readonly ModelInfo[]): ModelInfo[] => {
+  const liveFree = models.filter((model) => {
+    if (model.isFree !== undefined) return model.isFree;
+    return isOpenCodeFreeModelId(model.name);
+  });
+  const served = new Set(liveFree.map((model) => model.name.toLowerCase()));
+  const pending = OPENCODE_CONSOLE_FREE_MODEL_IDS.filter((id) => !served.has(id.toLowerCase())).map(
+    (name) => ({ name, isFree: true })
+  );
+  return [...liveFree, ...pending];
 };

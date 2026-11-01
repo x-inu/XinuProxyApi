@@ -196,16 +196,24 @@ export function CredentialModelCard({
             <span className={styles.noDiscoveryHint}>{t('models_page.no_discovery')}</span>
           )}
           {card.discovery?.brand === 'openaiCompatibility' && onFreeOnlyChange ? (
-            <Button
-              variant={freeOnly ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => onFreeOnlyChange(!freeOnly)}
-              disabled={catalog.loading}
-              aria-pressed={freeOnly}
-              aria-label={t('providersPage.discovery.fetchFreeOnly')}
-            >
-              {t('providersPage.discovery.fetchFreeOnly')}
-            </Button>
+            card.groupKey === 'opencodeFree' ? (
+              // The OpenCode (free) fetch is pinned to free models — no
+              // toggle, the filter can never be lifted from this card.
+              <span className={styles.pinnedFreeNote}>
+                {t('models_page.pinned_free_note')}
+              </span>
+            ) : (
+              <Button
+                variant={freeOnly ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => onFreeOnlyChange(!freeOnly)}
+                disabled={catalog.loading}
+                aria-pressed={freeOnly}
+                aria-label={t('providersPage.discovery.fetchFreeOnly')}
+              >
+                {t('providersPage.discovery.fetchFreeOnly')}
+              </Button>
+            )
           ) : null}
           {catalog.error && !catalog.loading ? (
             <span className={styles.catalogError} role="status">
@@ -312,6 +320,10 @@ export function CredentialModelCard({
                     <span className={styles.rowHint} title={hint}>
                       <IconLock size={12} />
                       {hint}
+                    </span>
+                  ) : row.pendingUpstream ? (
+                    <span className={styles.rowHint} title={t('models_page.pending_upstream')}>
+                      {t('models_page.pending_upstream')}
                     </span>
                   ) : null}
                 </div>

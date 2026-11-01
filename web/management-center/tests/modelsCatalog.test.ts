@@ -3,12 +3,14 @@ import type { Config, OpenAIProviderConfig } from '../src/types';
 import {
   applyFreeOnlyFilter,
   buildModelRows,
+  buildOpencodeFreeCatalog,
   groupConfigCredentials,
   toggleExactExclusion,
   type CredentialCard,
   type ModelRow,
 } from '../src/features/models/modelsCatalog';
 import {
+  OPENCODE_CONSOLE_FREE_MODEL_IDS,
   OPENCODE_FREE_PROVIDER_NAME,
   OPENCODE_FREE_OPENAI_BASE_URL,
 } from '../src/features/providers/opencodeFree';
@@ -325,5 +327,94 @@ describe('toggleExactExclusion', () => {  test('adds and removes exact rules whi
   test('never adds a wildcard model id as an exclusion rule', () => {
     const next = toggleExactExclusion(['gpt-*'], 'kimi-*', true);
     expect(next).toEqual(['gpt-*']);
+  });
+});
+
+describe('buildOpencodeFreeCatalog', () => {
+  test('unions live free models with the pinned Console docs list', () => {
+    const models = [
+      { name: 'gpt-5.5', isFree: false },
+      { name: 'claude-opus-5', isFree: false },
+      { name: 'glm-5.3-flash-free', isFree: true },
+      { name: 'big-pickle', isFree: true },
+    ];
+    const names = buildOpencodeFreeCatalog(models).map((model) => model.name);
+
+    // Free plus pending whitelist rows, sorted live-first; paid never in.
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'big-pickle',
+        'glm-5.3-flash-free',
+        'nemotron-3-ultra-free',
+        'jev-1.13-free',
+      ])
+    );
+    expect(names.filter((name) => name === 'gpt-5.5' || name === 'claude-opus-5')).toEqual([]);
+    // Every documented whitelist id lands in the union.
+    for (const id of OPENCODE_CONSOLE_FREE_MODEL_IDS) {
+      expect(names).toContain(id);
+    }
+    // No duplicate when a whitelist id is also served upstream.
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  test('ids without a pricing block fall back to the -free suffix', () => {
+    const names = buildOpencodeFreeCatalog([
+      { name: 'beam-free' },
+      { name: 'claude-opus-5' },
+    ]).map((model) => model.name);
+    expect(names).toContain('beam-free');
+    expect(names).not.toContain('claude-opus-5');
+  });
+
+  test('a suffix id priced as paid stays out', () => {
+    const names = buildOpencodeFreeCatalog([{ name: 'not-really-free', isFree: false }]).map(
+      (model) => model.name
+    );
+    expect(names).not.toContain('not-really-free');
+  });
+});
+
+describe('buildModelRows pending upstream', () => {
+  test('surfaces pinned ids missing from the live catalog with the pending flag', () => {
+    const card = configCard({
+      kind: 'openai-compat',
+      id: 'openai:0',
+      groupKey: 'opencodeFree',
+      brand: 'opencodeFree',
+      configuredIds: [],
+    });
+    const rows = buildModelRows({
+      card,
+      discoveredNames: ['big-pickle'],
+      pendingUpstreamNames: ['jev-1.13-free'],
+    });
+
+    const byId = new Map<string, ModelRow>(rows.map((row) => [row.id, row]));
+    expect(byId.get('big-pickle')?.pendingUpstream).toBeUndefined();
+    expect(byId.get('big-pickle')?.excluded).toBe(true);
+    expect(byId.get('jev-1.13-free')?.origin).toBe('discovered');
+    expect(byId.get('jev-1.13-free')?.pendingUpstream).toBe(true);
+    expect(byId.get('jev-1.13-free')?.excluded).toBe(true);
+    expect(byId.get('jev-1.13-free')?.locked).toBe(false);
+  });
+
+  test('a configured pending model keeps the hint while enabled', () => {
+    const card = configCard({
+      kind: 'openai-compat',
+      id: 'openai:0',
+      groupKey: 'opencodeFree',
+      brand: 'opencodeFree',
+      configuredIds: ['jev-1.13-free'],
+    });
+    const rows = buildModelRows({
+      card,
+      discoveredNames: [],
+      pendingUpstreamNames: ['jev-1.13-free'],
+    });
+
+    const pending = rows.find((row) => row.id === 'jev-1.13-free');
+    expect(pending?.excluded).toBe(false);
+    expect(pending?.pendingUpstream).toBe(true);
   });
 });

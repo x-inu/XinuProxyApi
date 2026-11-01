@@ -9,6 +9,7 @@ import {
 } from '../src/features/providers/adapters';
 import {
   buildOpencodeFreeRaw,
+  OPENCODE_CONSOLE_FREE_MODEL_IDS,
   OPENCODE_FREE_OPENAI_BASE_URL,
   OPENCODE_FREE_PROVIDER_NAME,
 } from '../src/features/providers/opencodeFree';
@@ -230,5 +231,16 @@ describe('opencodeFree phase 2', () => {
     expect(logo.darkSrc).toBeTruthy();
     expect(logo.darkSrc).not.toBe(logo.src);
     expect(logo.transparent).toBe(true);
+  });
+});
+
+describe('pinned Console free model ids', () => {
+  test('matches the documented free list (10 ids, incl. the unsuffixed big-pickle)', () => {
+    // Reference: https://opencode.ai/v2/docs/console/models/#free-models
+    expect(OPENCODE_CONSOLE_FREE_MODEL_IDS).toHaveLength(10);
+    expect(OPENCODE_CONSOLE_FREE_MODEL_IDS).toContain('big-pickle');
+    expect(OPENCODE_CONSOLE_FREE_MODEL_IDS).toContain('glm-5.3-flash-free');
+    expect(OPENCODE_CONSOLE_FREE_MODEL_IDS).toContain('nemotron-3-ultra-free');
+    expect(OPENCODE_CONSOLE_FREE_MODEL_IDS.every((id) => id === id.toLowerCase())).toBe(true);
   });
 });

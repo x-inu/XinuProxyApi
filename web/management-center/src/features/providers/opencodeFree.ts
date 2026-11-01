@@ -65,11 +65,34 @@ export const isOpencodeFreeOpenAIProvider = (
 };
 
 /**
- * Free models on the OpenCode catalog carry a `-free` id suffix; the
- * endpoint does not report pricing, so the suffix is the only marker.
+ * Fallback marker for OpenCode free ids. The catalog now reports pricing
+ * (the v2 `cost` block), so the suffix only matters for payloads without a
+ * usable price block — never on top of a confirmed free/paid flag.
  */
 export const isOpenCodeFreeModelId = (name: string | undefined | null): boolean =>
   /-free$/i.test(String(name ?? '').trim());
+
+/**
+ * Free models curated by OpenCode in the Console docs — the pinned minimum
+ * for the OpenCode (free) card, independent of what the live catalog serves
+ * right now:
+ * https://opencode.ai/v2/docs/console/models/#free-models
+ *
+ * Some ids may be missing from `https://opencode.ai/zen/v1/models` (not
+ * served upstream yet); those surface on the Models page as pending rows.
+ */
+export const OPENCODE_CONSOLE_FREE_MODEL_IDS: readonly string[] = [
+  'beam-free',
+  'big-pickle',
+  'deepseek-v4.1-flash-free',
+  'flint-40b-free',
+  'glm-5.3-flash-free',
+  'jev-1.13-free',
+  'mimo-v2.6-flash-free',
+  'nemotron-3-ultra-free',
+  'nemotron-3.5-lightning-free',
+  'nemotron-3.5-super-vl-free',
+];
 
 export const buildOpencodeFreeRaw = (config: Config | null | undefined): SponsorProviderRaw => ({
   openai: (config?.openaiCompatibility ?? [])

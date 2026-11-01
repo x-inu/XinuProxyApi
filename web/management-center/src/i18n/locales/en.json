@@ -1908,6 +1908,8 @@
     "refetch": "Refresh catalog",
     "reload_catalog": "Reload catalog",
     "catalog_fetched": "{{count}} models · {{time}}",
+    "pinned_free_note": "Free models only",
+    "pending_upstream": "Not served upstream yet",
     "no_discovery": "Model discovery is not available for this provider.",
     "catalog_loading": "Loading model catalog…",
     "fetch_all": {

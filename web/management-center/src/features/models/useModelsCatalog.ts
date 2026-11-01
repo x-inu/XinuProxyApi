@@ -12,6 +12,7 @@ import type { ModelInfo } from '@/utils/models';
 import type { AuthFileItem } from '@/types/authFile';
 import { useAuthStore, useConfigStore, useNotificationStore } from '@/stores';
 import { PROVIDER_BRAND_ORDER } from '../providers/descriptors';
+import { OPENCODE_CONSOLE_FREE_MODEL_IDS } from '../providers/opencodeFree';
 import {
   fetchUpstreamModels,
   isUpstreamDiscoveryBrand,
@@ -20,6 +21,7 @@ import {
 import {
   applyFreeOnlyFilter,
   buildModelRows,
+  buildOpencodeFreeCatalog,
   groupConfigCredentials,
   toggleExactExclusion,
   type CredentialCard,
@@ -609,9 +611,8 @@ export function useModelsCatalog() {
   /* --------------------------- row computation --------------------------- */
 
   /**
-   * Free-only fetch choice per provider card, mirroring the AI Providers
-   * discovery panel. Defaults to ON for the OpenCode (free) group: its
-   * catalog fetch keeps free models only.
+   * Free-only fetch choice per provider card. Irrelevant for the OpenCode
+   * (free) card: its fetch is pinned to free models regardless of the flag.
    */
   const isFreeOnlyCard = useCallback(
     (card: CredentialCard): boolean =>
@@ -624,11 +625,12 @@ export function useModelsCatalog() {
     for (const card of providerCards) {
       const state = catalogs[card.id];
       if (!state) continue;
-      const filtered = applyFreeOnlyFilter(state.models, isFreeOnlyCard(card), {
-        // OpenCode's catalog carries no pricing info, so "free only" falls
-        // back to its `-free` id suffix instead of the pricing flag.
-        inferSuffixFree: card.groupKey === 'opencodeFree',
-      });
+      // The OpenCode (free) card is pinned to free models: the live catalog
+      // is narrowed by pricing and unioned with the Console docs free list.
+      const filtered =
+        card.groupKey === 'opencodeFree'
+          ? buildOpencodeFreeCatalog(state.models)
+          : applyFreeOnlyFilter(state.models, isFreeOnlyCard(card));
       out[card.id] =
         filtered.length === state.models.length
           ? state
@@ -636,6 +638,25 @@ export function useModelsCatalog() {
     }
     return out;
   }, [catalogs, providerCards, isFreeOnlyCard]);
+
+  /**
+   * OpenCode (free) docs-listed free ids that the fetched upstream list does
+   * not serve yet — rows built from them carry the pending hint.
+   */
+  const pendingUpstreamNamesByCard = useMemo(() => {
+    const out: Record<string, string[]> = {};
+    for (const card of providerCards) {
+      if (card.groupKey !== 'opencodeFree') continue;
+      const state = catalogs[card.id];
+      if (!state) continue;
+      const served = new Set(state.models.map((model) => model.name.toLowerCase()));
+      const pending = OPENCODE_CONSOLE_FREE_MODEL_IDS.filter(
+        (id) => !served.has(id.toLowerCase())
+      );
+      if (pending.length > 0) out[card.id] = pending;
+    }
+    return out;
+  }, [catalogs, providerCards]);
 
   const freeOnlyFlags = useMemo(() => {
     const out: Record<string, boolean> = {};
@@ -655,6 +676,10 @@ export function useModelsCatalog() {
         buildModelRows({
           card,
           discoveredNames: displayCatalogs[card.id]?.models.map((model) => model.name) ?? null,
+          pendingUpstreamNames:
+            card.groupKey === 'opencodeFree'
+              ? pendingUpstreamNamesByCard[card.id] ?? null
+              : null,
         })
       );
     }
@@ -711,7 +736,7 @@ export function useModelsCatalog() {
       );
     }
     return rows;
-  }, [channelCatalogs, displayCatalogs, fileStates, globalRulesByProvider, oauthCards, oauthGroups, providerCards]);
+  }, [channelCatalogs, displayCatalogs, fileStates, globalRulesByProvider, oauthCards, oauthGroups, pendingUpstreamNamesByCard, providerCards]);
 
   return {
     connected,

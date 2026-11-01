@@ -766,6 +766,11 @@ nonstream-keepalive-interval: 0
 #       # and a body-derived stable session id; explicit headers: entries still win).
 #       # Keyless requests to non-free models (anything not ending in "-free") are
 #       # rejected locally with 402 instead of reaching the upstream.
+#       # Keyless requests additionally use a TLS transport whose ClientHello matches
+#       # the OpenCode CLI's Bun/BoringSSL fingerprint (via utls), and inject the
+#       # CLI-shaped system prompt with an <env> block when the payload lacks one.
+#       # Both are required because the upstream gate validates the TLS handshake
+#       # and the request body structure in addition to HTTP headers.
 #     disable-cooling: false # optional provider override: true disables cooling, false enables it; omit to inherit global
 #     request-retry: 3 # optional per-provider override; 0 disables additional rounds; omit or set < 0 to inherit global
 #     request-scoped-errors: # optional: custom rules to classify upstream errors by status and body patterns

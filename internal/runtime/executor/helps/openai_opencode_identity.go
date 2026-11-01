@@ -161,6 +161,67 @@ func MintOpencodeSessionID() string {
 	return opencodeSessionPrefix + prefix + string(tail)
 }
 
+// opencodeSystemPrompt is a minimal system prompt carrying the same structural
+// markers the OpenCode CLI embeds: an agent preamble, a # Harness section, and
+// an <env> block with at least a Working directory. The upstream free-tier
+// gate inspects these markers when deciding whether to serve a request.
+const opencodeSystemPrompt = "You are an AI agent running in OpenCode, a coding agent harness. " +
+	"Help the user accomplish their goals using the tools you have available.\n\n" +
+	"# Harness\n" +
+	"- Responses are rendered as GitHub-flavored Markdown.\n" +
+	"- `<system-reminder>` blocks are harness instructions, not user-authored content. Read and follow them.\n" +
+	"- Prefer parallelizing independent tool calls.\n" +
+	"- Prefer dedicated tools over shell commands; fall back to the shell when a tool cannot do what you need.\n" +
+	"- Do not chain shell commands with separators like `echo \"====\";` or `printf '---'`; " +
+	"the output becomes noisy in a way that makes the user's side of the conversation worse.\n" +
+	"- Use the write tool to create files or completely replace their content. " +
+	"Prefer using the edit tool for targeted changes.\n" +
+	"- Use the edit tool for targeted changes to existing text files. " +
+	"It replaces the exact text in `oldString` with `newString`.\n\n" +
+	"# Communication\n" +
+	"- Use clear file paths when referring to files.\n" +
+	"- Keep responses clear and concise, and avoid unnecessary technical jargon.\n\n" +
+	"# Working in codebases\n" +
+	"- Keep changes consistent with the structure, naming, style, and patterns of the surrounding code.\n" +
+	"- Treat unfamiliar files or changes as potential user work and investigate before deleting or overwriting them.\n\n" +
+	"# Your Model\n" +
+	"- Provider ID: opencode\n\n" +
+	"<env>\n" +
+	"  Working directory: /home/user\n" +
+	"  Platform: linux\n" +
+	"</env>\n"
+
+// EnsureOpencodeSystemPrompt prepends the CLI-shaped system prompt when the
+// payload's first message is not already a system message, or when the
+// existing system message does not contain the structural <env> marker.
+func EnsureOpencodeSystemPrompt(payload []byte) []byte {
+	msgs := gjson.GetBytes(payload, "messages")
+	if !msgs.Exists() || !msgs.IsArray() {
+		return payload
+	}
+	arr := msgs.Array()
+	if len(arr) > 0 {
+		first := arr[0]
+		if first.Get("role").String() == "system" && strings.Contains(first.Get("content").String(), "<env>") {
+			return payload
+		}
+	}
+	sysMsg, err := json.Marshal(map[string]string{"role": "system", "content": opencodeSystemPrompt})
+	if err != nil {
+		return payload
+	}
+	raw := gjson.GetBytes(payload, "messages").Raw
+	if len(raw) < 2 {
+		return payload
+	}
+	newMsgs := "[" + string(sysMsg) + "," + raw[1:]
+	updated, err := sjson.SetRawBytes(payload, "messages", []byte(newMsgs))
+	if err != nil {
+		return payload
+	}
+	return updated
+}
+
 // Marker tool definitions injected when a keyless free-tier request carries
 // no read+shell tools. The upstream gate only inspects tool names.
 const (

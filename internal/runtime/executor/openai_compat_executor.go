@@ -81,7 +81,7 @@ func (e *OpenAICompatExecutor) HttpRequest(ctx context.Context, auth *cliproxyau
 	if err := e.PrepareRequest(httpReq, auth); err != nil {
 		return nil, err
 	}
-	httpClient := helps.NewProxyAwareHTTPClient(ctx, e.cfg, auth, 0)
+	httpClient := e.newHTTPClient(ctx, auth)
 	return httpClient.Do(httpReq)
 }
 
@@ -144,6 +144,7 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 				forceOpencodeDestream = true
 			} else {
 				translated = helps.EnsureOpencodeMarkerTools(translated)
+				translated = helps.EnsureOpencodeSystemPrompt(translated)
 				translated = helps.SetBoolIfDifferent(translated, "stream", true)
 				translated = helps.SetBoolIfDifferent(translated, "stream_options.include_usage", true)
 				forceOpencodeDestream = true
@@ -206,7 +207,7 @@ func (e *OpenAICompatExecutor) Execute(ctx context.Context, auth *cliproxyauth.A
 		AuthValue: authValue,
 	})
 
-	httpClient := helps.NewProxyAwareHTTPClient(ctx, e.cfg, auth, 0)
+	httpClient := e.newHTTPClient(ctx, auth)
 	httpClient = reporter.TrackHTTPClient(httpClient)
 	httpResp, err := httpClient.Do(httpReq)
 	if err != nil {
@@ -309,7 +310,7 @@ func (e *OpenAICompatExecutor) executeImages(ctx context.Context, auth *cliproxy
 		AuthValue: authValue,
 	})
 
-	httpClient := helps.NewProxyAwareHTTPClient(ctx, e.cfg, auth, 0)
+	httpClient := e.newHTTPClient(ctx, auth)
 	httpClient = reporter.TrackHTTPClient(httpClient)
 	httpResp, err := httpClient.Do(httpReq)
 	if err != nil {
@@ -411,6 +412,7 @@ func (e *OpenAICompatExecutor) ExecuteStream(ctx context.Context, auth *cliproxy
 			opencodeResponsesBridge = true
 		} else {
 			translated = helps.EnsureOpencodeMarkerTools(translated)
+			translated = helps.EnsureOpencodeSystemPrompt(translated)
 		}
 	}
 	reporter.SetTranslatedReasoningEffort(translated, to.String())
@@ -454,7 +456,7 @@ func (e *OpenAICompatExecutor) ExecuteStream(ctx context.Context, auth *cliproxy
 		AuthValue: authValue,
 	})
 
-	httpClient := helps.NewProxyAwareHTTPClient(ctx, e.cfg, auth, 0)
+	httpClient := e.newHTTPClient(ctx, auth)
 	httpClient = reporter.TrackHTTPClient(httpClient)
 	httpResp, err := httpClient.Do(httpReq)
 	if err != nil {
@@ -696,7 +698,7 @@ func (e *OpenAICompatExecutor) executeImagesStream(ctx context.Context, auth *cl
 		AuthValue: authValue,
 	})
 
-	httpClient := helps.NewProxyAwareHTTPClient(ctx, e.cfg, auth, 0)
+	httpClient := e.newHTTPClient(ctx, auth)
 	httpClient = reporter.TrackHTTPClient(httpClient)
 	httpResp, err := httpClient.Do(httpReq)
 	if err != nil {
@@ -985,6 +987,17 @@ func (e *OpenAICompatExecutor) applyPromptCacheKey(ctx context.Context, auth *cl
 	}, "\x00")
 	promptCacheKey := uuid.NewSHA1(uuid.NameSpaceOID, []byte(identity)).String()
 	return helps.SetStringIfDifferent(translated, "prompt_cache_key", promptCacheKey), nil
+}
+
+// newHTTPClient picks the transport for a compat request. Keyless OpenCode
+// free-tier traffic must present the CLI's TLS ClientHello upstream, so it
+// uses the utls transport; everything else keeps the regular proxy-aware one.
+func (e *OpenAICompatExecutor) newHTTPClient(ctx context.Context, auth *cliproxyauth.Auth) *http.Client {
+	baseURL, apiKey := e.resolveCredentials(auth)
+	if helps.OpencodeFreeTLSEnabled(e.resolveCompatConfig(auth), baseURL, apiKey) {
+		return helps.NewOpencodeHTTPClient(ctx, e.cfg, auth, 0)
+	}
+	return helps.NewProxyAwareHTTPClient(ctx, e.cfg, auth, 0)
 }
 
 func (e *OpenAICompatExecutor) resolveCredentials(auth *cliproxyauth.Auth) (baseURL, apiKey string) {

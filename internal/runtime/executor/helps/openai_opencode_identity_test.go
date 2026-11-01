@@ -321,3 +321,54 @@ func TestOpencodeUpstreamModel(t *testing.T) {
 		t.Fatalf("missing model must yield empty string, got %q", got)
 	}
 }
+
+func TestEnsureOpencodeSystemPrompt(t *testing.T) {
+	// Case 1: no system message → prepend one with <env>
+	bare := []byte(`{"model":"m","messages":[{"role":"user","content":"hi"}]}`)
+	out := EnsureOpencodeSystemPrompt(bare)
+	msgs := gjson.GetBytes(out, "messages").Array()
+	if len(msgs) != 2 {
+		t.Fatalf("expected 2 messages, got %d", len(msgs))
+	}
+	if msgs[0].Get("role").String() != "system" {
+		t.Fatal("first message must be system")
+	}
+	sys := msgs[0].Get("content").String()
+	if !strings.Contains(sys, "<env>") {
+		t.Fatal("system prompt must contain <env> block")
+	}
+	if !strings.Contains(sys, "OpenCode") {
+		t.Fatal("system prompt must mention OpenCode")
+	}
+	if msgs[1].Get("content").String() != "hi" {
+		t.Fatal("original user message must be preserved")
+	}
+
+	// Case 2: existing system message with <env> → leave untouched
+	existing := []byte(`{"model":"m","messages":[{"role":"system","content":"You are an agent.\n<env>\n  Working directory: /tmp\n</env>"},{"role":"user","content":"hi"}]}`)
+	out2 := EnsureOpencodeSystemPrompt(existing)
+	if string(out2) != string(existing) {
+		t.Fatal("payload with existing <env> system prompt must be left untouched")
+	}
+
+	// Case 3: existing system message without <env> → prepend new system before it
+	noEnv := []byte(`{"model":"m","messages":[{"role":"system","content":"Custom instructions"},{"role":"user","content":"hi"}]}`)
+	out3 := EnsureOpencodeSystemPrompt(noEnv)
+	msgs3 := gjson.GetBytes(out3, "messages").Array()
+	if len(msgs3) != 3 {
+		t.Fatalf("expected 3 messages after injection, got %d", len(msgs3))
+	}
+	if msgs3[0].Get("role").String() != "system" || !strings.Contains(msgs3[0].Get("content").String(), "<env>") {
+		t.Fatal("first message must be injected system with <env>")
+	}
+	if msgs3[1].Get("content").String() != "Custom instructions" {
+		t.Fatal("original system message must be preserved")
+	}
+
+	// Case 4: idempotent
+	out4 := EnsureOpencodeSystemPrompt(out)
+	msgs4 := gjson.GetBytes(out4, "messages").Array()
+	if len(msgs4) != 2 {
+		t.Fatal("re-injection must be idempotent")
+	}
+}

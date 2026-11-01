@@ -169,7 +169,7 @@ func TestApplyOpencodeIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 	ApplyOpencodeIdentity(first, compat, payload)
-	if got := first.Header.Get("User-Agent"); got != "opencode/latest/2.0.25/cli" {
+	if got := first.Header.Get("User-Agent"); got != "opencode/latest/2.2.5/cli" {
 		t.Fatalf("User-Agent = %q, want versioned CLI agent", got)
 	}
 	if got := first.Header.Get("x-opencode-client"); got != "cli" {

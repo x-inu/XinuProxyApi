@@ -24,7 +24,7 @@ import (
 // Explicit custom headers configured on the provider still win because they
 // are applied after this helper.
 const (
-	opencodeUserAgent       = "opencode/latest/2.0.25/cli"
+	opencodeUserAgent       = "opencode/latest/2.2.5/cli"
 	opencodeClientDefault   = "cli"
 	opencodeProjectDefault  = "global"
 	opencodeRequestHeader   = "x-opencode-request"

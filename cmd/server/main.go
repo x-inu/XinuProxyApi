@@ -48,6 +48,7 @@ var (
 	Commit            = "none"
 	BuildDate         = "unknown"
 	DefaultConfigPath = ""
+	activeSqliteStorePath = ""
 )
 
 // init initializes the shared logger setup.
@@ -163,8 +164,10 @@ func main() {
 	flag.BoolVar(&localModel, "local-model", false, "Use embedded models.json and codex_client_models.json only, skip remote model catalog fetching")
 	var useSqliteStoreFlag bool
 	var sqliteStorePathFlag string
+	var sqliteStoreLocalPathFlag string
 	flag.BoolVar(&useSqliteStoreFlag, "sqlitestore", false, "Use SQLite-backed token and configuration store")
 	flag.StringVar(&sqliteStorePathFlag, "sqlitestore-path", "data.sqlite", "SQLite database file path for sqlitestore")
+	flag.StringVar(&sqliteStoreLocalPathFlag, "sqlitestore-local-path", "", "Spool workspace directory for sqlitestore")
 
 	flag.CommandLine.Usage = func() {
 		out := flag.CommandLine.Output()
@@ -306,6 +309,9 @@ func main() {
 	if useSqliteStoreFlag {
 		useSqliteStore = true
 		sqliteStorePath = sqliteStorePathFlag
+		if sqliteStoreLocalPathFlag != "" {
+			sqliteStoreLocalPath = sqliteStoreLocalPathFlag
+		}
 	}
 	if value, ok := lookupEnv("SQLITESTORE", "sqlitestore"); ok {
 		if parsed, errParse := strconv.ParseBool(value); errParse == nil && parsed {
@@ -511,6 +517,7 @@ func main() {
 		if strings.TrimSpace(sqliteStorePath) == "" {
 			sqliteStorePath = filepath.Join(wd, "data.sqlite")
 		}
+		activeSqliteStorePath = sqliteStorePath
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		sqliteStoreInst, err = store.NewSqliteStore(ctx, store.SqliteStoreConfig{
 			DBPath:   sqliteStorePath,
@@ -935,20 +942,23 @@ func setupUsageHistory(cfg *config.Config, configFilePath, writableBase string, 
 	}
 
 	dir := strings.TrimSpace(writableBase)
-	if dir == "" {
-		if trimmed := strings.TrimSpace(configFilePath); trimmed != "" {
-			dir = filepath.Dir(trimmed)
-		}
+	useSqlite := len(isSqlite) > 0 && isSqlite[0]
+	if dir == "" && useSqlite && activeSqliteStorePath != "" {
+		dir = filepath.Dir(activeSqliteStorePath)
 	}
 	if dir == "" {
 		if wd, errWd := os.Getwd(); errWd == nil {
 			dir = wd
 		}
 	}
+	if dir == "" {
+		if trimmed := strings.TrimSpace(configFilePath); trimmed != "" {
+			dir = filepath.Dir(trimmed)
+		}
+	}
 	sqlitePath := filepath.Join(dir, "usage-history.sqlite")
 	jsonPath := filepath.Join(dir, "usage-history.json")
 	var path string
-	useSqlite := len(isSqlite) > 0 && isSqlite[0]
 	if _, errStat := os.Stat(sqlitePath); errStat == nil {
 		path = sqlitePath
 	} else if useSqlite {

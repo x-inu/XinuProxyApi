@@ -199,6 +199,9 @@ func (s *Store) migrateFromJSONIfEmpty(sqlitePath string) {
 		strings.TrimSuffix(sqlitePath, filepath.Ext(sqlitePath)) + ".json",
 		filepath.Join(dir, "usage-history.json"),
 	}
+	if cwd, err := os.Getwd(); err == nil && cwd != dir {
+		candidates = append(candidates, filepath.Join(cwd, "usage-history.json"))
+	}
 
 	for _, jsonFile := range candidates {
 		data, err := os.ReadFile(jsonFile)

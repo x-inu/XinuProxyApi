@@ -521,9 +521,32 @@ func main() {
 			log.Errorf("failed to initialize sqlite token store: %v", err)
 			return
 		}
-		examplePath := filepath.Join(wd, "config.example.yaml")
+		seedConfig := configPath
+		if _, errStat := os.Stat(seedConfig); errStat != nil {
+			seedConfig = filepath.Join(wd, "config.yaml")
+		}
+		if _, errStat := os.Stat(seedConfig); errStat != nil {
+			seedConfig = filepath.Join(wd, "config.example.yaml")
+		}
+
+		seedAuth := ""
+		if existingCfg, errLoad := config.LoadConfigOptional(seedConfig, false); errLoad == nil && existingCfg != nil && existingCfg.AuthDir != "" {
+			seedAuth = existingCfg.AuthDir
+		}
+		if seedAuth == "" {
+			candidate := filepath.Join(wd, ".xinuproxyapi")
+			if _, errStat := os.Stat(candidate); errStat == nil {
+				seedAuth = candidate
+			} else if home, errHome := os.UserHomeDir(); errHome == nil {
+				candidateHome := filepath.Join(home, ".xinuproxyapi")
+				if _, errStatH := os.Stat(candidateHome); errStatH == nil {
+					seedAuth = candidateHome
+				}
+			}
+		}
+
 		ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
-		if errBootstrap := sqliteStoreInst.Bootstrap(ctx, examplePath); errBootstrap != nil {
+		if errBootstrap := sqliteStoreInst.BootstrapWithSeeds(ctx, seedConfig, seedAuth); errBootstrap != nil {
 			cancel()
 			log.Errorf("failed to bootstrap sqlite-backed config: %v", errBootstrap)
 			return
@@ -692,7 +715,7 @@ func main() {
 	}
 	redisqueue.SetUsageStatisticsEnabled(cfg.UsageStatisticsEnabled)
 	redisqueue.SetRetentionSeconds(cfg.RedisUsageQueueRetentionSeconds)
-	setupUsageHistory(cfg, configFilePath, writableBase)
+	setupUsageHistory(cfg, configFilePath, writableBase, useSqliteStore)
 	coreauth.SetQuotaCooldownDisabled(cfg.DisableCooling)
 	coreauth.SetTransientErrorCooldownSeconds(cfg.TransientErrorCooldownSeconds)
 
@@ -902,7 +925,7 @@ func main() {
 // setupUsageHistory configures the persistent usage/cost rollup store. It is
 // enabled whenever usage statistics are enabled, storing an hourly rollup file
 // beside the config (or under WRITABLE_PATH when set) and flushing periodically.
-func setupUsageHistory(cfg *config.Config, configFilePath, writableBase string) {
+func setupUsageHistory(cfg *config.Config, configFilePath, writableBase string, isSqlite ...bool) {
 	if cfg == nil || !cfg.UsageStatisticsEnabled {
 		usagehistory.SetGlobal(nil)
 		return
@@ -925,7 +948,10 @@ func setupUsageHistory(cfg *config.Config, configFilePath, writableBase string) 
 	sqlitePath := filepath.Join(dir, "usage-history.sqlite")
 	jsonPath := filepath.Join(dir, "usage-history.json")
 	var path string
+	useSqlite := len(isSqlite) > 0 && isSqlite[0]
 	if _, errStat := os.Stat(sqlitePath); errStat == nil {
+		path = sqlitePath
+	} else if useSqlite {
 		path = sqlitePath
 	} else if val := strings.ToLower(strings.TrimSpace(os.Getenv("USAGE_STORAGE"))); val == "sqlite" {
 		path = sqlitePath

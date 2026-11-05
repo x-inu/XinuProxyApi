@@ -234,3 +234,31 @@ func TestSqliteStoreClear(t *testing.T) {
 		t.Errorf("expected 0 buckets in reloaded DB after clear, got %d", got)
 	}
 }
+
+func TestSqliteStoreMigratesFromLegacyJSON(t *testing.T) {
+	dir := t.TempDir()
+	jsonPath := filepath.Join(dir, "usage-history.json")
+	sqlitePath := filepath.Join(dir, "usage-history.sqlite")
+
+	// 1. Create a legacy json store and add some buckets
+	jsonStore := NewStore(jsonPath, 0)
+	base := time.Date(2026, 9, 30, 10, 0, 0, 0, time.UTC)
+	jsonStore.Add(Sample{Timestamp: base, Provider: "antigravity", Model: "gemini-3.8-flash-high", TotalTokens: 500, UncachedInput: 400, OutputTokens: 100})
+	jsonStore.Add(Sample{Timestamp: base.Add(time.Hour), Provider: "claude", Model: "claude-opus-4-6-thinking", TotalTokens: 1200, UncachedInput: 1000, OutputTokens: 200})
+	if err := jsonStore.Flush(); err != nil {
+		t.Fatalf("json flush failed: %v", err)
+	}
+
+	// 2. Open new SQLite store in the same directory
+	sqliteStore := NewStore(sqlitePath, 0)
+	defer sqliteStore.Close()
+
+	// 3. Verify that the buckets were migrated automatically from jsonPath
+	buckets := sqliteStore.Snapshot()
+	if len(buckets) != 2 {
+		t.Fatalf("expected 2 migrated buckets in sqlite, got %d", len(buckets))
+	}
+	if buckets[0].Provider != "antigravity" && buckets[1].Provider != "antigravity" {
+		t.Errorf("expected antigravity bucket to be present")
+	}
+}

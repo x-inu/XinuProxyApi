@@ -181,15 +181,76 @@ func (s *SqliteStore) EnsureSchema(ctx context.Context) error {
 
 // Bootstrap ensures the schema exists and synchronizes config/auth between SQLite and local spool.
 func (s *SqliteStore) Bootstrap(ctx context.Context, exampleConfigPath string) error {
+	return s.BootstrapWithSeeds(ctx, exampleConfigPath, "")
+}
+
+// BootstrapWithSeeds ensures the schema exists and seeds empty tables from existing files if provided.
+func (s *SqliteStore) BootstrapWithSeeds(ctx context.Context, seedConfigPath string, seedAuthDir string) error {
 	if err := s.EnsureSchema(ctx); err != nil {
 		return err
 	}
-	if err := s.syncConfigFromDatabase(ctx, exampleConfigPath); err != nil {
+	if err := s.syncConfigFromDatabase(ctx, seedConfigPath); err != nil {
+		return err
+	}
+	if err := s.seedAuthFromDirectoryIfEmpty(ctx, seedAuthDir); err != nil {
 		return err
 	}
 	if err := s.syncAuthFromDatabase(ctx); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (s *SqliteStore) seedAuthFromDirectoryIfEmpty(ctx context.Context, seedAuthDir string) error {
+	seedAuthDir = strings.TrimSpace(seedAuthDir)
+	if seedAuthDir == "" {
+		return nil
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var count int
+	queryCount := fmt.Sprintf("SELECT COUNT(1) FROM %s", s.cfg.AuthTable)
+	if err := s.db.QueryRowContext(ctx, queryCount).Scan(&count); err != nil {
+		return fmt.Errorf("sqlite store: count auth records: %w", err)
+	}
+	if count > 0 {
+		return nil // already populated
+	}
+
+	entries, err := os.ReadDir(seedAuthDir)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+		return fmt.Errorf("sqlite store: read seed auth dir: %w", err)
+	}
+
+	now := time.Now().UTC().Format(time.RFC3339)
+	upsert := fmt.Sprintf(`INSERT INTO %s (id, content, created_at, updated_at)
+		VALUES (?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at`,
+		s.cfg.AuthTable)
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(strings.ToLower(entry.Name()), ".json") {
+			continue
+		}
+		filePath := filepath.Join(seedAuthDir, entry.Name())
+		data, errRead := os.ReadFile(filePath)
+		if errRead != nil || len(data) == 0 {
+			continue
+		}
+		var dummy any
+		if errJSON := json.Unmarshal(data, &dummy); errJSON != nil {
+			continue
+		}
+		relID := entry.Name()
+		if _, errExec := s.db.ExecContext(ctx, upsert, relID, string(data), now, now); errExec != nil {
+			return fmt.Errorf("sqlite store: seed auth %s: %w", relID, errExec)
+		}
+	}
+
 	return nil
 }
 
@@ -502,6 +563,66 @@ func (s *SqliteStore) relativeAuthID(fullPath string) (string, error) {
 		return "", fmt.Errorf("sqlite store: relative path: %w", err)
 	}
 	return filepath.ToSlash(rel), nil
+}
+
+// PersistConfig mirrors the local configuration file to SQLite.
+func (s *SqliteStore) PersistConfig(ctx context.Context) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	data, err := os.ReadFile(s.configPath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+		return fmt.Errorf("sqlite store: read config file: %w", err)
+	}
+	now := time.Now().UTC().Format(time.RFC3339)
+	upsert := fmt.Sprintf(`INSERT INTO %s (id, content, created_at, updated_at)
+		VALUES (?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at`,
+		s.cfg.ConfigTable)
+	_, err = s.db.ExecContext(ctx, upsert, defaultSqliteConfigKey, string(data), now, now)
+	return err
+}
+
+// PersistAuthFiles stores the provided auth file changes in SQLite.
+func (s *SqliteStore) PersistAuthFiles(ctx context.Context, _ string, paths ...string) error {
+	if len(paths) == 0 {
+		return nil
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for _, p := range paths {
+		trimmed := strings.TrimSpace(p)
+		if trimmed == "" {
+			continue
+		}
+		relID, err := s.relativeAuthID(trimmed)
+		if err != nil {
+			abs := trimmed
+			if !filepath.IsAbs(abs) {
+				abs = filepath.Join(s.authDir, trimmed)
+			}
+			relID, err = s.relativeAuthID(abs)
+			if err != nil {
+				continue
+			}
+			trimmed = abs
+		}
+		data, err := os.ReadFile(trimmed)
+		if err != nil {
+			continue
+		}
+		now := time.Now().UTC().Format(time.RFC3339)
+		upsert := fmt.Sprintf(`INSERT INTO %s (id, content, created_at, updated_at)
+			VALUES (?, ?, ?, ?)
+			ON CONFLICT(id) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at`,
+			s.cfg.AuthTable)
+		_, _ = s.db.ExecContext(ctx, upsert, relID, string(data), now, now)
+	}
+	return nil
 }
 
 // CooldownStateStore returns the SQLite-backed runtime cooldown store.

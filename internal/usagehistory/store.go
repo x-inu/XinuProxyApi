@@ -179,8 +179,64 @@ func (s *Store) initSqlite(path string) error {
 	if err := s.initSqliteSchema(); err != nil {
 		return err
 	}
+	s.migrateFromJSONIfEmpty(path)
 	s.loadSqlite()
 	return nil
+}
+
+func (s *Store) migrateFromJSONIfEmpty(sqlitePath string) {
+	if s.sqliteDB == nil {
+		return
+	}
+	var count int
+	err := s.sqliteDB.QueryRow("SELECT COUNT(1) FROM usage_history").Scan(&count)
+	if err != nil || count > 0 {
+		return
+	}
+
+	dir := filepath.Dir(sqlitePath)
+	candidates := []string{
+		strings.TrimSuffix(sqlitePath, filepath.Ext(sqlitePath)) + ".json",
+		filepath.Join(dir, "usage-history.json"),
+	}
+
+	for _, jsonFile := range candidates {
+		data, err := os.ReadFile(jsonFile)
+		if err != nil || len(data) == 0 {
+			continue
+		}
+		var snap snapshot
+		if errUnmarshal := json.Unmarshal(data, &snap); errUnmarshal != nil || len(snap.Buckets) == 0 {
+			continue
+		}
+
+		log.Infof("usagehistory: migrating %d legacy usage buckets from %s to sqlite", len(snap.Buckets), jsonFile)
+		tx, errTx := s.sqliteDB.Begin()
+		if errTx != nil {
+			return
+		}
+		stmt, errStmt := tx.Prepare(`INSERT INTO usage_history (hour, provider, model, requests, failed, input_tokens, output_tokens, cached_tokens, total_tokens, cost_usd)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(hour, provider, model) DO UPDATE SET
+				requests = excluded.requests,
+				failed = excluded.failed,
+				input_tokens = excluded.input_tokens,
+				output_tokens = excluded.output_tokens,
+				cached_tokens = excluded.cached_tokens,
+				total_tokens = excluded.total_tokens,
+				cost_usd = excluded.cost_usd`)
+		if errStmt != nil {
+			_ = tx.Rollback()
+			return
+		}
+
+		for _, b := range snap.Buckets {
+			_, _ = stmt.Exec(b.Hour, b.Provider, b.Model, b.Requests, b.Failed, b.InputTokens, b.OutputTokens, b.CachedTokens, b.TotalTokens, b.CostUSD)
+		}
+		_ = stmt.Close()
+		_ = tx.Commit()
+		break
+	}
 }
 
 func (s *Store) initSqliteSchema() error {

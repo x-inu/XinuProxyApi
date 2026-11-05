@@ -126,3 +126,56 @@ func TestSqliteStoreLifecycle(t *testing.T) {
 		t.Fatalf("expected 0 auths after delete, got %d", len(listAfterDelete))
 	}
 }
+
+func TestSqliteStoreBootstrapWithSeeds(t *testing.T) {
+	tempDir := t.TempDir()
+	dbPath := filepath.Join(tempDir, "data.sqlite")
+	spoolDir := filepath.Join(tempDir, "spool")
+	seedAuthDir := filepath.Join(tempDir, "existing_auths")
+	if err := os.MkdirAll(seedAuthDir, 0o700); err != nil {
+		t.Fatalf("mkdir seed auth dir: %v", err)
+	}
+
+	// Create 2 existing auth files
+	auth1 := []byte(`{"email":"acc1@example.com","provider":"antigravity"}`)
+	auth2 := []byte(`{"email":"acc2@example.com","provider":"codex"}`)
+	_ = os.WriteFile(filepath.Join(seedAuthDir, "antigravity-acc1.json"), auth1, 0o600)
+	_ = os.WriteFile(filepath.Join(seedAuthDir, "codex-acc2.json"), auth2, 0o600)
+
+	// Create existing config
+	seedConfigFile := filepath.Join(tempDir, "existing_config.yaml")
+	seedConfigData := []byte("port: 20128\nremote-management:\n  allow-remote: true\n")
+	_ = os.WriteFile(seedConfigFile, seedConfigData, 0o600)
+
+	ctx := context.Background()
+	s, err := NewSqliteStore(ctx, SqliteStoreConfig{
+		DBPath:   dbPath,
+		SpoolDir: spoolDir,
+	})
+	if err != nil {
+		t.Fatalf("NewSqliteStore failed: %v", err)
+	}
+	defer s.Close()
+
+	if err := s.BootstrapWithSeeds(ctx, seedConfigFile, seedAuthDir); err != nil {
+		t.Fatalf("BootstrapWithSeeds failed: %v", err)
+	}
+
+	// Verify both auth files exist in sqlite
+	list, err := s.List(ctx)
+	if err != nil {
+		t.Fatalf("s.List: %v", err)
+	}
+	if len(list) != 2 {
+		t.Fatalf("expected 2 auth files in sqlite, got %d", len(list))
+	}
+
+	// Verify config exists in spool and matches
+	spoolCfg, err := os.ReadFile(s.ConfigPath())
+	if err != nil {
+		t.Fatalf("read spool config: %v", err)
+	}
+	if string(spoolCfg) != string(seedConfigData) {
+		t.Fatalf("expected spool config to match seed config, got: %s", string(spoolCfg))
+	}
+}

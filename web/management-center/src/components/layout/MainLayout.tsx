@@ -463,12 +463,6 @@ export function MainLayout() {
               : undefined,
           icon: sidebarIcons.authFiles,
         },
-        {
-          path: '/oauth',
-          labelKey: 'nav.oauth',
-          metaKey: 'nav_meta.oauth',
-          icon: sidebarIcons.oauth,
-        },
       ],
     },
     {

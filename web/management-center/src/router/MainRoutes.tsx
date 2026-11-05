@@ -6,7 +6,6 @@ import { ModelsPage } from '@/features/models/ModelsPage';
 import { AuthFilesPage } from '@/features/authFiles/AuthFilesPage';
 import { AuthFilesOAuthExcludedEditPage } from '@/pages/AuthFilesOAuthExcludedEditPage';
 import { AuthFilesOAuthModelAliasEditPage } from '@/pages/AuthFilesOAuthModelAliasEditPage';
-import { OAuthPage } from '@/pages/OAuthPage';
 import { QuotaPage } from '@/features/quota/QuotaPage';
 import { PluginResourcePage } from '@/features/plugins/PluginResourcePage';
 import { PluginsPage } from '@/features/plugins/PluginsPage';
@@ -25,11 +24,14 @@ const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/quick-start/*', element: <Navigate to="/ai-providers" replace /> },
   { path: '/ai-providers', element: <ProvidersWorkbenchPage /> },
   { path: '/ai-providers/*', element: <Navigate to="/ai-providers" replace /> },
+  { path: '/providers', element: <Navigate to="/ai-providers" replace /> },
+  { path: '/dashboard/providers', element: <Navigate to="/ai-providers" replace /> },
   { path: '/models', element: <ModelsPage /> },
   { path: '/auth-files', element: <AuthFilesPage /> },
   { path: '/auth-files/oauth-excluded', element: <AuthFilesOAuthExcludedEditPage /> },
   { path: '/auth-files/oauth-model-alias', element: <AuthFilesOAuthModelAliasEditPage /> },
-  { path: '/oauth', element: <OAuthPage /> },
+  { path: '/oauth', element: <Navigate to="/ai-providers" replace /> },
+  { path: '/oauth/*', element: <Navigate to="/ai-providers" replace /> },
   { path: '/quota', element: <QuotaPage /> },
   ...(supportsPlugin
     ? [

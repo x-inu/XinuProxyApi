@@ -93,7 +93,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "usage": "Usage",
-    "ai_providers": "AI Providers",
+    "ai_providers": "Providers",
     "models": "Models",
     "auth_files": "Auth Files",
     "oauth": "OAuth Login",

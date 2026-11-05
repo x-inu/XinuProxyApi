@@ -21,6 +21,22 @@ export interface ProviderDescriptor {
   sheetSize: 'md' | 'lg' | 'xl';
 }
 
+export interface OAuthProviderDef {
+  id: string;
+  name: string;
+}
+
+export const OAUTH_PROVIDER_DEFS: OAuthProviderDef[] = [
+  { id: 'antigravity', name: 'Google Cloud Code / Antigravity' },
+  { id: 'codex', name: 'OpenAI Codex / ChatGPT' },
+  { id: 'claude', name: 'Anthropic Claude Code CLI' },
+  { id: 'kimi', name: 'Kimi / Moonshot AI' },
+  { id: 'meta', name: 'Meta AI (Muse)' },
+  { id: 'xai', name: 'xAI Grok' },
+  { id: 'devin', name: 'Cognition Devin' },
+  { id: 'vertex', name: 'Google Vertex AI' },
+];
+
 export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
   gemini: {
     id: 'gemini',

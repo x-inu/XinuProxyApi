@@ -1,33 +1,19 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { useProviderRecentRequests } from '@/components/providers/hooks/useProviderRecentRequests';
-import {
-  getOpenAIProviderRecentWindowStats,
-  getProviderRecentWindowStats,
-  getProviderUsageKey,
-  type ProviderRecentUsageMap,
-} from '@/components/providers/utils';
-import type { OpenAIProviderConfig } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
-import { ProviderCategoryList } from './components/ProviderCategoryList';
-import { ProviderResourcePanel } from './components/ProviderResourcePanel';
-import type { ProviderPanelControls } from './components/ProviderResourcePanel';
+import { ProvidersOverviewGrid } from './components/ProvidersOverviewGrid';
+import { OAuthProviderDetailModal } from './components/OAuthProviderDetailModal';
 import { ProviderSheet, type ProviderSheetHandle } from './sheets/ProviderSheet';
-import { isMultiProtocolSponsorBrand } from './sponsorDefinitions';
-import { isSponsorPartialMutationError } from './sponsorMutationRecovery';
 import { useProviderWorkbench } from './useProviderWorkbench';
-import {
-  getProviderFilterState,
-  readProvidersWorkbenchUiState,
-  writeProvidersWorkbenchUiState,
-  type ProviderFilterState,
-  type ProvidersWorkbenchUiState,
-} from './uiState';
-import type { ProviderBrand, ProviderResource, ProviderSortBy, SortDir } from './types';
+import { authFilesApi } from '@/services/api/authFiles';
+import { getErrorMessage } from '@/utils/helpers';
+import type { AuthFileItem } from '@/types/authFile';
+import type { ProviderBrand, ProviderResource } from './types';
 import styles from './ProvidersWorkbenchPage.module.scss';
 
 type SheetMode = 'detail' | 'create' | 'edit';
@@ -52,55 +38,20 @@ const formatDateTime = (iso: string, locale?: string) => {
   }
 };
 
-const matchesFilter = (r: ProviderResource, normalized: string): boolean => {
-  if (!normalized) return true;
-  const haystack = [
-    r.identifier,
-    r.name,
-    r.authIndex,
-    r.apiKeyPreview,
-    r.apiKey,
-    r.baseUrl,
-    r.proxyUrl,
-    r.prefix,
-  ]
-    .filter(Boolean)
-    .map((v) => String(v).toLowerCase());
-  return haystack.some((v) => v.includes(normalized));
-};
-
-const getResourceSortName = (resource: ProviderResource): string =>
-  (resource.name ?? resource.identifier ?? resource.apiKeyPreview ?? '').toLowerCase();
-
-const getResourceRecentSuccess = (
-  resource: ProviderResource,
-  usageByProvider: ProviderRecentUsageMap
-): number => {
-  if (isMultiProtocolSponsorBrand(resource.brand)) {
-    return 0;
-  }
-  if (resource.brand === 'openaiCompatibility') {
-    return getOpenAIProviderRecentWindowStats(resource.raw as OpenAIProviderConfig, usageByProvider)
-      .success;
-  }
-  return getProviderRecentWindowStats(
-    usageByProvider,
-    getProviderUsageKey(resource.brand),
-    resource.apiKey ?? undefined,
-    resource.baseUrl ?? undefined
-  ).success;
-};
-
 export function ProvidersWorkbenchPage() {
   const { t, i18n } = useTranslation();
   const connectionStatus = useAuthStore((s) => s.connectionStatus);
-  const { showNotification, showConfirmation } = useNotificationStore();
+  const { showNotification } = useNotificationStore();
 
   const pageTransitionLayer = usePageTransitionLayer();
   const isCurrentLayer = pageTransitionLayer ? pageTransitionLayer.status === 'current' : true;
 
   const workbench = useProviderWorkbench();
-  const [uiState, setUiState] = useState<ProvidersWorkbenchUiState>(readProvidersWorkbenchUiState);
+  const [authFiles, setAuthFiles] = useState<AuthFileItem[]>([]);
+  const [selectedOAuthProvider, setSelectedOAuthProvider] = useState<{ id: string; name: string } | null>(
+    null
+  );
+
   const [sheetState, setSheetState] = useState<SheetState>({
     open: false,
     brand: 'gemini',
@@ -114,9 +65,28 @@ export function ProvidersWorkbenchPage() {
     enabled: connected,
   });
 
+  const refreshAuthFiles = useCallback(async () => {
+    try {
+      const res = await authFilesApi.list();
+      setAuthFiles(res.files || []);
+    } catch (err) {
+      console.warn('Failed to load auth files for providers overview', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (connected) {
+      void refreshAuthFiles();
+    }
+  }, [connected, refreshAuthFiles]);
+
   const handleRefresh = useCallback(async () => {
-    await Promise.allSettled([workbench.refetch(), refreshRecentRequests().catch(() => undefined)]);
-  }, [refreshRecentRequests, workbench]);
+    await Promise.allSettled([
+      workbench.refetch(),
+      refreshRecentRequests().catch(() => undefined),
+      refreshAuthFiles().catch(() => undefined),
+    ]);
+  }, [refreshAuthFiles, refreshRecentRequests, workbench]);
 
   useHeaderRefresh(handleRefresh, isCurrentLayer);
 
@@ -126,155 +96,41 @@ export function ProvidersWorkbenchPage() {
     workbench.isFetching ||
     workbench.isError;
 
-  const persistUiState = useCallback(
-    (updater: (prev: ProvidersWorkbenchUiState) => ProvidersWorkbenchUiState) => {
-      setUiState((prev) => {
-        const next = updater(prev);
-        writeProvidersWorkbenchUiState(next);
-        return next;
-      });
-    },
-    []
-  );
+  const groups = useMemo(() => workbench.snapshot?.groups ?? [], [workbench.snapshot]);
 
-  const setActiveBrand = useCallback(
-    (brand: ProviderBrand) => {
-      persistUiState((prev) =>
-        prev.activeBrand === brand ? prev : { ...prev, activeBrand: brand }
-      );
-    },
-    [persistUiState]
-  );
+  const totalActive = useMemo(() => {
+    const configActive = groups.reduce(
+      (sum, g) => sum + g.resources.filter((r) => !r.disabled).length,
+      0
+    );
+    const oauthActive = authFiles.filter((f) => !f.disabled && !f.unavailable).length;
+    return configActive + oauthActive;
+  }, [groups, authFiles]);
 
-  const allGroups = useMemo(() => workbench.snapshot?.groups ?? [], [workbench.snapshot]);
-  const groups = allGroups;
-  const firstVisibleBrand = groups[0]?.id ?? 'gemini';
-  const activeBrand = groups.some((group) => group.id === uiState.activeBrand)
-    ? uiState.activeBrand
-    : firstVisibleBrand;
-  const activeFilterState = getProviderFilterState(uiState, activeBrand);
-  const filter = activeFilterState.filter;
-  const providerSortBy = activeFilterState.sortBy;
-  const providerSortDir = activeFilterState.sortDir;
-  const activeGroup = groups.find((g) => g.id === activeBrand) ?? groups[0] ?? null;
+  const totalResources = useMemo(() => {
+    const configTotal = groups.reduce((sum, g) => sum + g.resources.length, 0);
+    const oauthTotal = authFiles.length;
+    return configTotal + oauthTotal;
+  }, [groups, authFiles]);
 
-  const updateActiveFilterState = useCallback(
-    (patch: Partial<ProviderFilterState>) => {
-      persistUiState((prev) => {
-        const current = getProviderFilterState(prev, activeBrand);
-        return {
-          ...prev,
-          filtersByBrand: {
-            ...prev.filtersByBrand,
-            [activeBrand]: {
-              ...current,
-              ...patch,
-            },
-          },
-        };
-      });
-    },
-    [activeBrand, persistUiState]
-  );
+  const providerFamilies = useMemo(() => {
+    const configFamilies = groups.filter((g) => g.resources.length > 0).length;
+    const oauthSeen = new Set(
+      authFiles.map((f) => (f.provider || f.type || '').toLowerCase()).filter(Boolean)
+    );
+    return configFamilies + oauthSeen.size;
+  }, [groups, authFiles]);
 
-  const filteredResources = useMemo(() => {
-    if (!activeGroup) return [];
-    const normalized = filter.trim().toLowerCase();
-    return activeGroup.resources.filter((r) => matchesFilter(r, normalized));
-  }, [activeGroup, filter]);
-
-  const availableModels = useMemo(() => {
-    if (!activeGroup) return [];
-    const seen = new Set<string>();
-    activeGroup.resources.forEach((r) => {
-      r.models.forEach((name) => seen.add(name));
-    });
-    return Array.from(seen).sort();
-  }, [activeGroup]);
-
-  const selectedModels = useMemo(() => {
-    if (availableModels.length === 0) return new Set<string>();
-    const availableModelSet = new Set(availableModels);
-    return new Set(activeFilterState.selectedModels.filter((name) => availableModelSet.has(name)));
-  }, [activeFilterState.selectedModels, availableModels]);
-
-  const visibleResources = useMemo(() => {
-    let arr = filteredResources;
-    if (selectedModels.size > 0) {
-      arr = arr.filter((r) => r.models.some((name) => selectedModels.has(name)));
-    }
-
-    const sorted = [...arr].sort((a, b) => {
-      const sortDiff =
-        providerSortBy === 'name'
-          ? getResourceSortName(a).localeCompare(getResourceSortName(b))
-          : providerSortBy === 'priority'
-            ? a.priority - b.priority
-            : getResourceRecentSuccess(a, usageByProvider) -
-              getResourceRecentSuccess(b, usageByProvider);
-      const diff = sortDiff || a.originalIndex - b.originalIndex;
-      return providerSortDir === 'asc' ? diff : -diff;
-    });
-
-    return sorted;
-  }, [filteredResources, providerSortBy, providerSortDir, selectedModels, usageByProvider]);
-
-  const toolbarControls = useMemo<ProviderPanelControls | undefined>(() => {
-    if (!activeGroup) return undefined;
-    return {
-      sortBy: providerSortBy,
-      sortDir: providerSortDir,
-      onSortBy: (value: ProviderSortBy) => updateActiveFilterState({ sortBy: value }),
-      onSortDir: (value: SortDir) => updateActiveFilterState({ sortDir: value }),
-      availableModels,
-      selectedModels,
-      onSelectedModelsChange: (next) =>
-        updateActiveFilterState({
-          selectedModels: Array.from(next).sort((a, b) => a.localeCompare(b)),
-        }),
-    };
-  }, [
-    activeGroup,
-    availableModels,
-    providerSortBy,
-    providerSortDir,
-    selectedModels,
-    updateActiveFilterState,
-  ]);
-
-  const totalResources = useMemo(
-    () => groups.reduce((sum, g) => sum + g.resources.length, 0),
-    [groups]
-  );
-
-  const totalActive = useMemo(
-    () => groups.reduce((sum, g) => sum + g.resources.filter((r) => !r.disabled).length, 0),
-    [groups]
-  );
-
-  const providerFamilies = useMemo(
-    () => groups.filter((g) => g.resources.length > 0).length,
-    [groups]
-  );
   const updatedAtLabel = workbench.snapshot
     ? formatDateTime(workbench.snapshot.fetchedAt, i18n.language)
     : t('providersPage.modelCatalog.notLoaded');
+
   const errorBanner = workbench.errorMessage ? (
     <div className="error-box">{workbench.errorMessage}</div>
   ) : null;
 
-  const openCreate = useCallback(() => {
-    const brand = activeBrand;
+  const openCreate = useCallback((brand: ProviderBrand = 'openaiCompatibility') => {
     setSheetState({ open: true, brand, mode: 'create', resource: null });
-  }, [activeBrand]);
-
-  const openView = useCallback((resource: ProviderResource) => {
-    setSheetState({
-      open: true,
-      brand: resource.brand,
-      mode: 'detail',
-      resource,
-    });
   }, []);
 
   const openEdit = useCallback((resource: ProviderResource) => {
@@ -290,70 +146,6 @@ export function ProvidersWorkbenchPage() {
     setSheetState((s) => ({ ...s, open: false }));
   }, []);
 
-  const handleDelete = useCallback(
-    (resource: ProviderResource) => {
-      const name = resource.name ?? resource.apiKeyPreview ?? resource.identifier ?? '';
-      showConfirmation({
-        title: t('providersPage.delete.title'),
-        message: t('providersPage.delete.confirm', { name }),
-        variant: 'danger',
-        confirmText: t('providersPage.actions.delete'),
-        onConfirm: async () => {
-          try {
-            await workbench.deleteProvider(resource);
-            showNotification(t('providersPage.toast.deleted'), 'success');
-          } catch (err) {
-            if (isSponsorPartialMutationError(err)) {
-              showNotification(t('providersPage.sponsor.partialMutationWarning'), 'warning');
-              return;
-            }
-            const msg = err instanceof Error ? err.message : String(err);
-            showNotification(`${t('notification.delete_failed')}: ${msg}`, 'error');
-          }
-        },
-      });
-    },
-    [showConfirmation, showNotification, t, workbench]
-  );
-
-  const handleToggleDisabled = useCallback(
-    async (resource: ProviderResource, disabled: boolean) => {
-      try {
-        await workbench.toggleDisabled(resource, disabled);
-        showNotification(
-          disabled ? t('providersPage.toast.disabled') : t('providersPage.toast.enabled'),
-          'success'
-        );
-      } catch (err) {
-        if (isSponsorPartialMutationError(err)) {
-          showNotification(t('providersPage.sponsor.partialMutationWarning'), 'warning');
-          return;
-        }
-        const msg = err instanceof Error ? err.message : String(err);
-        showNotification(`${t('providersPage.toast.toggleFailed')}: ${msg}`, 'error');
-      }
-    },
-    [showNotification, t, workbench]
-  );
-
-  const handleAddAccount = useCallback(async () => {
-    try {
-      const added = await workbench.addOpencodeFreeSlot();
-      if (!added) {
-        openCreate();
-        return;
-      }
-      showNotification(t('providersPage.toast.accountAdded'), 'success');
-    } catch (err) {
-      if (isSponsorPartialMutationError(err)) {
-        showNotification(t('providersPage.sponsor.partialMutationWarning'), 'warning');
-        return;
-      }
-      const msg = err instanceof Error ? err.message : String(err);
-      showNotification(`${t('notification.add_failed')}: ${msg}`, 'error');
-    }
-  }, [openCreate, showNotification, t, workbench]);
-
   const handleCreated = useCallback(() => {
     showNotification(t('providersPage.toast.created'), 'success');
     closeSheet();
@@ -364,34 +156,52 @@ export function ProvidersWorkbenchPage() {
     closeSheet();
   }, [closeSheet, showNotification, t]);
 
+  const handleToggleConfig = useCallback(
+    async (_brand: ProviderBrand, resource: ProviderResource, active: boolean) => {
+      try {
+        await workbench.toggleDisabled(resource, !active);
+        showNotification(active ? 'Provider enabled' : 'Provider disabled', 'success');
+      } catch (err) {
+        showNotification(`Failed to toggle provider: ${getErrorMessage(err)}`, 'error');
+      }
+    },
+    [workbench, showNotification]
+  );
+
+  const handleToggleOAuth = useCallback(
+    async (providerId: string, active: boolean) => {
+      const targetFiles = authFiles.filter((f) => {
+        const norm = (f.provider || f.type || '').toLowerCase();
+        if (providerId === 'claude') {
+          return norm === 'claude' || norm === 'anthropic';
+        }
+        return norm === providerId.toLowerCase();
+      });
+      if (targetFiles.length === 0) return;
+
+      try {
+        await Promise.allSettled(
+          targetFiles.map((f) => authFilesApi.setStatus(f.name, !active))
+        );
+        showNotification(
+          active
+            ? `${targetFiles.length} accounts enabled`
+            : `${targetFiles.length} accounts disabled`,
+          'success'
+        );
+        void refreshAuthFiles();
+      } catch (err) {
+        showNotification(`Failed to toggle accounts: ${getErrorMessage(err)}`, 'error');
+      }
+    },
+    [authFiles, refreshAuthFiles, showNotification]
+  );
+
   if (!workbench.snapshot && workbench.isPending) {
     return (
       <div className={styles.page}>
         <Skeleton height={120} />
-        <div className={styles.layout}>
-          <Skeleton height={420} />
-          <Skeleton height={420} />
-        </div>
-      </div>
-    );
-  }
-
-  if (!activeGroup) {
-    return (
-      <div className={styles.page}>
-        <ProviderHeaderCard
-          totalActive={0}
-          totalResources={0}
-          providerFamilies={0}
-          updatedAtLabel={updatedAtLabel}
-          isFetching={workbench.isFetching}
-          onRefresh={() => void handleRefresh()}
-          onNew={() => {}}
-          isNewDisabled
-          showNewAction
-          showSummary
-        />
-        {errorBanner}
+        <Skeleton height={320} />
       </div>
     );
   }
@@ -407,54 +217,51 @@ export function ProvidersWorkbenchPage() {
         isNewDisabled={disableMutations}
         showNewAction
         showSummary
-        newLabel={t('providersPage.actions.new')}
+        newLabel={t('providersPage.actions.new', { defaultValue: 'Add Custom Provider' })}
         onRefresh={() => void handleRefresh()}
-        onNew={openCreate}
+        onNew={() => openCreate('openaiCompatibility')}
       />
 
       {errorBanner}
 
-      <div className={styles.layout}>
-        <ProviderCategoryList
-          groups={groups}
-          activeBrand={activeGroup.id}
-          onSelect={(brand) => {
-            const isSwitching = sheetState.open && sheetState.brand !== brand;
-            const proceed =
-              isSwitching && sheetRef.current
-                ? sheetRef.current.confirmDiscardIfDirty()
-                : Promise.resolve(true);
-            void proceed.then((ok) => {
-              if (!ok) return;
-              setActiveBrand(brand);
-              if (isSwitching) {
-                closeSheet();
-              }
-            });
-          }}
-        />
-        <ProviderResourcePanel
-          group={activeGroup}
-          filter={filter}
-          onFilterChange={(value) => updateActiveFilterState({ filter: value })}
-          filteredResources={visibleResources}
-          selectedId={sheetState.open ? (sheetState.resource?.id ?? null) : null}
-          disableMutations={disableMutations}
-          usageByProvider={usageByProvider}
-          toolbarControls={toolbarControls}
-          onView={openView}
-          onEdit={openEdit}
-          onDelete={handleDelete}
-          onToggleDisabled={handleToggleDisabled}
-          onCreate={openCreate}
-          onAddAccount={
-            activeGroup.id === 'opencodeFree' && visibleResources.length > 0
-              ? handleAddAccount
-              : undefined
+      {/* Grid of Provider Cards ("Kotak-kotak" 1:1 like XRoute) */}
+      <ProvidersOverviewGrid
+        groups={groups}
+        authFiles={authFiles}
+        onSelectConfigProvider={(brand, resource) => {
+          if (resource) {
+            openEdit(resource);
+          } else {
+            openCreate(brand);
           }
-        />
-      </div>
+        }}
+        onAddCustomProvider={() => openCreate('openaiCompatibility')}
+        onToggleConfigProvider={handleToggleConfig}
+        onSelectOAuthProvider={(providerId, providerName) => {
+          setSelectedOAuthProvider({ id: providerId, name: providerName });
+        }}
+        onToggleOAuthProvider={handleToggleOAuth}
+      />
 
+      {/* OAuth Provider Detail & Login Modal */}
+      {selectedOAuthProvider && (
+        <OAuthProviderDetailModal
+          isOpen={Boolean(selectedOAuthProvider)}
+          onClose={() => setSelectedOAuthProvider(null)}
+          providerId={selectedOAuthProvider.id}
+          providerName={selectedOAuthProvider.name}
+          authFiles={authFiles.filter((f) => {
+            const norm = (f.provider || f.type || '').toLowerCase();
+            if (selectedOAuthProvider.id === 'claude') {
+              return norm === 'claude' || norm === 'anthropic';
+            }
+            return norm === selectedOAuthProvider.id.toLowerCase();
+          })}
+          onRefreshAuthFiles={refreshAuthFiles}
+        />
+      )}
+
+      {/* Config Provider Sheet (Drawer) */}
       <ProviderSheet
         ref={sheetRef}
         state={sheetState}

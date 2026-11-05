@@ -3,6 +3,8 @@ package managementasset
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
@@ -117,5 +119,27 @@ func TestAutoUpdateSkipReason(t *testing.T) {
 				t.Fatalf("autoUpdateSkipReason() = (%q, %t), want (%q, %t)", gotReason, gotSkip, tt.wantReason, tt.wantSkip)
 			}
 		})
+	}
+}
+
+func TestEnsureLatestManagementHTMLSkipsWhenAutoUpdateDisabled(t *testing.T) {
+	tempDir := t.TempDir()
+	staticDir := tempDir
+	localFile := filepath.Join(staticDir, managementAssetName)
+	if err := os.WriteFile(localFile, []byte("test-content"), 0o600); err != nil {
+		t.Fatalf("failed to write test asset: %v", err)
+	}
+
+	cfg := &config.Config{
+		RemoteManagement: config.RemoteManagement{
+			DisableAutoUpdatePanel: true,
+		},
+	}
+	SetCurrentConfig(cfg)
+	defer SetCurrentConfig(nil)
+
+	// EnsureLatestManagementHTML should immediately return true without network requests
+	if !EnsureLatestManagementHTML(t.Context(), staticDir, "", "invalid-repo-that-would-fail") {
+		t.Fatalf("EnsureLatestManagementHTML() = false, want true when local asset exists and auto update is disabled")
 	}
 }

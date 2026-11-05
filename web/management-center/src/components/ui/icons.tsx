@@ -510,7 +510,7 @@ export function IconSidebarQuota({ size = 20, ...props }: IconProps) {
   );
 }
 
-export const IconSidebarLogs = IconScrollText;
+export const IconSidebarLogs = IconTerminal;
 
 export function IconSidebarSystem({ size = 20, ...props }: IconProps) {
   return (

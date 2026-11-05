@@ -45,6 +45,9 @@ const createMainRoutes = (supportsPlugin: boolean) => [
       ]),
   { path: '/config', element: <ConfigPage /> },
   { path: '/logs', element: <LogsPage /> },
+  { path: '/console-log', element: <Navigate to="/logs" replace /> },
+  { path: '/terminal', element: <Navigate to="/logs" replace /> },
+  { path: '/dashboard/console-log', element: <Navigate to="/logs" replace /> },
   { path: '/system', element: <SystemPage /> },
   { path: '*', element: <Navigate to="/" replace /> },
 ];

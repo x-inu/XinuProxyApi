@@ -101,7 +101,7 @@
     "plugins": "Plugins",
     "plugin_store": "Plugin Store",
     "config_management": "Config Panel",
-    "logs": "Logs Viewer",
+    "logs": "Console Log",
     "system_info": "About"
   },
   "nav_groups": {
@@ -121,7 +121,7 @@
     "quota_management": "API keys & limits",
     "plugins": "Plugin toggles & config",
     "plugin_store": "Discover & install plugins",
-    "logs": "Request tracing",
+    "logs": "Live server console output",
     "config_management": "Gateway configuration",
     "system_info": "Runtime & diagnostics"
   },
@@ -926,7 +926,8 @@
     "no_requests": "No requests"
   },
   "logs": {
-    "title": "Logs Viewer",
+    "title": "Console Log",
+    "description": "Live server console output",
     "tab_console": "Live Console",
     "tab_files": "File Logs",
     "tab_errors": "Error Dumps",

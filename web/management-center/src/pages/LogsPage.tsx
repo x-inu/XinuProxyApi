@@ -39,7 +39,7 @@ import { createLogRequestGuard, createLogRequestQueue } from './hooks/logRequest
 import { errorLogViewerReducer } from './hooks/errorLogViewer';
 import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
-import { ConsoleLogStream } from './components/ConsoleLogStream';
+import { TerminalView } from '@/components/terminal/TerminalView';
 import styles from './LogsPage.module.scss';
 
 
@@ -133,9 +133,9 @@ const responseDataToText = async (data: unknown): Promise<string> => {
   }
 };
 
-type TabType = 'console' | 'logs' | 'errors';
+type TabType = 'logs' | 'errors';
 
-export function LogsPage() {
+export function LegacyLogsViewer() {
   const { t } = useTranslation();
   const { showNotification, showConfirmation } = useNotificationStore();
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
@@ -148,7 +148,7 @@ export function LogsPage() {
   const [fileLoggingRequired, setFileLoggingRequired] = useState(false);
   const showFileLoggingRequired = cpaNeedsFileLogging || fileLoggingRequired;
 
-  const [activeTab, setActiveTab] = useState<TabType>('console');
+  const [activeTab, setActiveTab] = useState<TabType>('logs');
   const [logState, setLogState] = useState<LogState>({ buffer: [], visibleFrom: 0 });
   const [loading, setLoading] = useState(true);
   const [clearingLogs, setClearingLogs] = useState(false);
@@ -727,20 +727,10 @@ export function LogsPage() {
       <div className={styles.tabBar}>
         <button
           type="button"
-          className={`${styles.tabItem} ${activeTab === 'console' ? styles.tabActive : ''}`}
-          onClick={() => {
-            setFullscreenLogs(false);
-            setActiveTab('console');
-          }}
-        >
-          {t('logs.tab_console', { defaultValue: 'Live Console' })}
-        </button>
-        <button
-          type="button"
           className={`${styles.tabItem} ${activeTab === 'logs' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('logs')}
         >
-          {t('logs.tab_files', { defaultValue: 'File Logs' })}
+          {t('logs.log_content')}
         </button>
         <button
           type="button"
@@ -750,12 +740,11 @@ export function LogsPage() {
             setActiveTab('errors');
           }}
         >
-          {t('logs.tab_errors', { defaultValue: 'Error Dumps' })}
+          {t('logs.error_logs_modal_title')}
         </button>
       </div>
 
       <div className={styles.content}>
-        {activeTab === 'console' && <ConsoleLogStream />}
         {activeTab === 'logs' && (
           <Card
             className={[styles.logCard, fullscreenLogs ? styles.logCardFullscreen : '']
@@ -1330,6 +1319,19 @@ export function LogsPage() {
       >
         {requestLogId ? t('logs.request_log_download_confirm', { id: requestLogId }) : null}
       </Modal>
+    </div>
+  );
+}
+
+export function LogsPage() {
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Console Log</h1>
+        <p className={styles.subtitle}>Live server console output</p>
+      </div>
+
+      <TerminalView />
     </div>
   );
 }

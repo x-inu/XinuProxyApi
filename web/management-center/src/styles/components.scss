@@ -48,6 +48,17 @@
     }
   }
 
+  &.btn-outline {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+
+    &:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--border-hover);
+    }
+  }
+
   &.btn-danger {
     background-color: $error-color;
     border-color: $error-color;

@@ -13,6 +13,24 @@
   }
 }
 
+.header {
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
 .pageTitle {
   font-size: 28px;
   font-weight: 700;

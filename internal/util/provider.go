@@ -239,7 +239,7 @@ func MaskSensitiveHeaderValue(key, value string) string {
 	}
 }
 
-// MaskSensitiveQuery masks sensitive query parameters, e.g. auth_token, within the raw query string.
+// MaskSensitiveQuery masks sensitive query parameters, e.g. auth_token, key, password, within the raw query string.
 func MaskSensitiveQuery(raw string) string {
 	if raw == "" {
 		return ""
@@ -251,10 +251,8 @@ func MaskSensitiveQuery(raw string) string {
 			continue
 		}
 		keyPart := part
-		valuePart := ""
 		if idx := strings.Index(part, "="); idx >= 0 {
 			keyPart = part[:idx]
-			valuePart = part[idx+1:]
 		}
 		decodedKey, err := url.QueryUnescape(keyPart)
 		if err != nil {
@@ -263,12 +261,7 @@ func MaskSensitiveQuery(raw string) string {
 		if !shouldMaskQueryParam(decodedKey) {
 			continue
 		}
-		decodedValue, err := url.QueryUnescape(valuePart)
-		if err != nil {
-			decodedValue = valuePart
-		}
-		masked := HideAPIKey(strings.TrimSpace(decodedValue))
-		parts[i] = keyPart + "=" + url.QueryEscape(masked)
+		parts[i] = keyPart + "=[REDACTED]"
 		changed = true
 	}
 	if !changed {
@@ -286,7 +279,7 @@ func shouldMaskQueryParam(key string) bool {
 	if key == "key" || strings.Contains(key, "api-key") || strings.Contains(key, "apikey") || strings.Contains(key, "api_key") {
 		return true
 	}
-	if strings.Contains(key, "token") || strings.Contains(key, "secret") {
+	if strings.Contains(key, "token") || strings.Contains(key, "secret") || strings.Contains(key, "password") || strings.Contains(key, "passwd") || strings.Contains(key, "pass") || strings.Contains(key, "auth") {
 		return true
 	}
 	return false

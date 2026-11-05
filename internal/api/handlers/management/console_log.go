@@ -67,6 +67,8 @@ func (h *Handler) PutConsoleLogLevel(c *gin.Context) {
 
 // StreamConsoleLogs streams real-time console log entries via Server-Sent Events (SSE).
 func (h *Handler) StreamConsoleLogs(c *gin.Context) {
+	logging.SkipGinRequestLogging(c)
+
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
 	c.Writer.Header().Set("Cache-Control", "no-cache, no-transform")
 	c.Writer.Header().Set("Connection", "keep-alive")

@@ -250,3 +250,29 @@ func TestRestoreSanitizedToolName(t *testing.T) {
 		t.Errorf("expected empty for empty name, got %q", got)
 	}
 }
+
+func TestMaskSensitiveQueryRedactsCompletely(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"Empty", "", ""},
+		{"Non-sensitive params", "foo=bar&page=1", "foo=bar&page=1"},
+		{"Key param redacted", "key=mySecretPassword123!", "key=[REDACTED]"},
+		{"API key param", "api_key=sk-1234567890", "api_key=[REDACTED]"},
+		{"Token param", "token=jwt.token.here&user=john", "token=[REDACTED]&user=john"},
+		{"Password param", "password=secretPass", "password=[REDACTED]"},
+		{"Auth param", "auth=secretVal", "auth=[REDACTED]"},
+		{"Mixed params with key", "model=gemini&key=superSecret&limit=10", "model=gemini&key=[REDACTED]&limit=10"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := MaskSensitiveQuery(tt.input)
+			if got != tt.expected {
+				t.Errorf("MaskSensitiveQuery(%q) = %q, want %q", tt.input, got, tt.expected)
+			}
+		})
+	}
+}

@@ -79,7 +79,7 @@ export function TerminalView() {
     const connect = async () => {
       try {
         controller = new AbortController();
-        const streamUrl = consoleLogsApi.getStreamUrl(apiBase, managementKey);
+        const streamUrl = consoleLogsApi.getStreamUrl(apiBase);
         const headers: Record<string, string> = {
           Accept: 'text/event-stream',
         };

@@ -32,12 +32,9 @@ export const consoleLogsApi = {
   setLevel: (level: string): Promise<ConsoleLogLevelResponse> =>
     apiClient.put('/console-logs/level', { level }),
 
-  getStreamUrl: (apiBase: string, managementKey?: string): string => {
+  getStreamUrl: (apiBase: string): string => {
     const base = computeApiUrl(apiBase);
     const url = new URL(`${base}/console-logs/stream`, window.location.href);
-    if (managementKey) {
-      url.searchParams.set('key', managementKey);
-    }
     return url.toString();
   },
 };

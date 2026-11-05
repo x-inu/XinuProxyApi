@@ -68,9 +68,14 @@ export const isOpencodeFreeOpenAIProvider = (
  * Fallback marker for OpenCode free ids. The catalog now reports pricing
  * (the v2 `cost` block), so the suffix only matters for payloads without a
  * usable price block — never on top of a confirmed free/paid flag.
+ * Supports `-free`, `:free`, `_free`, `.free`, `/free` suffixes and exact
+ * word `free`.
  */
-export const isOpenCodeFreeModelId = (name: string | undefined | null): boolean =>
-  /-free$/i.test(String(name ?? '').trim());
+export const isOpenCodeFreeModelId = (name: string | undefined | null): boolean => {
+  const normalized = String(name ?? '').trim();
+  if (!normalized) return false;
+  return /(?:[-/:_.\\s]free)$/i.test(normalized) || /\bfree\b/i.test(normalized);
+};
 
 /**
  * Free models curated by OpenCode in the Console docs — the pinned minimum

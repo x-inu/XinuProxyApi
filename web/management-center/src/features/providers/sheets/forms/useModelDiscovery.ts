@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { modelsApi } from '@/services/api';
 import { buildHeaderObject } from '@/utils/headers';
 import { getErrorMessage } from '@/utils/helpers';
+import { isFreeModelId } from '@/utils/models';
 import type { ModelInfo } from '@/utils/models';
 import type { ApiKeyEntryInput, ProviderBrand } from '../../types';
 
@@ -122,7 +123,13 @@ export function useModelDiscovery(args: UseModelDiscoveryArgs): UseModelDiscover
 
   const models = useMemo(() => {
     if (!freeOnly) return rawModels;
-    return rawModels.filter((m) => m.isFree === true);
+    return rawModels.filter((m) => {
+      // Price first (isFree true/false) — covers Nous/OpenCode providers
+      // even when the id has no free suffix (e.g., stealth/crouton-alpha).
+      if (m.isFree !== undefined) return m.isFree;
+      // Fallback to name heuristics only when pricing is absent.
+      return isFreeModelId(m.name);
+    });
   }, [rawModels, freeOnly]);
 
   const reset = useCallback(() => {

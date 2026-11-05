@@ -32,12 +32,38 @@ const matchCategory = (text: string) => {
   return null;
 };
 
+const isZeroPrice = (value: unknown): boolean => {
+  const normalized = String(value ?? '').trim();
+  if (normalized === '' || normalized.toLowerCase() === 'null' || normalized.toLowerCase() === 'undefined') {
+    return false;
+  }
+  const num = Number(normalized);
+  return !isNaN(num) && num === 0;
+};
+
+/**
+ * Universal free-model fallback for provider ids whose endpoint does not
+ * expose pricing. Covers suffixes like `-free`, `:free`, `_free`, `.free`,
+ * `/free` and exact word `free`.
+ */
+export const isFreeModelId = (name: string | undefined | null): boolean => {
+  const trimmed = String(name ?? '').trim();
+  if (!trimmed) return false;
+  return /(?:[-/:_\\s.]free)$/i.test(trimmed) || /\bfree\b/i.test(trimmed);
+};
+
 const isFreeByPricing = (entry: Record<string, unknown>): boolean | undefined => {
   const pricing = entry.pricing;
   if (isRecord(pricing)) {
-    const prompt = String(pricing.prompt ?? '').trim();
-    const completion = String(pricing.completion ?? '').trim();
-    if (prompt || completion) return prompt === '0' && completion === '0';
+    const prompt = pricing.prompt ?? pricing.input;
+    const completion = pricing.completion ?? pricing.output;
+    if (prompt !== undefined || completion !== undefined) {
+      const hasPrompt = String(prompt ?? '').trim() !== '';
+      const hasCompletion = String(completion ?? '').trim() !== '';
+      if (hasPrompt || hasCompletion) {
+        return isZeroPrice(prompt) && isZeroPrice(completion);
+      }
+    }
   }
   return isFreeByCost(entry);
 };
@@ -56,10 +82,12 @@ const isFreeByCost = (entry: Record<string, unknown>): boolean | undefined => {
   const input = text.input;
   const output = text.output;
   if (!isRecord(input) || !isRecord(output)) return undefined;
-  const inputPrice = String(input.price ?? '').trim();
-  const outputPrice = String(output.price ?? '').trim();
-  if (!inputPrice && !outputPrice) return undefined;
-  return inputPrice === '0' && inputPrice === outputPrice;
+  const inputPrice = input.price;
+  const outputPrice = output.price;
+  const hasInput = String(inputPrice ?? '').trim() !== '';
+  const hasOutput = String(outputPrice ?? '').trim() !== '';
+  if (!hasInput && !hasOutput) return undefined;
+  return isZeroPrice(inputPrice) && isZeroPrice(outputPrice);
 };
 
 export function normalizeModelList(payload: unknown, { dedupe = false } = {}): ModelInfo[] {

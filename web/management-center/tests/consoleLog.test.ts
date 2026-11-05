@@ -99,6 +99,12 @@ describe('toConsoleEntry', () => {
   it('carries the sequence number for stable ordering', () => {
     expect(entry({ line: 'a' }, 12).seq).toBe(12);
   });
+
+  it('strips redundant CPA log prefix [timestamp] [reqID] [level] [caller]', () => {
+    const raw = '[2026-11-05 19:13:34] [00000016] [info ] [gin_logger.go:103] 200 |        4.992s |       127.0.0.1 | POST    "/v1/chat/completions"';
+    const parsed = entry({ line: raw });
+    expect(parsed.line).toBe('200 |        4.992s |       127.0.0.1 | POST    "/v1/chat/completions"');
+  });
 });
 
 describe('countByLevel', () => {

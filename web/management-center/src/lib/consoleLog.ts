@@ -42,6 +42,9 @@ const LEADING_TIMESTAMP_RE = /^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?\s
 // eslint-disable-next-line no-control-regex
 const ANSI_RE = /\u001b\[[0-9;]*m/g;
 
+// CPA log prefix pattern: [YYYY-MM-DD HH:MM:SS] [reqID] [level] [caller:line] message
+const CPA_PREFIX_RE = /^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s*\[[^\]]*\]\s*\[[^\]]*\](?:\s*\[[^\]]*\])?\s*/;
+
 const pad = (value: number, size = 2) => String(value).padStart(size, '0');
 
 function coerceLevel(value: unknown): LogLevel | null {
@@ -56,6 +59,11 @@ function coerceLevel(value: unknown): LogLevel | null {
 /** ANSI escapes survive only on lines the logger never formatted itself. */
 export function stripAnsi(line: string): string {
   return line.includes('\u001b[') ? line.replace(ANSI_RE, '') : line;
+}
+
+/** Strips duplicate [timestamp] [reqID] [level] [caller] prefix if present in the raw line. */
+export function stripCpaPrefix(line: string): string {
+  return line.replace(CPA_PREFIX_RE, '');
 }
 
 function levelFromText(line: string): LogLevel | null {
@@ -102,7 +110,8 @@ export function toConsoleEntry(
   seq: number,
   receivedAt: number = Date.now()
 ): ConsoleEntry {
-  const line = stripAnsi(typeof raw.line === 'string' ? raw.line : '');
+  const rawLine = typeof raw.line === 'string' ? raw.line : '';
+  const line = stripCpaPrefix(stripAnsi(rawLine));
   const json = parseJsonLine(line);
   const serverTime = typeof raw.time === 'string' ? Date.parse(raw.time) : Number.NaN;
 
@@ -146,7 +155,7 @@ export function formatClock(iso: string): string {
  * prefix in front of the bracket are skipped rather than demanded absent.
  */
 export function splitTag(line: string): { tag: string; message: string } | null {
-  const withoutPrefix = line.replace(LEADING_TIMESTAMP_RE, '').replace(PREFIX_RE, '').trimStart();
+  const withoutPrefix = stripCpaPrefix(line).replace(LEADING_TIMESTAMP_RE, '').replace(PREFIX_RE, '').trimStart();
   const match = /^\[([^\]\s]+)\]\s?([\s\S]*)$/.exec(withoutPrefix);
   return match ? { tag: match[1], message: match[2] } : null;
 }

@@ -71,14 +71,38 @@ func (h *ConsoleLogHook) Levels() []log.Level {
 	return log.AllLevels
 }
 
+// FormatConsoleMessage formats the entry message and structured fields without the redundant
+// [timestamp] [req_id] [level] [caller] prefix since those are separate fields in ConsoleEntry and UI columns.
+func FormatConsoleMessage(entry *log.Entry) string {
+	message := strings.TrimRight(entry.Message, "\r\n")
+	var fieldsStr string
+	if len(entry.Data) > 0 {
+		var fields []string
+		for _, k := range logFieldOrder {
+			if k == "request_id" {
+				continue
+			}
+			if v, ok := entry.Data[k]; ok {
+				fields = append(fields, fmt.Sprintf("%s=%s", k, formatLogFieldValue(k, v)))
+			}
+		}
+		if pluginID, ok := entry.Data["plugin_id"]; ok && strings.TrimSpace(fmt.Sprint(pluginID)) != "" {
+			for _, k := range pluginPathFieldOrder {
+				if v, ok := entry.Data[k]; ok {
+					fields = append(fields, fmt.Sprintf("%s=%v", k, v))
+				}
+			}
+		}
+		if len(fields) > 0 {
+			fieldsStr = " " + strings.Join(fields, " ")
+		}
+	}
+	return StripANSI(message + fieldsStr)
+}
+
 // Fire processes a log entry and records it in the ring buffer.
 func (h *ConsoleLogHook) Fire(entry *log.Entry) error {
-	rawLine, err := h.formatter.Format(entry)
-	if err != nil {
-		rawLine = []byte(entry.Message)
-	}
-
-	cleanLine := StripANSI(strings.TrimRight(string(rawLine), "\r\n"))
+	cleanLine := FormatConsoleMessage(entry)
 
 	levelStr := entry.Level.String()
 	if levelStr == "warning" {

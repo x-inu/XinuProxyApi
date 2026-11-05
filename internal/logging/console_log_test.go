@@ -44,6 +44,9 @@ func TestConsoleLogHookAndBuffer(t *testing.T) {
 		if ev.Entry.Level != "info" {
 			t.Fatalf("expected level info, got %q", ev.Entry.Level)
 		}
+		if ev.Entry.Line != "Testing console log buffer entry" {
+			t.Fatalf("expected clean line without prefix, got %q", ev.Entry.Line)
+		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("timed out waiting for console log event")
 	}

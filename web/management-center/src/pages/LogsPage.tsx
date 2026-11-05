@@ -39,6 +39,7 @@ import { createLogRequestGuard, createLogRequestQueue } from './hooks/logRequest
 import { errorLogViewerReducer } from './hooks/errorLogViewer';
 import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
+import { ConsoleLogStream } from './components/ConsoleLogStream';
 import styles from './LogsPage.module.scss';
 
 
@@ -132,7 +133,7 @@ const responseDataToText = async (data: unknown): Promise<string> => {
   }
 };
 
-type TabType = 'logs' | 'errors';
+type TabType = 'console' | 'logs' | 'errors';
 
 export function LogsPage() {
   const { t } = useTranslation();
@@ -147,7 +148,7 @@ export function LogsPage() {
   const [fileLoggingRequired, setFileLoggingRequired] = useState(false);
   const showFileLoggingRequired = cpaNeedsFileLogging || fileLoggingRequired;
 
-  const [activeTab, setActiveTab] = useState<TabType>('logs');
+  const [activeTab, setActiveTab] = useState<TabType>('console');
   const [logState, setLogState] = useState<LogState>({ buffer: [], visibleFrom: 0 });
   const [loading, setLoading] = useState(true);
   const [clearingLogs, setClearingLogs] = useState(false);
@@ -726,10 +727,20 @@ export function LogsPage() {
       <div className={styles.tabBar}>
         <button
           type="button"
+          className={`${styles.tabItem} ${activeTab === 'console' ? styles.tabActive : ''}`}
+          onClick={() => {
+            setFullscreenLogs(false);
+            setActiveTab('console');
+          }}
+        >
+          {t('logs.tab_console', { defaultValue: 'Live Console' })}
+        </button>
+        <button
+          type="button"
           className={`${styles.tabItem} ${activeTab === 'logs' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('logs')}
         >
-          {t('logs.log_content')}
+          {t('logs.tab_files', { defaultValue: 'File Logs' })}
         </button>
         <button
           type="button"
@@ -739,11 +750,12 @@ export function LogsPage() {
             setActiveTab('errors');
           }}
         >
-          {t('logs.error_logs_modal_title')}
+          {t('logs.tab_errors', { defaultValue: 'Error Dumps' })}
         </button>
       </div>
 
       <div className={styles.content}>
+        {activeTab === 'console' && <ConsoleLogStream />}
         {activeTab === 'logs' && (
           <Card
             className={[styles.logCard, fullscreenLogs ? styles.logCardFullscreen : '']

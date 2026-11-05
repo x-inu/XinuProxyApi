@@ -135,6 +135,8 @@ func SetupBaseLogger() {
 			log.StandardLogger().Infof(format, values...)
 		}
 
+		RegisterConsoleLogHook()
+
 		log.RegisterExitHandler(closeLogOutputs)
 	})
 }

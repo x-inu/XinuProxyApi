@@ -12,6 +12,7 @@ const (
 	AuthSourceMemory      = "memory"
 	AuthSourceObjectStore = "objectstore"
 	AuthSourcePostgres    = "postgres"
+	AuthSourceSqlite      = "sqlite"
 
 	AttributeAPIKey               = "api_key"
 	AttributeAuthKind             = "auth_kind"
@@ -102,6 +103,8 @@ func normalizeAuthSourceKind(source string) string {
 		return AuthSourceObjectStore
 	case AuthSourcePostgres, "postgresql", "database", "db":
 		return AuthSourcePostgres
+	case AuthSourceSqlite, "sqlite3":
+		return AuthSourceSqlite
 	default:
 		return ""
 	}

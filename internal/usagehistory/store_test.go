@@ -155,3 +155,82 @@ func TestEstimateCostUsesCacheDefaults(t *testing.T) {
 		t.Errorf("unexpected cost: %f", cost)
 	}
 }
+
+func TestSqliteStorePersistAndReload(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "usage.sqlite")
+
+	store := NewStore(path, 0)
+	defer store.Close()
+
+	base := time.Date(2026, 9, 30, 12, 0, 0, 0, time.UTC)
+	store.Add(Sample{Timestamp: base, Provider: "xai", Model: "grok-4", UncachedInput: 100, OutputTokens: 50, TotalTokens: 150})
+	if err := store.Flush(); err != nil {
+		t.Fatalf("sqlite flush: %v", err)
+	}
+
+	if _, err := os.Stat(path); err != nil {
+		t.Fatalf("expected sqlite file to exist: %v", err)
+	}
+
+	reloaded := NewStore(path, 0)
+	defer reloaded.Close()
+
+	buckets := reloaded.Snapshot()
+	if len(buckets) != 1 {
+		t.Fatalf("expected 1 bucket after reload, got %d", len(buckets))
+	}
+	if buckets[0].TotalTokens != 150 {
+		t.Errorf("expected 150 total tokens, got %d", buckets[0].TotalTokens)
+	}
+}
+
+func TestSqliteStorePrunesExpiredBuckets(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "usage-prune.sqlite")
+
+	store := NewStore(path, 7) // 7-day retention
+	defer store.Close()
+
+	now := time.Date(2026, 9, 30, 12, 0, 0, 0, time.UTC)
+	store.nowFunc = fixedClock(now)
+
+	store.Add(Sample{Timestamp: now.Add(-10 * 24 * time.Hour), Provider: "openai", Model: "gpt-4o", TotalTokens: 10})
+	store.Add(Sample{Timestamp: now.Add(-1 * 24 * time.Hour), Provider: "openai", Model: "gpt-4o", TotalTokens: 20})
+
+	if err := store.Flush(); err != nil {
+		t.Fatalf("sqlite flush: %v", err)
+	}
+
+	buckets := store.Snapshot()
+	if len(buckets) != 1 {
+		t.Fatalf("expected 1 bucket after prune, got %d", len(buckets))
+	}
+	if buckets[0].TotalTokens != 20 {
+		t.Errorf("expected the recent bucket to remain, got %d", buckets[0].TotalTokens)
+	}
+}
+
+func TestSqliteStoreClear(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "usage-clear.sqlite")
+	store := NewStore(path, 0)
+	defer store.Close()
+
+	store.Add(Sample{Provider: "openai", Model: "gpt-4o", TotalTokens: 10})
+	if err := store.Flush(); err != nil {
+		t.Fatalf("flush: %v", err)
+	}
+	if err := store.Clear(); err != nil {
+		t.Fatalf("clear: %v", err)
+	}
+	if got := len(store.Snapshot()); got != 0 {
+		t.Errorf("expected 0 buckets after clear, got %d", got)
+	}
+
+	reloaded := NewStore(path, 0)
+	defer reloaded.Close()
+	if got := len(reloaded.Snapshot()); got != 0 {
+		t.Errorf("expected 0 buckets in reloaded DB after clear, got %d", got)
+	}
+}

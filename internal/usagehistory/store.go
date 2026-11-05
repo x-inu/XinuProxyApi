@@ -1,18 +1,21 @@
 // Package usagehistory provides a lightweight, persistent rollup of token
 // usage and estimated cost. It aggregates per-request usage records into
 // hourly buckets keyed by provider and model, keeping memory and storage use
-// minimal. Buckets are flushed to a single JSON file with atomic writes,
-// following the same durability pattern as the cooldown state store.
+// minimal. It supports both atomic JSON snapshots and high-performance SQLite WAL storage.
 package usagehistory
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
+	_ "modernc.org/sqlite"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -68,6 +71,9 @@ type Sample struct {
 type Store struct {
 	mu            sync.Mutex
 	path          string
+	sqliteDB      *sql.DB
+	ownsDB        bool
+	isSqlite      bool
 	buckets       map[bucketKey]*Bucket
 	dirty         bool
 	retentionDays int
@@ -93,8 +99,15 @@ func Global() *Store {
 	return globalStore
 }
 
-// NewStore creates a store backed by the given file path, loading any existing
-// rollup from disk. A zero or negative retentionDays uses the default.
+// isSqliteFile checks if a file path points to a SQLite database.
+func isSqliteFile(path string) bool {
+	lower := strings.ToLower(strings.TrimSpace(path))
+	return strings.HasSuffix(lower, ".sqlite") || strings.HasSuffix(lower, ".db")
+}
+
+// NewStore creates a store backed by the given file path.
+// If the path ends with .sqlite or .db, it automatically opens SQLite WAL mode;
+// otherwise it uses the JSON snapshot format. A zero or negative retentionDays uses default.
 func NewStore(path string, retentionDays int) *Store {
 	if retentionDays <= 0 {
 		retentionDays = defaultRetentionDays
@@ -105,8 +118,120 @@ func NewStore(path string, retentionDays int) *Store {
 		retentionDays: retentionDays,
 		nowFunc:       time.Now,
 	}
-	s.load()
+
+	if isSqliteFile(path) {
+		s.isSqlite = true
+		if err := s.initSqlite(path); err != nil {
+			log.Errorf("usagehistory: failed to initialize sqlite database at %s: %v", path, err)
+		}
+	} else {
+		s.load()
+	}
 	return s
+}
+
+// NewStoreWithDB creates a store backed by an existing SQLite *sql.DB connection.
+func NewStoreWithDB(db *sql.DB, retentionDays int) *Store {
+	if retentionDays <= 0 {
+		retentionDays = defaultRetentionDays
+	}
+	s := &Store{
+		sqliteDB:      db,
+		isSqlite:      true,
+		ownsDB:        false,
+		buckets:       make(map[bucketKey]*Bucket),
+		retentionDays: retentionDays,
+		nowFunc:       time.Now,
+	}
+	if err := s.initSqliteSchema(); err != nil {
+		log.Errorf("usagehistory: failed to initialize sqlite schema: %v", err)
+	}
+	s.loadSqlite()
+	return s
+}
+
+func (s *Store) initSqlite(path string) error {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("create sqlite dir %s: %w", dir, err)
+	}
+	_ = os.Chmod(dir, 0o700)
+
+	dsn := fmt.Sprintf("%s?_pragma=busy_timeout(5000)&_pragma=synchronous(NORMAL)&_pragma=foreign_keys(ON)", path)
+	db, err := sql.Open("sqlite", dsn)
+	if err != nil {
+		return fmt.Errorf("open sqlite: %w", err)
+	}
+
+	if _, err = db.Exec("PRAGMA journal_mode = WAL;"); err != nil {
+		_ = db.Close()
+		return fmt.Errorf("set WAL mode: %w", err)
+	}
+	_ = os.Chmod(path, 0o600)
+
+	db.SetMaxOpenConns(4)
+	db.SetMaxIdleConns(4)
+	db.SetConnMaxLifetime(time.Hour)
+
+	s.sqliteDB = db
+	s.ownsDB = true
+
+	if err := s.initSqliteSchema(); err != nil {
+		return err
+	}
+	s.loadSqlite()
+	return nil
+}
+
+func (s *Store) initSqliteSchema() error {
+	schema := `
+	CREATE TABLE IF NOT EXISTS usage_history (
+		hour INTEGER NOT NULL,
+		provider TEXT NOT NULL,
+		model TEXT NOT NULL,
+		requests INTEGER NOT NULL DEFAULT 0,
+		failed INTEGER NOT NULL DEFAULT 0,
+		input_tokens INTEGER NOT NULL DEFAULT 0,
+		output_tokens INTEGER NOT NULL DEFAULT 0,
+		cached_tokens INTEGER NOT NULL DEFAULT 0,
+		total_tokens INTEGER NOT NULL DEFAULT 0,
+		cost_usd REAL NOT NULL DEFAULT 0,
+		PRIMARY KEY (hour, provider, model)
+	);
+	CREATE INDEX IF NOT EXISTS idx_usage_history_hour ON usage_history(hour);
+	CREATE INDEX IF NOT EXISTS idx_usage_history_provider ON usage_history(provider);
+	CREATE INDEX IF NOT EXISTS idx_usage_history_model ON usage_history(model);
+	`
+	_, err := s.sqliteDB.Exec(schema)
+	return err
+}
+
+func (s *Store) loadSqlite() {
+	if s.sqliteDB == nil {
+		return
+	}
+	cutoff := int64(0)
+	if s.retentionDays > 0 {
+		cutoff = s.now().UTC().Add(-time.Duration(s.retentionDays) * 24 * time.Hour).Unix()
+	}
+
+	rows, err := s.sqliteDB.Query(`SELECT hour, provider, model, requests, failed, input_tokens, output_tokens, cached_tokens, total_tokens, cost_usd 
+		FROM usage_history WHERE hour >= ?`, cutoff)
+	if err != nil {
+		log.Warnf("usagehistory: sqlite query failed: %v", err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var b Bucket
+		if errScan := rows.Scan(&b.Hour, &b.Provider, &b.Model, &b.Requests, &b.Failed, &b.InputTokens, &b.OutputTokens, &b.CachedTokens, &b.TotalTokens, &b.CostUSD); errScan != nil {
+			log.Warnf("usagehistory: sqlite scan failed: %v", errScan)
+			return
+		}
+		key := bucketKey{Hour: b.Hour, Provider: b.Provider, Model: b.Model}
+		s.buckets[key] = &b
+	}
 }
 
 func (s *Store) now() time.Time {
@@ -116,7 +241,7 @@ func (s *Store) now() time.Time {
 	return time.Now()
 }
 
-// load reads the rollup file into memory. Missing or unreadable files start empty.
+// load reads the JSON rollup file into memory. Missing or unreadable files start empty.
 func (s *Store) load() {
 	if s.path == "" {
 		return
@@ -223,12 +348,14 @@ func (s *Store) pruneLocked() {
 			s.dirty = true
 		}
 	}
+	if s.isSqlite && s.sqliteDB != nil {
+		_, _ = s.sqliteDB.Exec("DELETE FROM usage_history WHERE hour < ?", cutoff)
+	}
 }
 
-// Flush persists the current rollup to disk when there are pending changes.
-// It prunes expired buckets first. Writes are atomic (temp file + rename).
+// Flush persists the current rollup to SQLite or JSON disk file.
 func (s *Store) Flush() error {
-	if s == nil || s.path == "" {
+	if s == nil {
 		return nil
 	}
 	s.mu.Lock()
@@ -237,6 +364,55 @@ func (s *Store) Flush() error {
 		s.mu.Unlock()
 		return nil
 	}
+
+	if s.isSqlite && s.sqliteDB != nil {
+		// Flush to SQLite
+		tx, err := s.sqliteDB.Begin()
+		if err != nil {
+			s.mu.Unlock()
+			return err
+		}
+		defer tx.Rollback()
+
+		stmt, err := tx.Prepare(`INSERT INTO usage_history (hour, provider, model, requests, failed, input_tokens, output_tokens, cached_tokens, total_tokens, cost_usd)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(hour, provider, model) DO UPDATE SET
+				requests = excluded.requests,
+				failed = excluded.failed,
+				input_tokens = excluded.input_tokens,
+				output_tokens = excluded.output_tokens,
+				cached_tokens = excluded.cached_tokens,
+				total_tokens = excluded.total_tokens,
+				cost_usd = excluded.cost_usd`)
+		if err != nil {
+			s.mu.Unlock()
+			return err
+		}
+		defer stmt.Close()
+
+		for _, b := range s.buckets {
+			if _, errExec := stmt.Exec(b.Hour, b.Provider, b.Model, b.Requests, b.Failed, b.InputTokens, b.OutputTokens, b.CachedTokens, b.TotalTokens, b.CostUSD); errExec != nil {
+				s.mu.Unlock()
+				return errExec
+			}
+		}
+
+		if errCommit := tx.Commit(); errCommit != nil {
+			s.mu.Unlock()
+			return errCommit
+		}
+		s.dirty = false
+		s.mu.Unlock()
+		return nil
+	}
+
+	// JSON format flush
+	if s.path == "" {
+		s.dirty = false
+		s.mu.Unlock()
+		return nil
+	}
+
 	snap := snapshot{
 		SchemaVersion: schemaVersion,
 		UpdatedAt:     s.now().UTC(),
@@ -270,8 +446,19 @@ func (s *Store) Clear() error {
 	s.mu.Lock()
 	s.buckets = make(map[bucketKey]*Bucket)
 	s.dirty = true
+	if s.isSqlite && s.sqliteDB != nil {
+		_, _ = s.sqliteDB.Exec("DELETE FROM usage_history")
+	}
 	s.mu.Unlock()
 	return s.Flush()
+}
+
+// Close closes the underlying SQLite database if opened by this store.
+func (s *Store) Close() error {
+	if s == nil || !s.ownsDB || s.sqliteDB == nil {
+		return nil
+	}
+	return s.sqliteDB.Close()
 }
 
 // StartAutoFlush launches a background goroutine that flushes on the given
@@ -290,12 +477,10 @@ func (s *Store) StartAutoFlush(interval time.Duration, stop <-chan struct{}) {
 			select {
 			case <-ticker.C:
 				if err := s.Flush(); err != nil {
-					log.Warnf("usagehistory: flush failed: %v", err)
+					log.Warnf("usagehistory: flush: %v", err)
 				}
 			case <-stop:
-				if err := s.Flush(); err != nil {
-					log.Warnf("usagehistory: final flush failed: %v", err)
-				}
+				_ = s.Flush()
 				return
 			}
 		}

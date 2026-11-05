@@ -161,6 +161,10 @@ func main() {
 	flag.BoolVar(&standalone, "standalone", false, "In TUI mode, start an embedded local server")
 	flag.StringVar(&managementBaseURL, "management-base-url", "", "Base URL of remote management API for TUI client mode (e.g. https://proxy.example.com)")
 	flag.BoolVar(&localModel, "local-model", false, "Use embedded models.json and codex_client_models.json only, skip remote model catalog fetching")
+	var useSqliteStoreFlag bool
+	var sqliteStorePathFlag string
+	flag.BoolVar(&useSqliteStoreFlag, "sqlitestore", false, "Use SQLite-backed token and configuration store")
+	flag.StringVar(&sqliteStorePathFlag, "sqlitestore-path", "data.sqlite", "SQLite database file path for sqlitestore")
 
 	flag.CommandLine.Usage = func() {
 		out := flag.CommandLine.Output()
@@ -227,6 +231,10 @@ func main() {
 		pgStoreSchema        string
 		pgStoreLocalPath     string
 		pgStoreInst          *store.PostgresStore
+		useSqliteStore       bool
+		sqliteStorePath      string
+		sqliteStoreLocalPath string
+		sqliteStoreInst      *store.SqliteStore
 		useGitStore          bool
 		gitStoreRemoteURL    string
 		gitStoreUser         string
@@ -294,6 +302,26 @@ func main() {
 			}
 		}
 		useGitStore = false
+	}
+	if useSqliteStoreFlag {
+		useSqliteStore = true
+		sqliteStorePath = sqliteStorePathFlag
+	}
+	if value, ok := lookupEnv("SQLITESTORE", "sqlitestore"); ok {
+		if parsed, errParse := strconv.ParseBool(value); errParse == nil && parsed {
+			useSqliteStore = true
+		}
+	}
+	if value, ok := lookupEnv("SQLITESTORE_PATH", "sqlitestore_path"); ok {
+		useSqliteStore = true
+		sqliteStorePath = value
+	}
+	if value, ok := lookupEnv("SQLITESTORE_LOCAL_PATH", "sqlitestore_local_path"); ok {
+		sqliteStoreLocalPath = value
+	}
+	if useSqliteStore {
+		useGitStore = false
+		usePostgresStore = false
 	}
 	if value, ok := lookupEnv("GITSTORE_GIT_URL", "gitstore_git_url"); ok {
 		useGitStore = true
@@ -470,6 +498,42 @@ func main() {
 		if err == nil {
 			cfg.AuthDir = pgStoreInst.AuthDir()
 			log.Infof("postgres-backed token store enabled, workspace path: %s", pgStoreInst.WorkDir())
+		}
+	} else if useSqliteStore {
+		if sqliteStoreLocalPath == "" {
+			if writableBase != "" {
+				sqliteStoreLocalPath = writableBase
+			} else {
+				sqliteStoreLocalPath = wd
+			}
+		}
+		sqliteStoreLocalPath = filepath.Join(sqliteStoreLocalPath, "sqlitestore")
+		if strings.TrimSpace(sqliteStorePath) == "" {
+			sqliteStorePath = filepath.Join(wd, "data.sqlite")
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		sqliteStoreInst, err = store.NewSqliteStore(ctx, store.SqliteStoreConfig{
+			DBPath:   sqliteStorePath,
+			SpoolDir: sqliteStoreLocalPath,
+		})
+		cancel()
+		if err != nil {
+			log.Errorf("failed to initialize sqlite token store: %v", err)
+			return
+		}
+		examplePath := filepath.Join(wd, "config.example.yaml")
+		ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
+		if errBootstrap := sqliteStoreInst.Bootstrap(ctx, examplePath); errBootstrap != nil {
+			cancel()
+			log.Errorf("failed to bootstrap sqlite-backed config: %v", errBootstrap)
+			return
+		}
+		cancel()
+		configFilePath = sqliteStoreInst.ConfigPath()
+		cfg, err = config.LoadConfigOptional(configFilePath, isCloudDeploy)
+		if err == nil {
+			cfg.AuthDir = sqliteStoreInst.AuthDir()
+			log.Infof("sqlite-backed token store enabled, database: %s, workspace path: %s", sqliteStorePath, sqliteStoreInst.WorkDir())
 		}
 	} else if useObjectStore {
 		if objectStoreLocalPath == "" {
@@ -670,6 +734,8 @@ func main() {
 	// Register the shared token store once so all components use the same persistence backend.
 	if usePostgresStore {
 		sdkAuth.RegisterTokenStore(pgStoreInst)
+	} else if useSqliteStore {
+		sdkAuth.RegisterTokenStore(sqliteStoreInst)
 	} else if useObjectStore {
 		sdkAuth.RegisterTokenStore(objectStoreInst)
 	} else if useGitStore {
@@ -856,7 +922,18 @@ func setupUsageHistory(cfg *config.Config, configFilePath, writableBase string) 
 			dir = wd
 		}
 	}
-	path := filepath.Join(dir, "usage-history.json")
+	sqlitePath := filepath.Join(dir, "usage-history.sqlite")
+	jsonPath := filepath.Join(dir, "usage-history.json")
+	var path string
+	if _, errStat := os.Stat(sqlitePath); errStat == nil {
+		path = sqlitePath
+	} else if val := strings.ToLower(strings.TrimSpace(os.Getenv("USAGE_STORAGE"))); val == "sqlite" {
+		path = sqlitePath
+	} else if val := strings.ToLower(strings.TrimSpace(os.Getenv("SQLITESTORE"))); val == "true" || val == "1" {
+		path = sqlitePath
+	} else {
+		path = jsonPath
+	}
 
 	store := usagehistory.NewStore(path, 0)
 	usagehistory.SetGlobal(store)

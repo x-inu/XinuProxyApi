@@ -100,6 +100,12 @@ func (s *Server) registerManagementRoutes() {
 		mgmt.POST("/semantic-cache/invalidate-model", s.mgmt.InvalidateSemanticCacheByModel)
 		mgmt.DELETE("/semantic-cache", s.mgmt.ClearSemanticCache)
 
+		mgmt.GET("/semantic-cache/stats", s.mgmt.GetSemanticCacheStats)
+		mgmt.GET("/semantic-cache/entries", s.mgmt.ListSemanticCacheEntries)
+		mgmt.DELETE("/semantic-cache/entries/:id", s.mgmt.DeleteSemanticCacheEntry)
+		mgmt.POST("/semantic-cache/invalidate-model", s.mgmt.InvalidateSemanticCacheByModel)
+		mgmt.DELETE("/semantic-cache", s.mgmt.ClearSemanticCache)
+
 		mgmt.GET("/gemini-api-key", s.mgmt.GetGeminiKeys)
 		mgmt.PUT("/gemini-api-key", s.mgmt.PutGeminiKeys)
 		mgmt.PATCH("/gemini-api-key", s.mgmt.PatchGeminiKey)

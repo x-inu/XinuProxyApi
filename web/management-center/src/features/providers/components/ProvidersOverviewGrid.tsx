@@ -161,7 +161,7 @@ export function ProvidersOverviewGrid({
     ];
   }, [freeGroup, matchesSearch, matchesStatus, t]);
 
-  // 4. API Key Providers (Gemini, Claude, OpenAI, etc.)
+  // 4. API Key Providers (Gemini, Claude, OpenAI, etc.) — always 1 grouped card per brand
   const apikeyProviders = useMemo(() => {
     return groups
       .filter(
@@ -169,41 +169,25 @@ export function ProvidersOverviewGrid({
           g.id !== 'openaiCompatibility' &&
           g.id !== 'opencodeFree'
       )
-      .flatMap((g) => {
-        const baseDisplayName = t(`providersPage.providerNames.${g.id}`, {
+      .map((g) => {
+        const displayName = t(`providersPage.providerNames.${g.id}`, {
           defaultValue: g.id,
         });
 
-        // When multiple Base URL groups exist under the same brand, surface
-        // one card per Base URL resource so each group is visible and editable.
-        if (g.resources.length > 1) {
-          return g.resources.map((r, idx) => {
-            const keyCount = r.apiKeyEntryCount || (r.apiKey ? 1 : 0);
-            const stats: ProviderStats = {
-              total: keyCount,
-              connected: r.disabled ? 0 : keyCount,
-              disabledCount: r.disabled ? Math.max(keyCount, 1) : 0,
-              errorCount: 0,
-              allDisabled: r.disabled,
-            };
-            const suffix = r.prefix || r.baseUrl || `#${idx + 1}`;
-            return {
-              cardKey: `${g.id}:${r.id}`,
-              brand: g.id,
-              displayName: `${baseDisplayName} · ${suffix}`,
-              stats,
-              targetResource: r as ProviderResource | undefined,
-            };
-          });
-        }
-
-        const first = g.resources[0];
-        const total = first
-          ? first.apiKeyEntryCount || (first.apiKey ? 1 : 0)
-          : 0;
-        const connected = first && !first.disabled ? total : 0;
-        const disabledCount = first && first.disabled ? Math.max(total, 1) : 0;
-        const allDisabled = Boolean(first && first.disabled);
+        const total = g.resources.reduce(
+          (sum, r) => sum + (r.apiKeyEntryCount || (r.apiKey ? 1 : 0)),
+          0
+        );
+        const connected = g.resources.reduce(
+          (sum, r) => sum + (r.disabled ? 0 : r.apiKeyEntryCount || (r.apiKey ? 1 : 0)),
+          0
+        );
+        const disabledCount = g.resources.reduce(
+          (sum, r) =>
+            sum + (r.disabled ? Math.max(r.apiKeyEntryCount || (r.apiKey ? 1 : 0), 1) : 0),
+          0
+        );
+        const allDisabled = g.resources.length > 0 && g.resources.every((r) => r.disabled);
 
         const stats: ProviderStats = {
           total,
@@ -213,15 +197,12 @@ export function ProvidersOverviewGrid({
           allDisabled,
         };
 
-        return [
-          {
-            cardKey: g.id,
-            brand: g.id,
-            displayName: baseDisplayName,
-            stats,
-            targetResource: first,
-          },
-        ];
+        return {
+          brand: g.id,
+          displayName,
+          stats,
+          firstResource: g.resources[0],
+        };
       })
       .filter(
         (p) =>
@@ -364,15 +345,15 @@ export function ProvidersOverviewGrid({
           <div className={styles.grid}>
             {apikeyProviders.map((p) => (
               <ProviderCard
-                key={p.cardKey}
+                key={p.brand}
                 id={p.brand}
                 name={p.displayName}
                 stats={p.stats}
-                onClick={() => onSelectConfigProvider(p.brand, p.targetResource)}
+                onClick={() => onSelectConfigProvider(p.brand, p.firstResource)}
                 onToggleAll={
-                  p.targetResource
+                  p.firstResource
                     ? (active) => {
-                        onToggleConfigProvider(p.brand, p.targetResource!, active);
+                        onToggleConfigProvider(p.brand, p.firstResource!, active);
                       }
                     : undefined
                 }

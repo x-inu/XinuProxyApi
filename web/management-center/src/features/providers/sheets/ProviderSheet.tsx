@@ -144,7 +144,15 @@ export function ProviderSheet({
   );
 
   const renderResourceSwitcher = () => {
-    if (isMultiProtocolSponsorBrand(state.brand)) return null;
+    // Custom Providers (openaiCompatibility) already have their own dedicated
+    // card per endpoint on the main grid, so only grouped API-key brands
+    // (such as Claude, Gemini, Codex, etc.) use the in-sheet Base URL Groups bar.
+    if (
+      state.brand === 'openaiCompatibility' ||
+      isMultiProtocolSponsorBrand(state.brand)
+    ) {
+      return null;
+    }
     if (brandResources.length === 0 && state.mode === 'create') return null;
 
     const formatResourceEndpoint = (r: ProviderResource) => {

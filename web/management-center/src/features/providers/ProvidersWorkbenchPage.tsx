@@ -182,7 +182,7 @@ export function ProvidersWorkbenchPage() {
                 (r) => r.id !== resource.id
               );
               if (prev.resource?.id === resource.id) {
-                if (remaining.length > 0) {
+                if (resource.brand !== 'openaiCompatibility' && remaining.length > 0) {
                   return {
                     ...prev,
                     mode: 'edit',

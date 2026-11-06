@@ -35,7 +35,7 @@ func NewLatencyTracker() *LatencyTracker {
 	return &LatencyTracker{buckets: make(map[string]*bucket)}
 }
 
-var globalMu sync.RWMutex
+var globalMu      sync.RWMutex
 var globalTracker = NewLatencyTracker()
 
 // Global returns the process-wide latency tracker.

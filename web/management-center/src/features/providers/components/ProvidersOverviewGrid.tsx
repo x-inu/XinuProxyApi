@@ -69,10 +69,11 @@ export function ProvidersOverviewGrid({
     if (!customGroup) return [];
     return customGroup.resources
       .map((r) => {
+        const keyCount = r.apiKeyEntryCount || (r.apiKey ? 1 : 0);
         const stats: ProviderStats = {
-          total: 1,
-          connected: r.disabled ? 0 : 1,
-          disabledCount: r.disabled ? 1 : 0,
+          total: keyCount,
+          connected: r.disabled ? 0 : keyCount,
+          disabledCount: r.disabled ? Math.max(keyCount, 1) : 0,
           errorCount: 0,
           allDisabled: r.disabled,
         };
@@ -168,11 +169,41 @@ export function ProvidersOverviewGrid({
           g.id !== 'openaiCompatibility' &&
           g.id !== 'opencodeFree'
       )
-      .map((g) => {
-        const total = g.resources.length;
-        const connected = g.resources.filter((r) => !r.disabled).length;
-        const disabledCount = g.resources.filter((r) => r.disabled).length;
-        const allDisabled = total > 0 && g.resources.every((r) => r.disabled);
+      .flatMap((g) => {
+        const baseDisplayName = t(`providersPage.providerNames.${g.id}`, {
+          defaultValue: g.id,
+        });
+
+        // When multiple Base URL groups exist under the same brand, surface
+        // one card per Base URL resource so each group is visible and editable.
+        if (g.resources.length > 1) {
+          return g.resources.map((r, idx) => {
+            const keyCount = r.apiKeyEntryCount || (r.apiKey ? 1 : 0);
+            const stats: ProviderStats = {
+              total: keyCount,
+              connected: r.disabled ? 0 : keyCount,
+              disabledCount: r.disabled ? Math.max(keyCount, 1) : 0,
+              errorCount: 0,
+              allDisabled: r.disabled,
+            };
+            const suffix = r.prefix || r.baseUrl || `#${idx + 1}`;
+            return {
+              cardKey: `${g.id}:${r.id}`,
+              brand: g.id,
+              displayName: `${baseDisplayName} · ${suffix}`,
+              stats,
+              targetResource: r as ProviderResource | undefined,
+            };
+          });
+        }
+
+        const first = g.resources[0];
+        const total = first
+          ? first.apiKeyEntryCount || (first.apiKey ? 1 : 0)
+          : 0;
+        const connected = first && !first.disabled ? total : 0;
+        const disabledCount = first && first.disabled ? Math.max(total, 1) : 0;
+        const allDisabled = Boolean(first && first.disabled);
 
         const stats: ProviderStats = {
           total,
@@ -182,16 +213,15 @@ export function ProvidersOverviewGrid({
           allDisabled,
         };
 
-        const displayName = t(`providersPage.providerNames.${g.id}`, {
-          defaultValue: g.id,
-        });
-
-        return {
-          brand: g.id,
-          displayName,
-          stats,
-          firstResource: g.resources[0],
-        };
+        return [
+          {
+            cardKey: g.id,
+            brand: g.id,
+            displayName: baseDisplayName,
+            stats,
+            targetResource: first,
+          },
+        ];
       })
       .filter(
         (p) =>
@@ -334,16 +364,18 @@ export function ProvidersOverviewGrid({
           <div className={styles.grid}>
             {apikeyProviders.map((p) => (
               <ProviderCard
-                key={p.brand}
+                key={p.cardKey}
                 id={p.brand}
                 name={p.displayName}
                 stats={p.stats}
-                onClick={() => onSelectConfigProvider(p.brand, p.firstResource)}
-                onToggleAll={(active) => {
-                  if (p.firstResource) {
-                    onToggleConfigProvider(p.brand, p.firstResource, active);
-                  }
-                }}
+                onClick={() => onSelectConfigProvider(p.brand, p.targetResource)}
+                onToggleAll={
+                  p.targetResource
+                    ? (active) => {
+                        onToggleConfigProvider(p.brand, p.targetResource!, active);
+                      }
+                    : undefined
+                }
               />
             ))}
           </div>

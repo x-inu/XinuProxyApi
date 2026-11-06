@@ -1810,6 +1810,8 @@
       "apiKeyEntriesSection": "API key entries",
       "apiKeyEntry": "Key #{{index}}",
       "addApiKeyEntry": "Add key entry",
+      "clearAllApiKeys": "Clear all keys",
+      "apiKeyEntriesEmpty": "No API keys in this group — click “Add key entry” to add one, or save to keep this Base URL group empty.",
       "showApiKey": "Show API key",
       "hideApiKey": "Hide API key",
       "disableCooling": "Disable cooling",

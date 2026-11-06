@@ -134,11 +134,22 @@ const normalizeProviderKeyConfig = (item: unknown): ProviderKeyConfig | null => 
   // Multi-key Claude credentials: api-key may be empty while the keys live in
   // api-key-entries (each becoming its own rotating credential).
   const apiKeyEntries = Array.isArray(record?.['api-key-entries'])
-    ? (record?.['api-key-entries'] as unknown[])
+    ? ((record?.['api-key-entries'] as unknown[])
         .map((entry) => normalizeApiKeyEntry(entry))
-        .filter(Boolean) as ApiKeyEntry[]
+        .filter(Boolean) as ApiKeyEntry[])
     : [];
-  if (!trimmed && apiKeyEntries.length === 0) return null;
+  const baseUrlRaw = record?.['base-url'] ? String(record['base-url']).trim() : '';
+  const prefix = normalizePrefix(record?.prefix);
+  const models = normalizeModelAliases(record?.models);
+  if (
+    !trimmed &&
+    apiKeyEntries.length === 0 &&
+    !baseUrlRaw &&
+    !prefix &&
+    models.length === 0
+  ) {
+    return null;
+  }
 
   const config: ProviderKeyConfig = { apiKey: trimmed };
   if (apiKeyEntries.length) config.apiKeyEntries = apiKeyEntries;
@@ -151,11 +162,9 @@ const normalizeProviderKeyConfig = (item: unknown): ProviderKeyConfig | null => 
       config.priority = parsed;
     }
   }
-  const prefix = normalizePrefix(record?.prefix);
   if (prefix) config.prefix = prefix;
-  const baseUrl = record?.['base-url'];
   const proxyUrl = record?.['proxy-url'];
-  if (baseUrl) config.baseUrl = String(baseUrl);
+  if (baseUrlRaw) config.baseUrl = baseUrlRaw;
   const websockets = normalizeBoolean(record?.websockets);
   if (websockets !== undefined) config.websockets = websockets;
   if (proxyUrl) config.proxyUrl = String(proxyUrl);
@@ -163,7 +172,6 @@ const normalizeProviderKeyConfig = (item: unknown): ProviderKeyConfig | null => 
   if (disableCooling !== undefined) config.disableCooling = disableCooling;
   const headers = normalizeHeaders(record?.headers);
   if (headers) config.headers = headers;
-  const models = normalizeModelAliases(record?.models);
   if (models.length) config.models = models;
   const excludedModels = normalizeExcludedModels(record?.['excluded-models']);
   if (excludedModels.length) config.excludedModels = excludedModels;

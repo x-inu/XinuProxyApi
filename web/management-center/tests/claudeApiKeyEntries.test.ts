@@ -1,7 +1,12 @@
 import { describe, expect, test } from 'bun:test';
 import { normalizeProviderKeyConfig } from '../src/services/api/transformers';
 import { groupConfigCredentials } from '../src/features/models/modelsCatalog';
-import type { Config } from '../src/types';
+import { claudeToResource } from '../src/features/providers/adapters';
+import {
+  buildOpenAIConfig,
+  buildProviderKeyConfig,
+} from '../src/features/providers/useProviderWorkbench';
+import type { Config, ProviderKeyConfig } from '../src/types';
 
 describe('claude multi-key (api-key-entries) normalization', () => {
   test('keeps an entry with empty api-key when api-key-entries exists', () => {
@@ -32,9 +37,82 @@ describe('claude multi-key (api-key-entries) normalization', () => {
     ).toBeNull();
   });
 
+  test('preserves emptied Base URL group when base-url or prefix is configured', () => {
+    const config = normalizeProviderKeyConfig({
+      'api-key': '',
+      prefix: 'jdw',
+      'base-url': 'https://api.justwoker.icu',
+      'api-key-entries': [],
+    });
+    expect(config).not.toBeNull();
+    expect(config?.apiKey).toBe('');
+    expect(config?.prefix).toBe('jdw');
+    expect(config?.baseUrl).toBe('https://api.justwoker.icu');
+    expect(config?.apiKeyEntries).toBeUndefined();
+
+    const resource = claudeToResource(config!, 0);
+    expect(resource.apiKeyEntryCount).toBe(0);
+    expect(resource.identifier).toBe('jdw · https://api.justwoker.icu');
+  });
+
   test('omits apiKeyEntries for plain single-key credentials', () => {
     const config = normalizeProviderKeyConfig({ 'api-key': 'solo' });
     expect(config?.apiKeyEntries).toBeUndefined();
+  });
+
+  test('buildProviderKeyConfig empties claude apiKeyEntries cleanly without resurrecting old keys', () => {
+    const existing: ProviderKeyConfig = {
+      apiKey: '',
+      prefix: 'jdw',
+      baseUrl: 'https://api.justwoker.icu',
+      apiKeyEntries: [{ apiKey: 'old-key-1' }, { apiKey: 'old-key-2' }],
+    };
+
+    const emptied = buildProviderKeyConfig(
+      'claude',
+      {
+        apiKey: '',
+        name: '',
+        baseUrl: 'https://api.justwoker.icu',
+        proxyUrl: '',
+        prefix: 'jdw',
+        disabled: true,
+        disableCooling: true,
+        models: [],
+        headers: [],
+        excludedModelsText: '',
+        apiKeyEntries: [{ apiKey: '', proxyUrl: '' }],
+      },
+      existing
+    ) as ProviderKeyConfig;
+
+    expect(emptied.apiKey).toBe('');
+    expect(emptied.apiKeyEntries).toEqual([]);
+  });
+
+  test('buildOpenAIConfig empties apiKeyEntries cleanly without resurrecting old keys', () => {
+    const emptied = buildOpenAIConfig(
+      {
+        apiKey: '',
+        name: 'Nous',
+        baseUrl: 'https://inference-api.nousresearch.com/v1',
+        proxyUrl: '',
+        prefix: 'nous',
+        disabled: true,
+        disableCooling: false,
+        models: [],
+        headers: [],
+        excludedModelsText: '',
+        apiKeyEntries: [{ apiKey: '', proxyUrl: '' }],
+      },
+      {
+        name: 'Nous',
+        baseUrl: 'https://inference-api.nousresearch.com/v1',
+        apiKeyEntries: [{ apiKey: 'old-nous-key' }],
+      }
+    );
+
+    expect(emptied.apiKeyEntries).toEqual([]);
   });
 });
 

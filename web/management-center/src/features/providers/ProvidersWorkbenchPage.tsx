@@ -9,6 +9,7 @@ import { ProviderHeaderCard } from './components/ProviderHeaderCard';
 import { ProvidersOverviewGrid } from './components/ProvidersOverviewGrid';
 import { OAuthProviderDetailModal } from './components/OAuthProviderDetailModal';
 import { ProviderSheet, type ProviderSheetHandle } from './sheets/ProviderSheet';
+import { isSponsorPartialMutationError } from './sponsorMutationRecovery';
 import { useProviderWorkbench } from './useProviderWorkbench';
 import { authFilesApi } from '@/services/api/authFiles';
 import { getErrorMessage } from '@/utils/helpers';
@@ -41,7 +42,7 @@ const formatDateTime = (iso: string, locale?: string) => {
 export function ProvidersWorkbenchPage() {
   const { t, i18n } = useTranslation();
   const connectionStatus = useAuthStore((s) => s.connectionStatus);
-  const { showNotification } = useNotificationStore();
+  const { showNotification, showConfirmation } = useNotificationStore();
 
   const pageTransitionLayer = usePageTransitionLayer();
   const isCurrentLayer = pageTransitionLayer ? pageTransitionLayer.status === 'current' : true;
@@ -156,6 +157,61 @@ export function ProvidersWorkbenchPage() {
     closeSheet();
   }, [closeSheet, showNotification, t]);
 
+  const handleDelete = useCallback(
+    (resource: ProviderResource) => {
+      const name =
+        resource.name ??
+        resource.baseUrl ??
+        resource.prefix ??
+        resource.apiKeyPreview ??
+        resource.identifier ??
+        '';
+      showConfirmation({
+        title: t('providersPage.delete.title'),
+        message: t('providersPage.delete.confirm', { name }),
+        variant: 'danger',
+        confirmText: t('providersPage.actions.delete'),
+        onConfirm: async () => {
+          try {
+            await workbench.deleteProvider(resource);
+            showNotification(t('providersPage.toast.deleted'), 'success');
+            setSheetState((prev) => {
+              if (!prev.open) return prev;
+              const brandGroup = groups.find((g) => g.id === resource.brand);
+              const remaining = (brandGroup?.resources ?? []).filter(
+                (r) => r.id !== resource.id
+              );
+              if (prev.resource?.id === resource.id) {
+                if (remaining.length > 0) {
+                  return {
+                    ...prev,
+                    mode: 'edit',
+                    resource: remaining[0],
+                  };
+                }
+                return { ...prev, open: false, resource: null };
+              }
+              return prev;
+            });
+          } catch (err) {
+            if (isSponsorPartialMutationError(err)) {
+              showNotification(t('providersPage.sponsor.partialMutationWarning'), 'warning');
+              return;
+            }
+            const msg = err instanceof Error ? err.message : String(err);
+            showNotification(`${t('notification.delete_failed')}: ${msg}`, 'error');
+          }
+        },
+      });
+    },
+    [groups, showConfirmation, showNotification, t, workbench]
+  );
+
+  const activeBrandResources = useMemo(
+    () => groups.find((g) => g.id === sheetState.brand)?.resources ?? [],
+    [groups, sheetState.brand]
+  );
+
   const handleToggleConfig = useCallback(
     async (_brand: ProviderBrand, resource: ProviderResource, active: boolean) => {
       try {
@@ -269,6 +325,10 @@ export function ProvidersWorkbenchPage() {
         onSwitchToEdit={() => {
           setSheetState((s) => (s.resource ? { ...s, mode: 'edit' } : s));
         }}
+        onSelectResource={openEdit}
+        onCreateNew={openCreate}
+        onDelete={handleDelete}
+        brandResources={activeBrandResources}
         workbench={workbench}
         onCreated={handleCreated}
         onUpdated={handleUpdated}

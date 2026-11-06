@@ -6,6 +6,7 @@ import {
   IconEyeOff,
   IconLoader2,
   IconPlus,
+  IconTrash2,
   IconX,
 } from '@/components/ui/icons';
 import { maskApiKey } from '@/utils/format';
@@ -32,6 +33,7 @@ interface ApiKeyEntriesEditorProps {
   /** Appends a new blank entry and returns its index. */
   onAdd: () => number;
   onRemove: (idx: number) => void;
+  onClearAll?: () => void;
   onTest: (idx: number) => void;
   onTestAll: () => void;
 }
@@ -45,6 +47,7 @@ export function ApiKeyEntriesEditor({
   onUpdate,
   onAdd,
   onRemove,
+  onClearAll,
   onTest,
   onTestAll,
 }: ApiKeyEntriesEditorProps) {
@@ -103,20 +106,47 @@ export function ApiKeyEntriesEditor({
           <IconPlus size={12} />
           <span>{t('providersPage.form.addApiKeyEntry')}</span>
         </button>
-        <button
-          type="button"
-          className={styles.connectivityBtn}
-          disabled={mutating || isTestingAny}
-          onClick={onTestAll}
-        >
-          {isTestingAny ? (
-            <span className={`${styles.statusIcon} ${styles.statusIconLoading}`}>
-              <IconLoader2 size={14} />
-            </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {onClearAll && entries.length > 0 ? (
+            <button
+              type="button"
+              className={styles.removeBtn}
+              disabled={mutating}
+              onClick={() => {
+                setShowPasswords(new Set());
+                setExpandedIdx(null);
+                onClearAll();
+              }}
+            >
+              <IconTrash2 size={12} />
+              <span>
+                {t('providersPage.form.clearAllApiKeys', { defaultValue: 'Clear all keys' })}
+              </span>
+            </button>
           ) : null}
-          <span>{t('providersPage.connectivity.testAll')}</span>
-        </button>
+          <button
+            type="button"
+            className={styles.connectivityBtn}
+            disabled={mutating || isTestingAny || entries.length === 0}
+            onClick={onTestAll}
+          >
+            {isTestingAny ? (
+              <span className={`${styles.statusIcon} ${styles.statusIconLoading}`}>
+                <IconLoader2 size={14} />
+              </span>
+            ) : null}
+            <span>{t('providersPage.connectivity.testAll')}</span>
+          </button>
+        </div>
       </div>
+      {entries.length === 0 ? (
+        <div className={styles.discoveryEmpty}>
+          {t('providersPage.form.apiKeyEntriesEmpty', {
+            defaultValue:
+              'No API keys in this group — click “Add API key” to add one, or save to keep this Base URL group empty.',
+          })}
+        </div>
+      ) : null}
       {visible.map(({ entry, idx }) => {
         const status = statuses[idx] ?? idleStatus;
         const expanded = expandedIdx === idx;

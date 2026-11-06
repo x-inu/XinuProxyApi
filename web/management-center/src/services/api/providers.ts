@@ -594,15 +594,20 @@ export const providersApi = {
     apiKey: string,
     baseUrl: string | undefined,
     config: ProviderKeyConfig,
-    existingEntries?: ApiKeyEntry[]
+    existingEntries?: ApiKeyEntry[],
+    index?: number
   ) =>
     mutateLatestProviderList('claude-api-key', (latestItems) =>
       replaceLatestProviderRecord(
         latestItems,
-        (record) =>
-          existingEntries?.length && !apiKey.trim()
-            ? matchesClaudeEntries(record, existingEntries)
-            : matchesProviderKey(record, apiKey, baseUrl),
+        (record, currentIndex) => {
+          const matched =
+            existingEntries?.length && !apiKey.trim()
+              ? matchesClaudeEntries(record, existingEntries)
+              : matchesProviderKey(record, apiKey, baseUrl);
+          if (matched) return true;
+          return typeof index === 'number' && index >= 0 && currentIndex === index;
+        },
         serializeProviderKey(config),
         (raw, payload) => mergeProviderKeyPayload(raw, payload, CLAUDE_KEY_FIELDS)
       )

@@ -149,7 +149,7 @@ function buildInitialForm(
             weight: entry.weight,
             authIndex: entry.authIndex,
           }))
-        : [emptyApiKeyEntry()],
+        : [],
     };
   }
 
@@ -220,18 +220,20 @@ function buildInitialForm(
           authIndex: entry.authIndex,
         }))
       : isClaudeLikeBrand(brand)
-        ? // Multi-key editor is always offered on Claude accounts: prefill the
-          // first row with the existing single key so an operator can append
-          // more keys (the merge-to-multi-key flow) without re-typing it.
-          [
-            {
-              apiKey: '',
-              existingApiKey: (cfg as ProviderKeyConfig).apiKey ?? '',
-              proxyUrl: (cfg as ProviderKeyConfig).proxyUrl ?? '',
-              weight: (cfg as ProviderKeyConfig).weight,
-              authIndex: (cfg as ProviderKeyConfig).authIndex,
-            },
-          ]
+        ? (cfg as ProviderKeyConfig).apiKey?.trim()
+          ? // Multi-key editor is always offered on Claude accounts: prefill the
+            // first row with the existing single key so an operator can append
+            // more keys (the merge-to-multi-key flow) without re-typing it.
+            [
+              {
+                apiKey: '',
+                existingApiKey: (cfg as ProviderKeyConfig).apiKey ?? '',
+                proxyUrl: (cfg as ProviderKeyConfig).proxyUrl ?? '',
+                weight: (cfg as ProviderKeyConfig).weight,
+                authIndex: (cfg as ProviderKeyConfig).authIndex,
+              },
+            ]
+          : []
         : undefined,
   };
 }
@@ -422,14 +424,19 @@ export function BaseProviderForm({
     if (descriptor.supportsName && !form.name.trim()) {
       return t('providersPage.form.validation.nameRequired');
     }
-    if (descriptor.supportsApiKey && mode === 'create' && !form.apiKey.trim()) {
-      return t('providersPage.form.validation.apiKeyRequired');
+    const hasEntryKeys = (form.apiKeyEntries ?? []).some(
+      (entry) => Boolean(entry.apiKey.trim() || entry.existingApiKey?.trim())
+    );
+    if (descriptor.supportsApiKey && mode === 'create' && !form.apiKey.trim() && !hasEntryKeys) {
+      if (!(descriptor.supportsApiKeyEntries && (form.baseUrl.trim() || form.prefix.trim()))) {
+        return t('providersPage.form.validation.apiKeyRequired');
+      }
     }
     if (descriptor.baseUrlRequired && !form.baseUrl.trim()) {
       return t('providersPage.form.validation.baseUrlRequired');
     }
     const weights = [
-      ...(brand === 'openaiCompatibility'
+      ...(descriptor.supportsApiKeyEntries
         ? (form.apiKeyEntries ?? []).map((entry) => entry.weight)
         : []),
       ...(brand !== 'openaiCompatibility' ? [form.weight] : []),
@@ -469,8 +476,7 @@ export function BaseProviderForm({
     [form.models]
   );
   const apiKeyEntries = useMemo(
-    () =>
-      form.apiKeyEntries && form.apiKeyEntries.length ? form.apiKeyEntries : [emptyApiKeyEntry()],
+    () => form.apiKeyEntries ?? [],
     [form.apiKeyEntries]
   );
 
@@ -500,7 +506,6 @@ export function BaseProviderForm({
       : excludedCandidates.length === 0
         ? 'unavailable'
         : 'ready';
-  const actualApiKeyEntries = form.apiKeyEntries ?? [];
   const supportsDisableCooling =
     brand === 'gemini' ||
     brand === 'interactions' ||
@@ -812,7 +817,7 @@ export function BaseProviderForm({
       </div>
 
 
-      {descriptor.supportsApiKeyEntries && form.apiKeyEntries ? (
+      {descriptor.supportsApiKeyEntries && form.apiKeyEntries !== undefined ? (
         <Collapsible
           label={t('providersPage.form.apiKeyEntriesSection')}
           hint={`${
@@ -822,7 +827,7 @@ export function BaseProviderForm({
         >
           <ApiKeyEntriesEditor
             entries={apiKeyEntries}
-            removeDisabled={actualApiKeyEntries.length === 0}
+            removeDisabled={false}
             mutating={mutating}
             statuses={connectivity.openaiStatuses}
             isTestingAny={connectivity.isTestingAny}
@@ -833,16 +838,23 @@ export function BaseProviderForm({
               )
             }
             onAdd={() => {
-              const next = [...actualApiKeyEntries, emptyApiKeyEntry()];
+              const next = [...apiKeyEntries, emptyApiKeyEntry()];
               updateField('apiKeyEntries', next);
               return next.length - 1;
             }}
             onRemove={(idx) =>
               updateField(
                 'apiKeyEntries',
-                actualApiKeyEntries.filter((_, i) => i !== idx)
+                apiKeyEntries.filter((_, i) => i !== idx)
               )
             }
+            onClearAll={() => {
+              setForm((prev) => ({
+                ...prev,
+                apiKey: '',
+                apiKeyEntries: [],
+              }));
+            }}
             onTest={(idx) => void connectivity.runOpenAIKey(idx)}
             onTestAll={() => void connectivity.runOpenAIAllKeys()}
           />

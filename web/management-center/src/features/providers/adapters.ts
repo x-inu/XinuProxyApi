@@ -86,20 +86,33 @@ function providerKeyToResource(
   // Multi-key entries (Claude api-key-entries) show how many keys rotate
   // instead of the "(keyless)" fallback.
   const claudeKeyEntries = (config as ProviderKeyConfig).apiKeyEntries ?? [];
+  const emptyGroupLabel = [
+    config.prefix ? `${config.prefix}` : null,
+    config.baseUrl ? `${config.baseUrl}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
   const identifier =
     (apiKey && maskApiKey(apiKey)) ||
     (claudeKeyEntries.length
-      ? `${maskApiKey(claudeKeyEntries[0].apiKey)} +${claudeKeyEntries.length - 1}`
+      ? claudeKeyEntries.length > 1
+        ? `${maskApiKey(claudeKeyEntries[0].apiKey)} +${claudeKeyEntries.length - 1}`
+        : maskApiKey(claudeKeyEntries[0].apiKey)
       : null) ||
+    emptyGroupLabel ||
     `#${index + 1}`;
 
   return {
-    id: buildId(brand, index, truncateForId(apiKey)),
+    id: buildId(brand, index, truncateForId(apiKey || config.prefix || config.baseUrl)),
     brand,
     originalIndex: index,
     name: null,
     identifier,
-    apiKeyPreview: apiKey ? maskApiKey(apiKey) : claudeKeyEntries.length ? `${claudeKeyEntries.length} keys` : null,
+    apiKeyPreview: apiKey
+      ? maskApiKey(apiKey)
+      : claudeKeyEntries.length
+        ? `${claudeKeyEntries.length} ${claudeKeyEntries.length === 1 ? 'key' : 'keys'}`
+        : null,
     apiKey: apiKey || null,
     authIndex: config.authIndex ?? null,
     baseUrl: config.baseUrl ?? null,
@@ -110,7 +123,7 @@ function providerKeyToResource(
     priority: normalizePriority(config.priority),
     headerCount: countHeaders(config.headers),
     excludedModelCount: stripDisableAllModelsRule(config.excludedModels).length,
-    apiKeyEntryCount: 0,
+    apiKeyEntryCount: claudeKeyEntries.length || (apiKey ? 1 : 0),
     disabled,
     flags,
     selector,

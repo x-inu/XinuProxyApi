@@ -149,7 +149,7 @@ const buildModelAliases = (
     })
     .filter((m) => m.name);
 
-const buildProviderKeyConfig = (
+export const buildProviderKeyConfig = (
   brand: 'gemini' | 'interactions' | 'codex' | 'meta' | 'xai' | 'claude' | 'vertex',
   input: ProviderEntryFormInput,
   existing?: ProviderKeyConfig | GeminiKeyConfig | null
@@ -192,11 +192,8 @@ const buildProviderKeyConfig = (
     // plain api-key is cleared (backend ignores it in multi-key mode); a key
     // typed into the single api-key field is folded in instead of being lost.
     const claudeEntries = (input.apiKeyEntries ?? [])
-      .map((entry, index) => {
-        const fallbackApiKey =
-          entry.existingApiKey?.trim() ||
-          (existing as ProviderKeyConfig | undefined)?.apiKeyEntries?.[index]?.apiKey?.trim() ||
-          '';
+      .map((entry) => {
+        const fallbackApiKey = entry.existingApiKey?.trim() || '';
         return {
           apiKey: entry.apiKey.trim() || fallbackApiKey,
           proxyUrl: entry.proxyUrl.trim() || undefined,
@@ -211,12 +208,17 @@ const buildProviderKeyConfig = (
       }
       next.apiKeyEntries = claudeEntries;
       next.apiKey = '';
+    } else if (!apiKeyChanged) {
+      // User explicitly cleared all entries in the group without typing a
+      // replacement single API key: persist an empty group cleanly.
+      next.apiKeyEntries = [];
+      next.apiKey = '';
     }
   }
   return next;
 };
 
-const buildOpenAIConfig = (
+export const buildOpenAIConfig = (
   input: ProviderEntryFormInput,
   existing?: OpenAIProviderConfig | null
 ): OpenAIProviderConfig => {
@@ -224,9 +226,8 @@ const buildOpenAIConfig = (
   const models = buildModelAliases(input.models, true);
   const apiKeyEntries =
     input.apiKeyEntries
-      ?.map((entry, index) => {
-        const fallbackApiKey =
-          entry.existingApiKey?.trim() || existing?.apiKeyEntries?.[index]?.apiKey?.trim() || '';
+      ?.map((entry) => {
+        const fallbackApiKey = entry.existingApiKey?.trim() || '';
         return {
           apiKey: entry.apiKey.trim() || fallbackApiKey,
           proxyUrl: entry.proxyUrl.trim() || undefined,
@@ -766,7 +767,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
             selector.apiKey,
             selector.baseUrl,
             buildProviderKeyConfig('claude', input, existing) as ProviderKeyConfig,
-            existing.apiKeyEntries
+            existing.apiKeyEntries,
+            selector.index
           );
         } else if (brand === 'vertex' && selector.brand === 'vertex') {
           const existing = resource.raw as ProviderKeyConfig;
@@ -928,7 +930,13 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           } else if (selector.brand === 'xai') {
             await providersApi.updateXAIConfig(selector.apiKey, selector.baseUrl, next);
           } else if (selector.brand === 'claude') {
-            await providersApi.updateClaudeConfig(selector.apiKey, selector.baseUrl, next, current.apiKeyEntries);
+            await providersApi.updateClaudeConfig(
+              selector.apiKey,
+              selector.baseUrl,
+              next,
+              current.apiKeyEntries,
+              selector.index
+            );
           } else if (selector.brand === 'vertex') {
             await providersApi.updateVertexConfig(selector.apiKey, selector.baseUrl, next);
           }

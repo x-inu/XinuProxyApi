@@ -141,6 +141,29 @@ func TestRateForLongestPrefixWins(t *testing.T) {
 		t.Errorf("expected gpt-4o-mini input rate 0.15, got %f", rate.InputPerM)
 	}
 
+	// Prefixed routes (e.g., gmn/models/gemini-4-argon, jdw/claude-opus-4-8)
+	// should strip route prefixes and match the underlying model rate.
+	gmnRate, ok := rateFor("gmn/models/gemini-4-argon")
+	if !ok || gmnRate.InputPerM != 1.25 || gmnRate.OutputPerM != 10.0 {
+		t.Errorf("expected gemini-4-argon rate (1.25/10.0) for gmn/models/gemini-4-argon, got ok=%v rate=%+v", ok, gmnRate)
+	}
+	claudeRate, ok := rateFor("jdw/claude-opus-4-8")
+	if !ok || claudeRate.InputPerM != 15.0 || claudeRate.OutputPerM != 75.0 {
+		t.Errorf("expected claude-opus-4-8 rate (15/75) for jdw/claude-opus-4-8, got ok=%v rate=%+v", ok, claudeRate)
+	}
+
+	// Free-tier suffixes and prefixes must always return no rate ($0.00).
+	for _, freeModel := range []string{
+		"oc/glm-5.3-flash-free",
+		"gfree/models/gemini-3.8-flash",
+		"nous/stepfun/step-3.7-flash:free",
+		"deepseek-v4.1-flash-free",
+	} {
+		if r, ok := rateFor(freeModel); ok {
+			t.Errorf("expected $0 (no rate) for free model %q, got %+v", freeModel, r)
+		}
+	}
+
 	if _, ok := rateFor("totally-unknown-model"); ok {
 		t.Error("expected no rate for unknown model")
 	}

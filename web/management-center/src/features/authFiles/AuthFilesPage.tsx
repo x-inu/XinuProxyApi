@@ -663,7 +663,7 @@ export function AuthFilesPage() {
                 >
                   {t('auth_files.upload_button')}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/oauth')}>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/ai-providers')}>
                   {t('auth_files.empty_oauth_link')}
                 </Button>
               </div>

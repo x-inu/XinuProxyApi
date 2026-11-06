@@ -36,13 +36,14 @@ type SqliteStoreConfig struct {
 // SqliteStore persists configuration, auth files, and cooldown state into a single SQLite database
 // while mirroring files to a local spool workspace so existing file-based watchers continue operating.
 type SqliteStore struct {
-	db            *sql.DB
-	cfg           SqliteStoreConfig
-	spoolRoot     string
-	configPath    string
-	authDir       string
-	cooldownStore *sqliteCooldownStateStore
-	mu            sync.Mutex
+	db             *sql.DB
+	cfg            SqliteStoreConfig
+	spoolRoot      string
+	configPath     string
+	seedConfigPath string
+	authDir        string
+	cooldownStore  *sqliteCooldownStateStore
+	mu             sync.Mutex
 }
 
 // NewSqliteStore opens or creates a SQLite database and prepares the local workspace.
@@ -189,6 +190,14 @@ func (s *SqliteStore) BootstrapWithSeeds(ctx context.Context, seedConfigPath str
 	if err := s.EnsureSchema(ctx); err != nil {
 		return err
 	}
+	trimmedSeed := strings.TrimSpace(seedConfigPath)
+	if trimmedSeed != "" && !strings.HasSuffix(strings.ToLower(trimmedSeed), "config.example.yaml") {
+		if absSeed, errAbs := filepath.Abs(trimmedSeed); errAbs == nil && absSeed != s.configPath {
+			s.mu.Lock()
+			s.seedConfigPath = absSeed
+			s.mu.Unlock()
+		}
+	}
 	if err := s.syncConfigFromDatabase(ctx, seedConfigPath); err != nil {
 		return err
 	}
@@ -199,6 +208,14 @@ func (s *SqliteStore) BootstrapWithSeeds(ctx context.Context, seedConfigPath str
 		return err
 	}
 	return nil
+}
+
+func (s *SqliteStore) mirrorSeedConfigLocked(content []byte) {
+	if s.seedConfigPath == "" || s.seedConfigPath == s.configPath {
+		return
+	}
+	_ = os.WriteFile(s.seedConfigPath, content, 0o600)
+	_ = os.Chmod(s.seedConfigPath, 0o600)
 }
 
 func (s *SqliteStore) seedAuthFromDirectoryIfEmpty(ctx context.Context, seedAuthDir string) error {
@@ -282,7 +299,11 @@ func (s *SqliteStore) syncConfigFromDatabase(ctx context.Context, exampleConfigP
 		return fmt.Errorf("sqlite store: query config: %w", err)
 	}
 
-	return os.WriteFile(s.configPath, []byte(content), 0o600)
+	if errWrite := os.WriteFile(s.configPath, []byte(content), 0o600); errWrite != nil {
+		return errWrite
+	}
+	s.mirrorSeedConfigLocked([]byte(content))
+	return nil
 }
 
 func (s *SqliteStore) syncAuthFromDatabase(ctx context.Context) error {
@@ -536,7 +557,11 @@ func (s *SqliteStore) UpdateConfig(ctx context.Context, content []byte) error {
 		return fmt.Errorf("sqlite store: update config: %w", err)
 	}
 
-	return os.WriteFile(s.configPath, content, 0o600)
+	if errWrite := os.WriteFile(s.configPath, content, 0o600); errWrite != nil {
+		return errWrite
+	}
+	s.mirrorSeedConfigLocked(content)
+	return nil
 }
 
 func (s *SqliteStore) resolveAuthPath(auth *cliproxyauth.Auth) (string, error) {
@@ -583,6 +608,9 @@ func (s *SqliteStore) PersistConfig(ctx context.Context) error {
 		ON CONFLICT(id) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at`,
 		s.cfg.ConfigTable)
 	_, err = s.db.ExecContext(ctx, upsert, defaultSqliteConfigKey, string(data), now, now)
+	if err == nil {
+		s.mirrorSeedConfigLocked(data)
+	}
 	return err
 }
 

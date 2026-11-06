@@ -19,6 +19,15 @@ func TestCodexClientModelsResponseMultiAgentV2FollowsConfig(t *testing.T) {
 
 	base := handlers.NewBaseAPIHandlers(&config.SDKConfig{}, nil)
 	handler := NewOpenAIAPIHandler(base)
+
+	// Synthesized models inherit multi_agent_version from the default template
+	// (gpt-5.5) when CodexOptimizeMultiAgentV2 is disabled.
+	defaultCatalog := CodexClientModelsResponse([]map[string]any{{"id": "gpt-5.5"}})
+	var wantDefaultMultiAgent any
+	if defaultModels, ok := defaultCatalog["models"].([]map[string]any); ok && len(defaultModels) > 0 {
+		wantDefaultMultiAgent = defaultModels[0]["multi_agent_version"]
+	}
+
 	for _, tt := range []struct {
 		name    string
 		enabled bool
@@ -51,8 +60,8 @@ func TestCodexClientModelsResponseMultiAgentV2FollowsConfig(t *testing.T) {
 				}
 				return
 			}
-			if !exists || value != nil {
-				t.Fatalf("multi_agent_version = %#v, want preserved null", value)
+			if !exists || value != wantDefaultMultiAgent {
+				t.Fatalf("multi_agent_version = %#v, want preserved %#v", value, wantDefaultMultiAgent)
 			}
 		})
 	}

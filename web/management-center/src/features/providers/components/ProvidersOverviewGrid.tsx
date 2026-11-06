@@ -202,6 +202,7 @@ export function ProvidersOverviewGrid({
           displayName,
           stats,
           firstResource: g.resources[0],
+          resources: g.resources,
         };
       })
       .filter(
@@ -351,9 +352,11 @@ export function ProvidersOverviewGrid({
                 stats={p.stats}
                 onClick={() => onSelectConfigProvider(p.brand, p.firstResource)}
                 onToggleAll={
-                  p.firstResource
+                  p.resources.length > 0
                     ? (active) => {
-                        onToggleConfigProvider(p.brand, p.firstResource!, active);
+                        p.resources.forEach((res) => {
+                          onToggleConfigProvider(p.brand, res, active);
+                        });
                       }
                     : undefined
                 }

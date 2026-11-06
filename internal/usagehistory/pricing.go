@@ -21,6 +21,10 @@ type ratePrefix struct {
 // Longer prefixes take precedence, so more specific model names win.
 var defaultRates = []ratePrefix{
 	// OpenAI / Codex
+	{"gpt-6.1", ModelRate{InputPerM: 2.5, OutputPerM: 12.0}},
+	{"gpt-6", ModelRate{InputPerM: 2.5, OutputPerM: 12.0}},
+	{"gpt-5.6", ModelRate{InputPerM: 1.5, OutputPerM: 10.0}},
+	{"gpt-5.5", ModelRate{InputPerM: 1.25, OutputPerM: 10.0}},
 	{"gpt-5-mini", ModelRate{InputPerM: 0.25, OutputPerM: 2.0}},
 	{"gpt-5-nano", ModelRate{InputPerM: 0.05, OutputPerM: 0.4}},
 	{"gpt-5", ModelRate{InputPerM: 1.25, OutputPerM: 10.0}},
@@ -37,6 +41,12 @@ var defaultRates = []ratePrefix{
 	{"codex", ModelRate{InputPerM: 1.25, OutputPerM: 10.0}},
 
 	// Anthropic / Claude
+	{"claude-opus-5", ModelRate{InputPerM: 15.0, OutputPerM: 75.0}},
+	{"claude-sonnet-5", ModelRate{InputPerM: 3.0, OutputPerM: 15.0}},
+	{"claude-haiku-5", ModelRate{InputPerM: 1.0, OutputPerM: 5.0}},
+	{"claude-opus-4-8", ModelRate{InputPerM: 15.0, OutputPerM: 75.0}},
+	{"claude-opus-4-6", ModelRate{InputPerM: 15.0, OutputPerM: 75.0}},
+	{"claude-sonnet-4-6", ModelRate{InputPerM: 3.0, OutputPerM: 15.0}},
 	{"claude-3-5-haiku", ModelRate{InputPerM: 0.8, OutputPerM: 4.0}},
 	{"claude-3-5-sonnet", ModelRate{InputPerM: 3.0, OutputPerM: 15.0}},
 	{"claude-3-opus", ModelRate{InputPerM: 15.0, OutputPerM: 75.0}},
@@ -47,6 +57,9 @@ var defaultRates = []ratePrefix{
 	{"claude", ModelRate{InputPerM: 3.0, OutputPerM: 15.0}},
 
 	// Google / Gemini
+	{"gemini-4-argon", ModelRate{InputPerM: 1.25, OutputPerM: 10.0}},
+	{"gemini-4", ModelRate{InputPerM: 1.25, OutputPerM: 10.0}},
+	{"gemini-3.8-flash", ModelRate{InputPerM: 0.3, OutputPerM: 2.5}},
 	{"gemini-3.7-flash", ModelRate{InputPerM: 0.75, OutputPerM: 3.75}},
 	{"gemini-3.5-flash-lite", ModelRate{InputPerM: 0.1, OutputPerM: 0.4}},
 	{"gemini-3.5-flash", ModelRate{InputPerM: 0.3, OutputPerM: 2.5}},
@@ -67,8 +80,14 @@ var defaultRates = []ratePrefix{
 	{"grok", ModelRate{InputPerM: 3.0, OutputPerM: 15.0}},
 
 	// Moonshot / Kimi
+	{"kimi-k3", ModelRate{InputPerM: 0.6, OutputPerM: 2.5}},
 	{"kimi", ModelRate{InputPerM: 0.6, OutputPerM: 2.5}},
 	{"moonshot", ModelRate{InputPerM: 0.6, OutputPerM: 2.5}},
+
+	// Zhipu / GLM
+	{"glm-5", ModelRate{InputPerM: 0.5, OutputPerM: 2.0}},
+	{"glm-4", ModelRate{InputPerM: 0.5, OutputPerM: 2.0}},
+	{"glm", ModelRate{InputPerM: 0.5, OutputPerM: 2.0}},
 
 	// DeepSeek
 	{"deepseek", ModelRate{InputPerM: 0.27, OutputPerM: 1.1}},
@@ -77,19 +96,51 @@ var defaultRates = []ratePrefix{
 	{"qwen", ModelRate{InputPerM: 0.4, OutputPerM: 1.2}},
 }
 
+func isFreeModelName(lowerName string) bool {
+	if strings.HasSuffix(lowerName, ":free") ||
+		strings.HasSuffix(lowerName, "-free") ||
+		strings.HasSuffix(lowerName, "_free") ||
+		strings.HasSuffix(lowerName, "/free") {
+		return true
+	}
+	if strings.HasPrefix(lowerName, "oc/") ||
+		strings.HasPrefix(lowerName, "gfree/") ||
+		strings.HasPrefix(lowerName, "opencodefree/") {
+		return true
+	}
+	return false
+}
+
 // rateFor returns the estimated pricing for a model, selecting the longest
-// matching known prefix. Unknown models return a zero rate so their cost is 0.
+// matching known prefix across the full name and any slash-stripped segments
+// (e.g., "gmn/models/gemini-4-argon" -> "gemini-4-argon"). Free-tier models
+// and unknown models return a zero rate so their cost is 0.
 func rateFor(model string) (ModelRate, bool) {
 	name := strings.ToLower(strings.TrimSpace(model))
-	if name == "" {
+	if name == "" || isFreeModelName(name) {
 		return ModelRate{}, false
 	}
+
+	candidates := []string{name}
+	for rest := name; ; {
+		idx := strings.IndexByte(rest, '/')
+		if idx < 0 {
+			break
+		}
+		rest = strings.TrimSpace(rest[idx+1:])
+		if rest != "" {
+			candidates = append(candidates, rest)
+		}
+	}
+
 	best := -1
 	var bestRate ModelRate
-	for _, entry := range defaultRates {
-		if strings.HasPrefix(name, entry.prefix) && len(entry.prefix) > best {
-			best = len(entry.prefix)
-			bestRate = entry.rate
+	for _, candidate := range candidates {
+		for _, entry := range defaultRates {
+			if strings.HasPrefix(candidate, entry.prefix) && len(entry.prefix) > best {
+				best = len(entry.prefix)
+				bestRate = entry.rate
+			}
 		}
 	}
 	if best < 0 {

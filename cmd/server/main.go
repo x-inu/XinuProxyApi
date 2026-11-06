@@ -45,10 +45,10 @@ import (
 )
 
 var (
-	Version           = "dev"
-	Commit            = "none"
-	BuildDate         = "unknown"
-	DefaultConfigPath = ""
+	Version               = "dev"
+	Commit                = "none"
+	BuildDate             = "unknown"
+	DefaultConfigPath     = ""
 	activeSqliteStorePath = ""
 )
 

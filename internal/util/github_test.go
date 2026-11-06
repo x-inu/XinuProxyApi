@@ -1,11 +1,15 @@
 package util
 
 import (
-	"runtime"
 	"testing"
+
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/githubauth"
 )
 
 func TestResolveGitHubToken(t *testing.T) {
+	t.Cleanup(func() { githubauth.SetToken("") })
+	githubauth.SetToken("")
+
 	tests := []struct {
 		name          string
 		githubToken   string
@@ -15,7 +19,7 @@ func TestResolveGitHubToken(t *testing.T) {
 		want          string
 	}{
 		{
-			name:          "GITHUB_TOKEN has highest priority",
+			name:          "GITHUB_TOKEN is used",
 			githubToken:   " primary-token ",
 			lowerToken:    "lower-token",
 			gitStoreToken: "gitstore-token",
@@ -23,27 +27,15 @@ func TestResolveGitHubToken(t *testing.T) {
 			want:          "primary-token",
 		},
 		{
-			name:          "lowercase token is second priority",
-			githubToken:   " ",
+			name:          "lowercase token is ignored",
 			lowerToken:    " lower-token ",
 			gitStoreToken: "gitstore-token",
 			gitStoreURL:   "https://github.com/example/repo.git",
-			want:          "lower-token",
 		},
 		{
-			name:          "Git store token is used for GitHub",
+			name:          "Git store token is ignored for GitHub",
 			gitStoreToken: " gitstore-token ",
 			gitStoreURL:   "HTTPS://GITHUB.COM/example/repo.git",
-			want:          "gitstore-token",
-		},
-		{
-			name:          "Git store token is ignored for other hosts",
-			gitStoreToken: "gitstore-token",
-			gitStoreURL:   "https://gitlab.com/example/repo.git",
-		},
-		{
-			name:          "Git store token is ignored without URL",
-			gitStoreToken: "gitstore-token",
 		},
 		{
 			name: "no token configured",
@@ -52,21 +44,11 @@ func TestResolveGitHubToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if runtime.GOOS == "windows" && tt.name == "GITHUB_TOKEN has highest priority" {
-				t.Skip("environment variables are case-insensitive on Windows")
-			}
-			if tt.githubToken != "" {
-				t.Setenv("GITHUB_TOKEN", tt.githubToken)
-			}
-			if tt.lowerToken != "" {
-				t.Setenv("github_token", tt.lowerToken)
-			}
-			if tt.githubToken == "" && tt.lowerToken == "" {
-				t.Setenv("GITHUB_TOKEN", "")
-				t.Setenv("github_token", "")
-			}
+			t.Setenv("GITHUB_TOKEN", tt.githubToken)
+			t.Setenv("github_token", tt.lowerToken)
 			t.Setenv("GITSTORE_GIT_TOKEN", tt.gitStoreToken)
 			t.Setenv("GITSTORE_GIT_URL", tt.gitStoreURL)
+			githubauth.SetToken("")
 
 			if got := ResolveGitHubToken(); got != tt.want {
 				t.Fatalf("ResolveGitHubToken() = %q, want %q", got, tt.want)

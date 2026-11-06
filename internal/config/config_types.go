@@ -178,6 +178,30 @@ type AntigravityConnectionPoolConfig struct {
 	MaxIdleConnsPerHost *int `yaml:"max-idle-conns-per-host,omitempty" json:"max-idle-conns-per-host,omitempty"`
 }
 
+// ResponseCompressionConfig controls downstream HTTP response compression.
+type ResponseCompressionConfig struct {
+	// Enabled defaults to false (disabled) when unset. Compression is negotiated
+	// only when Enabled is non-nil and true. This local default is OFF by design
+	// (upstream defaults to true); it must be explicitly enabled.
+	Enabled *bool `yaml:"enabled,omitempty" json:"enabled,omitempty"`
+	// MinBytes defaults to 1024 when zero or negative.
+	MinBytes int `yaml:"min-bytes" json:"min-bytes"`
+}
+
+// IsEnabled reports whether negotiated response compression is explicitly enabled.
+// Unlike upstream (where unset means enabled), local unset means disabled.
+func (c ResponseCompressionConfig) IsEnabled() bool {
+	return c.Enabled != nil && *c.Enabled
+}
+
+// EffectiveMinBytes returns the minimum non-streaming response size to compress.
+func (c ResponseCompressionConfig) EffectiveMinBytes() int {
+	if c.MinBytes <= 0 {
+		return 1024
+	}
+	return c.MinBytes
+}
+
 // CodexConfig configures provider-wide Codex request behavior.
 type CodexConfig struct {
 	IdentityConfuse bool `yaml:"identity-confuse" json:"identity-confuse"`

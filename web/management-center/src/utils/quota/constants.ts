@@ -143,7 +143,7 @@ export const CODEX_RATE_LIMIT_RESET_CREDITS_CONSUME_URL =
 export const CODEX_REQUEST_HEADERS = {
   Authorization: 'Bearer $TOKEN$',
   'Content-Type': 'application/json',
-  'User-Agent': 'codex-tui/0.149.1 (Mac OS 26.5.2; arm64) iTerm.app/3.6.11 (codex-tui; 0.149.1)',
+  'User-Agent': 'codex-tui/0.154.0 (Mac OS 26.5.2; arm64) iTerm.app/3.6.11 (codex-tui; 0.154.0)',
 };
 
 // Kimi API configuration
@@ -159,8 +159,8 @@ export const XAI_BILLING_MONTHLY_URL = 'https://cli-chat-proxy.grok.com/v1/billi
 export const XAI_API_ME_URL = 'https://api.x.ai/v1/me';
 export const XAI_API_CHAT_URL = 'https://api.x.ai/v1/chat/completions';
 export const XAI_PAID_HEALTH_MODEL = 'grok-4.5';
-export const XAI_GROK_CLIENT_VERSION = '0.2.91';
-export const XAI_GROK_USER_AGENT = 'grok-pager/0.2.91 grok-shell/0.2.91 (macos; aarch64)';
+export const XAI_GROK_CLIENT_VERSION = '1.0.46';
+export const XAI_GROK_USER_AGENT = 'grok-pager/1.0.46 grok-shell/1.0.46 (macos; aarch64)';
 
 export const XAI_REQUEST_HEADERS = {
   Authorization: 'Bearer $TOKEN$',

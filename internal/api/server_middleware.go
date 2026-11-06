@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	codexlive "github.com/router-for-me/CLIProxyAPI/v7/internal/client/codex/live"
@@ -11,6 +12,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/safemode"
 	sdkaccess "github.com/router-for-me/CLIProxyAPI/v7/sdk/access"
+	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -36,6 +38,53 @@ const (
 	exampleAPIKeyManagementPath = "/management.html"
 	exampleAPIKeyManagementURL  = "/management.html?safe-mode=configure"
 )
+
+func (s *Server) maxRequestBodyBytes() int64 {
+	if s == nil {
+		return 0
+	}
+	cfg := s.getConfig()
+	if cfg == nil || cfg.MaxRequestBodyBytes <= 0 {
+		return 0
+	}
+	return cfg.MaxRequestBodyBytes
+}
+
+func closeUnconsumedRequestOnAbort(c *gin.Context) {
+	if c == nil || c.Request == nil {
+		return
+	}
+	if c.Request.ContentLength != 0 || len(c.Request.TransferEncoding) > 0 {
+		c.Header("Connection", "close")
+		_ = http.NewResponseController(c.Writer).SetReadDeadline(time.Unix(1, 0))
+	}
+}
+
+func (s *Server) maxRequestBodyBytesMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c == nil || c.Request == nil {
+			c.Next()
+			return
+		}
+		maxBytes := s.maxRequestBodyBytes()
+		if maxBytes <= 0 {
+			c.Next()
+			return
+		}
+		c.Set(handlers.MaxRequestBodyBytesContextKey, maxBytes)
+		if c.Request.ContentLength > maxBytes {
+			closeUnconsumedRequestOnAbort(c)
+			c.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, gin.H{
+				"error": "http: request body too large",
+			})
+			return
+		}
+		if c.Request.Body != nil && c.Request.Body != http.NoBody {
+			c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxBytes)
+		}
+		c.Next()
+	}
+}
 
 func (s *Server) homeHeartbeatMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

@@ -6,6 +6,16 @@ package config
 
 // SDKConfig represents the application's configuration, loaded from a YAML file.
 type SDKConfig struct {
+	// MaxRequestBodyBytes limits the size (in bytes) of incoming HTTP request bodies.
+	// Values <= 0 disable the limit (default).
+	MaxRequestBodyBytes int64 `yaml:"max-request-body-bytes" json:"max-request-body-bytes"`
+
+	// ResponseCompression controls negotiated compression of downstream HTTP responses.
+	// Config.ServerResponseCompression mirrors it for JSON and programmatic access;
+	// read the effective value via Config.EffectiveResponseCompression.
+	// Default is disabled (Enabled must be non-nil and true).
+	ResponseCompression ResponseCompressionConfig `yaml:"response-compression" json:"-"`
+
 	// CodexResponseSteering mirrors the provider-wide runtime setting for API handlers.
 	CodexResponseSteering bool `yaml:"-" json:"-"`
 

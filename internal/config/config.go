@@ -13,6 +13,13 @@ type Config struct {
 	// Port is the network port on which the API server will listen.
 	Port int `yaml:"port" json:"-"`
 
+	// GitHubToken is the global token for GitHub requests, taking precedence over GITHUB_TOKEN.
+	GitHubToken string `yaml:"github-token" json:"-"`
+
+	// ServerResponseCompression is the JSON-visible mirror of the downstream
+	// response compression settings (YAML: response-compression).
+	ServerResponseCompression ResponseCompressionConfig `yaml:"-" json:"response-compression"`
+
 	// TrustedProxies lists the IPs or CIDRs allowed to provide forwarded client IP headers.
 	// The server applies this list at startup; changing it requires a restart.
 	TrustedProxies []string `yaml:"trusted-proxies" json:"trusted-proxies"`
@@ -190,4 +197,33 @@ type Config struct {
 
 	// Payload defines default and override rules for provider payload parameters.
 	Payload PayloadConfig `yaml:"payload" json:"payload"`
+}
+
+// ServerResponseCompression mirrors SDKConfig.ResponseCompression on the outer
+// Config so JSON and YAML round trips preserve response-compression.
+// The canonical storage remains SDKConfig.ResponseCompression; read the
+// effective value via EffectiveResponseCompression.
+type ServerResponseCompression = ResponseCompressionConfig
+
+// EffectiveResponseCompression returns the downstream response compression
+// settings from their canonical storage (SDKConfig.ResponseCompression, YAML
+// response-compression), falling back to the JSON/programmatic mirror
+// on the outer Config when the canonical value was never populated.
+func (cfg *Config) EffectiveResponseCompression() ResponseCompressionConfig {
+	if cfg == nil {
+		return ResponseCompressionConfig{}
+	}
+	if cfg.ResponseCompression.Enabled != nil || cfg.ResponseCompression.MinBytes != 0 {
+		return cfg.ResponseCompression
+	}
+	return cfg.ServerResponseCompression
+}
+
+// SyncServerResponseCompression copies the canonical response compression
+// settings into the JSON-visible mirror on the outer Config.
+func (cfg *Config) SyncServerResponseCompression() {
+	if cfg == nil {
+		return
+	}
+	cfg.ServerResponseCompression = cfg.ResponseCompression
 }

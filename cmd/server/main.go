@@ -33,8 +33,10 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/safemode"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/semanticcache"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/store"
 	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/translator"
+	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/usagestats"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/tui"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/usagehistory"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
@@ -724,6 +726,7 @@ func main() {
 	redisqueue.SetUsageStatisticsEnabled(cfg.UsageStatisticsEnabled)
 	redisqueue.SetRetentionSeconds(cfg.RedisUsageQueueRetentionSeconds)
 	setupUsageHistory(cfg, configFilePath, writableBase, useSqliteStore)
+	setupSemanticCache(cfg, configFilePath, writableBase, useSqliteStore)
 	coreauth.SetQuotaCooldownDisabled(cfg.DisableCooling)
 	coreauth.SetTransientErrorCooldownSeconds(cfg.TransientErrorCooldownSeconds)
 
@@ -932,6 +935,23 @@ func main() {
 }
 
 // resolveManagementBaseURL determines the management API base URL for TUI client mode.
+// setupSemanticCache wires the global exact-match prompt/response cache.
+// It stays disabled (and inert) unless semantic-cache.enabled is set in config.
+func setupSemanticCache(cfg *config.Config, configFilePath, writableBase string, isSqlite ...bool) {
+	if cfg == nil || !cfg.SemanticCache.IsEnabled() {
+		semanticcache.SetGlobal(semanticcache.New(semanticcache.Config{Enabled: false, TTL: 24 * time.Hour, MaxEntries: 1000}, nil))
+		return
+	}
+	semCfg := cfg.SemanticCache
+	cache := semanticcache.New(semanticcache.Config{
+		Enabled:    true,
+		TTL:        semCfg.EffectiveTTL(),
+		MaxEntries: semCfg.EffectiveMaxEntries(),
+	}, nil)
+	semanticcache.SetGlobal(cache)
+	log.Infof("semantic cache enabled (ttl=%s, max_entries=%d)", semCfg.EffectiveTTL(), semCfg.EffectiveMaxEntries())
+}
+
 // setupUsageHistory configures the persistent usage/cost rollup store. It is
 // enabled whenever usage statistics are enabled, storing an hourly rollup file
 // beside the config (or under WRITABLE_PATH when set) and flushing periodically.

@@ -178,6 +178,37 @@ type AntigravityConnectionPoolConfig struct {
 	MaxIdleConnsPerHost *int `yaml:"max-idle-conns-per-host,omitempty" json:"max-idle-conns-per-host,omitempty"`
 }
 
+// SemanticCacheConfig controls the exact-match prompt/response cache.
+type SemanticCacheConfig struct {
+	// Enabled defaults to false (disabled) when unset; must be explicitly enabled.
+	Enabled *bool `yaml:"enabled,omitempty" json:"enabled,omitempty"`
+	// TTL is a duration string like "24h"; empty means 24h.
+	TTL string `yaml:"ttl,omitempty" json:"ttl,omitempty"`
+	// MaxEntries bounds the in-memory cache; zero/negative means 1000.
+	MaxEntries int `yaml:"max-entries,omitempty" json:"max-entries,omitempty"`
+}
+
+// IsEnabled reports whether the semantic cache is explicitly enabled.
+func (c SemanticCacheConfig) IsEnabled() bool {
+	return c.Enabled != nil && *c.Enabled
+}
+
+// EffectiveTTL returns the cache TTL, defaulting to 24h.
+func (c SemanticCacheConfig) EffectiveTTL() time.Duration {
+	if d, err := time.ParseDuration(c.TTL); err == nil && d > 0 {
+		return d
+	}
+	return 24 * time.Hour
+}
+
+// EffectiveMaxEntries returns the capacity, defaulting to 1000.
+func (c SemanticCacheConfig) EffectiveMaxEntries() int {
+	if c.MaxEntries <= 0 {
+		return 1000
+	}
+	return c.MaxEntries
+}
+
 // ResponseCompressionConfig controls downstream HTTP response compression.
 type ResponseCompressionConfig struct {
 	// Enabled defaults to false (disabled) when unset. Compression is negotiated

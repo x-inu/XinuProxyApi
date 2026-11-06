@@ -19,8 +19,8 @@ func (h *Handler) GetLatencyStats(c *gin.Context) {
 	tracker := usagestats.Global()
 	if tracker == nil {
 		c.JSON(http.StatusOK, gin.H{
-			"enabled": false,
-			"overall": usagestats.OverallStats{ErrorRate: "0.0"},
+			"enabled":  false,
+			"overall":  usagestats.OverallStats{ErrorRate: "0.0"},
 			"by_model": []usagestats.BucketStats{},
 		})
 		return

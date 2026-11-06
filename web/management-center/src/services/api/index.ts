@@ -7,8 +7,6 @@ export * from './config';
 export * from './configFile';
 export * from './modelAvailability';
 export * from './apiKeys';
-export * from './cache';
-export * from './latency';
 export * from './providers';
 export * from './authFiles';
 export * from './oauth';

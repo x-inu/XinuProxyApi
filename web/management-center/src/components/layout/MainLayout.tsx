@@ -434,30 +434,12 @@ export function MainLayout() {
           metaKey: 'nav_meta.usage',
           icon: sidebarIcons.usage,
         },
-        {
-          path: '/cache',
-          labelKey: 'nav.cache_analytics',
-          metaKey: 'nav_meta.cache_analytics',
-          icon: sidebarIcons.quota,
-        },
-        {
-          path: '/latency',
-          labelKey: 'nav.latency_analytics',
-          metaKey: 'nav_meta.latency_analytics',
-          icon: sidebarIcons.quota,
-        },
       ],
     },
     {
       id: 'gateway',
       labelKey: 'nav_groups.gateway',
       items: [
-        {
-          path: '/endpoint',
-          labelKey: 'nav.endpoint',
-          metaKey: 'nav_meta.endpoint',
-          icon: sidebarIcons.dashboard,
-        },
         {
           path: '/ai-providers',
           labelKey: 'nav.ai_providers',

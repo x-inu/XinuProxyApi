@@ -16,10 +16,6 @@ type SDKConfig struct {
 	// Default is disabled (Enabled must be non-nil and true).
 	ResponseCompression ResponseCompressionConfig `yaml:"response-compression" json:"-"`
 
-	// SemanticCache controls the exact-match prompt/response cache.
-	// Default is disabled; it only applies to non-streaming chat completions.
-	SemanticCache SemanticCacheConfig `yaml:"semantic-cache" json:"semantic-cache,omitempty"`
-
 	// CodexResponseSteering mirrors the provider-wide runtime setting for API handlers.
 	CodexResponseSteering bool `yaml:"-" json:"-"`
 

@@ -22,7 +22,6 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
 	responsesconverter "github.com/router-for-me/CLIProxyAPI/v7/internal/translator/openai/openai/responses"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/usagehistory"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/semanticcache"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -824,27 +823,11 @@ func convertChatCompletionsStreamChunkToCompletions(chunkData []byte) []byte {
 func (h *OpenAIAPIHandler) handleNonStreamingResponse(c *gin.Context, rawJSON []byte) {
 	c.Header("Content-Type", "application/json")
 
-	// Semantic cache: consult before executing the upstream request. Exact
-	// match only, opt-in via semantic-cache.enabled, 200-only writes.
-	cache := semanticcache.Global()
-	if cacheEnabled(h.Cfg) && cache != nil {
-		if entry, ok := cache.Lookup(c.Request.Context(), "", rawJSON); ok {
-			handlers.WriteUpstreamHeaders(c.Writer.Header(), nil)
-			_, _ = c.Writer.Write(entry.ResponseBody)
-			return
-		}
-	}
-
 	modelName := gjson.GetBytes(rawJSON, "model").String()
 	cliCtx, cliCancel := h.GetContextWithCancel(h, c, context.Background())
 	stopKeepAlive := h.StartNonStreamingKeepAlive(c, cliCtx)
 	resp, upstreamHeaders, errMsg := h.ExecuteWithAuthManager(cliCtx, h.HandlerType(), modelName, rawJSON, h.GetAlt(c))
 	stopKeepAlive()
-	if errMsg == nil {
-		if cache != nil && cacheEnabled(h.Cfg) {
-			_ = cache.Store(c.Request.Context(), "", rawJSON, resp, "application/json")
-		}
-	}
 	if errMsg != nil {
 		h.WriteErrorResponse(c, errMsg)
 		cliCancel(errMsg.Error)

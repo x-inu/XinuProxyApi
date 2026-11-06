@@ -102,10 +102,7 @@
     "plugin_store": "Plugin Store",
     "config_management": "Config Panel",
     "logs": "Console Log",
-    "system_info": "About",
-    "cache_analytics": "Cache Analytics",
-    "latency_analytics": "Latency & Model Health",
-    "endpoint": "Endpoint & Key"
+    "system_info": "About"
   },
   "nav_groups": {
     "operate": "Operate",
@@ -126,10 +123,7 @@
     "plugin_store": "Discover & install plugins",
     "logs": "Live server console output",
     "config_management": "Gateway configuration",
-    "system_info": "Runtime & diagnostics",
-    "cache_analytics": "Exact-match prompt/response cache",
-    "latency_analytics": "p50/p95/p99 + model health",
-    "endpoint": "Base URL, keys & quick start"
+    "system_info": "Runtime & diagnostics"
   },
   "dashboard": {
     "hero_verdict_good": "All systems steady",

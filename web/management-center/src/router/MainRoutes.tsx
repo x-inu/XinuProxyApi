@@ -1,8 +1,5 @@
 import { Navigate, useRoutes, type Location } from 'react-router-dom';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
-import { CachePage } from '@/features/cache/CachePage';
-import { LatencyPage } from '@/features/latency/LatencyPage';
-import { EndpointPage } from '@/features/endpoint/EndpointPage';
 import { UsagePage } from '@/features/usage/UsagePage';
 import { ProvidersWorkbenchPage } from '@/features/providers/ProvidersWorkbenchPage';
 import { ModelsPage } from '@/features/models/ModelsPage';
@@ -22,9 +19,6 @@ const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/', element: <DashboardPage /> },
   { path: '/dashboard', element: <DashboardPage /> },
   { path: '/usage', element: <UsagePage /> },
-  { path: '/cache', element: <CachePage /> },
-  { path: '/latency', element: <LatencyPage /> },
-  { path: '/endpoint', element: <EndpointPage /> },
   { path: '/settings', element: <Navigate to="/config" replace /> },
   { path: '/api-keys', element: <Navigate to="/config" replace /> },
   { path: '/quick-start/*', element: <Navigate to="/ai-providers" replace /> },

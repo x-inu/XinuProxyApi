@@ -375,8 +375,15 @@ func EnrichOpenAIModel(model map[string]any) OpenAIModelResponse {
 
 	// Pricing estimation
 	var pricing *OpenAIModelPricing
-	rate, hasRate := usagehistory.RateFor(root)
-	if hasRate && (rate.InputPerM > 0 || rate.OutputPerM > 0) && !strings.Contains(rootLower, ":free") {
+	idLower := strings.ToLower(strings.TrimSpace(id))
+	isExplicitFree := strings.Contains(rootLower, ":free") ||
+		strings.HasSuffix(idLower, "-free") ||
+		usagehistory.IsFreeProvider(ownedBy)
+	rate, hasRate := usagehistory.RateFor(id)
+	if !hasRate {
+		rate, hasRate = usagehistory.RateFor(root)
+	}
+	if hasRate && (rate.InputPerM > 0 || rate.OutputPerM > 0) && !isExplicitFree {
 		cachedRate := rate.CacheReadPerM
 		if cachedRate == 0 {
 			cachedRate = rate.InputPerM * 0.1
@@ -392,7 +399,7 @@ func EnrichOpenAIModel(model map[string]any) OpenAIModelResponse {
 			Reasoning:     rate.OutputPerM,
 			CacheCreation: cacheWriteRate,
 		}
-	} else if hasRate && strings.Contains(rootLower, ":free") {
+	} else if hasRate && isExplicitFree {
 		pricing = &OpenAIModelPricing{
 			Input:         0,
 			Output:        0,

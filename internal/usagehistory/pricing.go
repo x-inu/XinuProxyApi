@@ -111,6 +111,21 @@ func isFreeModelName(lowerName string) bool {
 	return false
 }
 
+// IsFreeProvider reports whether a provider identifier corresponds to a
+// zero-cost / free-tier provider (e.g., opencodeFree, GeminiAPI-FreeTier).
+func IsFreeProvider(provider string) bool {
+	lower := strings.ToLower(strings.TrimSpace(provider))
+	if lower == "" {
+		return false
+	}
+	return strings.Contains(lower, "freetier") ||
+		strings.Contains(lower, "free-tier") ||
+		strings.Contains(lower, "opencodefree") ||
+		strings.Contains(lower, "opencode-free") ||
+		strings.HasSuffix(lower, "-free") ||
+		strings.HasSuffix(lower, "_free")
+}
+
 // rateFor returns the estimated pricing for a model, selecting the longest
 // matching known prefix across the full name and any slash-stripped segments
 // (e.g., "gmn/models/gemini-4-argon" -> "gemini-4-argon"). Free-tier models
@@ -121,7 +136,7 @@ func rateFor(model string) (ModelRate, bool) {
 		return ModelRate{}, false
 	}
 
-	candidates := []string{name}
+	rawCandidates := []string{name}
 	for rest := name; ; {
 		idx := strings.IndexByte(rest, '/')
 		if idx < 0 {
@@ -129,7 +144,15 @@ func rateFor(model string) (ModelRate, bool) {
 		}
 		rest = strings.TrimSpace(rest[idx+1:])
 		if rest != "" {
-			candidates = append(candidates, rest)
+			rawCandidates = append(rawCandidates, rest)
+		}
+	}
+
+	candidates := make([]string, 0, len(rawCandidates)*2)
+	for _, c := range rawCandidates {
+		candidates = append(candidates, c)
+		if strings.Contains(c, " ") {
+			candidates = append(candidates, strings.ReplaceAll(c, " ", "-"))
 		}
 	}
 

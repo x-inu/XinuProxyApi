@@ -20,9 +20,34 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 
+const OPENAI_COMPAT_PREFIX = 'openai-compatible-';
+
+const OPENAI_COMPAT_LABELS: Record<string, string> = {
+  opencodefree: 'OpenCode (free)',
+  'opencode-free': 'OpenCode (free)',
+  'geminiapi-paid': 'GeminiAPI-PAID',
+  'geminiapi-freetier': 'GeminiAPI-FreeTier',
+  nvidia: 'NVIDIA',
+  nous: 'Nous',
+  atria: 'Atria',
+};
+
+
 export function providerLabel(id: string, unknownLabel: string): string {
   if (id === 'unknown' || !id) return unknownLabel;
-  return PROVIDER_LABELS[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+  if (PROVIDER_LABELS[id]) return PROVIDER_LABELS[id];
+  const lower = id.toLowerCase();
+  if (lower.startsWith(OPENAI_COMPAT_PREFIX)) {
+    const suffix = id.slice(OPENAI_COMPAT_PREFIX.length);
+    const suffixLower = suffix.toLowerCase();
+    if (OPENAI_COMPAT_LABELS[suffixLower]) {
+      return OPENAI_COMPAT_LABELS[suffixLower];
+    }
+    if (suffix) {
+      return suffix.charAt(0).toUpperCase() + suffix.slice(1);
+    }
+  }
+  return id.charAt(0).toUpperCase() + id.slice(1);
 }
 
 export interface WindowParts {

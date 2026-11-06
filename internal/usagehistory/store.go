@@ -346,8 +346,10 @@ func (s *Store) Add(sample Sample) {
 	}
 
 	var cost float64
-	if rate, ok := rateFor(model); ok {
-		cost = estimateCost(rate, sample.UncachedInput, sample.CacheRead, sample.CacheWrite, sample.OutputTokens)
+	if !IsFreeProvider(provider) {
+		if rate, ok := rateFor(model); ok {
+			cost = estimateCost(rate, sample.UncachedInput, sample.CacheRead, sample.CacheWrite, sample.OutputTokens)
+		}
 	}
 
 	key := bucketKey{Hour: hour, Provider: provider, Model: model}

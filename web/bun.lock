@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "xinugate-management-center",
+      "name": "xinugate-web",
       "dependencies": {
         "@codemirror/lang-yaml": "^6.1.3",
         "@codemirror/merge": "^6.12.2",

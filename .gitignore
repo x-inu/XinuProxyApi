@@ -24,8 +24,8 @@ gitstore/*
 objectstore/*
 
 # Generated management panel
+internal/managementasset/dist/management.html
 static/*
-!static/.gitkeep
 
 # Authentication data
 auths/*

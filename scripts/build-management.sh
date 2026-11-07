@@ -2,12 +2,12 @@
 set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-frontend_dir="${root_dir}/web/management-center"
-output_dir="${root_dir}/static"
+frontend_dir="${root_dir}/web"
+embed_dir="${root_dir}/internal/managementasset/dist"
 version="${VERSION:-dev}"
 
 if ! command -v bun >/dev/null 2>&1; then
-  echo "bun is required to build the management center" >&2
+  echo "bun is required to build the web UI" >&2
   exit 1
 fi
 
@@ -17,11 +17,11 @@ VERSION="${version}" bun run build
 
 test -f dist/index.html
 if find dist -mindepth 1 -type f ! -name index.html -print -quit | grep -q .; then
-  echo "management center build produced external assets; expected one HTML file" >&2
+  echo "web UI build produced external assets; expected one HTML file" >&2
   exit 1
 fi
 
-mkdir -p "${output_dir}"
-cp dist/index.html "${output_dir}/management.html"
+mkdir -p "${embed_dir}"
+cp dist/index.html "${embed_dir}/management.html"
 
-echo "Built ${output_dir}/management.html"
+echo "Built and staged ${embed_dir}/management.html for Go binary embedding"

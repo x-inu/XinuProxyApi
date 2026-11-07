@@ -18,10 +18,9 @@ Point any OpenAI-, Gemini-, or Claude-compatible client or SDK at your own insta
 
 ## Repository layout
 
-- `cmd/`, `internal/`, `sdk/`, `test/` — Go proxy server and Management API.
-- `web/management-center/` — React + TypeScript + Vite + Bun frontend source.
-- `static/management.html` — generated single-file frontend, served at `/` and `/management.html`.
-- `scripts/build-management.sh` — reproducible frontend artifact builder.
+- `cmd/`, `internal/`, `sdk/`, `test/` — Go gateway server, SQLite store, and Management API.
+- `web/` — React + TypeScript + Vite + Bun frontend source (`web/src/`, `web/tests/`), compiled into a single HTML bundle and embedded directly into the `xinugate` binary via `//go:embed`.
+- `scripts/build-management.sh` — builds the frontend and stages `internal/managementasset/dist/management.html` for Go embedding.
 - `scripts/verify.sh` — frontend and backend verification.
 - `config.example.yaml` — annotated configuration template.
 
@@ -42,7 +41,7 @@ mkdir -p ~/xinugate && cd ~/xinugate
 tar -xzf XinuGate_<version>_linux_amd64.tar.gz
 ```
 
-Each archive contains the `xinugate` binary, `static/management.html`, `config.example.yaml`, `README.md`, and `LICENSE`.
+Each archive contains the self-contained `xinugate` binary (with the Web UI embedded inside), `config.example.yaml`, `README.md`, and `LICENSE`.
 
 ### 2. Create your config
 
@@ -139,14 +138,14 @@ Requirements: Go 1.26+, Bun 1.3.14 (Node.js 24 for frontend CI parity).
 make build VERSION=dev
 
 # Equivalent explicit steps
-VERSION=dev ./scripts/build-management.sh   # writes static/management.html
+VERSION=dev ./scripts/build-management.sh   # stages internal/managementasset/dist/management.html for Go embed
 go build -o xinugate ./cmd/server
 ```
 
 Frontend development server:
 
 ```bash
-cd web/management-center
+cd web
 bun install --frozen-lockfile
 bun run dev
 ```
@@ -184,8 +183,8 @@ Open the site in a browser and enter your **management key** (the `secret-key` f
 
 ## Release behavior
 
-Release archives contain the platform binary, `static/management.html`, `config.example.yaml`, documentation, and the license. The bundled panel is available without a first-start download. Set `disable-auto-update-panel: true` to keep the UI pinned to the shipped release.
+Release archives contain the self-contained platform binary (`xinugate` with the Management Center embedded inside), `config.example.yaml`, `README.md`, and `LICENSE`. No external `static/` directory is required at runtime.
 
 ## License
 
-The backend and Management Center are MIT licensed. The Management Center license is preserved at `web/management-center/LICENSE`.
+MIT licensed. See `LICENSE`.

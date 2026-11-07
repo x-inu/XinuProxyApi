@@ -1,11 +1,11 @@
 FROM oven/bun:1.3.14 AS management-builder
 
-WORKDIR /app/web/management-center
+WORKDIR /app/web
 
-COPY web/management-center/package.json web/management-center/bun.lock ./
+COPY web/package.json web/bun.lock ./
 RUN bun install --frozen-lockfile
 
-COPY web/management-center/ ./
+COPY web/ ./
 
 ARG VERSION=dev
 RUN VERSION="${VERSION}" bun run build \
@@ -23,6 +23,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+COPY --from=management-builder /app/web/dist/index.html /app/internal/managementasset/dist/management.html
 
 ARG VERSION=dev
 ARG COMMIT=none
@@ -34,10 +35,9 @@ FROM debian:bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends tzdata ca-certificates && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /xinugate/static
+RUN mkdir -p /xinugate
 
 COPY --from=builder /app/xinugate /xinugate/xinugate
-COPY --from=management-builder /app/web/management-center/dist/index.html /xinugate/static/management.html
 COPY --from=builder /app/config.example.yaml /xinugate/config.example.yaml
 
 WORKDIR /xinugate

@@ -109,7 +109,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: management-panel
-          path: static/management.html
+          path: internal/managementasset/dist/management.html
           if-no-files-found: error
 
   build-hosted:
@@ -159,8 +159,8 @@ jobs:
       - name: Prepare management panel
         shell: bash
         run: |
-          mkdir -p static
-          cp management-panel/management.html static/management.html
+          mkdir -p internal/managementasset/dist
+          cp management-panel/management.html internal/managementasset/dist/management.html
       - name: Refresh models catalog
         shell: bash
         run: bash .github/scripts/refresh-model-catalogs.sh
@@ -208,12 +208,10 @@ jobs:
             -o "$archive_dir/$binary_name" ./cmd/server/
 
           cp LICENSE README.md config.example.yaml "$archive_dir/"
-          mkdir -p "$archive_dir/static"
-          cp static/management.html "$archive_dir/static/management.html"
           if [[ "$ARCHIVE_FORMAT" == "zip" ]]; then
             powershell -NoProfile -Command "Compress-Archive -Path '${archive_dir}/*' -DestinationPath 'dist/${archive_name}' -Force"
           else
-            tar -C "$archive_dir" -czf "dist/$archive_name" "$binary_name" LICENSE README.md config.example.yaml static/management.html
+            tar -C "$archive_dir" -czf "dist/$archive_name" "$binary_name" LICENSE README.md config.example.yaml
           fi
       - uses: actions/upload-artifact@v4
         with:
@@ -297,8 +295,8 @@ jobs:
       - name: Prepare management panel
         shell: bash
         run: |
-          mkdir -p static
-          cp management-panel/management.html static/management.html
+          mkdir -p internal/managementasset/dist
+          cp management-panel/management.html internal/managementasset/dist/management.html
       - name: Refresh models catalog
         shell: bash
         run: bash .github/scripts/refresh-model-catalogs.sh
@@ -359,9 +357,7 @@ jobs:
             '
 
           cp LICENSE README.md config.example.yaml "$archive_dir/"
-          mkdir -p "$archive_dir/static"
-          cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" xinugate LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinugate LICENSE README.md config.example.yaml
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
@@ -440,8 +436,8 @@ jobs:
       - name: Prepare management panel
         shell: bash
         run: |
-          mkdir -p static
-          cp management-panel/management.html static/management.html
+          mkdir -p internal/managementasset/dist
+          cp management-panel/management.html internal/managementasset/dist/management.html
       - name: Refresh models catalog
         shell: bash
         run: bash .github/scripts/refresh-model-catalogs.sh
@@ -489,9 +485,7 @@ jobs:
           fi
 
           cp LICENSE README.md config.example.yaml "$archive_dir/"
-          mkdir -p "$archive_dir/static"
-          cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" xinugate LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinugate LICENSE README.md config.example.yaml
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
@@ -579,8 +573,8 @@ jobs:
       - name: Prepare management panel
         shell: bash
         run: |
-          mkdir -p static
-          cp management-panel/management.html static/management.html
+          mkdir -p internal/managementasset/dist
+          cp management-panel/management.html internal/managementasset/dist/management.html
       - name: Refresh models catalog
         run: bash .github/scripts/refresh-model-catalogs.sh
       - name: Fetch tags
@@ -701,9 +695,7 @@ jobs:
           echo "Packaging ${archive_name}"
           cp "dist/${TARGET}/bin/xinugate" "$archive_dir/xinugate"
           cp LICENSE README.md config.example.yaml "$archive_dir/"
-          mkdir -p "$archive_dir/static"
-          cp static/management.html "$archive_dir/static/management.html"
-          tar -C "$archive_dir" -czf "dist/$archive_name" xinugate LICENSE README.md config.example.yaml static/management.html
+          tar -C "$archive_dir" -czf "dist/$archive_name" xinugate LICENSE README.md config.example.yaml
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}

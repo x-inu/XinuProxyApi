@@ -328,27 +328,39 @@ func (s *Server) tryServeManagementControlPanel(c *gin.Context) bool {
 	if cfg == nil || cfg.Home.Enabled || cfg.RemoteManagement.DisableControlPanel {
 		return false
 	}
-	filePath := managementasset.FilePath(s.configFilePath)
-	if strings.TrimSpace(filePath) == "" {
-		return false
-	}
 
-	if _, err := os.Stat(filePath); err != nil {
-		if os.IsNotExist(err) {
-			// Synchronously ensure management.html is available with a detached context.
-			// Control panel bootstrap should not be canceled by client disconnects.
-			if !managementasset.EnsureLatestManagementHTML(context.Background(), managementasset.StaticDir(s.configFilePath), cfg.ProxyURL, cfg.RemoteManagement.PanelGitHubRepository) {
-				return false
-			}
-		} else {
+	// 1. If an explicit disk override (MANAGEMENT_STATIC_PATH) or local file exists, serve it.
+	filePath := managementasset.FilePath(s.configFilePath)
+	if strings.TrimSpace(filePath) != "" {
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			c.File(filePath)
+			return true
+		} else if err != nil && !os.IsNotExist(err) {
 			log.WithError(err).Error("failed to stat management control panel asset")
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return true
 		}
 	}
 
-	c.File(filePath)
-	return true
+	// 2. Serve the single-file Web UI embedded directly inside the xinugate binary.
+	if embedded := managementasset.EmbeddedHTML(); len(embedded) > 0 {
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		if c.Request.Method == http.MethodHead {
+			c.Status(http.StatusOK)
+			return true
+		}
+		c.Data(http.StatusOK, "text/html; charset=utf-8", embedded)
+		return true
+	}
+
+	// 3. Fallback: attempt on-demand download only when neither disk file nor embedded bundle is present.
+	if strings.TrimSpace(filePath) != "" {
+		if managementasset.EnsureLatestManagementHTML(context.Background(), managementasset.StaticDir(s.configFilePath), cfg.ProxyURL, cfg.RemoteManagement.PanelGitHubRepository) {
+			c.File(filePath)
+			return true
+		}
+	}
+	return false
 }
 
 // clientAcceptsHTML reports whether the request prefers an HTML response, which

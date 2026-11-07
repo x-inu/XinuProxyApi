@@ -4,15 +4,15 @@ import { UsagePage } from '@/features/usage/UsagePage';
 import { ProvidersWorkbenchPage } from '@/features/providers/ProvidersWorkbenchPage';
 import { ModelsPage } from '@/features/models/ModelsPage';
 import { AuthFilesPage } from '@/features/authFiles/AuthFilesPage';
-import { AuthFilesOAuthExcludedEditPage } from '@/pages/AuthFilesOAuthExcludedEditPage';
-import { AuthFilesOAuthModelAliasEditPage } from '@/pages/AuthFilesOAuthModelAliasEditPage';
+import { AuthFilesOAuthExcludedEditPage } from '@/features/authFiles/AuthFilesOAuthExcludedEditPage';
+import { AuthFilesOAuthModelAliasEditPage } from '@/features/authFiles/AuthFilesOAuthModelAliasEditPage';
 import { QuotaPage } from '@/features/quota/QuotaPage';
 import { PluginResourcePage } from '@/features/plugins/PluginResourcePage';
 import { PluginsPage } from '@/features/plugins/PluginsPage';
 import { PluginStorePage } from '@/features/plugins/PluginStorePage';
 import { ConfigPage } from '@/features/config/ConfigPage';
-import { LogsPage } from '@/pages/LogsPage';
-import { SystemPage } from '@/pages/SystemPage';
+import { LogsPage } from '@/features/logs/LogsPage';
+import { SystemPage } from '@/features/system/SystemPage';
 import { useAuthStore } from '@/stores';
 
 const createMainRoutes = (supportsPlugin: boolean) => [

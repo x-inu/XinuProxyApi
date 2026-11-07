@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: web/management-center
+        working-directory: web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -63,4 +63,4 @@ jobs:
       - name: Build server
         run: go build -o test-output ./cmd/server
       - name: Verify bundled runtime asset
-        run: test -s static/management.html
+        run: test -s internal/managementasset/dist/management.html

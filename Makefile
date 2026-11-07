@@ -17,11 +17,11 @@ backend:
 build: management backend
 
 test:
-	cd web/management-center && bun run test
+	cd web && bun run test
 	go test ./...
 
 verify:
 	./scripts/verify.sh
 
 clean:
-	rm -rf static/management.html web/management-center/dist xinugate test-output
+	rm -rf internal/managementasset/dist/management.html static/management.html web/dist xinugate test-output

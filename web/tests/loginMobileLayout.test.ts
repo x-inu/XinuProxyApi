@@ -2,12 +2,12 @@ import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 
 const pageSource = readFileSync(
-  new URL('../src/pages/LoginPage.tsx', import.meta.url),
+  new URL('../src/features/auth/LoginPage.tsx', import.meta.url),
   'utf8'
 );
 
 const scssSource = readFileSync(
-  new URL('../src/pages/LoginPage.module.scss', import.meta.url),
+  new URL('../src/features/auth/LoginPage.module.scss', import.meta.url),
   'utf8'
 );
 

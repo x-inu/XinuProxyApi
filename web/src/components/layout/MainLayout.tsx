@@ -846,15 +846,6 @@ export function MainLayout() {
         </div>
 
         <div className="header-actions floating-actions">
-          <span
-            className={`header-gateway-pill ${connectionStatus === 'connected' ? 'is-online' : 'is-offline'}`}
-            title={apiBase || 'Gateway status'}
-          >
-            <i className="header-gateway-dot" aria-hidden="true" />
-            <span className="header-gateway-text">
-              {connectionStatus === 'connected' ? 'ONLINE' : 'OFFLINE'}
-            </span>
-          </span>
           <span className="header-actions-divider" aria-hidden="true" />
           <Button
             variant="ghost"

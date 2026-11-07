@@ -8,9 +8,22 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	sdkpluginstore "github.com/x-inu/XinuGate/v7/sdk/pluginstore"
 	"gopkg.in/yaml.v3"
 )
+
+// PluginStoreAuthConfig describes an optional auth rule for plugin store requests.
+// Kept for backward compatibility; the dynamic plugin engine is removed.
+type PluginStoreAuthConfig struct {
+	Match          string   `yaml:"match,omitempty" json:"match,omitempty"`
+	ApplyTo        []string `yaml:"apply-to,omitempty" json:"apply_to,omitempty"`
+	Type           string   `yaml:"type,omitempty" json:"type,omitempty"`
+	TokenEnv       string   `yaml:"token-env,omitempty" json:"token_env,omitempty"`
+	UsernameEnv    string   `yaml:"username-env,omitempty" json:"username_env,omitempty"`
+	PasswordEnv    string   `yaml:"password-env,omitempty" json:"password_env,omitempty"`
+	HeaderName     string   `yaml:"header-name,omitempty" json:"header_name,omitempty"`
+	HeaderValueEnv string   `yaml:"header-value-env,omitempty" json:"header_value_env,omitempty"`
+	AllowInsecure  bool     `yaml:"allow-insecure,omitempty" json:"allow_insecure,omitempty"`
+}
 
 // RequestScopedErrorRule configures custom classification and handling for upstream errors.
 type RequestScopedErrorRule struct {
@@ -33,7 +46,7 @@ type PluginsConfig struct {
 	// StoreSources appends third-party plugin store registries to the built-in official source.
 	StoreSources []string `yaml:"store-sources,omitempty" json:"store-sources,omitempty"`
 	// StoreAuth defines optional auth rules for plugin store registry, metadata, and artifact requests.
-	StoreAuth []sdkpluginstore.AuthConfig `yaml:"store-auth,omitempty" json:"store-auth,omitempty"`
+	StoreAuth []PluginStoreAuthConfig `yaml:"store-auth,omitempty" json:"store-auth,omitempty"`
 	// AuthRevision changes when Home-managed plugin credentials change.
 	AuthRevision int64 `yaml:"auth-revision,omitempty" json:"auth-revision,omitempty"`
 	// Configs stores per-plugin instance configuration by plugin ID.

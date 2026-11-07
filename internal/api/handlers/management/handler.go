@@ -18,7 +18,6 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/buildinfo"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
-	"github.com/x-inu/XinuGate/v7/internal/pluginstore"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
 	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	"golang.org/x/crypto/bcrypt"
@@ -57,10 +56,6 @@ type Handler struct {
 	postAuthPersistHook     coreauth.PostAuthHook
 	pluginHost              *pluginhost.Host
 	configReloadHook        func(context.Context, *config.Config)
-	pluginStoreRegistryURL  string
-	pluginStoreHTTPClient   pluginstore.HTTPDoer
-	pluginStoreRateLimiter  *pluginstore.GitHubRateLimiter
-	pluginReleases          pluginReleaseCache
 }
 
 type configReloadSnapshot struct {

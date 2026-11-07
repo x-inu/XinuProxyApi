@@ -25,7 +25,6 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/cmd"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/home"
-	"github.com/x-inu/XinuGate/v7/internal/homeplugins"
 	"github.com/x-inu/XinuGate/v7/internal/logging"
 	"github.com/x-inu/XinuGate/v7/internal/managementasset"
 	"github.com/x-inu/XinuGate/v7/internal/misc"
@@ -40,7 +39,6 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/usagehistory"
 	"github.com/x-inu/XinuGate/v7/internal/util"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	sdkpluginstore "github.com/x-inu/XinuGate/v7/sdk/pluginstore"
 	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
@@ -227,8 +225,6 @@ func main() {
 	var isCloudDeploy bool
 	var configLoadedFromHome bool
 	var homeClient *home.Client
-	var homePluginSyncReport homeplugins.SyncReport
-	var homePluginStatusReady bool
 	var (
 		usePostgresStore     bool
 		pgStoreDSN           string
@@ -411,57 +407,7 @@ func main() {
 		parsed.Home = homeCfg
 		parsed.Port = config.NormalizeHomePort(parsed.Port)
 		parsed.UsageStatisticsEnabled = true
-		pluginSyncCfg := *parsed
 		parsed.Plugins.StoreAuth = nil
-		var errHomePlugins error
-		platform := homeplugins.CurrentPlatform()
-		if pluginSyncCfg.Plugins.Enabled {
-			ctxHomePlugins, cancelHomePlugins := context.WithTimeout(context.Background(), 30*time.Second)
-			installedVersions, errInstalledPlugins := homeplugins.InstalledVersions(&pluginSyncCfg)
-			if errInstalledPlugins != nil {
-				homePluginStatusReady = true
-				errHomePlugins = errInstalledPlugins
-				homePluginSyncReport = homeplugins.CompletedSyncReport(platform, errInstalledPlugins)
-			} else {
-				pluginSyncRequest := sdkpluginstore.PluginSyncRequest{
-					SchemaVersion:     sdkpluginstore.PluginSyncSchemaVersion,
-					GOOS:              platform.GOOS,
-					GOARCH:            platform.GOARCH,
-					InstalledVersions: installedVersions,
-				}
-				pluginSyncResponse, errFetchPlugins := homeClient.GetPluginSync(ctxHomePlugins, pluginSyncRequest)
-				errHomePlugins = errFetchPlugins
-				switch {
-				case errHomePlugins == nil:
-					homePluginStatusReady = true
-					homePluginSyncReport, errHomePlugins = homeplugins.SyncResolvedWithReport(ctxHomePlugins, &pluginSyncCfg, pluginSyncResponse.Items, pluginSyncResponse.ExpiresAt, pluginSyncRequest.InstalledVersions, pluginHost)
-				case errors.Is(errHomePlugins, home.ErrPluginSyncUnsupported):
-					homePluginStatusReady = true
-					homePluginSyncReport, errHomePlugins = homeplugins.SyncWithReport(ctxHomePlugins, &pluginSyncCfg, pluginHost)
-				default:
-					homePluginStatusReady = true
-					homePluginSyncReport = homeplugins.CompletedSyncReport(platform, errHomePlugins)
-				}
-				pluginSyncRequest.Clear()
-				pluginSyncResponse.Clear()
-			}
-			cancelHomePlugins()
-		} else {
-			homePluginStatusReady = true
-			homePluginSyncReport = homeplugins.CompletedSyncReport(platform, nil)
-		}
-		if errHomePlugins != nil {
-			log.Errorf("failed to sync plugins from home: %v", errHomePlugins)
-		}
-		if homePluginStatusReady {
-			errReportPlugins := home.ReportPluginStatus(context.Background(), homeClient, homeCfg.NodeID, homePluginSyncReport)
-			if errReportPlugins != nil {
-				log.Warnf("failed to report home plugin sync status: %v", errReportPlugins)
-			}
-		}
-		if errHomePlugins != nil {
-			return
-		}
 		cfg = parsed
 
 		// Keep a non-empty config path for downstream components (log paths, management assets, etc),
@@ -778,22 +724,9 @@ func main() {
 	// Register built-in access providers before constructing services.
 	configaccess.Register(&cfg.SDKConfig)
 	pluginHost.ApplyConfig(context.Background(), cfg)
-	if configLoadedFromHome && homePluginStatusReady {
-		errHomePluginLoad := homeplugins.MarkLoadResults(&homePluginSyncReport, pluginHost)
-		errReportPlugins := home.ReportPluginStatus(context.Background(), homeClient, cfg.Home.NodeID, homePluginSyncReport)
-		if errHomePluginLoad != nil {
-			log.Errorf("failed to load home plugins: %v", errHomePluginLoad)
-		}
-		if errReportPlugins != nil {
-			log.Warnf("failed to report home plugin load status: %v", errReportPlugins)
-		}
-		if errHomePluginLoad != nil {
-			return
-		}
-	}
 	if homeClient != nil {
 		// The bootstrap client is not owned by the runtime service. Close it after
-		// the final startup report so it cannot retain an idle RESP connection.
+		// the final startup so it cannot retain an idle RESP connection.
 		homeClient.Close()
 		homeClient = nil
 	}

@@ -19,6 +19,23 @@ import (
 	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
+func pluginVirtualAuthForTest(authDir, fileName, id string) *coreauth.Auth {
+	filePath := filepath.Join(authDir, fileName)
+	auth := &coreauth.Auth{
+		ID:       id,
+		FileName: fileName,
+		Provider: "gemini-cli",
+		Attributes: map[string]string{
+			"path": filePath,
+		},
+		Metadata: map[string]any{
+			"type": "gemini-cli",
+		},
+	}
+	coreauth.MarkPluginVirtualAuth(auth, filePath, 0)
+	return auth
+}
+
 func TestPatchAuthFileStatusInvokesPostAuthPersistHook(t *testing.T) {
 	t.Setenv("MANAGEMENT_PASSWORD", "")
 

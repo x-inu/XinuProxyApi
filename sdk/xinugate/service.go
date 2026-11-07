@@ -17,7 +17,6 @@ import (
 	sdkaccess "github.com/x-inu/XinuGate/v7/sdk/access"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/config"
-	sdkpluginstore "github.com/x-inu/XinuGate/v7/sdk/pluginstore"
 	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/xinugate/executionregistry"
 )
@@ -129,7 +128,7 @@ type Service struct {
 	homeLogForwarderClient       *home.Client
 	homePluginSyncMu             sync.Mutex
 	homePluginSyncKey            string
-	homePluginSyncFetch          func(context.Context, sdkpluginstore.PluginSyncRequest) (sdkpluginstore.PluginSyncResponse, error)
+	homePluginSyncFetch          func(context.Context, homeplugins.PluginSyncRequest) (homeplugins.PluginSyncResponse, error)
 	homePluginDeleteTask         func(context.Context, *config.Config, home.PluginTask) homeplugins.SyncReport
 	antigravityProbeWg           sync.WaitGroup
 }

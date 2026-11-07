@@ -3,8 +3,6 @@ package config
 import (
 	"sort"
 	"strings"
-
-	sdkpluginstore "github.com/x-inu/XinuGate/v7/sdk/pluginstore"
 )
 
 // NormalizePluginsConfig applies default plugin configuration values.
@@ -27,10 +25,50 @@ func (cfg *Config) NormalizePluginsConfig() {
 		}
 		cfg.Plugins.StoreSources = sources
 	}
-	cfg.Plugins.StoreAuth = sdkpluginstore.NormalizeAuthConfigs(cfg.Plugins.StoreAuth)
+	cfg.Plugins.StoreAuth = normalizePluginStoreAuthConfigs(cfg.Plugins.StoreAuth)
 	if cfg.Plugins.Configs == nil {
 		cfg.Plugins.Configs = map[string]PluginInstanceConfig{}
 	}
+}
+
+func normalizePluginStoreAuthConfigs(in []PluginStoreAuthConfig) []PluginStoreAuthConfig {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make([]PluginStoreAuthConfig, 0, len(in))
+	for _, item := range in {
+		item.Match = strings.TrimSpace(item.Match)
+		item.Type = strings.ToLower(strings.TrimSpace(item.Type))
+		item.TokenEnv = strings.TrimSpace(item.TokenEnv)
+		item.UsernameEnv = strings.TrimSpace(item.UsernameEnv)
+		item.PasswordEnv = strings.TrimSpace(item.PasswordEnv)
+		item.HeaderName = strings.TrimSpace(item.HeaderName)
+		item.HeaderValueEnv = strings.TrimSpace(item.HeaderValueEnv)
+		if item.Type == "" {
+			item.Type = "none"
+		}
+		if item.Match == "" {
+			continue
+		}
+		if len(item.ApplyTo) > 0 {
+			applyTo := make([]string, 0, len(item.ApplyTo))
+			seen := map[string]struct{}{}
+			for _, value := range item.ApplyTo {
+				value = strings.ToLower(strings.TrimSpace(value))
+				if value == "" {
+					continue
+				}
+				if _, exists := seen[value]; exists {
+					continue
+				}
+				seen[value] = struct{}{}
+				applyTo = append(applyTo, value)
+			}
+			item.ApplyTo = applyTo
+		}
+		out = append(out, item)
+	}
+	return out
 }
 
 // SanitizeCodexHeaderDefaults trims surrounding whitespace from the

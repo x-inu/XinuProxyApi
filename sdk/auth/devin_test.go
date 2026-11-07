@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	devinauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/devin"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	devinauth "github.com/x-inu/XinuGate/v7/internal/auth/devin"
+	"github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 func TestDevinAuthenticatorProviderAndRefreshLead(t *testing.T) {

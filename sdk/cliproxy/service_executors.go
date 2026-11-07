@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/constant"
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/constant"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 type openAICompatibilityRegistrationCache struct {

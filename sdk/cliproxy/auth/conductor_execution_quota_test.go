@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	internallogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	internalutil "github.com/x-inu/XinuProxyApi/v7/internal/util"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	coresession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
+	internallogging "github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	internalutil "github.com/x-inu/XinuGate/v7/internal/util"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	coresession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
 )
 
 type quotaAttemptIsolationSelector struct{}

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/tidwall/gjson"
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
+	homekv "github.com/x-inu/XinuGate/v7/internal/home"
 )
 
 type fakeXAIReasoningReplayKVClient struct {

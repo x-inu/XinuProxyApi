@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 func TestStatusFromHomeErrorCodeMapsAuthenticationErrorToUnauthorized(t *testing.T) {

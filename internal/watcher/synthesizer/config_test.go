@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 func TestNewConfigSynthesizer(t *testing.T) {

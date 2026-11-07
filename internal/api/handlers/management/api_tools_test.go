@@ -17,12 +17,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	xaiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/xai"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	xaiauth "github.com/x-inu/XinuGate/v7/internal/auth/xai"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 func TestAPICallUsesRequestProxyURL(t *testing.T) {

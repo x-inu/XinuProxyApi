@@ -9,8 +9,8 @@ import (
 	"unicode/utf8"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 )
 
 // ResolveDiscoveryStateDir returns an absolute state directory for discovery metadata,

@@ -10,8 +10,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	logtest "github.com/sirupsen/logrus/hooks/test"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 func setupTestLoggerHook(t *testing.T) *logtest.Hook {

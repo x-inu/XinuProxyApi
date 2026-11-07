@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/synthesizer"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/watcher/synthesizer"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 var snapshotCoreAuthsFunc = snapshotCoreAuths

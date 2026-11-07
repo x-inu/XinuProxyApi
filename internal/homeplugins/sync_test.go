@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	sdkpluginstore "github.com/x-inu/XinuProxyApi/v7/sdk/pluginstore"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	sdkpluginstore "github.com/x-inu/XinuGate/v7/sdk/pluginstore"
 	"gopkg.in/yaml.v3"
 )
 
@@ -567,7 +567,7 @@ func TestDeleteWithReportRejectsUnresolvedPluginsDir(t *testing.T) {
 	t.Setenv("USERPROFILE", "")
 	t.Chdir(workspace)
 
-	literalPluginsDir := filepath.Join(workspace, "~", ".xinuproxyapi", "plugins")
+	literalPluginsDir := filepath.Join(workspace, "~", ".xinugate", "plugins")
 	targetDir := filepath.Join(literalPluginsDir, runtime.GOOS, runtime.GOARCH)
 	if errMkdir := os.MkdirAll(targetDir, 0o755); errMkdir != nil {
 		t.Fatalf("MkdirAll(%s) error = %v", targetDir, errMkdir)
@@ -579,7 +579,7 @@ func TestDeleteWithReportRejectsUnresolvedPluginsDir(t *testing.T) {
 	cfg := &config.Config{
 		Home: config.HomeConfig{Enabled: true},
 		Plugins: config.PluginsConfig{
-			Dir: "~/.xinuproxyapi/plugins",
+			Dir: "~/.xinugate/plugins",
 		},
 	}
 

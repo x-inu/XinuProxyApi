@@ -6,9 +6,9 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 func TestBuilderBuildInjectsPluginHostScheduler(t *testing.T) {

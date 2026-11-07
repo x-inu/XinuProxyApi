@@ -31,14 +31,14 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	sdkauth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	sdkauth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 

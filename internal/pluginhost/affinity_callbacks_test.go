@@ -7,10 +7,10 @@ import (
 	"sync"
 	"testing"
 
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginabi"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 type mockPluginScheduler struct{}

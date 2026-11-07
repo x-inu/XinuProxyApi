@@ -3,9 +3,9 @@ package cliproxy
 import (
 	"context"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/watcher"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 func defaultWatcherFactory(configPath, authDir string, reload func(*config.Config)) (*WatcherWrapper, error) {

@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executionregistry"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	cliproxysession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	cliproxysession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 type sessionAliasCaptureDispatcher struct {

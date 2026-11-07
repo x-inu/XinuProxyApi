@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/signature"
+	"github.com/x-inu/XinuGate/v7/internal/signature"
 )
 
 const capturedGeminiThinkingSignature = "EjQKMgEMOdbHO0Gd+c9Mxk4ELwPGbpCEcp2mFfYYLix2UVtBH3fL8GECc4+JITVnHF4qZDsA"

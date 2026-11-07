@@ -8,8 +8,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	cliproxysession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	cliproxysession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
 )
 
 // 1. Explicit Header Fast Path (Pi, Claude Code, OpenCode)

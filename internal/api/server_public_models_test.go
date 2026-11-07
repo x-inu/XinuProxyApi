@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	proxyconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	proxyconfig "github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 func TestPublicModelsEndpoint_DisabledByDefault(t *testing.T) {

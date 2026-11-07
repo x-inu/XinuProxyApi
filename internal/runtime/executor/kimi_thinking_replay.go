@@ -12,11 +12,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	internalcache "github.com/x-inu/XinuProxyApi/v7/internal/cache"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 type kimiThinkingReplayScope struct {

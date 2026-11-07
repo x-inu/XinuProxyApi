@@ -8,10 +8,10 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 // TestClaudeExecutor_DirectMessagesOAuthDefaultsToCloak_Issue6120 verifies Option A for Issue #6120:

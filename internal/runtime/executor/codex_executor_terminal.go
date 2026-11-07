@@ -11,7 +11,7 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 )
 
 const codexIncompleteStreamMessage = "stream error: stream disconnected before completion: stream closed before response.completed"

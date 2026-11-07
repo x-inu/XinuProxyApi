@@ -10,11 +10,11 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestCodexWebsocketsExecutorRestoresMultiAgentV2NamespaceAcrossIncrementalTurns(t *testing.T) {

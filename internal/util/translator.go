@@ -1,4 +1,4 @@
-// Package util provides utility functions for the XinuProxyApi server.
+// Package util provides utility functions for the XinuGate server.
 // It includes helper functions for JSON manipulation, proxy configuration,
 // and other common operations used across the application.
 package util

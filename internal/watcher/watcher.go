@@ -10,13 +10,13 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/synthesizer"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/watcher/synthesizer"
 	"gopkg.in/yaml.v3"
 
 	log "github.com/sirupsen/logrus"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 // storePersister captures persistence-capable token store methods used by the watcher.

@@ -3,10 +3,10 @@ package helps
 import (
 	"context"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 // EnsureSessionContext ensures that ctx carries the internal session identity

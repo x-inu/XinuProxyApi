@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
+	translatorcommon "github.com/x-inu/XinuGate/v7/internal/translator/common"
 )
 
 var (

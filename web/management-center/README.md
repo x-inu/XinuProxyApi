@@ -1,16 +1,16 @@
-# XinuProxyApi Management Center
+# XinuGate Management Center
 
-A single-file Web UI (React + TypeScript) for operating and monitoring **XinuProxyApi** via its **Management API** (`/v0/management`).
+A single-file Web UI (React + TypeScript) for operating and monitoring **XinuGate** via its **Management API** (`/v0/management`).
 
-**Main Repository**: https://github.com/x-inu/XinuProxyApi
+**Main Repository**: https://github.com/x-inu/XinuGate
 
-The Web UI ships bundled with `xinu-proxy-api` (`static/management.html`) and is served at both `/` (for browsers) and `/management.html` on the gateway port (`20128` by default).
+The Web UI ships bundled with `xinugate` (`static/management.html`) and is served at both `/` (for browsers) and `/management.html` on the gateway port (`20128` by default).
 
 ## Quick start
 
 ### Option A: Use the bundled Web UI (recommended)
 
-1. Start your `xinu-proxy-api` service.
+1. Start your `xinugate` service.
 2. Open `http://<host>:20128/` or `http://<host>:20128/management.html`.
 3. Enter your **management key** (`remote-management.secret-key`) to sign in.
 

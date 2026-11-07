@@ -18,8 +18,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginstore"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/pluginstore"
 )
 
 func TestListPluginStoreMergesInstalledStatus(t *testing.T) {
@@ -736,7 +736,7 @@ func TestInstallPluginFromStoreRejectsUnresolvedPluginsDir(t *testing.T) {
 	h := &Handler{
 		cfg: &config.Config{
 			Plugins: config.PluginsConfig{
-				Dir:     "~/.xinuproxyapi/plugins",
+				Dir:     "~/.xinugate/plugins",
 				Configs: map[string]config.PluginInstanceConfig{},
 			},
 		},
@@ -778,13 +778,13 @@ func TestInstallPluginFromStoreWritesFileAndEnablesConfig(t *testing.T) {
 	cfg, errParse := config.ParseConfigBytes([]byte(`
 plugins:
   enabled: false
-  dir: "~/.xinuproxyapi/plugins"
+  dir: "~/.xinugate/plugins"
 `))
 	if errParse != nil {
 		t.Fatalf("ParseConfigBytes() error = %v", errParse)
 	}
 	cfg.Plugins.Configs["sample-provider"] = pluginConfigFromYAML(t, "enabled: false\nmode: fast\n")
-	pluginsDir := filepath.Join(homeDir, ".xinuproxyapi", "plugins")
+	pluginsDir := filepath.Join(homeDir, ".xinugate", "plugins")
 	archiveData := makeManagementPluginStoreZip(t, "sample-provider"+managementPluginExtension(runtime.GOOS), "library-data")
 	archiveName := "sample-provider_0.1.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".zip"
 	checksum := sha256.Sum256(archiveData)

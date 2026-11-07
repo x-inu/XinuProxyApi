@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 type testUsageCapturePlugin struct {

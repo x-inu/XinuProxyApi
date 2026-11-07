@@ -8,10 +8,10 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
 )
 
 // NewProxyAwareHTTPClient creates an HTTP client with proper proxy configuration priority:

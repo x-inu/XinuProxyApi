@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func (h *Host) RegisterUsagePlugins() {

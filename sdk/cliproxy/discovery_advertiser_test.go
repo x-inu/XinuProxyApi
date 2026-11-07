@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/discovery"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/discovery"
 )
 
 type fakeAdvertiser struct {

@@ -18,8 +18,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 )
 
 const (

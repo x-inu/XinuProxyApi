@@ -40,7 +40,7 @@ func TestMetadataConfigFieldsExposePluginSchema(t *testing.T) {
 		Name:             "example",
 		Version:          "1.0.0",
 		Author:           "test",
-		GitHubRepository: "https://github.com/x-inu/XinuProxyApi",
+		GitHubRepository: "https://github.com/x-inu/XinuGate",
 		Logo:             "https://example.com/logo.svg",
 		ConfigFields: []ConfigField{{
 			Name:        "mode",

@@ -1,4 +1,4 @@
-// Package util provides utility functions for the XinuProxyApi server.
+// Package util provides utility functions for the XinuGate server.
 // It includes helper functions for logging configuration, file system operations,
 // and other common utilities used throughout the application.
 package util
@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 var functionNameSanitizer = regexp.MustCompile(`[^a-zA-Z0-9_.:-]`)
@@ -73,7 +73,7 @@ func SetLogLevel(cfg *config.Config) {
 
 // ResolveAuthDir normalizes the auth directory path for consistent reuse throughout the app.
 // It expands a leading tilde (~) to the user's home directory and returns a cleaned path.
-// If authDir is empty, it defaults to ~/.xinuproxyapi.
+// If authDir is empty, it defaults to ~/.xinugate.
 func ResolveAuthDir(authDir string) (string, error) {
 	if authDir == "" {
 		authDir = config.DefaultAuthDir

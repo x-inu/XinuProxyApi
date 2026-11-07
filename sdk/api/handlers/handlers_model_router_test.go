@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 type handlerModelRouterTestHost struct {

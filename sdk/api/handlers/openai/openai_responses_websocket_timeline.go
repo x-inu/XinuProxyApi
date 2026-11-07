@@ -12,8 +12,8 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	requestlogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	requestlogging "github.com/x-inu/XinuGate/v7/internal/logging"
 )
 
 type websocketTimelineAppender interface {

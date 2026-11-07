@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 var _ cliproxyauth.CooldownStateStoreProvider = (*SqliteStore)(nil)

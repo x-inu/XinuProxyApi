@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/redisqueue"
 )
 
 func TestManagerMarkResultPublishesErrorEventAfterAuthStateUpdate(t *testing.T) {

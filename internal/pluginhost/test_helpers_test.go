@@ -9,9 +9,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginabi"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 	"gopkg.in/yaml.v3"
 )
 
@@ -292,7 +292,7 @@ func validTestPlugin(name string) pluginapi.Plugin {
 			Name:             name,
 			Version:          "1.0.0",
 			Author:           "test",
-			GitHubRepository: "https://github.com/x-inu/XinuProxyApi",
+			GitHubRepository: "https://github.com/x-inu/XinuGate",
 		},
 		Capabilities: pluginapi.Capabilities{
 			UsagePlugin: testUsageCapability{},

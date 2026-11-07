@@ -15,17 +15,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/auth/antigravity"
-	"github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
-	"github.com/x-inu/XinuProxyApi/v7/internal/auth/codex"
-	"github.com/x-inu/XinuProxyApi/v7/internal/auth/kimi"
-	metaauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/meta"
-	xaiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/xai"
-	"github.com/x-inu/XinuProxyApi/v7/internal/misc"
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuGate/v7/internal/auth/antigravity"
+	"github.com/x-inu/XinuGate/v7/internal/auth/claude"
+	"github.com/x-inu/XinuGate/v7/internal/auth/codex"
+	"github.com/x-inu/XinuGate/v7/internal/auth/kimi"
+	metaauth "github.com/x-inu/XinuGate/v7/internal/auth/meta"
+	xaiauth "github.com/x-inu/XinuGate/v7/internal/auth/xai"
+	"github.com/x-inu/XinuGate/v7/internal/misc"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 type codexOAuthService interface {

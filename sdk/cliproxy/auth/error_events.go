@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
+	"github.com/x-inu/XinuGate/v7/internal/redisqueue"
 )
 
 type errorEvent struct {

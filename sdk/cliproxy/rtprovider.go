@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
 )
 
 // defaultRoundTripperProvider returns a per-auth HTTP RoundTripper based on

@@ -10,16 +10,16 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/home"
-	"github.com/x-inu/XinuProxyApi/v7/internal/homeplugins"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/diff"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executionregistry"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/home"
+	"github.com/x-inu/XinuGate/v7/internal/homeplugins"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/redisqueue"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/watcher/diff"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 type homeSubscriberSupervisor struct {

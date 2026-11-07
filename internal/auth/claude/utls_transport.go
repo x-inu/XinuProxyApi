@@ -10,10 +10,10 @@ import (
 
 	tls "github.com/refraction-networking/utls"
 	log "github.com/sirupsen/logrus"
-	internalcache "github.com/x-inu/XinuProxyApi/v7/internal/cache"
-	"github.com/x-inu/XinuProxyApi/v7/internal/httpwire"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
+	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
+	"github.com/x-inu/XinuGate/v7/internal/httpwire"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
 	"golang.org/x/net/proxy"
 )
 

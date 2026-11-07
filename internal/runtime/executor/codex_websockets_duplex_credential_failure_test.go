@@ -12,11 +12,11 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	auth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	core "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	translator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	auth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	core "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	translator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestCodexDuplexLaterCredentialFailure(t *testing.T) {

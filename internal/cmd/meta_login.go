@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
 )
 
 // DoMetaLogin triggers the OAuth device-code flow for the Meta provider and saves tokens.

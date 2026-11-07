@@ -12,12 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
-	multiagentv2 "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/optimize-multi-agent-v2"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	multiagentv2 "github.com/x-inu/XinuGate/v7/internal/client/codex/optimize-multi-agent-v2"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 func TestPrepareCodexMultiAgentV2ToolsAtResponsesBoundary(t *testing.T) {

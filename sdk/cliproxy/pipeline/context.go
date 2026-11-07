@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 // Context encapsulates execution state shared across middleware, translators, and executors.

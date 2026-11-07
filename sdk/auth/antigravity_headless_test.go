@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/sdk/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/auth"
 )
 
 type mockRoundTripper func(req *http.Request) (*http.Response, error)

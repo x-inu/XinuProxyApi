@@ -14,12 +14,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/clienterror"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 type directResponseTestError struct {

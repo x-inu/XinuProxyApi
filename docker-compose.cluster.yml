@@ -1,6 +1,6 @@
 services:
-  xinu-proxy-api:
-    image: ${XINU_PROXY_IMAGE:-x-inu/xinu-proxy-api:latest}
+  xinugate:
+    image: ${XINUGATE_IMAGE:-x-inu/xinugate:latest}
     pull_policy: always
     build:
       context: .
@@ -9,15 +9,15 @@ services:
         VERSION: ${VERSION:-dev}
         COMMIT: ${COMMIT:-none}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-    container_name: xinu-proxy-api-cluster
+    container_name: xinugate-cluster
     environment:
       HOME_JWT: ${HOME_JWT:-}
     ports:
       - "20128:20128"
     volumes:
-      - ${XINU_PROXY_HOME_PATH:-./home}:/root/.xinuproxyapi
-      - ${XINU_PROXY_LOG_PATH:-./logs}:/xinuproxyapi/logs
-      - ${XINU_PROXY_PLUGIN_PATH:-./plugins}:/xinuproxyapi/plugins
+      - ${XINUGATE_HOME_PATH:-./home}:/root/.xinugate
+      - ${XINUGATE_LOG_PATH:-./logs}:/xinugate/logs
+      - ${XINUGATE_PLUGIN_PATH:-./plugins}:/xinugate/plugins
     command: >
       sh -eu -c '
         if [ -z "$$HOME_JWT" ]; then
@@ -25,6 +25,6 @@ services:
           exit 1
         fi
 
-        exec ./xinu-proxy-api -home-jwt "$$HOME_JWT"
+        exec ./xinugate -home-jwt "$$HOME_JWT"
       '
     restart: unless-stopped

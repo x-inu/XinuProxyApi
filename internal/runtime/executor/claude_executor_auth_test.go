@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"testing"
 
-	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestClaudeExecutorDuplicateMetadataIsRequestScoped(t *testing.T) {

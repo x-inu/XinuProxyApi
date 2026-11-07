@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/clienterror"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
 )
 
 func TestExtractRequestBodyPrefersOverride(t *testing.T) {

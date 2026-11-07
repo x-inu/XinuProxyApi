@@ -1,4 +1,4 @@
-// Package api provides the HTTP API server implementation for XinuProxyApi.
+// Package api provides the HTTP API server implementation for XinuGate.
 // It includes the main server struct, routing setup, middleware for CORS and authentication,
 // and integration with various AI API handlers (OpenAI, Claude, Gemini).
 // The server supports hot-reloading of clients and configuration.
@@ -19,18 +19,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	managementHandlers "github.com/x-inu/XinuProxyApi/v7/internal/api/handlers/management"
-	"github.com/x-inu/XinuProxyApi/v7/internal/api/middleware"
-	codexlive "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/live"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/githubauth"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/managementasset"
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
-	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	managementHandlers "github.com/x-inu/XinuGate/v7/internal/api/handlers/management"
+	"github.com/x-inu/XinuGate/v7/internal/api/middleware"
+	codexlive "github.com/x-inu/XinuGate/v7/internal/client/codex/live"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/githubauth"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/managementasset"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	"github.com/x-inu/XinuGate/v7/internal/redisqueue"
+	sdkaccess "github.com/x-inu/XinuGate/v7/sdk/access"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
+	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"golang.org/x/net/http2"
 	"gopkg.in/yaml.v3"
 )

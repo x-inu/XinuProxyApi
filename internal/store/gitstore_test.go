@@ -16,7 +16,7 @@ import (
 	gitconfig "github.com/go-git/go-git/v6/config"
 	"github.com/go-git/go-git/v6/plumbing"
 	"github.com/go-git/go-git/v6/plumbing/object"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 type testBranchSpec struct {

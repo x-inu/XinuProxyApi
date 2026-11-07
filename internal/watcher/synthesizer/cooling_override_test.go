@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 func boolPointer(value bool) *bool {

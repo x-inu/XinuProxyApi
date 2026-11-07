@@ -13,7 +13,7 @@ import (
 	"github.com/pion/webrtc/v4"
 	log "github.com/sirupsen/logrus"
 	logtest "github.com/sirupsen/logrus/hooks/test"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 func TestPionMediaRelaySelectsRemoteProxyMode(t *testing.T) {

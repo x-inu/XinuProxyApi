@@ -3,11 +3,11 @@ package pluginhost
 import (
 	"context"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	internalpluginhost "github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	internalregistry "github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	internalpluginhost "github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	internalregistry "github.com/x-inu/XinuGate/v7/internal/registry"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 	"gopkg.in/yaml.v3"
 )
 

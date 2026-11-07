@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
+	"github.com/x-inu/XinuGate/v7/internal/redisqueue"
 )
 
 const (

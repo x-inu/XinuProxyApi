@@ -1,4 +1,4 @@
-// Package util provides utility functions used across the XinuProxyApi application.
+// Package util provides utility functions used across the XinuGate application.
 // These functions handle common tasks such as determining AI service providers
 // from model names and managing HTTP proxies.
 package util
@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
 )
 
 const openAICompatibleProviderPrefix = "openai-compatible-"

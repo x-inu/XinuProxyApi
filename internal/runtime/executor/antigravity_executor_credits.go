@@ -16,10 +16,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	homekv "github.com/x-inu/XinuGate/v7/internal/home"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"golang.org/x/sync/singleflight"
 )
 

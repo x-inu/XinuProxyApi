@@ -3,7 +3,7 @@ package diff
 import (
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 func TestSummarizeExcludedModels_NormalizesAndDedupes(t *testing.T) {

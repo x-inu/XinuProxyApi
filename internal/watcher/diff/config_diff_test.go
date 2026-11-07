@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 func TestBuildConfigChangeDetails(t *testing.T) {

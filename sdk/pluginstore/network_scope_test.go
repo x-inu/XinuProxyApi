@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	internalpluginstore "github.com/x-inu/XinuProxyApi/v7/internal/pluginstore"
+	internalpluginstore "github.com/x-inu/XinuGate/v7/internal/pluginstore"
 )
 
 type networkScopeDoer func(*http.Request) (*http.Response, error)

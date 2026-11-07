@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
-	internallogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	internallogging "github.com/x-inu/XinuGate/v7/internal/logging"
 )
 
 // DefaultServiceTier is retained for direct SDK and non-OpenAI usage callers.

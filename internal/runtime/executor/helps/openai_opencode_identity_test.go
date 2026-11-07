@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 func opencodeTestCompat(enabled bool) *config.OpenAICompatibility {

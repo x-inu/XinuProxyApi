@@ -37,16 +37,16 @@ remote-management:
   # Enable this to keep the UI pinned to the version shipped with this release.
   disable-auto-update-panel: true
 
-  # Base URL of remote management API when using TUI client mode (xinu-proxy-api --tui).
+  # Base URL of remote management API when using TUI client mode (xinugate --tui).
   # Defaults to http://127.0.0.1:<port> if not set. Can also be set via --management-base-url.
   # base-url: "https://proxy.example.com"
 
   # GitHub repository used only when management panel auto-updates are enabled.
   # Accepts a repository URL or releases API URL.
-  panel-github-repository: "https://github.com/x-inu/XinuProxyApi"
+  panel-github-repository: "https://github.com/x-inu/XinuGate"
 
 # Authentication directory (supports ~ for home directory)
-auth-dir: "~/.xinuproxyapi"
+auth-dir: "~/.xinugate"
 
 # API keys for authentication
 api-keys:

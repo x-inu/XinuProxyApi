@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"golang.org/x/sync/singleflight"
 )
 

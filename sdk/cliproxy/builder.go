@@ -1,4 +1,4 @@
-// Package cliproxy provides the core service implementation for XinuProxyApi.
+// Package cliproxy provides the core service implementation for XinuGate.
 // It includes service lifecycle management, authentication handling, file watching,
 // and integration with various AI service providers through a unified interface.
 package cliproxy
@@ -7,14 +7,14 @@ import (
 	"context"
 	"fmt"
 
-	configaccess "github.com/x-inu/XinuProxyApi/v7/internal/access/config_access"
-	"github.com/x-inu/XinuProxyApi/v7/internal/api"
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher"
-	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	configaccess "github.com/x-inu/XinuGate/v7/internal/access/config_access"
+	"github.com/x-inu/XinuGate/v7/internal/api"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	"github.com/x-inu/XinuGate/v7/internal/watcher"
+	sdkaccess "github.com/x-inu/XinuGate/v7/sdk/access"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 // Builder constructs a Service instance with customizable providers.

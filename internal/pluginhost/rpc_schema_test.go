@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginabi"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 func TestRPCCapabilitiesIncludeFrontendAuthProviderExclusive(t *testing.T) {
@@ -251,7 +251,7 @@ func TestRPCModelRouteUsesAdapter(t *testing.T) {
 				Name:             "router",
 				Version:          "1.0.0",
 				Author:           "test",
-				GitHubRepository: "https://github.com/x-inu/XinuProxyApi",
+				GitHubRepository: "https://github.com/x-inu/XinuGate",
 			},
 			Capabilities: pluginapi.Capabilities{
 				ModelRouter: modelRouterFunc(func(ctx context.Context, req pluginapi.ModelRouteRequest) (pluginapi.ModelRouteResponse, error) {
@@ -321,7 +321,7 @@ func TestRPCSchedulerPickUsesAdapter(t *testing.T) {
 				Name:             "scheduler",
 				Version:          "1.0.0",
 				Author:           "test",
-				GitHubRepository: "https://github.com/x-inu/XinuProxyApi",
+				GitHubRepository: "https://github.com/x-inu/XinuGate",
 			},
 			Capabilities: pluginapi.Capabilities{
 				Scheduler: schedulerFunc(func(ctx context.Context, req pluginapi.SchedulerPickRequest) (pluginapi.SchedulerPickResponse, error) {

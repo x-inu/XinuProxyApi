@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 // Stable identity seeds for fingerprint-profile=claude-code-cli on non-OAuth credentials.

@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 // CodexWebsocketsExecutor executes Codex Responses requests using a WebSocket transport.

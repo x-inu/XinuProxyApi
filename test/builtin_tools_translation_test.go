@@ -3,10 +3,10 @@ package test
 import (
 	"testing"
 
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
+	_ "github.com/x-inu/XinuGate/v7/internal/translator"
 
 	"github.com/tidwall/gjson"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestOpenAIToCodex_PreservesBuiltinTools(t *testing.T) {

@@ -13,12 +13,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
-	internalcache "github.com/x-inu/XinuProxyApi/v7/internal/cache"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	_ "github.com/x-inu/XinuGate/v7/internal/translator"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func validCodexReasoningEncryptedContentForTestSeed(seed byte) string {

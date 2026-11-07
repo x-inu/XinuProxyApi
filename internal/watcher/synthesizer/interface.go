@@ -5,7 +5,7 @@
 package synthesizer
 
 import (
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 // AuthSynthesizer defines the interface for generating Auth entries from various sources.

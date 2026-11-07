@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestTranslateCodexRequestPairReusesEqualPayload(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 type rpcLifecycleRequest struct {

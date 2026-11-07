@@ -3,9 +3,9 @@ package helps
 import (
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 // IsNativeCodexRequest checks the client dialect for use inside Codex executors.

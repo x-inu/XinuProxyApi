@@ -5,7 +5,7 @@ import '@/i18n';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
 import App from './App.tsx';
 
-document.title = 'XinuProxyApi';
+document.title = 'XinuGate';
 document.documentElement.setAttribute('translate', 'no');
 document.documentElement.classList.add('notranslate');
 

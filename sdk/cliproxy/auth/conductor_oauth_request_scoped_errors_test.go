@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 func TestOAuthRequestScopedErrors_AppliesToOAuthAuth(t *testing.T) {

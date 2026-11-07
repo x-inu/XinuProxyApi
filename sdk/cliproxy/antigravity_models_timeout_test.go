@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 // TestAntigravityCapabilityProbe_HardTimeout verifies that fetchAntigravityModelCapabilityHintsForAuth

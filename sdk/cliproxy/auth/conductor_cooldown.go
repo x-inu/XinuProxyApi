@@ -15,12 +15,12 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	internallogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/internal/clienterror"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	internallogging "github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 var quotaCooldownDisabled atomic.Bool

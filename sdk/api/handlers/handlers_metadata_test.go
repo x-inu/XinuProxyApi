@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	coresession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	coresession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 	"golang.org/x/net/context"
 )
 

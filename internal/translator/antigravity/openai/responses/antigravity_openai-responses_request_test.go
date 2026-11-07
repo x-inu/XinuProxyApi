@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	sigcompat "github.com/x-inu/XinuGate/v7/internal/signature"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 

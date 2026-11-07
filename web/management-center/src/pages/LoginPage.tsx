@@ -231,7 +231,7 @@ export function LoginPage() {
     return (
       <div className={styles.splashScreen} role="status" aria-live="polite">
         <div className={styles.splashContent}>
-          <img src={INLINE_LOGO_JPEG} alt="XinuProxyApi" className={styles.splashLogo} />
+          <img src={INLINE_LOGO_JPEG} alt="XinuGate" className={styles.splashLogo} />
           <h1 className={styles.splashTitle}>{t('splash.title')}</h1>
           <p className={styles.splashSubtitle}>{t('splash.subtitle')}</p>
           <div className={styles.splashLoader}>
@@ -254,7 +254,7 @@ export function LoginPage() {
       <header className={styles.header}>
         <div className={styles.headerLogo}>
           <img src={INLINE_LOGO_JPEG} alt="" className={styles.headerGlyph} />
-          <span>XinuProxyApi</span>
+          <span>XinuGate</span>
         </div>
         <div className={styles.headerRight}>
           <button
@@ -339,7 +339,7 @@ export function LoginPage() {
       </main>
 
       <div className={styles.marginal} aria-hidden="true">
-        XINUPROXYAPI / UNIFIED GATEWAY / EST. 2026
+        XINUGATE / UNIFIED GATEWAY / EST. 2026
       </div>
     </div>
   );

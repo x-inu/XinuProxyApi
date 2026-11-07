@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	gemresponses "github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/openai/responses"
+	gemresponses "github.com/x-inu/XinuGate/v7/internal/translator/gemini/openai/responses"
 )
 
 func antigravityLiveSSEChunks(t *testing.T) [][]byte {

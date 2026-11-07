@@ -13,8 +13,8 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	translatorcommon "github.com/x-inu/XinuGate/v7/internal/translator/common"
 )
 
 // ConvertGeminiRequestToOpenAI parses and transforms a Gemini API request into OpenAI Chat Completions API format.

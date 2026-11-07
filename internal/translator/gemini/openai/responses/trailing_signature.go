@@ -7,8 +7,8 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/cache"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
+	"github.com/x-inu/XinuGate/v7/internal/cache"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
 )
 
 // Keep text signature carriers off the client-visible reasoning timeline. The

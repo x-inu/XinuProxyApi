@@ -1,4 +1,4 @@
-// Package util provides utility functions for the XinuProxyApi server.
+// Package util provides utility functions for the XinuGate server.
 // It includes helper functions for proxy configuration, HTTP client setup,
 // log level management, and other common operations used across the application.
 package util
@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
 )
 
 // SetProxy configures the provided HTTP client with proxy settings from the configuration.

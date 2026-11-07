@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/signature"
+	"github.com/x-inu/XinuGate/v7/internal/signature"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 

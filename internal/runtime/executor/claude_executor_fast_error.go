@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 // claudeFastRequestError marks a Fast request failure as request-scoped. Fast

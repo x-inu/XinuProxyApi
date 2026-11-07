@@ -9,7 +9,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
+	homekv "github.com/x-inu/XinuGate/v7/internal/home"
 )
 
 const testModelName = "claude-sonnet-4-5"

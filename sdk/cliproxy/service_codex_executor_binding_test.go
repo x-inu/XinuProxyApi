@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor"
+	"github.com/x-inu/XinuGate/v7/internal/watcher"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestEnsureExecutorsForAuth_CodexDoesNotReplaceInNormalMode(t *testing.T) {

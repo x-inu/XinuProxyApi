@@ -9,13 +9,13 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	internalcache "github.com/x-inu/XinuProxyApi/v7/internal/cache"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
-	internalsignature "github.com/x-inu/XinuProxyApi/v7/internal/signature"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	homekv "github.com/x-inu/XinuGate/v7/internal/home"
+	internalsignature "github.com/x-inu/XinuGate/v7/internal/signature"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestAntigravityReasoningReplayAccumulatorMultiToolSSEChunks(t *testing.T) {

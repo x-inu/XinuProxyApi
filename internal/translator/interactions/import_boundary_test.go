@@ -16,7 +16,7 @@ func TestInteractionsTranslatorsDoNotImportGeminiTranslators(t *testing.T) {
 		"internal/translator/codex/interactions",
 		"internal/translator/antigravity/interactions",
 	}
-	forbidden := regexp.MustCompile(`"github\.com/x-inu/XinuProxyApi/v7/internal/translator/[^"]*/gemini[^"]*"`)
+	forbidden := regexp.MustCompile(`"github\.com/x-inu/XinuGate/v7/internal/translator/[^"]*/gemini[^"]*"`)
 	var violations []string
 	for _, scanDir := range scanDirs {
 		root := filepath.Join(repoRoot, scanDir)

@@ -16,10 +16,10 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	sigcompat "github.com/x-inu/XinuGate/v7/internal/signature"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	translatorcommon "github.com/x-inu/XinuGate/v7/internal/translator/common"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 )
 
 // ConvertClaudeRequestToCodex parses and transforms a Claude Code API request into the internal client format.

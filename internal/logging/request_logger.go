@@ -1,4 +1,4 @@
-// Package logging provides request logging functionality for the XinuProxyApi server.
+// Package logging provides request logging functionality for the XinuGate server.
 // It handles capturing and storing detailed HTTP request and response data when enabled
 // through configuration, supporting both regular and streaming responses.
 package logging
@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
 )
 
 const (

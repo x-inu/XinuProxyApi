@@ -1,4 +1,4 @@
-// Package util provides utility functions for the XinuProxyApi server.
+// Package util provides utility functions for the XinuGate server.
 package util
 
 import (

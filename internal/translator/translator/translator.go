@@ -7,8 +7,8 @@ package translator
 import (
 	"context"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 // registry holds the default translator registry instance.

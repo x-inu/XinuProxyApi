@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 func TestLocalRecoveryHintsSurviveDefaultHeaderPolicyAndEnrichment(t *testing.T) {

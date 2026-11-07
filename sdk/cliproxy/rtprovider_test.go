@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 func TestRoundTripperForDirectBypassesProxy(t *testing.T) {

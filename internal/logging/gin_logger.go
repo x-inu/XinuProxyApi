@@ -13,7 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 )
 
 // aiAPIPrefixes defines path prefixes for AI API requests that should have request ID tracking.

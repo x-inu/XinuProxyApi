@@ -237,7 +237,7 @@ export function SystemPage() {
       <div className={styles.content}>
         <Card className={styles.aboutCard}>
           <div className={styles.aboutHeader}>
-            <img src={INLINE_LOGO_JPEG} alt="XinuProxyApi" className={styles.aboutLogo} />
+            <img src={INLINE_LOGO_JPEG} alt="XinuGate" className={styles.aboutLogo} />
             <div className={styles.aboutTitle}>{t('system_info.about_title')}</div>
           </div>
 
@@ -273,7 +273,7 @@ export function SystemPage() {
           <p className={styles.sectionDescription}>{t('system_info.quick_links_desc')}</p>
           <div className={styles.quickLinks}>
             <a
-              href="https://github.com/x-inu/XinuProxyApi"
+              href="https://github.com/x-inu/XinuGate"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.linkCard}

@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/claude"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/kimi"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/claude"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/kimi"
 )
 
 // TestKimiK28ClaudeMessagesMaxPreservesMax verifies that K2.8 models preserve effort=max

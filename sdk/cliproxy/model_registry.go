@@ -1,6 +1,6 @@
 package cliproxy
 
-import "github.com/x-inu/XinuProxyApi/v7/internal/registry"
+import "github.com/x-inu/XinuGate/v7/internal/registry"
 
 // ModelInfo re-exports the registry model info structure.
 type ModelInfo = registry.ModelInfo

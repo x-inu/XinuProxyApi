@@ -7,10 +7,10 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/auth/kimi"
-	"github.com/x-inu/XinuProxyApi/v7/internal/browser"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/auth/kimi"
+	"github.com/x-inu/XinuGate/v7/internal/browser"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 // kimiRefreshLead is the duration before token expiry when refresh should occur.

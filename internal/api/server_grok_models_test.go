@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/x-inu/XinuProxyApi/v7/internal/client/grokbuild"
-	"github.com/x-inu/XinuProxyApi/v7/internal/home"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/client/grokbuild"
+	"github.com/x-inu/XinuGate/v7/internal/home"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
 )
 
 func TestModelsDispatchByGrokShellUserAgent(t *testing.T) {

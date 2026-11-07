@@ -5,23 +5,23 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
+	_ "github.com/x-inu/XinuGate/v7/internal/translator"
 
 	// Import provider packages to trigger init() registration of ProviderAppliers
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/antigravity"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/claude"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/codex"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/gemini"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/interactions"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/kimi"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/openai"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/xai"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/antigravity"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/claude"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/codex"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/gemini"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/interactions"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/kimi"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/openai"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/xai"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 // thinkingTestCase represents a common test case structure for both suffix and body tests.

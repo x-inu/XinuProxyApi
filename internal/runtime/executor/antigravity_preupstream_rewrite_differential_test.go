@@ -10,7 +10,7 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 )
 
 func TestNormalizeAntigravityGeminiFunctionResponseRolesMatchesLegacy(t *testing.T) {

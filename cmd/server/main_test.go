@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 func TestArgvEnablesBoolFlag(t *testing.T) {

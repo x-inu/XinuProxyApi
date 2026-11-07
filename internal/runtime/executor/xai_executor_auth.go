@@ -7,9 +7,9 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	xaiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/xai"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	xaiauth "github.com/x-inu/XinuGate/v7/internal/auth/xai"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 // Refresh refreshes xAI OAuth credentials using the stored refresh token.

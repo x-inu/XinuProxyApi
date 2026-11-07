@@ -14,15 +14,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	sdkaccess "github.com/x-inu/XinuGate/v7/sdk/access"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginabi"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestPluginModelInfoToRegistryModelInfoClonesThinkingAndSlices(t *testing.T) {

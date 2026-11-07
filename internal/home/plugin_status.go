@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/homeplugins"
+	"github.com/x-inu/XinuGate/v7/internal/homeplugins"
 )
 
 const pluginStatusReportTimeout = 10 * time.Second

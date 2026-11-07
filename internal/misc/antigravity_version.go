@@ -1,4 +1,4 @@
-// Package misc provides miscellaneous utility functions for the XinuProxyApi server.
+// Package misc provides miscellaneous utility functions for the XinuGate server.
 package misc
 
 import (

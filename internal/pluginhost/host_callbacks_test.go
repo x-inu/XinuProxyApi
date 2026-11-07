@@ -14,13 +14,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuGate/v7/internal/clienterror"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginabi"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 type fakeHostModelExecutor struct {

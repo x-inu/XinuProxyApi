@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 func TestClaudeModelsResponseUsesConfiguredDisplayName(t *testing.T) {

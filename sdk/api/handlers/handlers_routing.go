@@ -8,12 +8,12 @@ import (
 
 	"github.com/tidwall/sjson"
 
-	. "github.com/x-inu/XinuProxyApi/v7/internal/constant"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	. "github.com/x-inu/XinuGate/v7/internal/constant"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 	"golang.org/x/net/context"
 )
 

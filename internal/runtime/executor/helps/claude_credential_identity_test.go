@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
+	homekv "github.com/x-inu/XinuGate/v7/internal/home"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 type fakeClaudeCredentialDevicePoolKV struct {

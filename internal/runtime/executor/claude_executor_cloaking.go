@@ -15,12 +15,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 
 	"github.com/gin-gonic/gin"
 )

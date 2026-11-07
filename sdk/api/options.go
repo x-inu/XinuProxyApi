@@ -1,4 +1,4 @@
-// Package api exposes server option helpers for embedding XinuProxyApi.
+// Package api exposes server option helpers for embedding XinuGate.
 //
 // It wraps internal server option types so external projects can configure the embedded
 // HTTP server without importing internal packages.
@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	internalapi "github.com/x-inu/XinuProxyApi/v7/internal/api"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/logging"
+	internalapi "github.com/x-inu/XinuGate/v7/internal/api"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/sdk/logging"
 )
 
 // ServerOption customises HTTP server construction.

@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 const (

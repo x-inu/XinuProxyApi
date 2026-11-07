@@ -13,7 +13,7 @@ import (
 	"github.com/tidwall/sjson"
 	"github.com/tiktoken-go/tokenizer"
 
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 var (

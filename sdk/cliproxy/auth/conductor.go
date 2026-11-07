@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 // ProviderExecutor defines the contract required by Manager to execute provider calls.

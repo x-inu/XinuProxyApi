@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/x-inu/XinuProxyApi/v7/internal/usagehistory"
+	"github.com/x-inu/XinuGate/v7/internal/usagehistory"
 )
 
 // usageHistoryModelRow aggregates totals for a single model.

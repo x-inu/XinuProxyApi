@@ -18,12 +18,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	xaiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/xai"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	xaiauth "github.com/x-inu/XinuGate/v7/internal/auth/xai"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 // XAIWebsocketsExecutor executes xAI Responses requests using a WebSocket transport.

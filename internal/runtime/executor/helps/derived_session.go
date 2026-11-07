@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	cliproxysession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	cliproxysession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
 )
 
 // DerivedSessionID returns the first context-derived session identity in metadata order.

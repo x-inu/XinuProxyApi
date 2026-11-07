@@ -1,4 +1,4 @@
-// Package cliproxy provides the core service implementation for XinuProxyApi.
+// Package cliproxy provides the core service implementation for XinuGate.
 // It includes service lifecycle management, authentication handling, file watching,
 // and integration with various AI service providers through a unified interface.
 package cliproxy
@@ -6,10 +6,10 @@ package cliproxy
 import (
 	"context"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuGate/v7/internal/watcher"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 // TokenClientProvider loads clients backed by stored authentication tokens.

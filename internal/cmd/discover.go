@@ -13,7 +13,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/discovery"
+	"github.com/x-inu/XinuGate/v7/internal/discovery"
 	"gopkg.in/yaml.v3"
 )
 

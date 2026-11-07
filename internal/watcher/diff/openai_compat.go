@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 // DiffOpenAICompatibility produces human-readable change descriptions.

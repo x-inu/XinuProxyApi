@@ -3,10 +3,10 @@ package cliproxy
 import (
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	runtimeexecutor "github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	runtimeexecutor "github.com/x-inu/XinuGate/v7/internal/runtime/executor"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 func TestRegisterExecutorForAuth_PluginAuthProviderWrapsOpenAICompatRefresh(t *testing.T) {

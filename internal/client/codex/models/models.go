@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
 )
 
 type codexClientModelsPayload struct {

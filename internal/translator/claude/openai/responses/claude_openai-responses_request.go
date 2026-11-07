@@ -9,11 +9,11 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	"github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	sigcompat "github.com/x-inu/XinuGate/v7/internal/signature"
+	"github.com/x-inu/XinuGate/v7/internal/thinking"
+	"github.com/x-inu/XinuGate/v7/internal/translator/common"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 )
 
 const (

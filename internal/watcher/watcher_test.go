@@ -14,12 +14,12 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/diff"
-	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/synthesizer"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/redisqueue"
+	"github.com/x-inu/XinuGate/v7/internal/watcher/diff"
+	"github.com/x-inu/XinuGate/v7/internal/watcher/synthesizer"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"gopkg.in/yaml.v3"
 )
 

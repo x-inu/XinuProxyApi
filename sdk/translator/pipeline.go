@@ -3,7 +3,7 @@ package translator
 import (
 	"context"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
 )
 
 // RequestEnvelope represents a request in the translation pipeline.

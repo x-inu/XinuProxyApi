@@ -13,10 +13,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/signature"
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/signature"
+	translatorcommon "github.com/x-inu/XinuGate/v7/internal/translator/common"
+	"github.com/x-inu/XinuGate/v7/internal/translator/gemini/common"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 )
 
 // ConvertGeminiRequestToAntigravity parses and transforms a Antigravity API request into Gemini API format.

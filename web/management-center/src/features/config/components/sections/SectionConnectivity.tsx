@@ -38,7 +38,7 @@ export function SectionConnectivity({
         <FieldAnchor fieldId="authDir">
           <Input
             label={t('config_management.visual.sections.auth.auth_dir')}
-            placeholder="~/.xinuproxyapi"
+            placeholder="~/.xinugate"
             value={values.authDir}
             onChange={(e) => onChange({ authDir: e.target.value })}
             disabled={disabled}
@@ -155,7 +155,7 @@ export function SectionConnectivity({
               <FieldAnchor fieldId="rmPanelRepo">
                 <Input
                   label={t('config_management.visual.sections.remote.panel_repo')}
-                  placeholder="https://github.com/x-inu/XinuProxyApi"
+                  placeholder="https://github.com/x-inu/XinuGate"
                   value={values.rmPanelRepo}
                   onChange={(e) => onChange({ rmPanelRepo: e.target.value })}
                   disabled={disabled}

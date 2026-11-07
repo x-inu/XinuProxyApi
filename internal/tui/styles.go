@@ -1,4 +1,4 @@
-// Package tui provides a terminal-based management interface for XinuProxyApi.
+// Package tui provides a terminal-based management interface for XinuGate.
 package tui
 
 import "github.com/charmbracelet/lipgloss"

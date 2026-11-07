@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 )
 
 const homeResultExecutorType = "home-result"

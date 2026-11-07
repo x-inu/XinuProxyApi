@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/misc"
+	"github.com/x-inu/XinuGate/v7/internal/misc"
 )
 
 // CodexTokenStorage stores OAuth2 token information for OpenAI Codex API authentication.

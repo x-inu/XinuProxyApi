@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	DefaultRegistryURL = "https://raw.githubusercontent.com/x-inu/XinuProxyApi-Plugins-Store/main/registry.json"
+	DefaultRegistryURL = "https://raw.githubusercontent.com/x-inu/XinuGate-Plugins-Store/main/registry.json"
 	DefaultSourceID    = "official"
 	DefaultSourceName  = "Official"
 	SchemaVersion      = 1

@@ -9,12 +9,12 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/auth/antigravity"
-	"github.com/x-inu/XinuProxyApi/v7/internal/browser"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/misc"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/auth/antigravity"
+	"github.com/x-inu/XinuGate/v7/internal/browser"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/misc"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 // AntigravityAuthenticator implements OAuth login for the antigravity provider.

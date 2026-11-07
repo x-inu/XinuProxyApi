@@ -57,11 +57,11 @@
     "unsaved_changes_message": "You have unsaved changes. Leaving now will discard them. Do you want to leave?"
   },
   "title": {
-    "login": "XinuProxyApi",
-    "abbr": "XinuProxyApi"
+    "login": "XinuGate",
+    "abbr": "XinuGate"
   },
   "splash": {
-    "title": "XinuProxyApi",
+    "title": "XinuGate",
     "subtitle": "Management Center"
   },
   "login": {
@@ -78,7 +78,7 @@
     "error_timeout": "Connection timed out, server not responding",
     "error_unauthorized": "Authentication failed, management key is missing or invalid",
     "error_forbidden": "Access denied, remote management is disabled, the management key is not configured, or this IP is temporarily banned",
-    "error_not_found": "Management API not found, confirm the server address points to the XinuProxyApi backend",
+    "error_not_found": "Management API not found, confirm the server address points to the XinuGate backend",
     "error_server": "Backend failed while handling the management request, check the server logs",
     "error_cors": "Cross-origin request blocked, please check server configuration",
     "error_ssl": "SSL/TLS certificate verification failed",
@@ -375,7 +375,7 @@
     "models_empty": "No available models for this credential",
     "models_empty_desc": "This credential may not be loaded by the server yet, or no models are bound to it.",
     "models_unsupported": "This feature is not supported in the current version",
-    "models_unsupported_desc": "Please update XinuProxyApi to the latest version and try again",
+    "models_unsupported_desc": "Please update XinuGate to the latest version and try again",
     "models_excluded_badge": "Disabled",
     "models_excluded_hint": "This OAuth model is disabled",
     "status_toggle_label": "Enabled",
@@ -656,9 +656,9 @@
     "model_count": "{{count}} models disabled",
     "list_empty_all": "No provider model disablement yet; click “Add Disablement” to create one.",
     "provider_required": "Please enter a provider first",
-    "upgrade_required": "Current XinuProxyApi version does not support OAuth model disablement. Please upgrade.",
-    "upgrade_required_title": "Please upgrade XinuProxyApi",
-    "upgrade_required_desc": "The current server version does not support fetching OAuth model disablement. Please upgrade to the latest XinuProxyApi version and try again.",
+    "upgrade_required": "Current XinuGate version does not support OAuth model disablement. Please upgrade.",
+    "upgrade_required_title": "Please upgrade XinuGate",
+    "upgrade_required_desc": "The current server version does not support fetching OAuth model disablement. Please upgrade to the latest XinuGate version and try again.",
     "delete_title": "Delete Exclusion"
   },
   "excluded_models": {
@@ -756,9 +756,9 @@
     "view_mode_diagram": "Diagram",
     "view_mode_list": "List",
     "provider_required": "Please enter a provider first",
-    "upgrade_required": "This feature requires a newer XinuProxyApi version. Please upgrade.",
-    "upgrade_required_title": "Please upgrade XinuProxyApi",
-    "upgrade_required_desc": "The current server does not support the OAuth model aliases API. Please upgrade to the latest XinuProxyApi version.",
+    "upgrade_required": "This feature requires a newer XinuGate version. Please upgrade.",
+    "upgrade_required_title": "Please upgrade XinuGate",
+    "upgrade_required_desc": "The current server does not support the OAuth model aliases API. Please upgrade to the latest XinuGate version.",
     "delete_title": "Delete Mappings"
   },
   "stats": {
@@ -1224,7 +1224,7 @@
     "description_show_more": "Show more",
     "description_show_less": "Show less",
     "source_name": "Source: {{source}}",
-    "xinu_proxy_api_source": "XinuProxyApi source",
+    "xinugate_source": "XinuGate source",
     "refresh": "Refresh",
     "retry": "Retry",
     "load_failed": "Failed to load the plugin store",
@@ -1326,7 +1326,7 @@
   },
   "system_info": {
     "title": "About",
-    "about_title": "XinuProxyApi",
+    "about_title": "XinuGate",
     "models_title": "Available Models",
     "models_desc": "Shows the /models response and uses saved API keys for auth automatically.",
     "models_loading": "Loading available models...",
@@ -1342,7 +1342,7 @@
     "quick_links_title": "Quick Links",
     "quick_links_desc": "Access project repository for help and updates.",
     "link_main_repo": "Main Repository",
-    "link_main_repo_desc": "XinuProxyApi core program source code",
+    "link_main_repo_desc": "XinuGate core program source code",
     "clear_login_title": "Local Login Data",
     "clear_login_desc": "Clear locally saved login data and sign out.",
     "clear_login_button": "Clear login data",
@@ -1381,11 +1381,11 @@
     "toggle_collapse": "Collapse sidebar",
     "expand": "Expand",
     "collapse": "Collapse",
-    "subtitle": "Xinu Proxy API Console",
+    "subtitle": "XinuGate Console",
     "auth_files_count": "Authentication files: {{count}}"
   },
   "footer": {
-    "api_version": "XinuProxyAPI Version",
+    "api_version": "XinuGate Version",
     "build_date": "Build Time",
     "version": "Management UI Version"
   },

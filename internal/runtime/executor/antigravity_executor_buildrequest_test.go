@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestResolveAntigravityRequestBaseURL(t *testing.T) {

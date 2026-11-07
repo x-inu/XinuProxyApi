@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	sdkpluginstore "github.com/x-inu/XinuProxyApi/v7/sdk/pluginstore"
+	sdkpluginstore "github.com/x-inu/XinuGate/v7/sdk/pluginstore"
 )
 
 // NormalizePluginsConfig applies default plugin configuration values.

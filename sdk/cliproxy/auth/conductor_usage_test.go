@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 )
 
 func TestContextWithRequestedModelAliasIncludesStream(t *testing.T) {

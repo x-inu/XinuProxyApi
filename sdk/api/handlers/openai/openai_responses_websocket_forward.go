@@ -15,10 +15,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/clienterror"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 type responsesWebsocketForwardOptions struct {

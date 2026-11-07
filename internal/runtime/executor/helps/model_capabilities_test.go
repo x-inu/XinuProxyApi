@@ -6,17 +6,17 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	helps "github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/claude"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/codex"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/gemini"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/openai"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	helps "github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/claude"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/codex"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/gemini"
+	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/openai"
+	_ "github.com/x-inu/XinuGate/v7/internal/translator"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 type configuredThinkingExecutor struct {

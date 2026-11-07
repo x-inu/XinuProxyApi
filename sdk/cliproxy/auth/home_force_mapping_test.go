@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	internalhome "github.com/x-inu/XinuProxyApi/v7/internal/home"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executionregistry"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	internalhome "github.com/x-inu/XinuGate/v7/internal/home"
+	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 func TestHomeForceMappingAliasResult(t *testing.T) {

@@ -11,8 +11,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/home"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/home"
 )
 
 type stubHomeAppLogClient struct {

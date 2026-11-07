@@ -1,4 +1,4 @@
-// Package constant defines provider name constants used throughout XinuProxyApi.
+// Package constant defines provider name constants used throughout XinuGate.
 // These constants identify different AI service providers and their variants,
 // ensuring consistent naming across the application.
 package constant

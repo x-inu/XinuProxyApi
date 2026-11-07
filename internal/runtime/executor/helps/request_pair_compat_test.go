@@ -5,8 +5,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestCompatibilityRequestPair(t *testing.T) {

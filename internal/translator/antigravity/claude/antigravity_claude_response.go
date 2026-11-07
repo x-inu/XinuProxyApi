@@ -16,10 +16,10 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/cache"
-	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/cache"
+	sigcompat "github.com/x-inu/XinuGate/v7/internal/signature"
+	translatorcommon "github.com/x-inu/XinuGate/v7/internal/translator/common"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"

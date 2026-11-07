@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/managementasset"
+	"github.com/x-inu/XinuGate/v7/internal/managementasset"
 )
 
 func (s *Server) registerManagementRoutes() {

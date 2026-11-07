@@ -4,7 +4,7 @@
 // thinking configurations across various AI providers (Claude, Gemini, OpenAI, Codex, Antigravity, Kimi, xAI).
 package thinking
 
-import "github.com/x-inu/XinuProxyApi/v7/internal/registry"
+import "github.com/x-inu/XinuGate/v7/internal/registry"
 
 // ThinkingMode represents the type of thinking configuration mode.
 type ThinkingMode int

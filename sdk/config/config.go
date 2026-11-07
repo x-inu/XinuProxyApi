@@ -1,10 +1,10 @@
 // Package config provides the public SDK configuration API.
 //
 // It re-exports the server configuration types and helpers so external projects can
-// embed XinuProxyApi without importing internal packages.
+// embed XinuGate without importing internal packages.
 package config
 
-import internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+import internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
 
 type SDKConfig = internalconfig.SDKConfig
 

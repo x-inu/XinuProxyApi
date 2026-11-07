@@ -1,5 +1,5 @@
 // Package discovery provides local network mDNS / DNS-SD service advertising
-// and discovery capabilities for XinuProxyApi.
+// and discovery capabilities for XinuGate.
 package discovery
 
 import (
@@ -22,7 +22,7 @@ const (
 	SubtypeGenerateContent = "_generate-content"
 	// SubtypeInteractions identifies the Interactions API protocol.
 	SubtypeInteractions = "_interactions"
-	// ProductCPA is the product identifier for XinuProxyApi.
+	// ProductCPA is the product identifier for XinuGate.
 	ProductCPA = "cliproxyapi"
 )
 

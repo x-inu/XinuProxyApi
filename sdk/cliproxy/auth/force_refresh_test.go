@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 )
 
 func TestManager_ForceRefreshAuth_ClearsErrorAndRefreshes(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/misc"
+	"github.com/x-inu/XinuGate/v7/internal/misc"
 )
 
 // VertexCredentialStorage stores the service account JSON for Vertex AI access.

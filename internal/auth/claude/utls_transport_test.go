@@ -15,7 +15,7 @@ import (
 	"time"
 
 	tls "github.com/refraction-networking/utls"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 type claudeTestDialer struct {

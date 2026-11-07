@@ -7,7 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
 )
 
 type modelStreamBridge struct {

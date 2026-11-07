@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	sdkaccess "github.com/x-inu/XinuGate/v7/sdk/access"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 // Register ensures the config-access provider is available to the access manager.

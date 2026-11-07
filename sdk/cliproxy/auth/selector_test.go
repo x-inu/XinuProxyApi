@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	cliproxysession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
+	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	cliproxysession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
+	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
 )
 
 func TestFillFirstSelectorPick_Deterministic(t *testing.T) {

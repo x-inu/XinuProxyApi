@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/tidwall/gjson"
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
+	translatorcommon "github.com/x-inu/XinuGate/v7/internal/translator/common"
 )
 
 type responsesToolIdentity struct {

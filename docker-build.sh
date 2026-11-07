@@ -42,7 +42,7 @@ case "$choice" in
     echo "----------------------------------------"
 
     # Build and start the services with a local-only image tag
-    export XINU_PROXY_IMAGE="xinu-proxy-api:local"
+    export XINUGATE_IMAGE="xinugate:local"
 
     echo "Building the Docker image..."
     docker compose build \

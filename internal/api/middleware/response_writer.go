@@ -1,4 +1,4 @@
-// Package middleware provides Gin HTTP middleware for the XinuProxyApi server.
+// Package middleware provides Gin HTTP middleware for the XinuGate server.
 // It includes a sophisticated response writer wrapper designed to capture and log request and response data,
 // including support for streaming responses, without impacting latency.
 package middleware
@@ -13,9 +13,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/clienterror"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
 )
 
 const requestBodyOverrideContextKey = "REQUEST_BODY_OVERRIDE"

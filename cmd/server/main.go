@@ -1,4 +1,4 @@
-// Package main provides the entry point for the XinuProxyApi server.
+// Package main provides the entry point for the XinuGate server.
 // This server acts as a proxy that provides OpenAI/Gemini/Claude compatible API interfaces
 // for CLI models, allowing CLI models to be used with tools and libraries designed for standard AI APIs.
 package main
@@ -19,29 +19,29 @@ import (
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	configaccess "github.com/x-inu/XinuProxyApi/v7/internal/access/config_access"
-	"github.com/x-inu/XinuProxyApi/v7/internal/api"
-	"github.com/x-inu/XinuProxyApi/v7/internal/buildinfo"
-	"github.com/x-inu/XinuProxyApi/v7/internal/cmd"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/home"
-	"github.com/x-inu/XinuProxyApi/v7/internal/homeplugins"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/managementasset"
-	"github.com/x-inu/XinuProxyApi/v7/internal/misc"
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
-	"github.com/x-inu/XinuProxyApi/v7/internal/safemode"
-	"github.com/x-inu/XinuProxyApi/v7/internal/store"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
-	"github.com/x-inu/XinuProxyApi/v7/internal/tui"
-	"github.com/x-inu/XinuProxyApi/v7/internal/usagehistory"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	sdkpluginstore "github.com/x-inu/XinuProxyApi/v7/sdk/pluginstore"
+	configaccess "github.com/x-inu/XinuGate/v7/internal/access/config_access"
+	"github.com/x-inu/XinuGate/v7/internal/api"
+	"github.com/x-inu/XinuGate/v7/internal/buildinfo"
+	"github.com/x-inu/XinuGate/v7/internal/cmd"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/home"
+	"github.com/x-inu/XinuGate/v7/internal/homeplugins"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/managementasset"
+	"github.com/x-inu/XinuGate/v7/internal/misc"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	"github.com/x-inu/XinuGate/v7/internal/redisqueue"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor"
+	"github.com/x-inu/XinuGate/v7/internal/safemode"
+	"github.com/x-inu/XinuGate/v7/internal/store"
+	_ "github.com/x-inu/XinuGate/v7/internal/translator"
+	"github.com/x-inu/XinuGate/v7/internal/tui"
+	"github.com/x-inu/XinuGate/v7/internal/usagehistory"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	sdkpluginstore "github.com/x-inu/XinuGate/v7/sdk/pluginstore"
 )
 
 var (
@@ -85,7 +85,7 @@ func main() {
 		discoverFlags.Func("exclude", "Comma-separated interface names to skip", appendCSV(&exclude))
 		_ = discoverFlags.Parse(os.Args[2:])
 		if !*jsonOut {
-			fmt.Fprintf(os.Stderr, "XinuProxyApi Version: %s, Commit: %s, BuiltAt: %s\n", buildinfo.Version, buildinfo.Commit, buildinfo.BuildDate)
+			fmt.Fprintf(os.Stderr, "XinuGate Version: %s, Commit: %s, BuiltAt: %s\n", buildinfo.Version, buildinfo.Commit, buildinfo.BuildDate)
 		}
 		cfgInclude, cfgExclude := cmd.LoadDiscoveryScanFilters(*configPathFlag)
 		include, exclude = cmd.ResolveDiscoveryInterfaceFilters(include, exclude, cfgInclude, cfgExclude)
@@ -103,7 +103,7 @@ func main() {
 	isJSONDiscover := argvEnablesBoolFlag(os.Args[1:], "discover-json")
 	isDiscoverMode := isJSONDiscover || argvEnablesBoolFlag(os.Args[1:], "discover")
 	if !isJSONDiscover {
-		fmt.Printf("XinuProxyApi Version: %s, Commit: %s, BuiltAt: %s\n", buildinfo.Version, buildinfo.Commit, buildinfo.BuildDate)
+		fmt.Printf("XinuGate Version: %s, Commit: %s, BuiltAt: %s\n", buildinfo.Version, buildinfo.Commit, buildinfo.BuildDate)
 	}
 
 	// Command-line flags to control the application's behavior.
@@ -542,11 +542,11 @@ func main() {
 			seedAuth = existingCfg.AuthDir
 		}
 		if seedAuth == "" {
-			candidate := filepath.Join(wd, ".xinuproxyapi")
+			candidate := filepath.Join(wd, ".xinugate")
 			if _, errStat := os.Stat(candidate); errStat == nil {
 				seedAuth = candidate
 			} else if home, errHome := os.UserHomeDir(); errHome == nil {
-				candidateHome := filepath.Join(home, ".xinuproxyapi")
+				candidateHome := filepath.Join(home, ".xinugate")
 				if _, errStatH := os.Stat(candidateHome); errStatH == nil {
 					seedAuth = candidateHome
 				}
@@ -732,7 +732,7 @@ func main() {
 		return
 	}
 
-	log.Infof("XinuProxyApi Version: %s, Commit: %s, BuiltAt: %s", buildinfo.Version, buildinfo.Commit, buildinfo.BuildDate)
+	log.Infof("XinuGate Version: %s, Commit: %s, BuiltAt: %s", buildinfo.Version, buildinfo.Commit, buildinfo.BuildDate)
 
 	// Set the log level based on the configuration.
 	util.SetLogLevel(cfg)

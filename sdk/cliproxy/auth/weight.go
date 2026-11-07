@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/credentialweight"
+	"github.com/x-inu/XinuGate/v7/internal/credentialweight"
 )
 
 // ValidateAuthWeight validates every explicit credential weight source.

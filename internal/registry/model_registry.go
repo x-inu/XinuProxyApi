@@ -14,7 +14,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	misc "github.com/x-inu/XinuProxyApi/v7/internal/misc"
+	misc "github.com/x-inu/XinuGate/v7/internal/misc"
 )
 
 // OpenAIImageModelType marks models that are callable through OpenAI-compatible image endpoints.

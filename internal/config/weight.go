@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/credentialweight"
+	"github.com/x-inu/XinuGate/v7/internal/credentialweight"
 	"gopkg.in/yaml.v3"
 )
 

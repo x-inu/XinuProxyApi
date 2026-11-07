@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 env:
-  APP_NAME: XinuProxyApi
-  DOCKERHUB_REPO: x-inu/xinu-proxy-api
+  APP_NAME: XinuGate
+  DOCKERHUB_REPO: x-inu/xinugate
 
 jobs:
   docker_amd64:

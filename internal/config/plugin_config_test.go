@@ -38,13 +38,13 @@ func TestParseConfigBytes_PluginsDirExpandsLeadingTilde(t *testing.T) {
 
 	cfg, errParse := ParseConfigBytes([]byte(`
 plugins:
-  dir: "~/.xinuproxyapi/plugins"
+  dir: "~/.xinugate/plugins"
 `))
 	if errParse != nil {
 		t.Fatalf("ParseConfigBytes() error = %v", errParse)
 	}
 
-	want := filepath.Join(homeDir, ".xinuproxyapi", "plugins")
+	want := filepath.Join(homeDir, ".xinugate", "plugins")
 	if cfg.Plugins.Dir != want {
 		t.Fatalf("Plugins.Dir = %q, want %q", cfg.Plugins.Dir, want)
 	}
@@ -55,7 +55,7 @@ func TestLoadConfig_PluginsDirExpandsLeadingTilde(t *testing.T) {
 	t.Setenv("HOME", homeDir)
 	t.Setenv("USERPROFILE", homeDir)
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
-	if errWrite := os.WriteFile(configPath, []byte("plugins:\n  dir: \"~/.xinuproxyapi/plugins\"\n"), 0o600); errWrite != nil {
+	if errWrite := os.WriteFile(configPath, []byte("plugins:\n  dir: \"~/.xinugate/plugins\"\n"), 0o600); errWrite != nil {
 		t.Fatalf("os.WriteFile() error = %v", errWrite)
 	}
 
@@ -64,7 +64,7 @@ func TestLoadConfig_PluginsDirExpandsLeadingTilde(t *testing.T) {
 		t.Fatalf("LoadConfig() error = %v", errLoad)
 	}
 
-	want := filepath.Join(homeDir, ".xinuproxyapi", "plugins")
+	want := filepath.Join(homeDir, ".xinugate", "plugins")
 	if cfg.Plugins.Dir != want {
 		t.Fatalf("Plugins.Dir = %q, want %q", cfg.Plugins.Dir, want)
 	}

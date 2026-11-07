@@ -12,9 +12,9 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 // Refresh refreshes the authentication credentials using the refresh token.

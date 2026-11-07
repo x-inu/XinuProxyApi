@@ -3,7 +3,7 @@ package auth
 import (
 	"testing"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 func TestResolveOAuthUpstreamModel_SuffixPreservation(t *testing.T) {

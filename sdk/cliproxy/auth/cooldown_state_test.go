@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
 )
 
 type recordingCooldownStateStore struct {

@@ -1,4 +1,4 @@
-// Package api exposes helpers for embedding XinuProxyApi.
+// Package api exposes helpers for embedding XinuGate.
 //
 // It wraps internal management handler types and helpers so external projects
 // can integrate management endpoints without importing internal packages.
@@ -8,9 +8,9 @@ import (
 	"context"
 
 	"github.com/gin-gonic/gin"
-	internalmanagement "github.com/x-inu/XinuProxyApi/v7/internal/api/handlers/management"
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	internalmanagement "github.com/x-inu/XinuGate/v7/internal/api/handlers/management"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
 )
 
 // Handler re-exports the management handler used by the internal HTTP API.

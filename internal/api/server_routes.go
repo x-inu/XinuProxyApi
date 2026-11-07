@@ -14,23 +14,23 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	managementHandlers "github.com/x-inu/XinuProxyApi/v7/internal/api/handlers/management"
-	claudemodels "github.com/x-inu/XinuProxyApi/v7/internal/client/claude/models"
-	codexlive "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/live"
-	codexmodels "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/models"
-	"github.com/x-inu/XinuProxyApi/v7/internal/client/grokbuild"
-	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
-	"github.com/x-inu/XinuProxyApi/v7/internal/home"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers/claude"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers/gemini"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers/openai"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	managementHandlers "github.com/x-inu/XinuGate/v7/internal/api/handlers/management"
+	claudemodels "github.com/x-inu/XinuGate/v7/internal/client/claude/models"
+	codexlive "github.com/x-inu/XinuGate/v7/internal/client/codex/live"
+	codexmodels "github.com/x-inu/XinuGate/v7/internal/client/codex/models"
+	"github.com/x-inu/XinuGate/v7/internal/client/grokbuild"
+	"github.com/x-inu/XinuGate/v7/internal/clienterror"
+	"github.com/x-inu/XinuGate/v7/internal/home"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers/claude"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers/gemini"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers/openai"
+	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 const oauthCallbackSuccessHTML = `<html><head><meta charset="utf-8"><title>Authentication successful</title><script>setTimeout(function(){window.close();},5000);</script></head><body><h1>Authentication successful!</h1><p>You can close this window.</p><p>This window will close automatically in 5 seconds.</p></body></html>`
@@ -140,7 +140,7 @@ func (s *Server) setupRoutes() {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"message": "XinuProxyApi Server",
+			"message": "XinuGate Server",
 			"endpoints": []string{
 				"POST /v1/chat/completions",
 				"POST /v1/completions",

@@ -1,6 +1,6 @@
 services:
-  xinu-proxy-api:
-    image: ${XINU_PROXY_IMAGE:-x-inu/xinu-proxy-api:latest}
+  xinugate:
+    image: ${XINUGATE_IMAGE:-x-inu/xinugate:latest}
     pull_policy: always
     build:
       context: .
@@ -9,7 +9,7 @@ services:
         VERSION: ${VERSION:-dev}
         COMMIT: ${COMMIT:-none}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-    container_name: xinu-proxy-api
+    container_name: xinugate
     # env_file:
     #   - .env
     environment:
@@ -22,8 +22,8 @@ services:
       - "51121:51121"
       - "11451:11451"
     volumes:
-      - ${XINU_PROXY_CONFIG_PATH:-./config.yaml}:/xinuproxyapi/config.yaml
-      - ${XINU_PROXY_AUTH_PATH:-./auths}:/root/.xinuproxyapi
-      - ${XINU_PROXY_LOG_PATH:-./logs}:/xinuproxyapi/logs
-      - ${XINU_PROXY_PLUGIN_PATH:-./plugins}:/xinuproxyapi/plugins
+      - ${XINUGATE_CONFIG_PATH:-./config.yaml}:/xinugate/config.yaml
+      - ${XINUGATE_AUTH_PATH:-./auths}:/root/.xinugate
+      - ${XINUGATE_LOG_PATH:-./logs}:/xinugate/logs
+      - ${XINUGATE_PLUGIN_PATH:-./plugins}:/xinugate/plugins
     restart: unless-stopped

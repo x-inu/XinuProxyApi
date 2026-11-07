@@ -18,17 +18,17 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/httpfetch"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/httpfetch"
+	"github.com/x-inu/XinuGate/v7/internal/util"
+	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 	"golang.org/x/sync/singleflight"
 )
 
 const (
-	defaultManagementReleaseURL = "https://api.github.com/repos/x-inu/XinuProxyApi/releases/latest"
+	defaultManagementReleaseURL = "https://api.github.com/repos/x-inu/XinuGate/releases/latest"
 	managementAssetName         = "management.html"
-	httpUserAgent               = "XinuProxyApi-management-updater"
+	httpUserAgent               = "XinuGate-management-updater"
 	managementSyncMinInterval   = 30 * time.Second
 	updateCheckInterval         = 3 * time.Hour
 	maxAssetDownloadSize        = 50 << 20 // 50 MB safety limit for management asset downloads

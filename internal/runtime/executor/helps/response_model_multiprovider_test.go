@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 )
 
 type multiProviderTestExecutor struct {

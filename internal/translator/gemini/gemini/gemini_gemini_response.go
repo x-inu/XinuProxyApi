@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
+	translatorcommon "github.com/x-inu/XinuGate/v7/internal/translator/common"
 )
 
 // PassthroughGeminiResponseStream forwards Gemini responses unchanged.

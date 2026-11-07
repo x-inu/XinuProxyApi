@@ -7,7 +7,7 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
+	homekv "github.com/x-inu/XinuGate/v7/internal/home"
 )
 
 func TestGeminiResponsesLateSignaturePreservesSummary(t *testing.T) {

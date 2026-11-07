@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	management "github.com/x-inu/XinuProxyApi/v7/internal/api/handlers/management"
+	management "github.com/x-inu/XinuGate/v7/internal/api/handlers/management"
 )
 
 func TestDevinOAuthRoutes(t *testing.T) {

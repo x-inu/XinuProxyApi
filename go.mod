@@ -1,4 +1,4 @@
-module github.com/x-inu/XinuProxyApi/v7
+module github.com/x-inu/XinuGate/v7
 
 go 1.26.10
 

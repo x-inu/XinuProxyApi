@@ -1,4 +1,4 @@
-// Package cmd provides command-line interface functionality for the XinuProxyApi server.
+// Package cmd provides command-line interface functionality for the XinuGate server.
 // It includes authentication flows for various AI service providers, service startup,
 // and other command-line operations.
 package cmd
@@ -11,10 +11,10 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/api"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy"
+	"github.com/x-inu/XinuGate/v7/internal/api"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
+	"github.com/x-inu/XinuGate/v7/sdk/cliproxy"
 )
 
 // StartService builds and runs the proxy service using the exported SDK.

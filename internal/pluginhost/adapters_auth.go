@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	sdkaccess "github.com/x-inu/XinuGate/v7/sdk/access"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 func (h *Host) RegisterFrontendAuthProviders() {

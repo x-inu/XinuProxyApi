@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
 )
 
 func TestResolveDevinChatModelUID(t *testing.T) {

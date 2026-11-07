@@ -11,8 +11,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 )
 
 type commandLineFlagRecord struct {

@@ -14,9 +14,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
-	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuGate/v7/internal/config"
+	homekv "github.com/x-inu/XinuGate/v7/internal/home"
+	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 )
 
 const (

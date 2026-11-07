@@ -18,13 +18,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	codexmodels "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/models"
-	. "github.com/x-inu/XinuProxyApi/v7/internal/constant"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	responsesconverter "github.com/x-inu/XinuProxyApi/v7/internal/translator/openai/openai/responses"
-	"github.com/x-inu/XinuProxyApi/v7/internal/usagehistory"
-	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
+	codexmodels "github.com/x-inu/XinuGate/v7/internal/client/codex/models"
+	. "github.com/x-inu/XinuGate/v7/internal/constant"
+	"github.com/x-inu/XinuGate/v7/internal/interfaces"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	responsesconverter "github.com/x-inu/XinuGate/v7/internal/translator/openai/openai/responses"
+	"github.com/x-inu/XinuGate/v7/internal/usagehistory"
+	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
 )
 
 // OpenAIAPIHandler contains the handlers for OpenAI API endpoints.

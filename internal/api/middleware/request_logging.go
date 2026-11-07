@@ -1,4 +1,4 @@
-// Package middleware provides HTTP middleware components for the XinuProxyApi server.
+// Package middleware provides HTTP middleware components for the XinuGate server.
 // This file contains the request logging middleware that captures comprehensive
 // request and response data when enabled through configuration.
 package middleware
@@ -15,8 +15,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/klauspost/compress/zstd"
 	log "github.com/sirupsen/logrus"
-	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuGate/v7/internal/logging"
+	"github.com/x-inu/XinuGate/v7/internal/util"
 )
 
 const (

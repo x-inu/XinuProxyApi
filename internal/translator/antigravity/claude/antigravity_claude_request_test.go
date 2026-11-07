@@ -10,9 +10,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/tidwall/gjson"
-	"github.com/x-inu/XinuProxyApi/v7/internal/cache"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	internalsignature "github.com/x-inu/XinuProxyApi/v7/internal/signature"
+	"github.com/x-inu/XinuGate/v7/internal/cache"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
+	internalsignature "github.com/x-inu/XinuGate/v7/internal/signature"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 

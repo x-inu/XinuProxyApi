@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/homeplugins"
+	"github.com/x-inu/XinuGate/v7/internal/homeplugins"
 )
 
 type recordingPluginStatusClient struct {

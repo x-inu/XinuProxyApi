@@ -1,6 +1,6 @@
-# XinuProxyApi
+# XinuGate
 
-XinuProxyApi is a self-hosted proxy server that exposes OpenAI, Gemini, Claude, Codex, and Grok compatible API endpoints, bundled together with its browser-based Management Center in a single application and release.
+XinuGate is a self-hosted proxy server that exposes OpenAI, Gemini, Claude, Codex, and Grok compatible API endpoints, bundled together with its browser-based Management Center in a single application and release.
 
 Point any OpenAI-, Gemini-, or Claude-compatible client or SDK at your own instance and route requests across multiple CLI accounts with round-robin load balancing — all managed from a built-in web UI.
 
@@ -33,16 +33,16 @@ The frontend uses hash routing and calls the same-origin Management API under `/
 
 Grab the archive that matches your CPU architecture from the repository Releases page:
 
-- `XinuProxyApi_<version>_linux_amd64.tar.gz` — standard x86-64 build (glibc 2.17+ baseline, supports dynamic plugins).
-- `XinuProxyApi_<version>_linux_aarch64.tar.gz` — standard arm64 build.
+- `XinuGate_<version>_linux_amd64.tar.gz` — standard x86-64 build (glibc 2.17+ baseline, supports dynamic plugins).
+- `XinuGate_<version>_linux_aarch64.tar.gz` — standard arm64 build.
 - `*_no-plugin.tar.gz` — portable build for musl-based or older systems (no dynamic plugin support).
 
 ```bash
-mkdir -p ~/xinuproxyapi && cd ~/xinuproxyapi
-tar -xzf XinuProxyApi_<version>_linux_amd64.tar.gz
+mkdir -p ~/xinugate && cd ~/xinugate
+tar -xzf XinuGate_<version>_linux_amd64.tar.gz
 ```
 
-Each archive contains the `xinu-proxy-api` binary, `static/management.html`, `config.example.yaml`, `README.md`, and `LICENSE`.
+Each archive contains the `xinugate` binary, `static/management.html`, `config.example.yaml`, `README.md`, and `LICENSE`.
 
 ### 2. Create your config
 
@@ -71,7 +71,7 @@ Leave `secret-key` empty only if you intentionally want to disable the Managemen
 ### 3. Run it
 
 ```bash
-./xinu-proxy-api --config config.yaml
+./xinugate --config config.yaml
 ```
 
 The server binds `port` (default `20128`). Verify it locally:
@@ -85,17 +85,17 @@ Open `http://127.0.0.1:20128/` in a browser to reach the Management Center.
 
 ### 4. Run as a systemd service (optional)
 
-Create `/etc/systemd/system/xinuproxyapi.service`:
+Create `/etc/systemd/system/xinugate.service`:
 
 ```ini
 [Unit]
-Description=XinuProxyApi
+Description=XinuGate
 After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/xinuproxyapi
-ExecStart=/opt/xinuproxyapi/xinu-proxy-api --config /opt/xinuproxyapi/config.yaml
+WorkingDirectory=/opt/xinugate
+ExecStart=/opt/xinugate/xinugate --config /opt/xinugate/config.yaml
 Restart=on-failure
 RestartSec=3
 
@@ -105,8 +105,8 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now xinuproxyapi.service
-sudo systemctl status xinuproxyapi.service
+sudo systemctl enable --now xinugate.service
+sudo systemctl status xinugate.service
 ```
 
 ### 5. Expose it (optional)
@@ -117,7 +117,7 @@ When exposing the Management API beyond localhost, also set `remote-management.a
 
 ### 6. Run with Docker (optional)
 
-You can also build and run XinuProxyApi in a container using Docker Compose:
+You can also build and run XinuGate in a container using Docker Compose:
 
 ```bash
 cp config.example.yaml config.yaml
@@ -125,7 +125,7 @@ cp config.example.yaml config.yaml
 ./docker-build.sh
 
 # Or build and start directly with Docker Compose
-XINU_PROXY_IMAGE=xinu-proxy-api:local docker compose up -d --build
+XINUGATE_IMAGE=xinugate:local docker compose up -d --build
 ```
 
 For cluster / control-plane worker mode, see `docker-compose.cluster.yml` and `.env.cluster.example`.
@@ -140,7 +140,7 @@ make build VERSION=dev
 
 # Equivalent explicit steps
 VERSION=dev ./scripts/build-management.sh   # writes static/management.html
-go build -o xinu-proxy-api ./cmd/server
+go build -o xinugate ./cmd/server
 ```
 
 Frontend development server:

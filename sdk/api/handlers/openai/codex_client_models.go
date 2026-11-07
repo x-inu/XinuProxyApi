@@ -1,8 +1,8 @@
 package openai
 
 import (
-	codexmodels "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/models"
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	codexmodels "github.com/x-inu/XinuGate/v7/internal/client/codex/models"
+	"github.com/x-inu/XinuGate/v7/internal/registry"
 )
 
 func (h *OpenAIAPIHandler) codexClientModelsResponse(clientVersion ...string) map[string]any {

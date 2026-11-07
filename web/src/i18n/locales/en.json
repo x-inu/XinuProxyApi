@@ -100,8 +100,6 @@
     "auth_files": "Auth Files",
     "oauth": "OAuth Login",
     "quota_management": "Quota Management",
-    "plugins": "Plugins",
-    "plugin_store": "Plugin Store",
     "config_management": "Config Panel",
     "logs": "Console Log",
     "system_info": "About"
@@ -110,7 +108,6 @@
     "operate": "Operate",
     "gateway": "Gateway",
     "observe": "Observe",
-    "plugin_pages": "Plugins",
     "control": "Control"
   },
   "nav_meta": {
@@ -121,8 +118,6 @@
     "auth_files": "Auth files & credentials",
     "oauth": "OAuth authorization",
     "quota_management": "API keys & limits",
-    "plugins": "Plugin toggles & config",
-    "plugin_store": "Discover & install plugins",
     "logs": "Live server console output",
     "config_management": "Gateway configuration",
     "system_info": "Runtime & diagnostics"
@@ -1314,15 +1309,6 @@
     "gate_step3_prompt": "To confirm, type \"{{token}}\" in the box below",
     "gate_step3_action": "Install this plugin",
     "gate_step3_hint": "Enter the exact identifier shown above to enable installation."
-  },
-  "plugin_resource": {
-    "page_count": "{{count}} pages",
-    "load_failed": "Failed to load plugin page",
-    "unavailable": "Plugin page unavailable",
-    "not_found": "Plugin page not found",
-    "not_found_desc": "This plugin page is not declared by the current backend plugin list.",
-    "empty_src": "Plugin page URL is empty",
-    "empty_src_desc": "This plugin menu does not provide an embeddable page URL."
   },
   "system_info": {
     "title": "About",

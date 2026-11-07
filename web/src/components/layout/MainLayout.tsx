@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { PageTransition } from '@/components/common/PageTransition';
 import { MainRoutes } from '@/router/MainRoutes';
-import { authFilesApi, pluginsApi } from '@/services/api';
+import { authFilesApi } from '@/services/api';
 import {
   IconSidebarAuthFiles,
   IconSidebarConfig,
@@ -23,10 +23,8 @@ import {
   IconSidebarLogs,
   IconSidebarModels,
   IconSidebarOauth,
-  IconSidebarPlugins,
   IconSidebarProviders,
   IconSidebarQuota,
-  IconSidebarStore,
   IconSidebarSystem,
   IconSidebarUsage,
   IconChevronDown,
@@ -39,12 +37,6 @@ import {
   useThemeStore,
 } from '@/stores';
 import { AUTH_FILES_CHANGED_EVENT } from '@/features/authFiles/authFilesEvents';
-import {
-  collectPluginResourceEntries,
-  PLUGIN_RESOURCES_REFRESH_EVENT,
-  resolvePluginAssetURL,
-  type PluginResourceEntry,
-} from '@/features/plugins/pluginResources';
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { getSidebarShortcutLabel, isSidebarToggleShortcut } from '@/utils/sidebarShortcut';
 
@@ -56,8 +48,6 @@ const sidebarIcons: Record<string, ReactNode> = {
   authFiles: <IconSidebarAuthFiles size={18} />,
   oauth: <IconSidebarOauth size={18} />,
   quota: <IconSidebarQuota size={18} />,
-  plugins: <IconSidebarPlugins size={18} />,
-  pluginStore: <IconSidebarStore size={18} />,
   config: <IconSidebarConfig size={18} />,
   logs: <IconSidebarLogs size={18} />,
   system: <IconSidebarSystem size={18} />,
@@ -98,17 +88,6 @@ interface SidebarNavGroup {
 const flattenNavItems = (items: SidebarNavItem[]): SidebarNavLinkItem[] =>
   items.flatMap((item) => (item.kind === 'drawer' ? item.children : [item]));
 
-
-function PluginSidebarIcon({ src }: { src: string }) {
-  const [failed, setFailed] = useState(false);
-  const showImage = Boolean(src) && !failed;
-
-  return showImage ? (
-    <img src={src} alt="" onError={() => setFailed(true)} />
-  ) : (
-    <IconSidebarPlugins size={18} />
-  );
-}
 
 // Header action icons - smaller size for header buttons
 const headerIconProps: SVGProps<SVGSVGElement> = {
@@ -190,7 +169,6 @@ export function MainLayout() {
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
   const apiBase = useAuthStore((state) => state.apiBase);
   const serverVersion = useAuthStore((state) => state.serverVersion);
-  const supportsPlugin = useAuthStore((state) => state.supportsPlugin);
 
   const fetchConfig = useConfigStore((state) => state.fetchConfig);
   const clearCache = useConfigStore((state) => state.clearCache);
@@ -208,10 +186,6 @@ export function MainLayout() {
     anchorTop: number;
     top: number;
   } | null>(null);
-  const [pluginResources, setPluginResources] = useState<PluginResourceEntry[]>([]);
-  const [expandedPluginResourceIDs, setExpandedPluginResourceIDs] = useState<Set<string>>(
-    () => new Set()
-  );
   const contentRef = useRef<HTMLDivElement | null>(null);
   const authFilesCountRequestRef = useRef(0);
   const railTooltipRef = useRef<HTMLDivElement | null>(null);
@@ -221,7 +195,6 @@ export function MainLayout() {
   const fullBrandName = 'XinuGate';
   const abbrBrandName = t('title.abbr');
   const isLogsPage = location.pathname.startsWith('/logs');
-  const isPluginResourcePage = location.pathname.startsWith('/plugin-pages');
   const showSidebarLabels = !sidebarCollapsed || sidebarOpen;
 
   // Keep floating header height available to sticky mobile elements and overlays.
@@ -319,20 +292,6 @@ export function MainLayout() {
     });
   }, [fetchConfig]);
 
-  const loadPluginResources = useCallback(async () => {
-    if (connectionStatus !== 'connected' || !supportsPlugin) {
-      setPluginResources([]);
-      return;
-    }
-
-    try {
-      const plugins = await pluginsApi.list();
-      setPluginResources(collectPluginResourceEntries(plugins.plugins));
-    } catch {
-      setPluginResources([]);
-    }
-  }, [connectionStatus, supportsPlugin]);
-
   const loadAuthFilesCount = useCallback(async () => {
     const requestID = ++authFilesCountRequestRef.current;
     if (connectionStatus !== 'connected') {
@@ -352,71 +311,17 @@ export function MainLayout() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      void loadPluginResources();
       void loadAuthFilesCount();
     }, 0);
 
-    window.addEventListener(PLUGIN_RESOURCES_REFRESH_EVENT, loadPluginResources);
     window.addEventListener(AUTH_FILES_CHANGED_EVENT, loadAuthFilesCount);
 
     return () => {
       authFilesCountRequestRef.current += 1;
       window.clearTimeout(timer);
-      window.removeEventListener(PLUGIN_RESOURCES_REFRESH_EVENT, loadPluginResources);
       window.removeEventListener(AUTH_FILES_CHANGED_EVENT, loadAuthFilesCount);
     };
-  }, [apiBase, loadPluginResources, loadAuthFilesCount]);
-
-  const pluginResourceGroups = pluginResources.reduce<
-    Array<{ pluginID: string; pluginTitle: string; entries: PluginResourceEntry[] }>
-  >((groups, resource) => {
-    const group = groups.find((item) => item.pluginID === resource.pluginID);
-    if (group) {
-      group.entries.push(resource);
-      return groups;
-    }
-
-    groups.push({
-      pluginID: resource.pluginID,
-      pluginTitle: resource.pluginTitle,
-      entries: [resource],
-    });
-    return groups;
-  }, []);
-
-  const pluginPageNavItems: SidebarNavItem[] = supportsPlugin
-    ? pluginResourceGroups.flatMap((group): SidebarNavItem[] => {
-        if (group.entries.length === 1) {
-          const resource = group.entries[0];
-          const pluginLogo = resolvePluginAssetURL(resource.pluginLogo, apiBase);
-          return [
-            {
-              path: resource.route,
-              label: resource.label,
-              meta: resource.description,
-              icon: <PluginSidebarIcon src={pluginLogo} />,
-            },
-          ];
-        }
-
-        const pluginLogo = resolvePluginAssetURL(group.entries[0]?.pluginLogo ?? '', apiBase);
-        return [
-          {
-            kind: 'drawer',
-            id: `plugin-pages-${group.pluginID}`,
-            label: group.pluginTitle,
-            meta: t('plugin_resource.page_count', { count: group.entries.length }),
-            icon: <PluginSidebarIcon src={pluginLogo} />,
-            children: group.entries.map((resource) => ({
-              path: resource.route,
-              label: resource.label,
-              meta: resource.description,
-              icon: <span className="nav-sub-dot" aria-hidden="true" />,
-            })),
-          },
-        ];
-      })
-    : [];
+  }, [apiBase, loadAuthFilesCount]);
 
   const navGroups: SidebarNavGroup[] = [
     {
@@ -494,22 +399,6 @@ export function MainLayout() {
           metaKey: 'nav_meta.config_management',
           icon: sidebarIcons.config,
         },
-        ...(supportsPlugin
-          ? [
-              {
-                path: '/plugins',
-                labelKey: 'nav.plugins',
-                metaKey: 'nav_meta.plugins',
-                icon: sidebarIcons.plugins,
-              },
-              {
-                path: '/plugin-store',
-                labelKey: 'nav.plugin_store',
-                metaKey: 'nav_meta.plugin_store',
-                icon: sidebarIcons.pluginStore,
-              },
-            ]
-          : []),
         {
           path: '/system',
           labelKey: 'nav.system_info',
@@ -518,15 +407,6 @@ export function MainLayout() {
         },
       ],
     },
-    ...(pluginPageNavItems.length > 0
-      ? [
-          {
-            id: 'plugin-pages',
-            labelKey: 'nav_groups.plugin_pages',
-            items: pluginPageNavItems,
-          },
-        ]
-      : []),
   ];
   const navItems = navGroups.flatMap((group) => flattenNavItems(group.items));
   const navOrder = navItems.map((item) => item.path);
@@ -572,7 +452,6 @@ export function MainLayout() {
     clearCache();
     const results = await Promise.allSettled([
       fetchConfig(true),
-      loadPluginResources(),
       loadAuthFilesCount(),
       triggerHeaderRefresh(),
     ]);
@@ -590,17 +469,7 @@ export function MainLayout() {
     showNotification(t('notification.data_refreshed'), 'success');
   };
 
-  const togglePluginResourceDrawer = useCallback((drawerID: string) => {
-    setExpandedPluginResourceIDs((current) => {
-      const next = new Set(current);
-      if (next.has(drawerID)) {
-        next.delete(drawerID);
-      } else {
-        next.add(drawerID);
-      }
-      return next;
-    });
-  }, []);
+  const togglePluginResourceDrawer = useCallback((_drawerID: string) => {}, []);
 
   const showRailTooltip = useCallback(
     (event: SyntheticEvent<HTMLElement>, targetID: string, label: string, meta?: string) => {
@@ -739,7 +608,7 @@ export function MainLayout() {
     }
 
     const isActive = item.children.some((child) => child.path === location.pathname);
-    const isOpen = isActive || expandedPluginResourceIDs.has(item.id);
+    const isOpen = isActive;
 
     return (
       <div className={`nav-drawer ${isOpen ? 'open' : ''}`} key={item.id}>
@@ -801,11 +670,7 @@ export function MainLayout() {
   const sidebarToggleLabel = sidebarCollapsed ? t('sidebar.expand') : t('sidebar.collapse');
 
   return (
-    <div
-      className={`app-shell ${sidebarCollapsed ? 'sidebar-is-collapsed' : ''} ${
-        isPluginResourcePage ? 'plugin-resource-shell' : ''
-      }`}
-    >
+    <div className={`app-shell ${sidebarCollapsed ? 'sidebar-is-collapsed' : ''}`}>
       <div className="top-gradient-blur" aria-hidden="true" />
 
       <header className="main-header" ref={headerRef}>
@@ -936,17 +801,8 @@ export function MainLayout() {
           </div>
         )}
 
-        <div
-          className={`content${isLogsPage ? ' content-logs' : ''}${
-            isPluginResourcePage ? ' content-plugin-resource' : ''
-          }`}
-          ref={contentRef}
-        >
-          <main
-            className={`main-content${isLogsPage ? ' main-content-logs' : ''}${
-              isPluginResourcePage ? ' main-content-plugin-resource' : ''
-            }`}
-          >
+        <div className={`content${isLogsPage ? ' content-logs' : ''}`} ref={contentRef}>
+          <main className={`main-content${isLogsPage ? ' main-content-logs' : ''}`}>
             <PageTransition
               render={(location) => <MainRoutes location={location} />}
               getRouteOrder={getRouteOrder}

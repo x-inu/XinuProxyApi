@@ -17,13 +17,13 @@ import (
 )
 
 var corsExposedResponseHeaders = []string{
-	logging.CPATraceIDHeader,
-	"X-CPA-VERSION",
-	"X-CPA-COMMIT",
-	"X-CPA-BUILD-DATE",
-	"X-CPA-SUPPORT-PLUGIN",
-	"X-CPA-HOME-VERSION",
-	"X-CPA-HOME-BUILD-DATE",
+	logging.XGTraceIDHeader,
+	"X-XG-VERSION",
+	"X-XG-COMMIT",
+	"X-XG-BUILD-DATE",
+	"X-XG-SUPPORT-PLUGIN",
+	"X-XG-HOME-VERSION",
+	"X-XG-HOME-BUILD-DATE",
 	"X-SERVER-VERSION",
 	"X-SERVER-BUILD-DATE",
 	"Location",
@@ -133,7 +133,7 @@ func (s *Server) exampleAPIKeySafeModeMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Header("X-CPA-SAFE-MODE", "example-api-key")
+		c.Header("X-XG-SAFE-MODE", "example-api-key")
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 			"error":   "unsafe_example_api_key",
 			"message": "Proxy API endpoints are disabled because api-keys contains template values. Open /management.html?safe-mode=configure, update api-keys in Management, then retry.",

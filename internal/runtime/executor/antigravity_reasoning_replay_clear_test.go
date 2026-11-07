@@ -10,9 +10,9 @@ import (
 
 	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestAntigravityReasoningReplayClearsOnInvalidSignature400(t *testing.T) {
@@ -35,7 +35,7 @@ func TestAntigravityReasoningReplayClearsOnInvalidSignature400(t *testing.T) {
 	defer server.Close()
 
 	exec := NewAntigravityExecutor(&config.Config{RequestRetry: 1})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID: "auth-pr3900-invalid-sig",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -48,10 +48,10 @@ func TestAntigravityReasoningReplayClearsOnInvalidSignature400(t *testing.T) {
 	}
 
 	payload := []byte(`{"sessionId":"pr3900-invalid-sig","request":{"contents":[{"role":"user","parts":[{"text":"hi"}]},{"role":"model","parts":[{"functionCall":{"id":"id1","name":"Bash","args":{}}}]},{"role":"model","parts":[{"functionResponse":{"id":"id1","name":"Bash","response":{"result":"ok"}}}]}]}}`)
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   model,
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatAntigravity,
 		Stream:       false,
 	})

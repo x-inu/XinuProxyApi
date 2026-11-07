@@ -12,7 +12,7 @@ import (
 	"time"
 
 	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/executionregistry"
 )
 
 func concurrencyReleaseFrameFromFixture(t *testing.T) ConcurrencyReleaseFrame {

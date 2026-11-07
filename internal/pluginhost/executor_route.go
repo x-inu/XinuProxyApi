@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // executorPluginReady reports whether the named plugin can actually execute a

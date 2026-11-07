@@ -10,8 +10,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/x-inu/XinuGate/v7/internal/interfaces"
 	"github.com/x-inu/XinuGate/v7/internal/logging"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 	"golang.org/x/net/context"
 )
 

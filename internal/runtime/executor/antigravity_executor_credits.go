@@ -19,7 +19,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	homekv "github.com/x-inu/XinuGate/v7/internal/home"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -93,7 +93,7 @@ type antigravityTokenRefreshData struct {
 	TokenType    string `json:"token_type"`
 }
 
-func antigravityAuthHasCredits(auth *cliproxyauth.Auth) bool {
+func antigravityAuthHasCredits(auth *xinugateauth.Auth) bool {
 	ok, err := antigravityAuthHasCreditsRequired(context.Background(), auth)
 	if err != nil {
 		log.Errorf("antigravity executor: home kv credits check error: %v", err)
@@ -102,12 +102,12 @@ func antigravityAuthHasCredits(auth *cliproxyauth.Auth) bool {
 	return ok
 }
 
-func antigravityAuthHasCreditsRequired(ctx context.Context, auth *cliproxyauth.Auth) (bool, error) {
+func antigravityAuthHasCreditsRequired(ctx context.Context, auth *xinugateauth.Auth) (bool, error) {
 	if auth == nil || strings.TrimSpace(auth.ID) == "" {
 		return false, nil
 	}
 	authID := strings.TrimSpace(auth.ID)
-	if hint, ok, errHint := cliproxyauth.GetAntigravityCreditsHintRequired(ctx, authID); errHint != nil {
+	if hint, ok, errHint := xinugateauth.GetAntigravityCreditsHintRequired(ctx, authID); errHint != nil {
 		return false, errHint
 	} else if ok && hint.Known {
 		return hint.Available, nil
@@ -149,7 +149,7 @@ func antigravityCreditsBalanceAvailable(authID string, bal antigravityCreditsBal
 		return false
 	}
 	available := bal.CreditAmount >= bal.MinCreditAmount
-	cliproxyauth.SetAntigravityCreditsHint(strings.TrimSpace(authID), cliproxyauth.AntigravityCreditsHint{
+	xinugateauth.SetAntigravityCreditsHint(strings.TrimSpace(authID), xinugateauth.AntigravityCreditsHint{
 		Known:           true,
 		Available:       available,
 		CreditAmount:    bal.CreditAmount,
@@ -275,13 +275,13 @@ func antigravityCreditsRetryEnabled(cfg *config.Config) bool {
 	return cfg != nil && cfg.QuotaExceeded.AntigravityCredits
 }
 
-func clearAntigravityCreditsFailureState(auth *cliproxyauth.Auth) {
+func clearAntigravityCreditsFailureState(auth *xinugateauth.Auth) {
 	if auth == nil || strings.TrimSpace(auth.ID) == "" {
 		return
 	}
 	antigravityCreditsFailureByAuth.Delete(strings.TrimSpace(auth.ID))
 }
-func markAntigravityCreditsPermanentlyDisabled(auth *cliproxyauth.Auth) {
+func markAntigravityCreditsPermanentlyDisabled(auth *xinugateauth.Auth) {
 	if auth == nil || strings.TrimSpace(auth.ID) == "" || antigravityCoolingDisabled(auth, nil) {
 		return
 	}
@@ -297,7 +297,7 @@ func markAntigravityCreditsPermanentlyDisabled(auth *cliproxyauth.Auth) {
 		Known:           true,
 	}
 	storeAntigravityCreditsBalanceBestEffort(authID, bal)
-	cliproxyauth.SetAntigravityCreditsHint(authID, cliproxyauth.AntigravityCreditsHint{
+	xinugateauth.SetAntigravityCreditsHint(authID, xinugateauth.AntigravityCreditsHint{
 		Known:           true,
 		Available:       false,
 		CreditAmount:    0,
@@ -306,7 +306,7 @@ func markAntigravityCreditsPermanentlyDisabled(auth *cliproxyauth.Auth) {
 	})
 }
 
-func clearAntigravityCreditsPermanentlyDisabled(auth *cliproxyauth.Auth) {
+func clearAntigravityCreditsPermanentlyDisabled(auth *xinugateauth.Auth) {
 	if auth == nil || strings.TrimSpace(auth.ID) == "" {
 		return
 	}
@@ -342,7 +342,7 @@ func newAntigravityStatusErr(statusCode int, body []byte) statusErr {
 	}
 	return err
 }
-func (e *AntigravityExecutor) maybeRefreshAntigravityCreditsHint(ctx context.Context, auth *cliproxyauth.Auth, accessToken string) {
+func (e *AntigravityExecutor) maybeRefreshAntigravityCreditsHint(ctx context.Context, auth *xinugateauth.Auth, accessToken string) {
 	if e == nil || auth == nil || !antigravityCreditsRetryEnabled(e.cfg) || antigravityCoolingDisabled(auth, e.cfg) {
 		return
 	}
@@ -353,7 +353,7 @@ func (e *AntigravityExecutor) maybeRefreshAntigravityCreditsHint(ctx context.Con
 	if authID == "" {
 		return
 	}
-	if hint, ok := cliproxyauth.GetAntigravityCreditsHint(authID); ok && hint.Known {
+	if hint, ok := xinugateauth.GetAntigravityCreditsHint(authID); ok && hint.Known {
 		return
 	}
 	if strings.TrimSpace(accessToken) == "" {
@@ -378,13 +378,13 @@ func (e *AntigravityExecutor) maybeRefreshAntigravityCreditsHint(ctx context.Con
 		}
 		refreshCtx := context.Background()
 		if ctx != nil {
-			if rt, ok := ctx.Value("cliproxy.roundtripper").(http.RoundTripper); ok && rt != nil {
-				refreshCtx = context.WithValue(refreshCtx, "cliproxy.roundtripper", rt)
+			if rt, ok := ctx.Value("xinugate.roundtripper").(http.RoundTripper); ok && rt != nil {
+				refreshCtx = context.WithValue(refreshCtx, "xinugate.roundtripper", rt)
 			}
 		}
 		refreshCtx, cancel := context.WithTimeout(refreshCtx, antigravityCreditsHintRefreshTimeout)
 		authCopy := auth.Clone()
-		go func(auth *cliproxyauth.Auth, token string) {
+		go func(auth *xinugateauth.Auth, token string) {
 			defer cancel()
 			e.updateAntigravityCreditsBalance(refreshCtx, auth, token)
 		}(authCopy, accessToken)
@@ -413,21 +413,21 @@ func (e *AntigravityExecutor) maybeRefreshAntigravityCreditsHint(ctx context.Con
 
 	refreshCtx := context.Background()
 	if ctx != nil {
-		if rt, ok := ctx.Value("cliproxy.roundtripper").(http.RoundTripper); ok && rt != nil {
-			refreshCtx = context.WithValue(refreshCtx, "cliproxy.roundtripper", rt)
+		if rt, ok := ctx.Value("xinugate.roundtripper").(http.RoundTripper); ok && rt != nil {
+			refreshCtx = context.WithValue(refreshCtx, "xinugate.roundtripper", rt)
 		}
 	}
 	refreshCtx, cancel := context.WithTimeout(refreshCtx, antigravityCreditsHintRefreshTimeout)
 	authCopy := auth.Clone()
 
-	go func(state *antigravityCreditsHintRefreshState, auth *cliproxyauth.Auth, token string) {
+	go func(state *antigravityCreditsHintRefreshState, auth *xinugateauth.Auth, token string) {
 		defer cancel()
 		defer state.mu.Unlock()
 		e.updateAntigravityCreditsBalance(refreshCtx, auth, token)
 	}(state, authCopy, accessToken)
 }
 
-func (e *AntigravityExecutor) updateAntigravityCreditsBalance(ctx context.Context, auth *cliproxyauth.Auth, accessToken string) {
+func (e *AntigravityExecutor) updateAntigravityCreditsBalance(ctx context.Context, auth *xinugateauth.Auth, accessToken string) {
 	if auth == nil || strings.TrimSpace(auth.ID) == "" {
 		return
 	}
@@ -484,7 +484,7 @@ func (e *AntigravityExecutor) updateAntigravityCreditsBalance(ctx context.Contex
 
 	credits := gjson.GetBytes(bodyBytes, "paidTier.availableCredits")
 	if !credits.IsArray() {
-		cliproxyauth.SetAntigravityCreditsHint(authID, cliproxyauth.AntigravityCreditsHint{
+		xinugateauth.SetAntigravityCreditsHint(authID, xinugateauth.AntigravityCreditsHint{
 			Known:      true,
 			Available:  false,
 			PaidTierID: paidTierID,
@@ -511,7 +511,7 @@ func (e *AntigravityExecutor) updateAntigravityCreditsBalance(ctx context.Contex
 			Known:           true,
 		}
 		storeAntigravityCreditsBalanceBestEffort(authID, bal)
-		cliproxyauth.SetAntigravityCreditsHint(authID, cliproxyauth.AntigravityCreditsHint{
+		xinugateauth.SetAntigravityCreditsHint(authID, xinugateauth.AntigravityCreditsHint{
 			Known:           true,
 			Available:       creditAmount >= minAmount,
 			CreditAmount:    creditAmount,
@@ -526,10 +526,10 @@ func (e *AntigravityExecutor) updateAntigravityCreditsBalance(ctx context.Contex
 	}
 }
 func antigravityShouldBypassShortCooldown(ctx context.Context, cfg *config.Config) bool {
-	return cliproxyauth.AntigravityCreditsRequested(ctx) && antigravityCreditsRetryEnabled(cfg)
+	return xinugateauth.AntigravityCreditsRequested(ctx) && antigravityCreditsRetryEnabled(cfg)
 }
 
-func antigravityShortCooldownKey(auth *cliproxyauth.Auth, modelName string) string {
+func antigravityShortCooldownKey(auth *xinugateauth.Auth, modelName string) string {
 	if auth == nil {
 		return ""
 	}
@@ -549,7 +549,7 @@ func antigravityCreditsRefreshLockKey(authID string) string {
 	return "cpa:antigravity:credits-refresh-lock:" + strings.TrimSpace(authID)
 }
 
-func antigravityShortCooldownKVKey(auth *cliproxyauth.Auth, modelName string) string {
+func antigravityShortCooldownKVKey(auth *xinugateauth.Auth, modelName string) string {
 	if auth == nil {
 		return ""
 	}
@@ -561,11 +561,11 @@ func antigravityShortCooldownKVKey(auth *cliproxyauth.Auth, modelName string) st
 	return "cpa:antigravity:short-cooldown:" + authID + ":" + homekv.HashKeyPart(modelName)
 }
 
-func antigravityCoolingDisabled(auth *cliproxyauth.Auth, cfg *config.Config) bool {
-	return cliproxyauth.QuotaCooldownDisabledForAuthWithConfig(auth, cfg)
+func antigravityCoolingDisabled(auth *xinugateauth.Auth, cfg *config.Config) bool {
+	return xinugateauth.QuotaCooldownDisabledForAuthWithConfig(auth, cfg)
 }
 
-func antigravityIsInShortCooldown(auth *cliproxyauth.Auth, modelName string, now time.Time) (bool, time.Duration) {
+func antigravityIsInShortCooldown(auth *xinugateauth.Auth, modelName string, now time.Time) (bool, time.Duration) {
 	inCooldown, remaining, errCooldown := antigravityIsInShortCooldownRequired(context.Background(), auth, modelName, now)
 	if errCooldown != nil {
 		log.Errorf("antigravity executor: home kv cooldown read error: %v", errCooldown)
@@ -574,7 +574,7 @@ func antigravityIsInShortCooldown(auth *cliproxyauth.Auth, modelName string, now
 	return inCooldown, remaining
 }
 
-func antigravityIsInShortCooldownRequired(ctx context.Context, auth *cliproxyauth.Auth, modelName string, now time.Time) (bool, time.Duration, error) {
+func antigravityIsInShortCooldownRequired(ctx context.Context, auth *xinugateauth.Auth, modelName string, now time.Time) (bool, time.Duration, error) {
 	if antigravityCoolingDisabled(auth, nil) {
 		return false, 0, nil
 	}
@@ -626,13 +626,13 @@ func antigravityIsInShortCooldownRequired(ctx context.Context, auth *cliproxyaut
 	return true, remaining, nil
 }
 
-func markAntigravityShortCooldown(auth *cliproxyauth.Auth, modelName string, now time.Time, duration time.Duration) {
+func markAntigravityShortCooldown(auth *xinugateauth.Auth, modelName string, now time.Time, duration time.Duration) {
 	if errMark := markAntigravityShortCooldownRequired(context.Background(), auth, modelName, now, duration); errMark != nil {
 		log.Errorf("antigravity executor: home kv cooldown write error: %v", errMark)
 	}
 }
 
-func markAntigravityShortCooldownRequired(ctx context.Context, auth *cliproxyauth.Auth, modelName string, now time.Time, duration time.Duration) error {
+func markAntigravityShortCooldownRequired(ctx context.Context, auth *xinugateauth.Auth, modelName string, now time.Time, duration time.Duration) error {
 	if antigravityCoolingDisabled(auth, nil) {
 		return nil
 	}

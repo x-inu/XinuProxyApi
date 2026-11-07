@@ -12,7 +12,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/watcher/synthesizer"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // pauseAuthSnapshot suspends a real scan after reading files, before publishing them.

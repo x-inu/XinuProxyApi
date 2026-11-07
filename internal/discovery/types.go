@@ -22,8 +22,8 @@ const (
 	SubtypeGenerateContent = "_generate-content"
 	// SubtypeInteractions identifies the Interactions API protocol.
 	SubtypeInteractions = "_interactions"
-	// ProductCPA is the product identifier for XinuGate.
-	ProductCPA = "cliproxyapi"
+	// ProductXG is the product identifier for XinuGate.
+	ProductXG = "xinugate"
 )
 
 // ServiceSpec describes a service to be advertised on the local network.

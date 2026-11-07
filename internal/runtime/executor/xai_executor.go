@@ -9,7 +9,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 var (
@@ -94,7 +94,7 @@ func (e *XAIExecutor) Identifier() string {
 }
 
 // PrepareRequest injects xAI credentials into the outgoing HTTP request.
-func (e *XAIExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth) error {
+func (e *XAIExecutor) PrepareRequest(req *http.Request, auth *xinugateauth.Auth) error {
 	if req == nil {
 		return nil
 	}
@@ -113,7 +113,7 @@ func (e *XAIExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth)
 }
 
 // HttpRequest injects xAI credentials into the request and executes it.
-func (e *XAIExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth, req *http.Request) (*http.Response, error) {
+func (e *XAIExecutor) HttpRequest(ctx context.Context, auth *xinugateauth.Auth, req *http.Request) (*http.Response, error) {
 	if req == nil {
 		return nil, fmt.Errorf("xai executor: request is nil")
 	}

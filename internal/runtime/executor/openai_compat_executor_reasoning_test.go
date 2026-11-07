@@ -10,9 +10,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestOpenAICompatExecutorUsesCompatibleClaudeTranslation(t *testing.T) {
@@ -25,21 +25,21 @@ func TestOpenAICompatExecutorUsesCompatibleClaudeTranslation(t *testing.T) {
 	defer server.Close()
 
 	executor := NewOpenAICompatExecutor("openai-compatibility", &config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "openai-compatibility",
 		Attributes: map[string]string{
 			"base_url": server.URL,
 			"api_key":  "test-key",
 		},
 	}
-	request := cliproxyexecutor.Request{
+	request := xinugateexecutor.Request{
 		Model:   "deepseek-v4-flash",
 		Payload: []byte(`{"model":"deepseek-v4-flash","messages":[{"role":"assistant","content":[{"type":"thinking","thinking":"prior reasoning","signature":""},{"type":"tool_use","id":"call_1","name":"Read","input":{}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"call_1","content":"ok"}]}]}`),
 		Metadata: map[string]any{
-			"cliproxy.resolved_api_key_model_info": &registry.ModelInfo{IsCompat: true},
+			"xinugate.resolved_api_key_model_info": &registry.ModelInfo{IsCompat: true},
 		},
 	}
-	options := cliproxyexecutor.Options{
+	options := xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatClaude,
 		ResponseFormat: sdktranslator.FormatOpenAI,
 	}

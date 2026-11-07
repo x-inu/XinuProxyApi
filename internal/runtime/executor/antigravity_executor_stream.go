@@ -15,13 +15,13 @@ import (
 	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // ExecuteStream performs a streaming request to the Antigravity API.
-func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	if opts.Alt == "responses/compact" {
 		return nil, statusErr{code: http.StatusBadRequest, msg: "streaming not supported for /responses/compact"}
 	}
@@ -60,7 +60,7 @@ func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxya
 	defer reporter.TrackFailure(ctx, &err)
 
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	to := sdktranslator.FromString("antigravity")
 
 	originalPayloadSource := req.Payload
@@ -82,7 +82,7 @@ func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxya
 		reporter.UpdateAccessTokenFingerprint(auth)
 	}
 
-	modelInfo, _ := cliproxyauth.ResolvedModelInfo(req)
+	modelInfo, _ := xinugateauth.ResolvedModelInfo(req)
 	translationReq := sdktranslator.RequestEnvelope{Format: from, Model: baseModel, Stream: true, ModelInfo: modelInfo}
 	originalTranslated, translated := helps.TranslateRequestEnvelopePairWithCodexMultiAgentV2(ctx, opts.Headers, e.cfg, from, to, translationReq, originalPayload, req.Payload)
 
@@ -99,7 +99,7 @@ func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxya
 	translated, _ = sjson.DeleteBytes(translated, "request.stream")
 	reporter.SetTranslatedReasoningEffort(translated, to.String())
 
-	useCredits := cliproxyauth.AntigravityCreditsRequested(ctx) && antigravityCreditsRetryEnabled(e.cfg)
+	useCredits := xinugateauth.AntigravityCreditsRequested(ctx) && antigravityCreditsRetryEnabled(e.cfg)
 
 	baseURL := resolveAntigravityRequestBaseURL(auth)
 	httpClient := newAntigravityHTTPClient(ctx, e.cfg, auth, 0)
@@ -193,7 +193,7 @@ func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxya
 		clearAntigravityCreditsFailureState(auth)
 	}
 	replayAccumulator := newAntigravityReasoningReplayAccumulator(replayScope, requestPayload)
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func(resp *http.Response) {
 		defer close(out)
 		defer func() {
@@ -230,7 +230,7 @@ func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxya
 			chunks := helps.TranslateStreamWithClaudeInputTokens(ctx, to, responseFormat, req.Model, opts.OriginalRequest, translated, bytes.Clone(payload), &param, claudeInputTokens)
 			for i := range chunks {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: chunks[i]}:
+				case out <- xinugateexecutor.StreamChunk{Payload: chunks[i]}:
 				case <-ctx.Done():
 					return
 				}
@@ -240,7 +240,7 @@ func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxya
 			helps.RecordAPIResponseError(ctx, e.cfg, errScan)
 			reporter.PublishFailure(ctx, errScan)
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errScan}:
+			case out <- xinugateexecutor.StreamChunk{Err: errScan}:
 			case <-ctx.Done():
 			}
 		} else {
@@ -250,7 +250,7 @@ func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxya
 			tail := helps.TranslateStreamWithClaudeInputTokens(ctx, to, responseFormat, req.Model, opts.OriginalRequest, translated, []byte("[DONE]"), &param, claudeInputTokens)
 			for i := range tail {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: tail[i]}:
+				case out <- xinugateexecutor.StreamChunk{Payload: tail[i]}:
 				case <-ctx.Done():
 					return
 				}
@@ -261,10 +261,10 @@ func (e *AntigravityExecutor) ExecuteStream(ctx context.Context, auth *cliproxya
 			reporter.EnsurePublished(ctx)
 		}
 	}(httpResp)
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }
 
-func (e *AntigravityExecutor) executeCompactionStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
+func (e *AntigravityExecutor) executeCompactionStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (*xinugateexecutor.StreamResult, error) {
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 	payload := req.Payload
 	if len(payload) == 0 && len(opts.OriginalRequest) > 0 {
@@ -272,7 +272,7 @@ func (e *AntigravityExecutor) executeCompactionStream(ctx context.Context, auth 
 	}
 	summaryPayload := helps.PrepareAntigravityCompactionSummaryPayload(payload, baseModel)
 
-	summaryReq := cliproxyexecutor.Request{
+	summaryReq := xinugateexecutor.Request{
 		Model:    req.Model,
 		Payload:  summaryPayload,
 		Metadata: req.Metadata,
@@ -309,9 +309,9 @@ func (e *AntigravityExecutor) executeCompactionStream(ctx context.Context, auth 
 	}
 
 	chunks := helps.BuildAntigravityCompactionStreamChunks(baseModel, capsule, inputTokens, outputTokens, totalTokens)
-	out := make(chan cliproxyexecutor.StreamChunk, len(chunks))
+	out := make(chan xinugateexecutor.StreamChunk, len(chunks))
 	for _, chunk := range chunks {
-		out <- cliproxyexecutor.StreamChunk{Payload: chunk}
+		out <- xinugateexecutor.StreamChunk{Payload: chunk}
 	}
 	close(out)
 
@@ -321,7 +321,7 @@ func (e *AntigravityExecutor) executeCompactionStream(ctx context.Context, auth 
 	}
 	headers.Set("Content-Type", "text/event-stream")
 
-	return &cliproxyexecutor.StreamResult{
+	return &xinugateexecutor.StreamResult{
 		Headers: headers,
 		Chunks:  out,
 	}, nil

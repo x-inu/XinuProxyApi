@@ -24,8 +24,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/misc"
 	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 type codexOAuthService interface {

@@ -19,7 +19,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/buildinfo"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -115,7 +115,7 @@ func ResolveKimiAPIBaseURL(domain string) string {
 
 // ResolveKimiDomainFromAuth detects whether an Auth represents kimi.ai or kimi.com.
 // Explicit configurations (domain, base_url, type) take precedence over file names.
-func ResolveKimiDomainFromAuth(auth *cliproxyauth.Auth) string {
+func ResolveKimiDomainFromAuth(auth *xinugateauth.Auth) string {
 	if auth == nil {
 		return KimiDefaultDomain
 	}
@@ -212,7 +212,7 @@ func ResolveKimiDomainFromAuth(auth *cliproxyauth.Auth) string {
 }
 
 // IsKimiAIAuth reports whether the provided auth targets kimi.ai.
-func IsKimiAIAuth(auth *cliproxyauth.Auth) bool {
+func IsKimiAIAuth(auth *xinugateauth.Auth) bool {
 	return IsKimiAIDomain(ResolveKimiDomainFromAuth(auth))
 }
 
@@ -400,7 +400,7 @@ func getHostname() string {
 // commonHeaders returns headers required for Kimi API requests.
 func (c *DeviceFlowClient) commonHeaders() map[string]string {
 	return map[string]string{
-		"X-Msh-Platform":     "CLIProxyAPI",
+		"X-Msh-Platform":     "XinuGate",
 		"X-Msh-Version":      buildinfo.Version,
 		"X-Msh-Device-Name":  getHostname(),
 		"X-Msh-Device-Model": getDeviceModel(),

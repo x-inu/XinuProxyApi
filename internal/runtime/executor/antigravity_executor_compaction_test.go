@@ -13,9 +13,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestAntigravityCompactionTriggerStreamGemini(t *testing.T) {
@@ -41,7 +41,7 @@ func TestAntigravityCompactionTriggerStreamGemini(t *testing.T) {
 		Antigravity:  config.AntigravityConfig{},
 		RequestRetry: 1,
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "antigravity-auth-test",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -64,10 +64,10 @@ func TestAntigravityCompactionTriggerStreamGemini(t *testing.T) {
 		]
 	}`)
 
-	streamResult, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	streamResult, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         true,
@@ -120,7 +120,7 @@ func TestAntigravityCompactionTriggerStreamClaude(t *testing.T) {
 		Antigravity:  config.AntigravityConfig{},
 		RequestRetry: 1,
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "antigravity-auth-test",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -143,10 +143,10 @@ func TestAntigravityCompactionTriggerStreamClaude(t *testing.T) {
 		]
 	}`)
 
-	streamResult, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	streamResult, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "claude-sonnet-4-6",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         true,
@@ -194,7 +194,7 @@ func TestAntigravityCompactionAltResponsesCompact(t *testing.T) {
 		Antigravity:  config.AntigravityConfig{},
 		RequestRetry: 1,
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "antigravity-auth-test",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -215,10 +215,10 @@ func TestAntigravityCompactionAltResponsesCompact(t *testing.T) {
 		]
 	}`)
 
-	resp, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Alt:            "responses/compact",
@@ -255,7 +255,7 @@ func TestAntigravityCompactionReplayNextTurn(t *testing.T) {
 		Antigravity:  config.AntigravityConfig{},
 		RequestRetry: 1,
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "antigravity-auth-test",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -277,10 +277,10 @@ func TestAntigravityCompactionReplayNextTurn(t *testing.T) {
 			{"type": "compaction_trigger"}
 		]
 	}`)
-	compactResp, errCompact := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	compactResp, errCompact := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: compactPayload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         false,
@@ -303,10 +303,10 @@ func TestAntigravityCompactionReplayNextTurn(t *testing.T) {
 		]
 	}`, capsule))
 
-	nextResp, errNext := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	nextResp, errNext := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: nextPayload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         false,
@@ -345,10 +345,10 @@ func TestAntigravityCompactionReplayNextTurn(t *testing.T) {
 			{"type": "message", "role": "user", "content": "next task"}
 		]
 	}`)
-	_, errCorrupted := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, errCorrupted := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: corruptedPayload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         false,
@@ -375,7 +375,7 @@ func TestAntigravityCompactionSequentialCompactionPreservesContext(t *testing.T)
 		Antigravity:  config.AntigravityConfig{},
 		RequestRetry: 1,
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "antigravity-auth-test",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -396,10 +396,10 @@ func TestAntigravityCompactionSequentialCompactionPreservesContext(t *testing.T)
 			{"type": "compaction_trigger"}
 		]
 	}`)
-	resp1, err1 := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp1, err1 := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: compactPayload1,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         false,
@@ -421,10 +421,10 @@ func TestAntigravityCompactionSequentialCompactionPreservesContext(t *testing.T)
 		]
 	}`, capsule1))
 
-	streamResult, err2 := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	streamResult, err2 := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: compactPayload2,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         true,
@@ -456,10 +456,10 @@ func TestAntigravityCompactionSequentialCompactionPreservesContext(t *testing.T)
 			{"type": "compaction_trigger"}
 		]
 	}`)
-	_, errCorruptedTrigger := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	_, errCorruptedTrigger := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: corruptedWithTrigger,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         true,

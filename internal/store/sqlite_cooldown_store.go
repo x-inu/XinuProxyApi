@@ -7,18 +7,18 @@ import (
 	"sync"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
-var _ cliproxyauth.CooldownStateStoreProvider = (*SqliteStore)(nil)
-var _ cliproxyauth.CooldownStateStore = (*sqliteCooldownStateStore)(nil)
+var _ xinugateauth.CooldownStateStoreProvider = (*SqliteStore)(nil)
+var _ xinugateauth.CooldownStateStore = (*sqliteCooldownStateStore)(nil)
 
 type sqliteCooldownStateStore struct {
 	store *SqliteStore
 	mu    sync.Mutex
 }
 
-func (s *sqliteCooldownStateStore) Load(ctx context.Context) (records []cliproxyauth.CooldownStateRecord, err error) {
+func (s *sqliteCooldownStateStore) Load(ctx context.Context) (records []xinugateauth.CooldownStateRecord, err error) {
 	if s == nil || s.store == nil || s.store.db == nil {
 		return nil, fmt.Errorf("sqlite cooldown store: not initialized")
 	}
@@ -41,7 +41,7 @@ func (s *sqliteCooldownStateStore) Load(ctx context.Context) (records []cliproxy
 		if errScan := rows.Scan(&content); errScan != nil {
 			return nil, fmt.Errorf("sqlite cooldown store: scan record: %w", errScan)
 		}
-		var record cliproxyauth.CooldownStateRecord
+		var record xinugateauth.CooldownStateRecord
 		if errJSON := json.Unmarshal([]byte(content), &record); errJSON == nil {
 			records = append(records, record)
 		}
@@ -50,7 +50,7 @@ func (s *sqliteCooldownStateStore) Load(ctx context.Context) (records []cliproxy
 	return records, rows.Err()
 }
 
-func (s *sqliteCooldownStateStore) Save(ctx context.Context, records []cliproxyauth.CooldownStateRecord) error {
+func (s *sqliteCooldownStateStore) Save(ctx context.Context, records []xinugateauth.CooldownStateRecord) error {
 	if s == nil || s.store == nil || s.store.db == nil {
 		return fmt.Errorf("sqlite cooldown store: not initialized")
 	}

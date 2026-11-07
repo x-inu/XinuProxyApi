@@ -7,8 +7,8 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type updateNormalizingHooks struct{ effort string }
@@ -44,7 +44,7 @@ func TestXAIResponsesPluginNormalizationOverridesOldSourceUpdate(t *testing.T) {
 			sdktranslator.SetPluginHooks(&updateNormalizingHooks{effort: tc.effort})
 			t.Cleanup(func() { sdktranslator.SetPluginHooks(nil) })
 			exec := NewXAIExecutor(&config.Config{})
-			prepared, errPrepare := exec.prepareResponsesRequest(t.Context(), cliproxyexecutor.Request{Model: "grok-4.5", Payload: []byte(source)}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}, false)
+			prepared, errPrepare := exec.prepareResponsesRequest(t.Context(), xinugateexecutor.Request{Model: "grok-4.5", Payload: []byte(source)}, xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}, false)
 			if errPrepare != nil {
 				t.Fatal(errPrepare)
 			}

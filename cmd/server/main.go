@@ -40,8 +40,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/usagehistory"
 	"github.com/x-inu/XinuGate/v7/internal/util"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	sdkpluginstore "github.com/x-inu/XinuGate/v7/sdk/pluginstore"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 var (

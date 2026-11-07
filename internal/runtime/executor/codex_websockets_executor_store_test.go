@@ -3,7 +3,7 @@ package executor
 import (
 	"testing"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestCodexWebsocketsExecutor_CloseAllReleasesSessions(t *testing.T) {
@@ -28,7 +28,7 @@ func TestCodexWebsocketsExecutor_CloseAllReleasesSessions(t *testing.T) {
 		t.Fatalf("expected the same session instance across executors")
 	}
 
-	exec1.CloseExecutionSession(cliproxyauth.CloseAllExecutionSessionsID)
+	exec1.CloseExecutionSession(xinugateauth.CloseAllExecutionSessionsID)
 
 	globalCodexWebsocketSessionStore.mu.Lock()
 	_, stillPresent := globalCodexWebsocketSessionStore.sessions[sessionID]

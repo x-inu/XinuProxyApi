@@ -11,9 +11,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func codexAllocationStream(deltas, deltaSize int) string {
@@ -48,9 +48,9 @@ func TestCodexStreamChunksRemainOwnedAfterScannerAdvances(t *testing.T) {
 				cfg := &config.Config{}
 				cfg.Codex.StreamBootstrapBuffering = buffered
 				executor := NewCodexExecutor(cfg)
-				ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", codexAllocationTransport{stream: codexAllocationStream(deltas, deltaSize)})
-				auth := &cliproxyauth.Auth{Attributes: map[string]string{"api_key": "test"}}
-				result, err := executor.ExecuteStream(ctx, auth, cliproxyexecutor.Request{Model: "gpt-5.4", Payload: []byte(`{"model":"gpt-5.4","input":"hello"}`)}, cliproxyexecutor.Options{Stream: true, SourceFormat: sdktranslator.FormatOpenAIResponse, ResponseFormat: format})
+				ctx := context.WithValue(t.Context(), "xinugate.roundtripper", codexAllocationTransport{stream: codexAllocationStream(deltas, deltaSize)})
+				auth := &xinugateauth.Auth{Attributes: map[string]string{"api_key": "test"}}
+				result, err := executor.ExecuteStream(ctx, auth, xinugateexecutor.Request{Model: "gpt-5.4", Payload: []byte(`{"model":"gpt-5.4","input":"hello"}`)}, xinugateexecutor.Options{Stream: true, SourceFormat: sdktranslator.FormatOpenAIResponse, ResponseFormat: format})
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -104,10 +104,10 @@ func BenchmarkCodexExecuteStreamAllocations(b *testing.B) {
 				cfg := &config.Config{}
 				cfg.Codex.StreamBootstrapBuffering = buffered
 				executor := NewCodexExecutor(cfg)
-				ctx := context.WithValue(b.Context(), "cliproxy.roundtripper", codexAllocationTransport{stream: stream})
-				auth := &cliproxyauth.Auth{Attributes: map[string]string{"api_key": "test"}}
-				request := cliproxyexecutor.Request{Model: "gpt-5.4", Payload: []byte(`{"model":"gpt-5.4","input":"hello"}`)}
-				opts := cliproxyexecutor.Options{Stream: true, SourceFormat: sdktranslator.FormatOpenAIResponse, ResponseFormat: format}
+				ctx := context.WithValue(b.Context(), "xinugate.roundtripper", codexAllocationTransport{stream: stream})
+				auth := &xinugateauth.Auth{Attributes: map[string]string{"api_key": "test"}}
+				request := xinugateexecutor.Request{Model: "gpt-5.4", Payload: []byte(`{"model":"gpt-5.4","input":"hello"}`)}
+				opts := xinugateexecutor.Options{Stream: true, SourceFormat: sdktranslator.FormatOpenAIResponse, ResponseFormat: format}
 				b.ReportAllocs()
 				b.SetBytes(int64(len(stream)))
 				b.ResetTimer()

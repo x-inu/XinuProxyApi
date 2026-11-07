@@ -21,9 +21,9 @@ import (
 	internalsignature "github.com/x-inu/XinuGate/v7/internal/signature"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 const (
@@ -73,7 +73,7 @@ func (e *GeminiExecutor) Identifier() string {
 }
 
 // RequestToFormat reports the upstream request format used after auth selection.
-func (e *GeminiExecutor) RequestToFormat(req cliproxyexecutor.Request, opts cliproxyexecutor.Options) sdktranslator.Format {
+func (e *GeminiExecutor) RequestToFormat(req xinugateexecutor.Request, opts xinugateexecutor.Options) sdktranslator.Format {
 	if strings.EqualFold(strings.TrimSpace(e.Identifier()), "gemini-interactions") && nativeInteractionsSourceFormat(opts.SourceFormat) {
 		return sdktranslator.FormatInteractions
 	}
@@ -81,7 +81,7 @@ func (e *GeminiExecutor) RequestToFormat(req cliproxyexecutor.Request, opts clip
 }
 
 // PrepareRequest injects Gemini credentials into the outgoing HTTP request.
-func (e *GeminiExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth) error {
+func (e *GeminiExecutor) PrepareRequest(req *http.Request, auth *xinugateauth.Auth) error {
 	if req == nil {
 		return nil
 	}
@@ -98,7 +98,7 @@ func (e *GeminiExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Au
 }
 
 // HttpRequest injects Gemini credentials into the request and executes it.
-func (e *GeminiExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth, req *http.Request) (*http.Response, error) {
+func (e *GeminiExecutor) HttpRequest(ctx context.Context, auth *xinugateauth.Auth, req *http.Request) (*http.Response, error) {
 	if req == nil {
 		return nil, fmt.Errorf("gemini executor: request is nil")
 	}
@@ -124,9 +124,9 @@ func (e *GeminiExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Aut
 //   - opts: Additional execution options
 //
 // Returns:
-//   - cliproxyexecutor.Response: The response from the API
+//   - xinugateexecutor.Response: The response from the API
 //   - error: An error if the request fails
-func (e *GeminiExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *GeminiExecutor) Execute(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	ctx = helps.EnsureSessionContext(ctx, opts, req.Payload)
 	if opts.Alt == "responses/compact" {
 		return resp, statusErr{code: http.StatusNotImplemented, msg: "/responses/compact not supported"}
@@ -143,7 +143,7 @@ func (e *GeminiExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, r
 
 	// Official Gemini API via API key.
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	to := sdktranslator.FromString("gemini")
 	originalPayloadSource := req.Payload
 	if len(opts.OriginalRequest) > 0 {
@@ -245,12 +245,12 @@ func (e *GeminiExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, r
 	if responseFormat == sdktranslator.FormatOpenAIResponse {
 		out = helps.EnsureResponsesUsageDetails(out)
 	}
-	resp = cliproxyexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}
+	resp = xinugateexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}
 	return resp, nil
 }
 
 // ExecuteStream performs a streaming request to the Gemini API.
-func (e *GeminiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *GeminiExecutor) ExecuteStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	ctx = helps.EnsureSessionContext(ctx, opts, req.Payload)
 	if opts.Alt == "responses/compact" {
 		return nil, statusErr{code: http.StatusNotImplemented, msg: "/responses/compact not supported"}
@@ -266,7 +266,7 @@ func (e *GeminiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 	defer reporter.TrackFailure(ctx, &err)
 
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	to := sdktranslator.FromString("gemini")
 	originalPayloadSource := req.Payload
 	if len(opts.OriginalRequest) > 0 {
@@ -346,7 +346,7 @@ func (e *GeminiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		err = statusErr{code: httpResp.StatusCode, msg: string(b)}
 		return nil, err
 	}
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func() {
 		defer close(out)
 		defer reporter.EnsurePublished(ctx)
@@ -374,7 +374,7 @@ func (e *GeminiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			lines := helps.TranslateStreamWithClaudeInputTokens(ctx, to, responseFormat, req.Model, opts.OriginalRequest, body, bytes.Clone(payload), &param, claudeInputTokens)
 			for i := range lines {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: lines[i]}:
+				case out <- xinugateexecutor.StreamChunk{Payload: lines[i]}:
 				case <-ctx.Done():
 					return
 				}
@@ -383,7 +383,7 @@ func (e *GeminiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 		lines := helps.TranslateStreamWithClaudeInputTokens(ctx, to, responseFormat, req.Model, opts.OriginalRequest, body, []byte("[DONE]"), &param, claudeInputTokens)
 		for i := range lines {
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Payload: lines[i]}:
+			case out <- xinugateexecutor.StreamChunk{Payload: lines[i]}:
 			case <-ctx.Done():
 				return
 			}
@@ -392,15 +392,15 @@ func (e *GeminiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.A
 			helps.RecordAPIResponseError(ctx, e.cfg, errScan)
 			reporter.PublishFailure(ctx, errScan)
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errScan}:
+			case out <- xinugateexecutor.StreamChunk{Err: errScan}:
 			case <-ctx.Done():
 			}
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }
 
-func (e *GeminiExecutor) executeInteractions(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *GeminiExecutor) executeInteractions(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	targetName := thinking.ParseSuffix(req.Model).ModelName
 	apiKey := geminiAPIKey(auth)
 	reporter := helps.NewExecutorUsageReporter(ctx, e, targetName, auth)
@@ -473,16 +473,16 @@ func (e *GeminiExecutor) executeInteractions(ctx context.Context, auth *cliproxy
 	}
 	reporter.ObserveResponseModel(data)
 	reporter.Publish(ctx, helps.ParseInteractionsUsage(data))
-	targetFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	targetFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	var param any
 	out := sdktranslator.TranslateNonStream(ctx, sdktranslator.FormatInteractions, targetFormat, req.Model, opts.OriginalRequest, body, data, &param)
 	if targetFormat == sdktranslator.FormatOpenAIResponse {
 		out = helps.EnsureResponsesUsageDetails(out)
 	}
-	return cliproxyexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}, nil
+	return xinugateexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}, nil
 }
 
-func (e *GeminiExecutor) executeInteractionsStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *GeminiExecutor) executeInteractionsStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	targetName := thinking.ParseSuffix(req.Model).ModelName
 	apiKey := geminiAPIKey(auth)
 	reporter := helps.NewExecutorUsageReporter(ctx, e, targetName, auth)
@@ -546,8 +546,8 @@ func (e *GeminiExecutor) executeInteractionsStream(ctx context.Context, auth *cl
 		return nil, statusErr{code: httpResp.StatusCode, msg: string(data)}
 	}
 
-	out := make(chan cliproxyexecutor.StreamChunk)
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	out := make(chan xinugateexecutor.StreamChunk)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	go func() {
 		defer close(out)
 		defer reporter.EnsurePublished(ctx)
@@ -588,7 +588,7 @@ func (e *GeminiExecutor) executeInteractionsStream(ctx context.Context, auth *cl
 			if responseFormat == sdktranslator.FormatInteractions {
 				visibleFrame := append(bytes.TrimRight(rawFrame, "\r\n"), '\n', '\n')
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: visibleFrame}:
+				case out <- xinugateexecutor.StreamChunk{Payload: visibleFrame}:
 				case <-ctx.Done():
 					return false
 				}
@@ -601,7 +601,7 @@ func (e *GeminiExecutor) executeInteractionsStream(ctx context.Context, auth *cl
 			lines = helps.TranslateStreamWithClaudeInputTokens(ctx, sdktranslator.FormatInteractions, responseFormat, req.Model, opts.OriginalRequest, body, payload, &param, claudeInputTokens)
 			for i := range lines {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: lines[i]}:
+				case out <- xinugateexecutor.StreamChunk{Payload: lines[i]}:
 				case <-ctx.Done():
 					return false
 				}
@@ -630,28 +630,28 @@ func (e *GeminiExecutor) executeInteractionsStream(ctx context.Context, auth *cl
 			helps.RecordAPIResponseError(ctx, e.cfg, errScan)
 			reporter.PublishFailure(ctx, errScan)
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errScan}:
+			case out <- xinugateexecutor.StreamChunk{Err: errScan}:
 			case <-ctx.Done():
 			}
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }
 
 // CountTokens counts tokens for the given request using the Gemini API.
-func (e *GeminiExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *GeminiExecutor) CountTokens(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 
 	apiKey := geminiAPIKey(auth)
 
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	to := sdktranslator.FromString("gemini")
 	translatedReq := helps.TranslateRequestWithAPIKeyModelCompatibility(ctx, opts.Headers, e.cfg, from, to, baseModel, req.Payload, false, helps.APIKeyModelIsCompat(req))
 
 	translatedReq, err := helps.ApplyRequestThinking(translatedReq, req, opts, from.String(), to.String(), e.Identifier())
 	if err != nil {
-		return cliproxyexecutor.Response{}, err
+		return xinugateexecutor.Response{}, err
 	}
 
 	translatedReq = fixGeminiImageAspectRatio(baseModel, translatedReq)
@@ -670,7 +670,7 @@ func (e *GeminiExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Aut
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, requestBody)
 	if err != nil {
-		return cliproxyexecutor.Response{}, err
+		return xinugateexecutor.Response{}, err
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 	if apiKey != "" {
@@ -696,11 +696,11 @@ func (e *GeminiExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Aut
 	})
 
 	httpClient := helps.NewProxyAwareHTTPClient(ctx, e.cfg, auth, 0)
-	cliproxyexecutor.MarkUpstreamAttempt(ctx)
+	xinugateexecutor.MarkUpstreamAttempt(ctx)
 	resp, err := httpClient.Do(httpReq)
 	if err != nil {
 		helps.RecordAPIResponseError(ctx, e.cfg, err)
-		return cliproxyexecutor.Response{}, err
+		return xinugateexecutor.Response{}, err
 	}
 	defer func() {
 		if errClose := resp.Body.Close(); errClose != nil {
@@ -712,28 +712,28 @@ func (e *GeminiExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Aut
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		helps.RecordAPIResponseError(ctx, e.cfg, err)
-		return cliproxyexecutor.Response{}, err
+		return xinugateexecutor.Response{}, err
 	}
 	helps.AppendAPIResponseChunk(ctx, e.cfg, data)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		helps.LogWithRequestID(ctx).Debugf("request error, error status: %d, error message: %s", resp.StatusCode, helps.SummarizeErrorBody(resp.Header.Get("Content-Type"), data))
-		return cliproxyexecutor.Response{}, statusErr{code: resp.StatusCode, msg: string(data)}
+		return xinugateexecutor.Response{}, statusErr{code: resp.StatusCode, msg: string(data)}
 	}
 
 	count := gjson.GetBytes(data, "totalTokens").Int()
 	translated := sdktranslator.TranslateTokenCount(respCtx, to, responseFormat, count, data)
-	return cliproxyexecutor.Response{Payload: translated, Headers: resp.Header.Clone()}, nil
+	return xinugateexecutor.Response{Payload: translated, Headers: resp.Header.Clone()}, nil
 }
 
 // Refresh refreshes the authentication credentials (no-op for Gemini API key).
-func (e *GeminiExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (e *GeminiExecutor) Refresh(ctx context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	if refreshed, handled, err := helps.RefreshAuthViaHome(ctx, e.cfg, auth); handled {
 		return refreshed, err
 	}
 	return auth, nil
 }
 
-func geminiAPIKey(a *cliproxyauth.Auth) string {
+func geminiAPIKey(a *xinugateauth.Auth) string {
 	if a == nil {
 		return ""
 	}
@@ -745,7 +745,7 @@ func geminiAPIKey(a *cliproxyauth.Auth) string {
 	return ""
 }
 
-func resolveGeminiBaseURL(auth *cliproxyauth.Auth) string {
+func resolveGeminiBaseURL(auth *xinugateauth.Auth) string {
 	base := glEndpoint
 	if auth != nil && auth.Attributes != nil {
 		if custom := strings.TrimSpace(auth.Attributes["base_url"]); custom != "" {
@@ -758,7 +758,7 @@ func resolveGeminiBaseURL(auth *cliproxyauth.Auth) string {
 	return base
 }
 
-func (e *GeminiExecutor) resolveGeminiConfig(auth *cliproxyauth.Auth) *config.GeminiKey {
+func (e *GeminiExecutor) resolveGeminiConfig(auth *xinugateauth.Auth) *config.GeminiKey {
 	if auth == nil || e.cfg == nil {
 		return nil
 	}
@@ -797,7 +797,7 @@ func (e *GeminiExecutor) resolveGeminiConfig(auth *cliproxyauth.Auth) *config.Ge
 	return nil
 }
 
-func shouldExecuteNativeInteractions(auth *cliproxyauth.Auth, opts cliproxyexecutor.Options) bool {
+func shouldExecuteNativeInteractions(auth *xinugateauth.Auth, opts xinugateexecutor.Options) bool {
 	return nativeInteractionsSourceFormat(opts.SourceFormat) && isNativeInteractionsAuth(auth)
 }
 
@@ -847,7 +847,7 @@ func sanitizeGeminiInteractionsUnsupportedInputIDs(body []byte) []byte {
 	return body
 }
 
-func translateGeminiInteractionsRequestBody(ctx context.Context, cfg *config.Config, model string, payload []byte, opts cliproxyexecutor.Options, stream, isCompat bool) []byte {
+func translateGeminiInteractionsRequestBody(ctx context.Context, cfg *config.Config, model string, payload []byte, opts xinugateexecutor.Options, stream, isCompat bool) []byte {
 	if opts.SourceFormat == "" || opts.SourceFormat == sdktranslator.FormatInteractions {
 		return bytes.Clone(payload)
 	}
@@ -860,7 +860,7 @@ func translateGeminiInteractionsRequestBody(ctx context.Context, cfg *config.Con
 // mutations, and the working buffer is a separate copy so those mutations cannot
 // change it. Distinct inputs and plugin hooks keep the existing order: working
 // payload first, then the payload-config source.
-func translateGeminiInteractionsRequestPair(ctx context.Context, cfg *config.Config, model string, payload []byte, opts cliproxyexecutor.Options, stream, isCompat bool) (original, working []byte) {
+func translateGeminiInteractionsRequestPair(ctx context.Context, cfg *config.Config, model string, payload []byte, opts xinugateexecutor.Options, stream, isCompat bool) (original, working []byte) {
 	source := geminiInteractionsPayloadConfigInput(opts, payload)
 	if geminiInteractionsSameByteSlice(payload, source) && !sdktranslator.HasPluginHooks() {
 		original = translateGeminiInteractionsRequestBody(ctx, cfg, model, payload, opts, stream, isCompat)
@@ -871,11 +871,11 @@ func translateGeminiInteractionsRequestPair(ctx context.Context, cfg *config.Con
 	return original, working
 }
 
-func geminiInteractionsPayloadConfigSource(ctx context.Context, cfg *config.Config, model string, payload []byte, opts cliproxyexecutor.Options, stream, isCompat bool) []byte {
+func geminiInteractionsPayloadConfigSource(ctx context.Context, cfg *config.Config, model string, payload []byte, opts xinugateexecutor.Options, stream, isCompat bool) []byte {
 	return translateGeminiInteractionsRequestBody(ctx, cfg, model, geminiInteractionsPayloadConfigInput(opts, payload), opts, stream, isCompat)
 }
 
-func geminiInteractionsPayloadConfigInput(opts cliproxyexecutor.Options, payload []byte) []byte {
+func geminiInteractionsPayloadConfigInput(opts xinugateexecutor.Options, payload []byte) []byte {
 	if len(opts.OriginalRequest) == 0 {
 		return payload
 	}
@@ -895,14 +895,14 @@ func geminiInteractionsSameByteSlice(a, b []byte) bool {
 	return &a[0] == &b[0]
 }
 
-func isNativeInteractionsAuth(auth *cliproxyauth.Auth) bool {
+func isNativeInteractionsAuth(auth *xinugateauth.Auth) bool {
 	if auth == nil {
 		return false
 	}
 	return strings.EqualFold(strings.TrimSpace(auth.Provider), "gemini-interactions")
 }
 
-func applyGeminiInteractionsThinking(body []byte, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) ([]byte, error) {
+func applyGeminiInteractionsThinking(body []byte, req xinugateexecutor.Request, opts xinugateexecutor.Options) ([]byte, error) {
 	fromFormat := opts.SourceFormat.String()
 	if strings.TrimSpace(fromFormat) == "" {
 		fromFormat = sdktranslator.FormatInteractions.String()
@@ -981,7 +981,7 @@ func geminiInteractionsSSEDone(frame []byte) bool {
 	return sawDoneEvent
 }
 
-func geminiAuthLogFields(auth *cliproxyauth.Auth) (string, string, string, string) {
+func geminiAuthLogFields(auth *xinugateauth.Auth) (string, string, string, string) {
 	if auth == nil {
 		return "", "", "", ""
 	}
@@ -989,7 +989,7 @@ func geminiAuthLogFields(auth *cliproxyauth.Auth) (string, string, string, strin
 	return auth.ID, auth.Label, authType, authValue
 }
 
-func applyGeminiHeaders(req *http.Request, auth *cliproxyauth.Auth, clientHeaders ...http.Header) {
+func applyGeminiHeaders(req *http.Request, auth *xinugateauth.Auth, clientHeaders ...http.Header) {
 	var attrs map[string]string
 	if auth != nil {
 		attrs = auth.Attributes

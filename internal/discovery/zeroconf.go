@@ -461,7 +461,7 @@ func (b *ZeroconfBrowser) BrowseWithFallbackServiceType(ctx context.Context, ser
 	var cpaGateways []DiscoveredService
 	var otherGateways []DiscoveredService
 	for _, gw := range allGateways {
-		if gw.Product == ProductCPA {
+		if gw.Product == ProductXG {
 			cpaGateways = append(cpaGateways, gw)
 		} else {
 			otherGateways = append(otherGateways, gw)

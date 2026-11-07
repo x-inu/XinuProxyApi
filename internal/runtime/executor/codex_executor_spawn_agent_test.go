@@ -13,9 +13,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexExecutorOptimizeMultiAgentV2(t *testing.T) {
@@ -49,7 +49,7 @@ func TestCodexExecutorOptimizeMultiAgentV2(t *testing.T) {
 	defer server.Close()
 
 	payload := codexSpawnAgentTestPayload()
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
@@ -72,8 +72,8 @@ func TestCodexExecutorOptimizeMultiAgentV2(t *testing.T) {
 			executor := NewCodexExecutor(&config.Config{Codex: config.CodexConfig{OptimizeMultiAgentV2: tt.enabled}})
 			ctx := codexSpawnAgentTestContext()
 			headers := http.Header{"User-Agent": []string{"overridden-client/1.0"}}
-			req := cliproxyexecutor.Request{Model: "gpt-5.4", Payload: payload}
-			opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Headers: headers}
+			req := xinugateexecutor.Request{Model: "gpt-5.4", Payload: payload}
+			opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Headers: headers}
 
 			var clientPayload []byte
 			switch tt.mode {
@@ -128,7 +128,7 @@ func TestCodexExecutorIsCompatConvertsAgentMessage(t *testing.T) {
 			},
 		}},
 	}
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -174,8 +174,8 @@ func TestCodexExecutorIsCompatConvertsAgentMessage(t *testing.T) {
 			cfg.Codex.OptimizeMultiAgentV2 = tt.enabled
 			executor := NewCodexExecutor(&cfg)
 			ctx := codexSpawnAgentTestContext()
-			req := cliproxyexecutor.Request{Model: tt.model, Payload: payload}
-			opts := cliproxyexecutor.Options{
+			req := xinugateexecutor.Request{Model: tt.model, Payload: payload}
+			opts := xinugateexecutor.Options{
 				SourceFormat: sdktranslator.FromString("openai-response"),
 				Headers:      http.Header{"User-Agent": []string{"overridden-client/1.0"}},
 			}
@@ -228,7 +228,7 @@ func TestCodexExecutor_IsCompat_StripsAuthorAndRecipient_Issue6136(t *testing.T)
 			},
 		}},
 	}
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -241,8 +241,8 @@ func TestCodexExecutor_IsCompat_StripsAuthorAndRecipient_Issue6136(t *testing.T)
 		cfg := baseCfg
 		executor := NewCodexExecutor(&cfg)
 		ctx := codexSpawnAgentTestContext()
-		req := cliproxyexecutor.Request{Model: "compat-model", Payload: payload}
-		opts := cliproxyexecutor.Options{
+		req := xinugateexecutor.Request{Model: "compat-model", Payload: payload}
+		opts := xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Headers:      http.Header{"User-Agent": []string{"Codex Desktop/0.154.0"}},
 		}
@@ -272,8 +272,8 @@ func TestCodexExecutor_IsCompat_StripsAuthorAndRecipient_Issue6136(t *testing.T)
 		cfg := baseCfg
 		executor := NewCodexExecutor(&cfg)
 		ctx := codexSpawnAgentTestContext()
-		req := cliproxyexecutor.Request{Model: "compat-model", Payload: payload}
-		opts := cliproxyexecutor.Options{
+		req := xinugateexecutor.Request{Model: "compat-model", Payload: payload}
+		opts := xinugateexecutor.Options{
 			Stream:       true,
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Headers:      http.Header{"User-Agent": []string{"Codex Desktop/0.154.0"}},
@@ -306,8 +306,8 @@ func TestCodexExecutor_IsCompat_StripsAuthorAndRecipient_Issue6136(t *testing.T)
 		cfg := baseCfg
 		executor := NewCodexExecutor(&cfg)
 		ctx := codexSpawnAgentTestContext()
-		req := cliproxyexecutor.Request{Model: "compat-model", Payload: payload}
-		opts := cliproxyexecutor.Options{
+		req := xinugateexecutor.Request{Model: "compat-model", Payload: payload}
+		opts := xinugateexecutor.Options{
 			Alt:          "responses/compact",
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Headers:      http.Header{"User-Agent": []string{"Codex Desktop/0.154.0"}},
@@ -336,8 +336,8 @@ func TestCodexExecutor_IsCompat_StripsAuthorAndRecipient_Issue6136(t *testing.T)
 		cfg.Codex.OptimizeMultiAgentV2 = false
 		executor := NewCodexExecutor(&cfg)
 		ctx := codexSpawnAgentTestContext()
-		req := cliproxyexecutor.Request{Model: "compat-model", Payload: payload}
-		opts := cliproxyexecutor.Options{
+		req := xinugateexecutor.Request{Model: "compat-model", Payload: payload}
+		opts := xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Headers:      http.Header{"User-Agent": []string{"Codex Desktop/0.154.0"}},
 		}
@@ -367,8 +367,8 @@ func TestCodexExecutor_IsCompat_StripsAuthorAndRecipient_Issue6136(t *testing.T)
 		cfg := baseCfg
 		executor := NewCodexExecutor(&cfg)
 		ctx := codexSpawnAgentTestContext()
-		req := cliproxyexecutor.Request{Model: "native-model", Payload: payload}
-		opts := cliproxyexecutor.Options{
+		req := xinugateexecutor.Request{Model: "native-model", Payload: payload}
+		opts := xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Headers:      http.Header{"User-Agent": []string{"Codex Desktop/0.154.0"}},
 		}
@@ -500,7 +500,7 @@ func TestCodexExecutorOptimizeMultiAgentV2RestoresDottedFlatToolName(t *testing.
 	defer server.Close()
 
 	payload := codexSpawnAgentTestPayload()
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
@@ -508,8 +508,8 @@ func TestCodexExecutorOptimizeMultiAgentV2RestoresDottedFlatToolName(t *testing.
 	executor := NewCodexExecutor(&config.Config{Codex: config.CodexConfig{OptimizeMultiAgentV2: true}})
 	ctx := codexSpawnAgentTestContext()
 	headers := http.Header{"User-Agent": []string{"overridden-client/1.0"}}
-	req := cliproxyexecutor.Request{Model: "gpt-5.4", Payload: payload}
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Headers: headers}
+	req := xinugateexecutor.Request{Model: "gpt-5.4", Payload: payload}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Headers: headers}
 
 	// Test streaming execution
 	result, errStream := executor.ExecuteStream(ctx, auth, req, opts)

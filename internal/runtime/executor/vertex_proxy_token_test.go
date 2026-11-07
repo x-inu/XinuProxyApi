@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestVertexAccessTokenUsesCredentialProxyNotRequestProxy(t *testing.T) {
@@ -40,14 +40,14 @@ func TestVertexAccessTokenUsesCredentialProxyNotRequestProxy(t *testing.T) {
 	defer globalProxy.Close()
 
 	ctx, cancel := context.WithTimeout(
-		cliproxyexecutor.WithRequestProxyURL(context.Background(), requestProxy.URL),
+		xinugateexecutor.WithRequestProxyURL(context.Background(), requestProxy.URL),
 		3*time.Second,
 	)
 	defer cancel()
 	_, _ = vertexAccessToken(
 		ctx,
 		&config.Config{SDKConfig: sdkconfig.SDKConfig{ProxyURL: globalProxy.URL}},
-		&cliproxyauth.Auth{ProxyURL: authProxy.URL},
+		&xinugateauth.Auth{ProxyURL: authProxy.URL},
 		testVertexServiceAccountJSON(t, "https://oauth2.googleapis.com/token"),
 	)
 

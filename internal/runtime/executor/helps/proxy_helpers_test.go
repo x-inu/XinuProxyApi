@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestNewProxyAwareHTTPClientRequestProxyOverridesAuthAndGlobal(t *testing.T) {
@@ -18,7 +18,7 @@ func TestNewProxyAwareHTTPClientRequestProxyOverridesAuthAndGlobal(t *testing.T)
 	client := NewProxyAwareHTTPClient(
 		ctx,
 		&config.Config{SDKConfig: sdkconfig.SDKConfig{ProxyURL: "http://global-proxy.example.com:8080"}},
-		&cliproxyauth.Auth{ProxyURL: "http://auth-proxy.example:8080"},
+		&xinugateauth.Auth{ProxyURL: "http://auth-proxy.example:8080"},
 		0,
 	)
 	transport, ok := client.Transport.(*http.Transport)
@@ -41,7 +41,7 @@ func TestNewProxyAwareHTTPClientRequestProxyOverridesAuthAndGlobal(t *testing.T)
 	refreshClient := NewProxyAwareHTTPClient(
 		refreshCtx,
 		&config.Config{SDKConfig: sdkconfig.SDKConfig{ProxyURL: "http://global-proxy.example.com:8080"}},
-		&cliproxyauth.Auth{ProxyURL: "http://auth-proxy.example:8080"},
+		&xinugateauth.Auth{ProxyURL: "http://auth-proxy.example:8080"},
 		0,
 	)
 	refreshTransport, ok := refreshClient.Transport.(*http.Transport)
@@ -63,7 +63,7 @@ func TestNewProxyAwareHTTPClientDirectBypassesGlobalProxy(t *testing.T) {
 	client := NewProxyAwareHTTPClient(
 		context.Background(),
 		&config.Config{SDKConfig: sdkconfig.SDKConfig{ProxyURL: "http://global-proxy.example.com:8080"}},
-		&cliproxyauth.Auth{ProxyURL: "direct"},
+		&xinugateauth.Auth{ProxyURL: "direct"},
 		0,
 	)
 
@@ -78,7 +78,7 @@ func TestNewProxyAwareHTTPClientDirectBypassesGlobalProxy(t *testing.T) {
 
 func TestNewDevinHTTPClient_ReusesTransportFromContext(t *testing.T) {
 	baseTransport := &http.Transport{}
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", baseTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", baseTransport)
 
 	c1 := NewDevinHTTPClient(ctx, nil, nil, 0)
 	c2 := NewDevinHTTPClient(ctx, nil, nil, 0)
@@ -102,7 +102,7 @@ func TestNewDevinHTTPClient_NonStandardRoundTripperDisablesGzip(t *testing.T) {
 		seenEncoding = req.Header.Get("Accept-Encoding")
 		return &http.Response{StatusCode: 200}, nil
 	})
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", customRT)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", customRT)
 
 	c := NewDevinHTTPClient(ctx, nil, nil, 0)
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://example.invalid", nil)

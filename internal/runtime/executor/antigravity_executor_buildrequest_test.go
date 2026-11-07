@@ -9,26 +9,26 @@ import (
 	"testing"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestResolveAntigravityRequestBaseURL(t *testing.T) {
 	t.Run("default uses daily endpoint", func(t *testing.T) {
-		if got := resolveAntigravityRequestBaseURL(&cliproxyauth.Auth{}); got != antigravityBaseURLDaily {
+		if got := resolveAntigravityRequestBaseURL(&xinugateauth.Auth{}); got != antigravityBaseURLDaily {
 			t.Fatalf("base URL = %q, want %q", got, antigravityBaseURLDaily)
 		}
 	})
 
 	t.Run("custom attribute endpoint remains supported", func(t *testing.T) {
-		auth := &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://enterprise.example.com/"}}
+		auth := &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://enterprise.example.com/"}}
 		if got := resolveAntigravityRequestBaseURL(auth); got != "https://enterprise.example.com" {
 			t.Fatalf("base URL = %q, want custom endpoint", got)
 		}
 	})
 
 	t.Run("custom auth file endpoint remains supported", func(t *testing.T) {
-		auth := &cliproxyauth.Auth{Metadata: map[string]any{"base_url": "https://enterprise.example.com/"}}
+		auth := &xinugateauth.Auth{Metadata: map[string]any{"base_url": "https://enterprise.example.com/"}}
 		if got := resolveAntigravityRequestBaseURL(auth); got != "https://enterprise.example.com" {
 			t.Fatalf("base URL = %q, want custom auth file endpoint", got)
 		}
@@ -36,7 +36,7 @@ func TestResolveAntigravityRequestBaseURL(t *testing.T) {
 }
 
 func TestAntigravityLoadCodeAssistBaseURLRemainsProdByDefault(t *testing.T) {
-	if got := antigravityLoadCodeAssistBaseURL(&cliproxyauth.Auth{}); got != antigravityBaseURLProd {
+	if got := antigravityLoadCodeAssistBaseURL(&xinugateauth.Auth{}); got != antigravityBaseURLProd {
 		t.Fatalf("loadCodeAssist base URL = %q, want %q", got, antigravityBaseURLProd)
 	}
 }
@@ -162,7 +162,7 @@ func TestAntigravityBuildRequestUsesDerivedSessionIDAndPreservesExplicit(t *test
 	t.Parallel()
 
 	executor := &AntigravityExecutor{}
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{"project_id": "project-1"}}
+	auth := &xinugateauth.Auth{Metadata: map[string]any{"project_id": "project-1"}}
 	payload := []byte(`{"request":{"contents":[{"role":"user","parts":[{"text":"hello"}]}]}}`)
 	req, err := executor.buildRequest(context.Background(), auth, "token", "gemini-3.1-pro", payload, false, "", "https://example.com", "-123456789")
 	if err != nil {
@@ -263,11 +263,11 @@ func TestShouldResolveAntigravityWebSearchGroundingURLsRequiresTypedWebSearchAnd
 
 func TestAntigravityPrepareRequestAuth_FetchesMissingProjectID(t *testing.T) {
 	executor := &AntigravityExecutor{}
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{
+	auth := &xinugateauth.Auth{Metadata: map[string]any{
 		"access_token": "token",
 		"expired":      time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 	}}
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		if req.URL.String() != "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist" {
 			t.Fatalf("unexpected project discovery request: %s", req.URL.String())
 		}
@@ -305,11 +305,11 @@ func TestAntigravityPrepareRequestAuth_FetchesMissingProjectID(t *testing.T) {
 
 func TestAntigravityPrepareRequestAuth_UpstreamForbiddenPreserves403(t *testing.T) {
 	executor := &AntigravityExecutor{}
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{
+	auth := &xinugateauth.Auth{Metadata: map[string]any{
 		"access_token": "token",
 		"expired":      time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 	}}
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusForbidden,
 			Header:     make(http.Header),
@@ -332,7 +332,7 @@ func TestAntigravityPrepareRequestAuth_UpstreamForbiddenPreserves403(t *testing.
 
 func TestAntigravityBuildRequest_RejectsMissingProjectID(t *testing.T) {
 	executor := &AntigravityExecutor{}
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{}}
+	auth := &xinugateauth.Auth{Metadata: map[string]any{}}
 
 	_, err := executor.buildRequest(context.Background(), auth, "token", "gemini-3.1-pro", []byte(`{"request":{}}`), false, "", "https://example.com")
 	if err == nil {
@@ -432,7 +432,7 @@ func buildRequestBodyFromRawPayload(t *testing.T, modelName string, payload []by
 	t.Helper()
 
 	executor := &AntigravityExecutor{}
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{"project_id": "project-1"}}
+	auth := &xinugateauth.Auth{Metadata: map[string]any{"project_id": "project-1"}}
 
 	req, err := executor.buildRequest(context.Background(), auth, "token", modelName, payload, false, "", "https://example.com")
 	if err != nil {

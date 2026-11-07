@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func claudeAuthCount(auths []*coreauth.Auth) int {

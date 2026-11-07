@@ -1,0 +1,55 @@
+package auth
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"testing"
+
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+)
+
+type requestProxyRefreshExecutor struct {
+	refreshProxy string
+}
+
+func (e *requestProxyRefreshExecutor) Identifier() string { return "request-proxy-refresh" }
+
+func (e *requestProxyRefreshExecutor) Execute(context.Context, *Auth, xinugateexecutor.Request, xinugateexecutor.Options) (xinugateexecutor.Response, error) {
+	return xinugateexecutor.Response{}, errors.New("not used")
+}
+
+func (e *requestProxyRefreshExecutor) ExecuteStream(context.Context, *Auth, xinugateexecutor.Request, xinugateexecutor.Options) (*xinugateexecutor.StreamResult, error) {
+	return nil, errors.New("not used")
+}
+
+func (e *requestProxyRefreshExecutor) Refresh(ctx context.Context, auth *Auth) (*Auth, error) {
+	e.refreshProxy = xinugateexecutor.RequestProxyURL(ctx)
+	return auth, nil
+}
+
+func (e *requestProxyRefreshExecutor) CountTokens(context.Context, *Auth, xinugateexecutor.Request, xinugateexecutor.Options) (xinugateexecutor.Response, error) {
+	return xinugateexecutor.Response{}, errors.New("not used")
+}
+
+func (e *requestProxyRefreshExecutor) HttpRequest(context.Context, *Auth, *http.Request) (*http.Response, error) {
+	return nil, errors.New("not used")
+}
+
+func TestRefreshAuthForRequestIgnoresExecutionProxy(t *testing.T) {
+	executor := &requestProxyRefreshExecutor{}
+	manager := NewManager(nil, nil, nil)
+	manager.RegisterExecutor(executor)
+	auth := &Auth{ID: "request-proxy-auth", Provider: executor.Identifier(), Status: StatusActive}
+	if _, errRegister := manager.Register(context.Background(), auth); errRegister != nil {
+		t.Fatalf("Register: %v", errRegister)
+	}
+
+	ctx := xinugateexecutor.WithRequestProxyURL(context.Background(), "http://request-proxy.example:8081")
+	if _, errRefresh := manager.refreshAuthForRequest(ctx, auth.ID, ""); errRefresh != nil {
+		t.Fatalf("refreshAuthForRequest: %v", errRefresh)
+	}
+	if executor.refreshProxy != "" {
+		t.Fatalf("refresh proxy = %q, want credential or global proxy only", executor.refreshProxy)
+	}
+}

@@ -10,17 +10,17 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestAntigravityDisableCooling_ShortCooldownBypassedInHomeMode(t *testing.T) {
 	resetAntigravityCreditsRetryState()
 	t.Cleanup(resetAntigravityCreditsRetryState)
 
-	cliproxyauth.SetQuotaCooldownDisabled(true)
-	t.Cleanup(func() { cliproxyauth.SetQuotaCooldownDisabled(false) })
+	xinugateauth.SetQuotaCooldownDisabled(true)
+	t.Cleanup(func() { xinugateauth.SetQuotaCooldownDisabled(false) })
 
 	client := newFakeAntigravityKVClient()
 	useFakeAntigravityKVClient(t, client, true, nil)
@@ -32,7 +32,7 @@ func TestAntigravityDisableCooling_ShortCooldownBypassedInHomeMode(t *testing.T)
 		},
 	}
 	exec := NewAntigravityExecutor(cfg)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID: "home-cooling-disabled-auth",
 		Metadata: map[string]any{
 			"access_token": "token",
@@ -66,7 +66,7 @@ func TestAntigravityDisableCooling_ShortCooldownBypassedInHomeMode(t *testing.T)
 	// 3. In Execute, upstream 429 RATE_LIMIT_EXCEEDED should not record short cooldown to KV
 	client.setCount = 0
 	upstreamResp := `{"error":{"code":429,"message":"Rate limit exceeded","status":"RESOURCE_EXHAUSTED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"RATE_LIMIT_EXCEEDED"}]}}`
-	execCtx := context.WithValue(context.Background(), "cliproxy.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	execCtx := context.WithValue(context.Background(), "xinugate.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		h := make(http.Header)
 		h.Set("Retry-After", "10")
 		h.Set("Content-Type", "application/json")
@@ -77,11 +77,11 @@ func TestAntigravityDisableCooling_ShortCooldownBypassedInHomeMode(t *testing.T)
 		}, nil
 	}))
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   modelName,
 		Payload: []byte(`{"contents":[{"role":"user","parts":[{"text":"hello"}]}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 	}
 	_, _ = exec.Execute(execCtx, auth, req, opts)
@@ -104,7 +104,7 @@ func TestAntigravityDisableCooling_ExecuteStreamBypassesShortCooldown(t *testing
 		},
 	}
 	exec := NewAntigravityExecutor(cfg)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID: "home-cooling-disabled-auth-stream",
 		Metadata: map[string]any{
 			"access_token": "token",
@@ -114,7 +114,7 @@ func TestAntigravityDisableCooling_ExecuteStreamBypassesShortCooldown(t *testing
 
 	modelName := "claude-sonnet-4-5"
 	upstreamResp := `{"error":{"code":429,"message":"Rate limit exceeded","status":"RESOURCE_EXHAUSTED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"RATE_LIMIT_EXCEEDED"}]}}`
-	execCtx := context.WithValue(context.Background(), "cliproxy.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	execCtx := context.WithValue(context.Background(), "xinugate.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		h := make(http.Header)
 		h.Set("Retry-After", "10")
 		h.Set("Content-Type", "application/json")
@@ -125,11 +125,11 @@ func TestAntigravityDisableCooling_ExecuteStreamBypassesShortCooldown(t *testing
 		}, nil
 	}))
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   modelName,
 		Payload: []byte(`{"contents":[{"role":"user","parts":[{"text":"hello"}]}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 	}
 	_, _ = exec.ExecuteStream(execCtx, auth, req, opts)
@@ -149,7 +149,7 @@ func TestAntigravityDisableCooling_AuthOverrideBypassesShortCooldown(t *testing.
 		DisableCooling: false,
 	}
 	exec := NewAntigravityExecutor(cfg)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID: "override-cooling-disabled-auth",
 		Metadata: map[string]any{
 			"disable_cooling": true,
@@ -183,7 +183,7 @@ func TestAntigravityDisableCooling_AuthOverrideBypassesShortCooldown(t *testing.
 	// In Execute, upstream 429 RATE_LIMIT_EXCEEDED should not record short cooldown to memory map
 	antigravityShortCooldownByAuth = sync.Map{}
 	upstreamResp := `{"error":{"code":429,"message":"Rate limit exceeded","status":"RESOURCE_EXHAUSTED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"RATE_LIMIT_EXCEEDED"}]}}`
-	execCtx := context.WithValue(context.Background(), "cliproxy.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	execCtx := context.WithValue(context.Background(), "xinugate.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		h := make(http.Header)
 		h.Set("Retry-After", "10")
 		h.Set("Content-Type", "application/json")
@@ -194,11 +194,11 @@ func TestAntigravityDisableCooling_AuthOverrideBypassesShortCooldown(t *testing.
 		}, nil
 	}))
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   modelName,
 		Payload: []byte(`{"contents":[{"role":"user","parts":[{"text":"hello"}]}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 	}
 	_, _ = exec.Execute(execCtx, auth, req, opts)
@@ -224,7 +224,7 @@ func TestAntigravityDisableCooling_CreditsHintRefreshBypassedInHomeMode(t *testi
 		},
 	}
 	exec := NewAntigravityExecutor(cfg)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID: "home-refresh-cooling-disabled-auth",
 		Metadata: map[string]any{
 			"access_token": "token",
@@ -245,7 +245,7 @@ func TestAntigravityDisableCooling_CreditsPermanentlyDisabledBypassed(t *testing
 	client := newFakeAntigravityKVClient()
 	useFakeAntigravityKVClient(t, client, true, nil)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID: "home-permanently-disabled-auth",
 		Metadata: map[string]any{
 			"disable_cooling": true,
@@ -256,7 +256,7 @@ func TestAntigravityDisableCooling_CreditsPermanentlyDisabledBypassed(t *testing
 	if client.setCount != 0 {
 		t.Fatalf("KVSet count = %d, want 0 when DisableCooling is true", client.setCount)
 	}
-	if cliproxyauth.HasKnownAntigravityCreditsHint(auth.ID) {
+	if xinugateauth.HasKnownAntigravityCreditsHint(auth.ID) {
 		t.Fatalf("credits hint was stored for auth with DisableCooling true")
 	}
 }

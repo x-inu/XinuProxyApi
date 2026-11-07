@@ -17,13 +17,13 @@ import (
 	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // Execute performs a non-streaming request to the Antigravity API.
-func (e *AntigravityExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *AntigravityExecutor) Execute(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	if helps.HasResponsesCompactionItem(req.Payload) {
 		expanded, errExpand := helps.ExpandAntigravityCompactionCapsules(req.Payload)
 		if errExpand != nil {
@@ -62,7 +62,7 @@ func (e *AntigravityExecutor) Execute(ctx context.Context, auth *cliproxyauth.Au
 	defer reporter.TrackFailure(ctx, &err)
 
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	to := sdktranslator.FromString("antigravity")
 
 	originalPayloadSource := req.Payload
@@ -83,7 +83,7 @@ func (e *AntigravityExecutor) Execute(ctx context.Context, auth *cliproxyauth.Au
 		auth = updatedAuth
 		reporter.UpdateAccessTokenFingerprint(auth)
 	}
-	modelInfo, _ := cliproxyauth.ResolvedModelInfo(req)
+	modelInfo, _ := xinugateauth.ResolvedModelInfo(req)
 	translationReq := sdktranslator.RequestEnvelope{Format: from, Model: baseModel, ModelInfo: modelInfo}
 	originalTranslated, translated := helps.TranslateRequestEnvelopePairWithCodexMultiAgentV2(ctx, opts.Headers, e.cfg, from, to, translationReq, originalPayload, req.Payload)
 
@@ -99,7 +99,7 @@ func (e *AntigravityExecutor) Execute(ctx context.Context, auth *cliproxyauth.Au
 	translated = sanitizeAntigravityGeminiRequestSignatures(baseModel, translated)
 	reporter.SetTranslatedReasoningEffort(translated, to.String())
 
-	useCredits := cliproxyauth.AntigravityCreditsRequested(ctx) && antigravityCreditsRetryEnabled(e.cfg)
+	useCredits := xinugateauth.AntigravityCreditsRequested(ctx) && antigravityCreditsRetryEnabled(e.cfg)
 
 	baseURL := resolveAntigravityRequestBaseURL(auth)
 	httpClient := newAntigravityHTTPClient(ctx, e.cfg, auth, 0)
@@ -196,12 +196,12 @@ func (e *AntigravityExecutor) Execute(ctx context.Context, auth *cliproxyauth.Au
 	if responseFormat == sdktranslator.FormatOpenAIResponse {
 		converted = helps.EnsureResponsesUsageDetails(converted)
 	}
-	resp = cliproxyexecutor.Response{Payload: converted, Headers: httpResp.Header.Clone()}
+	resp = xinugateexecutor.Response{Payload: converted, Headers: httpResp.Header.Clone()}
 	reporter.EnsurePublished(ctx)
 	return resp, nil
 }
 
-func (e *AntigravityExecutor) executeCompaction(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *AntigravityExecutor) executeCompaction(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 	payload := req.Payload
 	if len(payload) == 0 && len(opts.OriginalRequest) > 0 {
@@ -209,7 +209,7 @@ func (e *AntigravityExecutor) executeCompaction(ctx context.Context, auth *clipr
 	}
 	summaryPayload := helps.PrepareAntigravityCompactionSummaryPayload(payload, baseModel)
 
-	summaryReq := cliproxyexecutor.Request{
+	summaryReq := xinugateexecutor.Request{
 		Model:    req.Model,
 		Payload:  summaryPayload,
 		Metadata: req.Metadata,
@@ -246,14 +246,14 @@ func (e *AntigravityExecutor) executeCompaction(ctx context.Context, auth *clipr
 	}
 
 	respBytes := helps.BuildAntigravityCompactionResponse(baseModel, capsule, inputTokens, outputTokens, totalTokens)
-	return cliproxyexecutor.Response{
+	return xinugateexecutor.Response{
 		Payload: respBytes,
 		Headers: summaryResp.Headers,
 	}, nil
 }
 
 // executeClaudeNonStream performs a claude non-streaming request to the Antigravity API.
-func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 	if !antigravityCoolingDisabled(auth, e.cfg) {
 		if inCooldown, remaining, errCooldown := antigravityIsInShortCooldownRequired(ctx, auth, baseModel, time.Now()); errCooldown != nil {
@@ -269,7 +269,7 @@ func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *
 	defer reporter.TrackFailure(ctx, &err)
 
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	to := sdktranslator.FromString("antigravity")
 
 	originalPayloadSource := req.Payload
@@ -290,7 +290,7 @@ func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *
 		auth = updatedAuth
 		reporter.UpdateAccessTokenFingerprint(auth)
 	}
-	modelInfo, _ := cliproxyauth.ResolvedModelInfo(req)
+	modelInfo, _ := xinugateauth.ResolvedModelInfo(req)
 	translationReq := sdktranslator.RequestEnvelope{Format: from, Model: baseModel, Stream: true, ModelInfo: modelInfo}
 	originalTranslated, translated := helps.TranslateRequestEnvelopePairWithCodexMultiAgentV2(ctx, opts.Headers, e.cfg, from, to, translationReq, originalPayload, req.Payload)
 
@@ -306,7 +306,7 @@ func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *
 	translated = sanitizeAntigravityGeminiRequestSignatures(baseModel, translated)
 	reporter.SetTranslatedReasoningEffort(translated, to.String())
 
-	useCredits := cliproxyauth.AntigravityCreditsRequested(ctx) && antigravityCreditsRetryEnabled(e.cfg)
+	useCredits := xinugateauth.AntigravityCreditsRequested(ctx) && antigravityCreditsRetryEnabled(e.cfg)
 
 	baseURL := resolveAntigravityRequestBaseURL(auth)
 	httpClient := newAntigravityHTTPClient(ctx, e.cfg, auth, 0)
@@ -401,7 +401,7 @@ func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *
 		clearAntigravityCreditsFailureState(auth)
 	}
 	replayAccumulator := newAntigravityReasoningReplayAccumulator(replayScope, requestPayload)
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func(resp *http.Response) {
 		defer close(out)
 		defer func() {
@@ -432,12 +432,12 @@ func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *
 				reporter.Publish(ctx, detail)
 			}
 
-			out <- cliproxyexecutor.StreamChunk{Payload: payload}
+			out <- xinugateexecutor.StreamChunk{Payload: payload}
 		}
 		if errScan := scanner.Err(); errScan != nil {
 			helps.RecordAPIResponseError(ctx, e.cfg, errScan)
 			reporter.PublishFailure(ctx, errScan)
-			out <- cliproxyexecutor.StreamChunk{Err: errScan}
+			out <- xinugateexecutor.StreamChunk{Err: errScan}
 		} else {
 			if replayAccumulator != nil {
 				replayAccumulator.Commit(ctx)
@@ -456,7 +456,7 @@ func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *
 			_, _ = buffer.Write([]byte("\n"))
 		}
 	}
-	resp = cliproxyexecutor.Response{Payload: e.convertStreamToNonStream(buffer.Bytes())}
+	resp = xinugateexecutor.Response{Payload: e.convertStreamToNonStream(buffer.Bytes())}
 
 	resp.Payload = e.resolveWebSearchGroundingURLs(ctx, auth, from, originalPayload, translated, resp.Payload)
 	reporter.ObserveResponseModel(resp.Payload)
@@ -466,7 +466,7 @@ func (e *AntigravityExecutor) executeClaudeNonStream(ctx context.Context, auth *
 	if responseFormat == sdktranslator.FormatOpenAIResponse {
 		converted = helps.EnsureResponsesUsageDetails(converted)
 	}
-	resp = cliproxyexecutor.Response{Payload: converted, Headers: httpResp.Header.Clone()}
+	resp = xinugateexecutor.Response{Payload: converted, Headers: httpResp.Header.Clone()}
 	reporter.EnsurePublished(ctx)
 
 	return resp, nil

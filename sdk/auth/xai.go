@@ -10,7 +10,7 @@ import (
 	xaiauth "github.com/x-inu/XinuGate/v7/internal/auth/xai"
 	"github.com/x-inu/XinuGate/v7/internal/browser"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // XAIAuthenticator implements the xAI Grok OAuth device-code flow.
@@ -35,7 +35,7 @@ func (XAIAuthenticator) RefreshLead() *time.Duration {
 // Login launches the OAuth device-code flow to obtain xAI tokens and persists them.
 func (a XAIAuthenticator) Login(ctx context.Context, cfg *config.Config, opts *LoginOptions) (*coreauth.Auth, error) {
 	if cfg == nil {
-		return nil, fmt.Errorf("cliproxy auth: configuration is required")
+		return nil, fmt.Errorf("xinugate auth: configuration is required")
 	}
 	if ctx == nil {
 		ctx = context.Background()

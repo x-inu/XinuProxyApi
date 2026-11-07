@@ -12,36 +12,36 @@ import (
 	"github.com/tidwall/gjson"
 	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-const claudeReplayResolvedModelInfoKey = "cliproxy.resolved_api_key_model_info"
+const claudeReplayResolvedModelInfoKey = "xinugate.resolved_api_key_model_info"
 
-func claudeReplayTestAuth(baseURL string) *cliproxyauth.Auth {
-	return &cliproxyauth.Auth{
+func claudeReplayTestAuth(baseURL string) *xinugateauth.Auth {
+	return &xinugateauth.Auth{
 		ID:       "claude-replay-auth",
 		Provider: "claude",
 		Attributes: map[string]string{
-			cliproxyauth.AttributeAPIKey:   "key-claude-replay",
-			cliproxyauth.AttributeAuthKind: cliproxyauth.AuthKindAPIKey,
+			xinugateauth.AttributeAPIKey:   "key-claude-replay",
+			xinugateauth.AttributeAuthKind: xinugateauth.AuthKindAPIKey,
 			"base_url":                     baseURL,
 		},
 	}
 }
 
-func claudeReplayTestRequest(payload []byte, sessionID string, isCompat bool, source sdktranslator.Format) (cliproxyexecutor.Request, cliproxyexecutor.Options) {
-	return cliproxyexecutor.Request{
+func claudeReplayTestRequest(payload []byte, sessionID string, isCompat bool, source sdktranslator.Format) (xinugateexecutor.Request, xinugateexecutor.Options) {
+	return xinugateexecutor.Request{
 			Model:   "claude-synthetic-4772",
 			Payload: payload,
 			Metadata: map[string]any{
 				claudeReplayResolvedModelInfoKey: &registry.ModelInfo{IsCompat: isCompat},
 			},
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: source,
 			Metadata: map[string]any{
-				cliproxyexecutor.ExecutionSessionMetadataKey: sessionID,
+				xinugateexecutor.ExecutionSessionMetadataKey: sessionID,
 			},
 		}
 }
@@ -52,9 +52,9 @@ func TestClaudeThinkingReplayEnabledRequiresCompatClaudeAPIKey(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		auth       *cliproxyauth.Auth
-		request    cliproxyexecutor.Request
-		options    cliproxyexecutor.Options
+		auth       *xinugateauth.Auth
+		request    xinugateexecutor.Request
+		options    xinugateexecutor.Options
 		wantEnable bool
 	}{
 		{
@@ -67,7 +67,7 @@ func TestClaudeThinkingReplayEnabledRequiresCompatClaudeAPIKey(t *testing.T) {
 		{
 			name: "non compat model",
 			auth: baseAuth,
-			request: func() cliproxyexecutor.Request {
+			request: func() xinugateexecutor.Request {
 				request, _ := claudeReplayTestRequest([]byte(`{"messages":[]}`), "scope-non-compat", false, sdktranslator.FormatClaude)
 				return request
 			}(),
@@ -76,10 +76,10 @@ func TestClaudeThinkingReplayEnabledRequiresCompatClaudeAPIKey(t *testing.T) {
 		},
 		{
 			name: "OAuth credential",
-			auth: func() *cliproxyauth.Auth {
+			auth: func() *xinugateauth.Auth {
 				auth := baseAuth.Clone()
-				auth.Attributes[cliproxyauth.AttributeAuthKind] = cliproxyauth.AuthKindOAuth
-				auth.Attributes[cliproxyauth.AttributeAPIKey] = "sk-ant-oat-replay"
+				auth.Attributes[xinugateauth.AttributeAuthKind] = xinugateauth.AuthKindOAuth
+				auth.Attributes[xinugateauth.AttributeAPIKey] = "sk-ant-oat-replay"
 				return auth
 			}(),
 			request:    baseRequest,
@@ -88,7 +88,7 @@ func TestClaudeThinkingReplayEnabledRequiresCompatClaudeAPIKey(t *testing.T) {
 		},
 		{
 			name: "other provider",
-			auth: func() *cliproxyauth.Auth {
+			auth: func() *xinugateauth.Auth {
 				auth := baseAuth.Clone()
 				auth.Provider = "kimi"
 				return auth
@@ -101,7 +101,7 @@ func TestClaudeThinkingReplayEnabledRequiresCompatClaudeAPIKey(t *testing.T) {
 			name:    "OpenAI source format",
 			auth:    baseAuth,
 			request: baseRequest,
-			options: func() cliproxyexecutor.Options {
+			options: func() xinugateexecutor.Options {
 				options := baseOptions
 				options.SourceFormat = sdktranslator.FormatOpenAI
 				return options

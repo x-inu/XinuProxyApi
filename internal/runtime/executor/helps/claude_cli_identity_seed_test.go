@@ -6,13 +6,13 @@ import (
 
 	"github.com/tidwall/gjson"
 	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestEnsureClaudeCLIFingerprintIdentitySynthesizesStableSources(t *testing.T) {
 	t.Parallel()
 
-	auth := &cliproxyauth.Auth{}
+	auth := &xinugateauth.Auth{}
 	if err := EnsureClaudeCLIFingerprintIdentity(auth, "key-a", true); err != nil {
 		t.Fatalf("EnsureClaudeCLIFingerprintIdentity() error = %v", err)
 	}
@@ -61,13 +61,13 @@ func TestClaudeCLIAuthIdentitySeedPrefersStableAuthIdentity(t *testing.T) {
 
 	tests := []struct {
 		name string
-		auth *cliproxyauth.Auth
+		auth *xinugateauth.Auth
 		want string
 	}{
-		{name: "auth ID", auth: &cliproxyauth.Auth{ID: "kimi-auth"}, want: "auth-id|kimi-auth"},
-		{name: "auth index", auth: &cliproxyauth.Auth{Index: "kimi-index"}, want: "auth-index|kimi-index"},
-		{name: "auth file", auth: &cliproxyauth.Auth{FileName: "kimi.json"}, want: "auth-file|kimi.json"},
-		{name: "missing identity", auth: &cliproxyauth.Auth{}, want: ""},
+		{name: "auth ID", auth: &xinugateauth.Auth{ID: "kimi-auth"}, want: "auth-id|kimi-auth"},
+		{name: "auth index", auth: &xinugateauth.Auth{Index: "kimi-index"}, want: "auth-index|kimi-index"},
+		{name: "auth file", auth: &xinugateauth.Auth{FileName: "kimi.json"}, want: "auth-file|kimi.json"},
+		{name: "missing identity", auth: &xinugateauth.Auth{}, want: ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -82,7 +82,7 @@ func TestClaudeCLIAuthIdentitySeedPrefersStableAuthIdentity(t *testing.T) {
 func TestPrepareClaudeCLIFingerprintAuthDoesNotMutateSharedMetadata(t *testing.T) {
 	t.Parallel()
 
-	shared := &cliproxyauth.Auth{
+	shared := &xinugateauth.Auth{
 		ID: "kimi-shared",
 		Metadata: map[string]any{
 			"access_token": "token-1",
@@ -107,7 +107,7 @@ func TestPrepareClaudeCLIFingerprintAuthDoesNotMutateSharedMetadata(t *testing.T
 }
 
 func TestPrepareClaudeCLIFingerprintAuthIsolatesUnlockedMetadataReaders(t *testing.T) {
-	shared := &cliproxyauth.Auth{
+	shared := &xinugateauth.Auth{
 		ID: "kimi-race",
 		Metadata: map[string]any{
 			"access_token":  "token-1",
@@ -143,7 +143,7 @@ func TestPrepareClaudeCLIFingerprintAuthIsolatesUnlockedMetadataReaders(t *testi
 func TestEnsureClaudeCLIFingerprintIdentityNoopWithoutSynthesize(t *testing.T) {
 	t.Parallel()
 
-	auth := &cliproxyauth.Auth{}
+	auth := &xinugateauth.Auth{}
 	if err := EnsureClaudeCLIFingerprintIdentity(auth, "key-a", false); err != nil {
 		t.Fatalf("EnsureClaudeCLIFingerprintIdentity() error = %v", err)
 	}
@@ -155,7 +155,7 @@ func TestEnsureClaudeCLIFingerprintIdentityNoopWithoutSynthesize(t *testing.T) {
 func TestEnsureClaudeCLIFingerprintIdentityPreservesExistingOAuthSources(t *testing.T) {
 	t.Parallel()
 
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{
+	auth := &xinugateauth.Auth{Metadata: map[string]any{
 		"account_uuid":                        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
 		claudeauth.ClaudeDeviceIDsMetadataKey: []string{"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
 	}}

@@ -16,8 +16,8 @@ import (
 	xaiauth "github.com/x-inu/XinuGate/v7/internal/auth/xai"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 const defaultAPICallTimeout = 60 * time.Second
@@ -28,7 +28,7 @@ const defaultAPICallTimeout = 60 * time.Second
 // providers) reject with HTTP 403. This matches the User-Agent used by the
 // OpenAI-compatible runtime executor so management tools (connectivity tests and
 // model discovery) reach the same upstreams as production traffic.
-const defaultAPICallUserAgent = "cli-proxy-openai-compat"
+const defaultAPICallUserAgent = "xinugate-openai-compat"
 
 const (
 	antigravityOAuthClientID     = "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com"

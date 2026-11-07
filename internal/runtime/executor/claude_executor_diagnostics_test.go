@@ -13,9 +13,9 @@ import (
 	"github.com/tidwall/gjson"
 	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestInjectClaudeDiagnosticsMatchesNativeFieldOrderAndContinuity(t *testing.T) {
@@ -23,7 +23,7 @@ func TestInjectClaudeDiagnosticsMatchesNativeFieldOrderAndContinuity(t *testing.
 
 	body := []byte(`{"context_management":{"edits":[{"type":"clear_thinking_20251015","keep":"all"}]},"max_tokens":1,"messages":[]}`)
 	testID := uuid.NewString()
-	auth := &cliproxyauth.Auth{ID: "credential-diagnostics-order-" + testID}
+	auth := &xinugateauth.Auth{ID: "credential-diagnostics-order-" + testID}
 	first, state := injectClaudeDiagnostics(body, auth, "session-diagnostics-order-"+testID)
 	wantOrder := `"context_management":{"edits":[{"type":"clear_thinking_20251015","keep":"all"}]},"diagnostics":{"previous_message_id":null},"max_tokens"`
 	if !bytes.Contains(first, []byte(wantOrder)) {
@@ -59,10 +59,10 @@ func TestClaudeExecutorDiagnosticsAdvancesAfterSuccessfulResponse(t *testing.T) 
 		response := `{"id":"msg_diagnostics_` + string(rune('0'+call)) + `","type":"message","model":"claude-opus-5","role":"assistant","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":1,"output_tokens":1}}`
 		return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(response)), Request: req}, nil
 	})
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", http.RoundTripper(transport))
 	deviceIDs := []string{"0000000000000000000000000000000000000000000000000000000000000000"}
 	testID := uuid.NewString()
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:         "diagnostics-live-path-" + testID,
 		Attributes: map[string]string{"api_key": "sk-ant-oat-diagnostics-live-path", "cloak_mode": "always"},
 		Metadata: map[string]any{
@@ -71,10 +71,10 @@ func TestClaudeExecutorDiagnosticsAdvancesAfterSuccessfulResponse(t *testing.T) 
 		},
 	}
 	executor := NewClaudeExecutor(&config.Config{})
-	request := cliproxyexecutor.Request{Model: "claude-opus-5", Payload: []byte(`{"model":"claude-opus-5","messages":[{"role":"user","content":"x"}],"max_tokens":16}`)}
-	options := cliproxyexecutor.Options{
+	request := xinugateexecutor.Request{Model: "claude-opus-5", Payload: []byte(`{"model":"claude-opus-5","messages":[{"role":"user","content":"x"}],"max_tokens":16}`)}
+	options := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
-		Metadata:     map[string]any{cliproxyexecutor.ExecutionSessionMetadataKey: "diagnostics-conversation-" + testID},
+		Metadata:     map[string]any{xinugateexecutor.ExecutionSessionMetadataKey: "diagnostics-conversation-" + testID},
 	}
 	for turn := range 2 {
 		if _, errExecute := executor.Execute(ctx, auth, request, options); errExecute != nil {
@@ -129,10 +129,10 @@ func TestClaudeExecutorContinuityAdvancesRequestIDAndPromptIDInBillingHeader(t *
 		}
 		return &http.Response{StatusCode: http.StatusOK, Header: header, Body: io.NopCloser(strings.NewReader(response)), Request: req}, nil
 	})
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", http.RoundTripper(transport))
 	deviceIDs := []string{"0000000000000000000000000000000000000000000000000000000000000000"}
 	testID := uuid.NewString()
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:         "continuity-test-" + testID,
 		Attributes: map[string]string{"api_key": "sk-ant-oat-continuity-test", "cloak_mode": "always"},
 		Metadata: map[string]any{
@@ -141,48 +141,48 @@ func TestClaudeExecutorContinuityAdvancesRequestIDAndPromptIDInBillingHeader(t *
 		},
 	}
 	executor := NewClaudeExecutor(&config.Config{})
-	options := cliproxyexecutor.Options{
+	options := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
-		Metadata:     map[string]any{cliproxyexecutor.ExecutionSessionMetadataKey: "continuity-conv-" + testID},
+		Metadata:     map[string]any{xinugateexecutor.ExecutionSessionMetadataKey: "continuity-conv-" + testID},
 	}
 
 	// Turn 1: User prompt
-	req1 := cliproxyexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"turn 1 prompt"}],"max_tokens":100}`)}
+	req1 := xinugateexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"turn 1 prompt"}],"max_tokens":100}`)}
 	if _, err := executor.Execute(ctx, auth, req1, options); err != nil {
 		t.Fatalf("turn 1 failed: %v", err)
 	}
 
 	// Turn 2: User prompt in same conversation
-	req2 := cliproxyexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"turn 1 prompt"},{"role":"assistant","content":"ok"},{"role":"user","content":"turn 2 prompt"}],"max_tokens":100}`)}
+	req2 := xinugateexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"turn 1 prompt"},{"role":"assistant","content":"ok"},{"role":"user","content":"turn 2 prompt"}],"max_tokens":100}`)}
 	if _, err := executor.Execute(ctx, auth, req2, options); err != nil {
 		t.Fatalf("turn 2 failed: %v", err)
 	}
 
 	// Turn 2.1: Tool result continuation within turn 2
-	req2Tool := cliproxyexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"turn 1 prompt"},{"role":"assistant","content":"ok"},{"role":"user","content":"turn 2 prompt"},{"role":"assistant","content":[{"type":"tool_use","id":"t1","name":"bash","input":{}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"tool output"}]}],"max_tokens":100}`)}
+	req2Tool := xinugateexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"turn 1 prompt"},{"role":"assistant","content":"ok"},{"role":"user","content":"turn 2 prompt"},{"role":"assistant","content":[{"type":"tool_use","id":"t1","name":"bash","input":{}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"tool output"}]}],"max_tokens":100}`)}
 	if _, err := executor.Execute(ctx, auth, req2Tool, options); err != nil {
 		t.Fatalf("turn 2.1 tool failed: %v", err)
 	}
 
 	// Turn 3: Probe request (max_tokens: 1)
-	reqProbe := cliproxyexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"probe"}],"max_tokens":1}`)}
+	reqProbe := xinugateexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"probe"}],"max_tokens":1}`)}
 	if _, err := executor.Execute(ctx, auth, reqProbe, options); err != nil {
 		t.Fatalf("probe failed: %v", err)
 	}
 
 	// Turn 4: Subagent request (carrying X-Claude-Code-Agent-Id)
-	subagentOptions := cliproxyexecutor.Options{
+	subagentOptions := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Headers:      http.Header{"X-Claude-Code-Agent-Id": []string{"subagent-worker-1"}},
-		Metadata:     map[string]any{cliproxyexecutor.ExecutionSessionMetadataKey: "continuity-subagent-" + testID},
+		Metadata:     map[string]any{xinugateexecutor.ExecutionSessionMetadataKey: "continuity-subagent-" + testID},
 	}
-	reqSubagent := cliproxyexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"subagent prompt"}],"max_tokens":100}`)}
+	reqSubagent := xinugateexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"subagent prompt"}],"max_tokens":100}`)}
 	if _, err := executor.Execute(ctx, auth, reqSubagent, subagentOptions); err != nil {
 		t.Fatalf("subagent failed: %v", err)
 	}
 
 	// Turn 5: Resumed main session user prompt after probe (must chain from turn 2.1, NOT from probe turn 3)
-	req5 := cliproxyexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"turn 5 prompt"}],"max_tokens":100}`)}
+	req5 := xinugateexecutor.Request{Model: "claude-sonnet-5", Payload: []byte(`{"model":"claude-sonnet-5","messages":[{"role":"user","content":"turn 5 prompt"}],"max_tokens":100}`)}
 	if _, err := executor.Execute(ctx, auth, req5, options); err != nil {
 		t.Fatalf("turn 5 failed: %v", err)
 	}

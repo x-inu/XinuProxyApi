@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
-var ErrRefreshNotSupported = errors.New("cliproxy auth: refresh not supported")
+var ErrRefreshNotSupported = errors.New("xinugate auth: refresh not supported")
 
 // LoginOptions captures generic knobs shared across authenticators.
 // Provider-specific logic can inspect Metadata for extra parameters.

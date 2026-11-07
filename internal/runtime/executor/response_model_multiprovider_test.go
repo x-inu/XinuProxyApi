@@ -8,10 +8,10 @@ import (
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 
@@ -54,7 +54,7 @@ func TestClaudeUsageRecordCarriesResponseModel(t *testing.T) {
 	})
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	auth := &cliproxyauth.Auth{ID: "claude-auth-1", Index: "auth-claude-1", Provider: "claude"}
+	auth := &xinugateauth.Auth{ID: "claude-auth-1", Index: "auth-claude-1", Provider: "claude"}
 	reporter := helps.NewExecutorUsageReporter(ctx, NewClaudeExecutor(&config.Config{}), "claude-opus-5", auth)
 
 	reporter.ObserveResponseModel([]byte(`data: {"type":"message_start","message":{"id":"msg_1","type":"message","role":"assistant","model":"claude-sonnet-5"}}`))
@@ -78,7 +78,7 @@ func TestGeminiUsageRecordCarriesResponseModel(t *testing.T) {
 	})
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	auth := &cliproxyauth.Auth{ID: "gemini-auth-1", Index: "auth-gemini-1", Provider: "gemini"}
+	auth := &xinugateauth.Auth{ID: "gemini-auth-1", Index: "auth-gemini-1", Provider: "gemini"}
 	reporter := helps.NewExecutorUsageReporter(ctx, NewGeminiExecutor(&config.Config{}), "gemini-2.5-pro", auth)
 
 	reporter.ObserveResponseModel([]byte(`data: {"candidates":[{"content":{"parts":[{"text":"hi"}]}}],"modelVersion":"gemini-2.5-flash"}`))
@@ -102,7 +102,7 @@ func TestOpenAICompatUsageRecordCarriesResponseModel(t *testing.T) {
 	})
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	auth := &cliproxyauth.Auth{ID: "openai-auth-1", Index: "auth-openai-1", Provider: "openai"}
+	auth := &xinugateauth.Auth{ID: "openai-auth-1", Index: "auth-openai-1", Provider: "openai"}
 	reporter := helps.NewExecutorUsageReporter(ctx, NewOpenAICompatExecutor("openai", &config.Config{}), "gpt-4o", auth)
 
 	reporter.ObserveResponseModel([]byte(`{"id":"chatcmpl-1","object":"chat.completion","model":"gpt-4o-2024-08-06","choices":[]}`))
@@ -126,7 +126,7 @@ func TestGeminiInteractionsUsageRecordCarriesResponseModel(t *testing.T) {
 	})
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	auth := &cliproxyauth.Auth{ID: "gemini-auth-interactions", Index: "auth-gemini-interactions-1", Provider: "gemini"}
+	auth := &xinugateauth.Auth{ID: "gemini-auth-interactions", Index: "auth-gemini-interactions-1", Provider: "gemini"}
 	reporter := helps.NewExecutorUsageReporter(ctx, NewGeminiExecutor(&config.Config{}), "gemini-2.5-pro", auth)
 
 	sseChunk := []byte("data: {\"event_type\":\"interaction.completed\",\"interaction\":{\"id\":\"i1\",\"status\":\"completed\",\"service_tier\":\"standard\",\"model\":\"gemini-3.1-flash-lite\",\"usage\":{\"total_input_tokens\":2,\"total_output_tokens\":3,\"total_tokens\":5}}}\n\n")
@@ -155,7 +155,7 @@ func TestDevinStreamRecordsResponseModelFromUsage(t *testing.T) {
 	})
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	auth := &cliproxyauth.Auth{ID: "devin-auth-1", Index: "auth-devin-1", Provider: "devin"}
+	auth := &xinugateauth.Auth{ID: "devin-auth-1", Index: "auth-devin-1", Provider: "devin"}
 	exec := NewDevinExecutor(&config.Config{})
 	reporter := helps.NewExecutorUsageReporter(ctx, exec, "devin/swe-2", auth)
 
@@ -175,8 +175,8 @@ func TestDevinStreamRecordsResponseModelFromUsage(t *testing.T) {
 	buf.Write(helps.WrapConnectEnvelope(f1))
 	buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
-	out := make(chan cliproxyexecutor.StreamChunk, 20)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 20)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -185,7 +185,7 @@ func TestDevinStreamRecordsResponseModelFromUsage(t *testing.T) {
 		exec.streamDevinFrames(
 			ctx,
 			&buf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatInteractions,
@@ -215,7 +215,7 @@ func TestDevinStreamEmptyWhenNoModelNameInUsage(t *testing.T) {
 	})
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	auth := &cliproxyauth.Auth{ID: "devin-auth-2", Index: "auth-devin-2", Provider: "devin"}
+	auth := &xinugateauth.Auth{ID: "devin-auth-2", Index: "auth-devin-2", Provider: "devin"}
 	exec := NewDevinExecutor(&config.Config{})
 	reporter := helps.NewExecutorUsageReporter(ctx, exec, "devin/swe-2", auth)
 
@@ -233,8 +233,8 @@ func TestDevinStreamEmptyWhenNoModelNameInUsage(t *testing.T) {
 	buf.Write(helps.WrapConnectEnvelope(f1))
 	buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
-	out := make(chan cliproxyexecutor.StreamChunk, 20)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 20)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -243,7 +243,7 @@ func TestDevinStreamEmptyWhenNoModelNameInUsage(t *testing.T) {
 		exec.streamDevinFrames(
 			ctx,
 			&buf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatInteractions,
@@ -270,7 +270,7 @@ func TestDevinNonStreamRecordsResponseModelFromUsage(t *testing.T) {
 	})
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	auth := &cliproxyauth.Auth{ID: "devin-auth-3", Index: "auth-devin-3", Provider: "devin"}
+	auth := &xinugateauth.Auth{ID: "devin-auth-3", Index: "auth-devin-3", Provider: "devin"}
 	exec := NewDevinExecutor(&config.Config{})
 	reporter := helps.NewExecutorUsageReporter(ctx, exec, "devin/swe-2", auth)
 

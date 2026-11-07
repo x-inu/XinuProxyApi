@@ -20,10 +20,10 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/httpwire"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 	"golang.org/x/net/proxy"
 )
 
@@ -53,9 +53,9 @@ func (h *Host) newHTTPClientWithProxy(auth *coreauth.Auth, requestProxyURL strin
 
 func (c *hostHTTPClient) proxyContext(ctx context.Context) context.Context {
 	if c == nil {
-		return cliproxyexecutor.WithoutRequestProxyURL(ctx)
+		return xinugateexecutor.WithoutRequestProxyURL(ctx)
 	}
-	return cliproxyexecutor.WithRequestProxyURL(ctx, c.requestProxyURL)
+	return xinugateexecutor.WithRequestProxyURL(ctx, c.requestProxyURL)
 }
 
 func (c *hostHTTPClient) Do(ctx context.Context, req pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
@@ -166,7 +166,7 @@ func (c *hostHTTPClient) doHTTP(ctx context.Context, req pluginapi.HTTPRequest) 
 	if client == nil {
 		client = &http.Client{}
 	}
-	cliproxyexecutor.MarkUpstreamAttempt(ctx)
+	xinugateexecutor.MarkUpstreamAttempt(ctx)
 	resp, errDo := client.Do(httpReq)
 	if errDo != nil {
 		if cleanup != nil {
@@ -264,7 +264,7 @@ func (c *hostHTTPClient) newHTTPClientForRequest(ctx context.Context, cfg *confi
 
 	var ctxTransport *http.Transport
 	if ctx != nil {
-		if ctxRoundTripper, ok := ctx.Value("cliproxy.roundtripper").(http.RoundTripper); ok && ctxRoundTripper != nil {
+		if ctxRoundTripper, ok := ctx.Value("xinugate.roundtripper").(http.RoundTripper); ok && ctxRoundTripper != nil {
 			if t, ok := ctxRoundTripper.(*http.Transport); ok && t != nil {
 				ctxTransport = t
 			} else if baseTransport == nil {

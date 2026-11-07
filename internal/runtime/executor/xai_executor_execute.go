@@ -13,12 +13,12 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-func (e *XAIExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *XAIExecutor) Execute(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	ctx = helps.EnsureSessionContext(ctx, opts, req.Payload)
 	if opts.Alt == "responses/compact" {
 		return e.executeCompact(ctx, auth, req, opts)
@@ -120,14 +120,14 @@ func (e *XAIExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req 
 			if prepared.responseFormat == sdktranslator.FormatOpenAIResponse {
 				out = helps.EnsureResponsesUsageDetails(out)
 			}
-			return cliproxyexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}, nil
+			return xinugateexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}, nil
 		}
 	}
 
 	return resp, statusErr{code: http.StatusRequestTimeout, msg: "xai stream error: stream disconnected before response.completed or response.incomplete"}
 }
 
-func (e *XAIExecutor) executeCompact(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *XAIExecutor) executeCompact(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	prepared, data, headers, errCompact := e.executeCompactRequest(ctx, auth, req, opts)
 	if errCompact != nil {
 		return resp, errCompact
@@ -138,10 +138,10 @@ func (e *XAIExecutor) executeCompact(ctx context.Context, auth *cliproxyauth.Aut
 	if prepared.responseFormat == sdktranslator.FormatOpenAIResponse {
 		out = helps.EnsureResponsesUsageDetails(out)
 	}
-	return cliproxyexecutor.Response{Payload: out, Headers: headers}, nil
+	return xinugateexecutor.Response{Payload: out, Headers: headers}, nil
 }
 
-func (e *XAIExecutor) executeCompactRequest(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*xaiPreparedRequest, []byte, http.Header, error) {
+func (e *XAIExecutor) executeCompactRequest(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (*xaiPreparedRequest, []byte, http.Header, error) {
 	token, _ := xaiCreds(auth)
 	// Compact must not use xaiChatBaseURL: CLI chat-proxy returns 404 for
 	// /responses/compact and a 404 cools down the whole xAI auth pool.
@@ -214,7 +214,7 @@ func (e *XAIExecutor) executeCompactRequest(ctx context.Context, auth *cliproxya
 	return prepared, data, httpResp.Header.Clone(), nil
 }
 
-func (e *XAIExecutor) executeCompactionTriggerStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
+func (e *XAIExecutor) executeCompactionTriggerStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (*xinugateexecutor.StreamResult, error) {
 	prepared, data, headers, err := e.executeCompactRequest(ctx, auth, req, opts)
 	if err != nil {
 		return nil, err
@@ -227,12 +227,12 @@ func (e *XAIExecutor) executeCompactionTriggerStream(ctx context.Context, auth *
 	headers.Set("Content-Type", "text/event-stream")
 
 	chunks := xaiBuildCompactionTriggerStreamChunks(prepared, data)
-	out := make(chan cliproxyexecutor.StreamChunk, len(chunks))
+	out := make(chan xinugateexecutor.StreamChunk, len(chunks))
 	for _, chunk := range chunks {
-		out <- cliproxyexecutor.StreamChunk{Payload: chunk}
+		out <- xinugateexecutor.StreamChunk{Payload: chunk}
 	}
 	close(out)
-	return &cliproxyexecutor.StreamResult{Headers: headers, Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: headers, Chunks: out}, nil
 }
 
 func xaiInputHasItemType(body []byte, itemType string) bool {

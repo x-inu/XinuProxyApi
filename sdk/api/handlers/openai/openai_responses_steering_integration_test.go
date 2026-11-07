@@ -17,7 +17,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	runtimeexecutor "github.com/x-inu/XinuGate/v7/internal/runtime/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // Exercise the actual downstream handler, auth manager and Codex executor.

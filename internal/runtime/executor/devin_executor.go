@@ -28,9 +28,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	translatorcommon "github.com/x-inu/XinuGate/v7/internal/translator/common"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // DevinExecutor executes requests against the Codeium/Devin Connect-RPC backend.
@@ -89,12 +89,12 @@ func (e *DevinExecutor) Identifier() string {
 }
 
 // RequestToFormat specifies that Devin expects the interactions intermediate format.
-func (e *DevinExecutor) RequestToFormat(_ cliproxyexecutor.Request, _ cliproxyexecutor.Options) sdktranslator.Format {
+func (e *DevinExecutor) RequestToFormat(_ xinugateexecutor.Request, _ xinugateexecutor.Options) sdktranslator.Format {
 	return sdktranslator.FormatInteractions
 }
 
 // PrepareRequest decorates the outgoing HTTP request with Devin Connect-RPC headers.
-func (e *DevinExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth) error {
+func (e *DevinExecutor) PrepareRequest(req *http.Request, auth *xinugateauth.Auth) error {
 	if req == nil {
 		return nil
 	}
@@ -124,7 +124,7 @@ func (e *DevinExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Aut
 }
 
 // HttpRequest injects Devin credentials into the request and executes it.
-func (e *DevinExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth, req *http.Request) (*http.Response, error) {
+func (e *DevinExecutor) HttpRequest(ctx context.Context, auth *xinugateauth.Auth, req *http.Request) (*http.Response, error) {
 	if req == nil {
 		return nil, fmt.Errorf("devin executor: request is nil")
 	}
@@ -140,7 +140,7 @@ func (e *DevinExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth
 }
 
 // Refresh updates Devin user status, plan, and quota signals.
-func (e *DevinExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (e *DevinExecutor) Refresh(ctx context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	if auth == nil {
 		return nil, errors.New("devin executor: auth is nil")
 	}
@@ -227,15 +227,15 @@ func (e *DevinExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*
 }
 
 // CountTokens provides token counting for Devin requests.
-func (e *DevinExecutor) CountTokens(_ context.Context, _ *cliproxyauth.Auth, req cliproxyexecutor.Request, _ cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *DevinExecutor) CountTokens(_ context.Context, _ *xinugateauth.Auth, req xinugateexecutor.Request, _ xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	// Devin has no standalone token count endpoint; estimate via length heuristic.
 	promptTokens := int64(len(req.Payload) / 4)
 	out := []byte(fmt.Sprintf(`{"total_tokens":%d,"input_tokens":%d}`, promptTokens, promptTokens))
-	return cliproxyexecutor.Response{Payload: out}, nil
+	return xinugateexecutor.Response{Payload: out}, nil
 }
 
 // Execute performs non-streaming execution against the Devin backend.
-func (e *DevinExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *DevinExecutor) Execute(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	ctx = helps.EnsureSessionContext(ctx, opts, req.Payload)
 	targetModel := thinking.ParseSuffix(req.Model).ModelName
 
@@ -297,17 +297,17 @@ func (e *DevinExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, re
 	}
 	reporter.Publish(ctx, helps.ParseInteractionsUsage(interactionsJSON))
 
-	targetFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	targetFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	var param any
 	out := sdktranslator.TranslateNonStream(ctx, sdktranslator.FormatInteractions, targetFormat, req.Model, opts.OriginalRequest, req.Payload, interactionsJSON, &param)
 	if targetFormat == sdktranslator.FormatOpenAIResponse {
 		out = helps.EnsureResponsesUsageDetails(out)
 	}
-	return cliproxyexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}, nil
+	return xinugateexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}, nil
 }
 
 // ExecuteStream performs streaming execution against the Devin backend.
-func (e *DevinExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *DevinExecutor) ExecuteStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	ctx = helps.EnsureSessionContext(ctx, opts, req.Payload)
 	targetModel := thinking.ParseSuffix(req.Model).ModelName
 
@@ -349,8 +349,8 @@ func (e *DevinExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 		return nil, newDevinStatusError(httpResp.StatusCode, httpResp.Header, errData)
 	}
 
-	out := make(chan cliproxyexecutor.StreamChunk)
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	out := make(chan xinugateexecutor.StreamChunk)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 
 	streamCtx, cancelStream := context.WithCancel(ctx)
 
@@ -371,13 +371,13 @@ func (e *DevinExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 		e.streamDevinFrames(streamCtx, httpResp.Body, req, opts, chatModelUID, responseFormat, reporter, out)
 	}()
 
-	return &cliproxyexecutor.StreamResult{
+	return &xinugateexecutor.StreamResult{
 		Headers: httpResp.Header.Clone(),
 		Chunks:  out,
 	}, nil
 }
 
-func (e *DevinExecutor) prepareDevinHTTPRequest(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*http.Request, string, []byte, error) {
+func (e *DevinExecutor) prepareDevinHTTPRequest(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (*http.Request, string, []byte, error) {
 	apiKey, baseURL, deviceSeed := devinAuthCredentials(auth)
 	if apiKey == "" {
 		return nil, "", nil, fmt.Errorf("devin credentials missing: api_key or session_token required")
@@ -454,12 +454,12 @@ const maxDevinToolCalls = 128
 func (e *DevinExecutor) streamDevinFrames(
 	ctx context.Context,
 	body io.Reader,
-	req cliproxyexecutor.Request,
-	opts cliproxyexecutor.Options,
+	req xinugateexecutor.Request,
+	opts xinugateexecutor.Options,
 	chatModelUID string,
 	responseFormat sdktranslator.Format,
 	reporter *helps.UsageReporter,
-	out chan<- cliproxyexecutor.StreamChunk,
+	out chan<- xinugateexecutor.StreamChunk,
 ) {
 	if reporter != nil {
 		if chatModelUID != "" {
@@ -507,7 +507,7 @@ func (e *DevinExecutor) streamDevinFrames(
 		if responseFormat == sdktranslator.FormatInteractions {
 			frame := []byte(fmt.Sprintf("data: %s\n\n", string(trimmed)))
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Payload: frame}:
+			case out <- xinugateexecutor.StreamChunk{Payload: frame}:
 				return true
 			case <-ctx.Done():
 				return false
@@ -527,7 +527,7 @@ func (e *DevinExecutor) streamDevinFrames(
 		)
 		for _, line := range lines {
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Payload: line}:
+			case out <- xinugateexecutor.StreamChunk{Payload: line}:
 			case <-ctx.Done():
 				return false
 			}
@@ -540,7 +540,7 @@ func (e *DevinExecutor) streamDevinFrames(
 			return
 		}
 		select {
-		case out <- cliproxyexecutor.StreamChunk{Err: err}:
+		case out <- xinugateexecutor.StreamChunk{Err: err}:
 		case <-ctx.Done():
 		}
 	}
@@ -1013,7 +1013,7 @@ func (e *DevinExecutor) streamDevinFrames(
 	// 6. Terminate stream with [DONE]
 	if responseFormat == sdktranslator.FormatInteractions {
 		select {
-		case out <- cliproxyexecutor.StreamChunk{Payload: []byte("data: [DONE]\n\n")}:
+		case out <- xinugateexecutor.StreamChunk{Payload: []byte("data: [DONE]\n\n")}:
 		case <-ctx.Done():
 		}
 	} else {
@@ -1030,7 +1030,7 @@ func (e *DevinExecutor) streamDevinFrames(
 		)
 		for _, line := range lines {
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Payload: line}:
+			case out <- xinugateexecutor.StreamChunk{Payload: line}:
 			case <-ctx.Done():
 			}
 		}
@@ -2385,7 +2385,7 @@ func newDevinStatusError(code int, headers http.Header, body []byte) statusErr {
 	return err
 }
 
-func devinAuthCredentials(auth *cliproxyauth.Auth) (apiKey string, baseURL string, deviceSeed string) {
+func devinAuthCredentials(auth *xinugateauth.Auth) (apiKey string, baseURL string, deviceSeed string) {
 	if auth == nil {
 		return "", helps.DevinDefaultBaseURL, ""
 	}
@@ -2424,7 +2424,7 @@ func devinAuthCredentials(auth *cliproxyauth.Auth) (apiKey string, baseURL strin
 	return
 }
 
-func devinAuthLogFields(auth *cliproxyauth.Auth) (authID, authLabel, authType, authValue string) {
+func devinAuthLogFields(auth *xinugateauth.Auth) (authID, authLabel, authType, authValue string) {
 	if auth == nil {
 		return "", "", "devin", ""
 	}
@@ -2442,11 +2442,11 @@ func devinAuthLogFields(auth *cliproxyauth.Auth) (authID, authLabel, authType, a
 	return
 }
 
-func resolveDevinSessionAndCascadeIDs(ctx context.Context, sessionID, cascadeID string, opts cliproxyexecutor.Options) (string, string) {
+func resolveDevinSessionAndCascadeIDs(ctx context.Context, sessionID, cascadeID string, opts xinugateexecutor.Options) (string, string) {
 	if sessionID == "" {
 		if ctxSession := util.SessionIDFromContext(ctx); ctxSession != "" {
 			sessionID = ctxSession
-		} else if canon := cliproxyauth.CanonicalSessionID(opts.Headers, opts.OriginalRequest, opts.Metadata); canon != "" {
+		} else if canon := xinugateauth.CanonicalSessionID(opts.Headers, opts.OriginalRequest, opts.Metadata); canon != "" {
 			sessionID = canon
 		}
 	}

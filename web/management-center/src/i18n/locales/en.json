@@ -889,7 +889,7 @@
           "plugin_store_sources": "Third-party Plugin Sources",
           "plugin_store_sources_desc": "Append plugin-store registry sources; the built-in official source is always kept",
           "plugin_store_sources_label": "Plugin source registry URL (plugins.store-sources)",
-          "plugin_store_sources_placeholder": "https://example.com/cliproxy-plugins/registry.json",
+          "plugin_store_sources_placeholder": "https://example.com/xinugate-plugins/registry.json",
           "plugin_store_sources_hint": "One registry.json URL per row. Empty rows are filtered on save",
           "plugin_store_auth": "Plugin Store Auth Rules",
           "plugin_store_auth_desc": "Configure auth headers for private registries, GitHub Release metadata, or artifact downloads",

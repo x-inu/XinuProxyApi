@@ -12,9 +12,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexWebsocketsExecutorRestoresMultiAgentV2NamespaceAcrossIncrementalTurns(t *testing.T) {
@@ -61,24 +61,24 @@ func TestCodexWebsocketsExecutorRestoresMultiAgentV2NamespaceAcrossIncrementalTu
 			executor := NewCodexWebsocketsExecutor(&config.Config{Codex: config.CodexConfig{OptimizeMultiAgentV2: true}})
 			const executionSessionID = "multi-agent-v2-incremental"
 			t.Cleanup(func() { executor.CloseExecutionSession(executionSessionID) })
-			auth := &cliproxyauth.Auth{
+			auth := &xinugateauth.Auth{
 				ID: "codex-test",
 				Attributes: map[string]string{
 					"base_url": server.URL,
 					"api_key":  "test",
 				},
 			}
-			opts := cliproxyexecutor.Options{
+			opts := xinugateexecutor.Options{
 				SourceFormat:   sdktranslator.FromString("openai-response"),
 				ResponseFormat: sdktranslator.FromString("openai-response"),
 				Headers:        http.Header{"User-Agent": []string{"overridden-client/1.0"}},
 				Metadata: map[string]any{
-					cliproxyexecutor.ExecutionSessionMetadataKey: executionSessionID,
+					xinugateexecutor.ExecutionSessionMetadataKey: executionSessionID,
 				},
 			}
 			execute := func(payload []byte) []byte {
 				t.Helper()
-				req := cliproxyexecutor.Request{Model: "gpt-5.4", Payload: payload}
+				req := xinugateexecutor.Request{Model: "gpt-5.4", Payload: payload}
 				if !tt.stream {
 					response, errExecute := executor.Execute(codexSpawnAgentTestContext(), auth, req, opts)
 					if errExecute != nil {
@@ -194,12 +194,12 @@ func TestCodexWebsocketsExecutorOptimizeMultiAgentV2(t *testing.T) {
 	}))
 	defer server.Close()
 
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
-	req := cliproxyexecutor.Request{Model: "gpt-5.4", Payload: codexSpawnAgentTestPayload()}
-	opts := cliproxyexecutor.Options{
+	req := xinugateexecutor.Request{Model: "gpt-5.4", Payload: codexSpawnAgentTestPayload()}
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Headers:      http.Header{"User-Agent": []string{"overridden-client/1.0"}},
 	}

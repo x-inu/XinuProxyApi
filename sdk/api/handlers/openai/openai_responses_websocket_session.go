@@ -9,7 +9,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func websocketUpstreamSupportsIncrementalInput(attributes map[string]string, metadata map[string]any) bool {

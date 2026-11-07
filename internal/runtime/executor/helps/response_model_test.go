@@ -10,8 +10,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	logtest "github.com/sirupsen/logrus/hooks/test"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 func TestExtractCodexResponseModel(t *testing.T) {
@@ -217,7 +217,7 @@ type codexUsageTestExecutor struct{}
 
 func (codexUsageTestExecutor) Identifier() string { return "codex" }
 
-func newCodexTestReporter(ctx context.Context, model string, auth *cliproxyauth.Auth) *UsageReporter {
+func newCodexTestReporter(ctx context.Context, model string, auth *xinugateauth.Auth) *UsageReporter {
 	return NewExecutorUsageReporter(ctx, codexUsageTestExecutor{}, model, auth)
 }
 
@@ -237,8 +237,8 @@ data: {"type":"response.output_text.delta","delta":"hello"}
 data: {"type":"response.completed","response":{"id":"resp_1","model":"gpt-5.6-luna","usage":{"input_tokens":5,"output_tokens":7,"total_tokens":12}}}
 data: [DONE]`
 
-func newSubstitutionTestAuth() *cliproxyauth.Auth {
-	return &cliproxyauth.Auth{
+func newSubstitutionTestAuth() *xinugateauth.Auth {
+	return &xinugateauth.Auth{
 		ID:       "codex-auth-1",
 		Index:    "auth-index-7",
 		Provider: "codex",
@@ -375,7 +375,7 @@ func TestUsageReporterThrottlesRepeatedSubstitutionWarnings(t *testing.T) {
 	codexModelSubstitutionWarns = newCodexModelSubstitutionThrottle(func() time.Time { return now })
 
 	publishSubstitutedAttempt := func(authID, authIndex string) {
-		auth := &cliproxyauth.Auth{ID: authID, Index: authIndex, Provider: "codex"}
+		auth := &xinugateauth.Auth{ID: authID, Index: authIndex, Provider: "codex"}
 		reporter := newCodexTestReporter(ctx, "gpt-6-astra", auth)
 		reporter.ObserveCodexResponseModel([]byte(`{"type":"response.completed","response":{"model":"gpt-5.6-luna"}}`))
 		reporter.Publish(ctx, usage.Detail{TotalTokens: 3})
@@ -413,7 +413,7 @@ func TestUsageReporterThrottlesSubstitutionWarningsAcrossServedModelCase(t *test
 	now := time.Unix(1_700_000_000, 0)
 	codexModelSubstitutionWarns = newCodexModelSubstitutionThrottle(func() time.Time { return now })
 
-	auth := &cliproxyauth.Auth{ID: "codex-auth-1", Index: "auth-index-7", Provider: "codex"}
+	auth := &xinugateauth.Auth{ID: "codex-auth-1", Index: "auth-index-7", Provider: "codex"}
 	for _, served := range []string{"gpt-5.6-luna", "GPT-5.6-LUNA"} {
 		reporter := newCodexTestReporter(ctx, "gpt-6-astra", auth)
 		reporter.ObserveCodexResponseModel([]byte(`{"type":"response.completed","response":{"model":"` + served + `"}}`))

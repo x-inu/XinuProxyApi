@@ -13,17 +13,17 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // CountTokens counts tokens for the given request using the Antigravity API.
-func (e *AntigravityExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *AntigravityExecutor) CountTokens(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	to := sdktranslator.FromString("antigravity")
 	respCtx := context.WithValue(ctx, "alt", opts.Alt)
 	originalPayloadSource := req.Payload
@@ -32,35 +32,35 @@ func (e *AntigravityExecutor) CountTokens(ctx context.Context, auth *cliproxyaut
 	}
 	originalPayloadSource, errValidate := validateAntigravityRequestSignatures(ctx, baseModel, from, originalPayloadSource)
 	if errValidate != nil {
-		return cliproxyexecutor.Response{}, errValidate
+		return xinugateexecutor.Response{}, errValidate
 	}
 	req.Payload = originalPayloadSource
 	token, updatedAuth, errToken := e.ensureAccessToken(ctx, auth)
 	if errToken != nil {
-		return cliproxyexecutor.Response{}, errToken
+		return xinugateexecutor.Response{}, errToken
 	}
 	if updatedAuth != nil {
 		auth = updatedAuth
 	}
-	cliproxyauth.NotifyAccessTokenFingerprint(ctx, auth)
+	xinugateauth.NotifyAccessTokenFingerprint(ctx, auth)
 	if strings.TrimSpace(token) == "" {
-		return cliproxyexecutor.Response{}, statusErr{code: http.StatusUnauthorized, msg: "missing access token"}
+		return xinugateexecutor.Response{}, statusErr{code: http.StatusUnauthorized, msg: "missing access token"}
 	}
 
 	// Prepare payload once (doesn't depend on baseURL)
-	modelInfo, _ := cliproxyauth.ResolvedModelInfo(req)
+	modelInfo, _ := xinugateauth.ResolvedModelInfo(req)
 	translationReq := sdktranslator.RequestEnvelope{Format: from, Model: baseModel, Body: req.Payload, ModelInfo: modelInfo}
 	payload := helps.TranslateRequestEnvelopeWithCodexMultiAgentV2(ctx, opts.Headers, e.cfg, from, to, translationReq).Body
 
 	payload, err := helps.ApplyRequestThinking(payload, req, opts, from.String(), to.String(), e.Identifier())
 	if err != nil {
-		return cliproxyexecutor.Response{}, err
+		return xinugateexecutor.Response{}, err
 	}
 	payload = e.obfuscateSensitiveWords(payload)
 	payload = sanitizeAntigravityGeminiRequestSignatures(baseModel, payload)
 	preparedPayload, _, errReplay := prepareAntigravityGeminiReasoningReplayPayload(ctx, baseModel, req, opts, payload)
 	if errReplay != nil {
-		return cliproxyexecutor.Response{}, errReplay
+		return xinugateexecutor.Response{}, errReplay
 	}
 	payload = ensureAntigravityGeminiLeadingUserContent(baseModel, preparedPayload)
 
@@ -91,7 +91,7 @@ func (e *AntigravityExecutor) CountTokens(ctx context.Context, auth *cliproxyaut
 
 	httpReq, errReq := http.NewRequestWithContext(ctx, http.MethodPost, requestURL.String(), bytes.NewReader(payload))
 	if errReq != nil {
-		return cliproxyexecutor.Response{}, errReq
+		return xinugateexecutor.Response{}, errReq
 	}
 	// No httpReq.Close: keep the shared Antigravity connection pool usable.
 	httpReq.Header.Set("Content-Type", "application/json")
@@ -118,11 +118,11 @@ func (e *AntigravityExecutor) CountTokens(ctx context.Context, auth *cliproxyaut
 		AuthValue: authValue,
 	})
 
-	cliproxyexecutor.MarkUpstreamAttempt(ctx)
+	xinugateexecutor.MarkUpstreamAttempt(ctx)
 	httpResp, errDo := httpClient.Do(httpReq)
 	if errDo != nil {
 		helps.RecordAPIResponseError(ctx, e.cfg, errDo)
-		return cliproxyexecutor.Response{}, errDo
+		return xinugateexecutor.Response{}, errDo
 	}
 
 	helps.RecordAPIResponseMetadata(ctx, e.cfg, httpResp.StatusCode, httpResp.Header.Clone())
@@ -132,14 +132,14 @@ func (e *AntigravityExecutor) CountTokens(ctx context.Context, auth *cliproxyaut
 	}
 	if errRead != nil {
 		helps.RecordAPIResponseError(ctx, e.cfg, errRead)
-		return cliproxyexecutor.Response{}, errRead
+		return xinugateexecutor.Response{}, errRead
 	}
 	helps.AppendAPIResponseChunk(ctx, e.cfg, bodyBytes)
 
 	if httpResp.StatusCode >= http.StatusOK && httpResp.StatusCode < http.StatusMultipleChoices {
 		count := gjson.GetBytes(bodyBytes, "totalTokens").Int()
 		translated := sdktranslator.TranslateTokenCount(respCtx, to, responseFormat, count, bodyBytes)
-		return cliproxyexecutor.Response{Payload: translated, Headers: httpResp.Header.Clone()}, nil
+		return xinugateexecutor.Response{Payload: translated, Headers: httpResp.Header.Clone()}, nil
 	}
 
 	sErr := statusErr{code: httpResp.StatusCode, msg: string(bodyBytes)}
@@ -149,5 +149,5 @@ func (e *AntigravityExecutor) CountTokens(ctx context.Context, auth *cliproxyaut
 			sErr.retryAfter = retryAfter
 		}
 	}
-	return cliproxyexecutor.Response{}, sErr
+	return xinugateexecutor.Response{}, sErr
 }

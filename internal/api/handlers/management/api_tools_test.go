@@ -21,8 +21,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestAPICallUsesRequestProxyURL(t *testing.T) {

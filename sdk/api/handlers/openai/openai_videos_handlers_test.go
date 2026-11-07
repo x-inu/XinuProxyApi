@@ -15,9 +15,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	apihandlers "github.com/x-inu/XinuGate/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func performVideosEndpointRequest(t *testing.T, method string, endpointPath string, contentType string, body io.Reader, handler gin.HandlerFunc) *httptest.ResponseRecorder {

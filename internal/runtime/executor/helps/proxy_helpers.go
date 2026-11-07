@@ -9,9 +9,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // NewProxyAwareHTTPClient creates an HTTP client with proper proxy configuration priority:
@@ -28,7 +28,7 @@ import (
 //
 // Returns:
 //   - *http.Client: An HTTP client with configured proxy or transport
-func NewProxyAwareHTTPClient(ctx context.Context, cfg *config.Config, auth *cliproxyauth.Auth, timeout time.Duration) *http.Client {
+func NewProxyAwareHTTPClient(ctx context.Context, cfg *config.Config, auth *xinugateauth.Auth, timeout time.Duration) *http.Client {
 	httpClient := &http.Client{}
 	if timeout > 0 {
 		httpClient.Timeout = timeout
@@ -49,7 +49,7 @@ func NewProxyAwareHTTPClient(ctx context.Context, cfg *config.Config, auth *clip
 	}
 
 	// Priority 3: Use RoundTripper from context (typically from RoundTripperFor)
-	if rt, ok := ctx.Value("cliproxy.roundtripper").(http.RoundTripper); ok && rt != nil {
+	if rt, ok := ctx.Value("xinugate.roundtripper").(http.RoundTripper); ok && rt != nil {
 		httpClient.Transport = rt
 	}
 
@@ -60,11 +60,11 @@ var devinTransportCache = NewTransportCache[string](DefaultTransportCacheCapacit
 
 // NewDevinHTTPClient creates an HTTP client customized for Devin Connect-RPC upstream.
 // Suppresses automatic Accept-Encoding: gzip while preserving connection reuse across requests.
-func NewDevinHTTPClient(ctx context.Context, cfg *config.Config, auth *cliproxyauth.Auth, timeout time.Duration) *http.Client {
+func NewDevinHTTPClient(ctx context.Context, cfg *config.Config, auth *xinugateauth.Auth, timeout time.Duration) *http.Client {
 	// A request proxy replaces both the injected round tripper and credential/global proxy.
 	// Respect explicitly injected context RoundTripper only when no request override is set.
-	if cliproxyexecutor.RequestProxyURL(ctx) == "" && ctx != nil {
-		if rt, ok := ctx.Value("cliproxy.roundtripper").(http.RoundTripper); ok && rt != nil {
+	if xinugateexecutor.RequestProxyURL(ctx) == "" && ctx != nil {
+		if rt, ok := ctx.Value("xinugate.roundtripper").(http.RoundTripper); ok && rt != nil {
 			if tr, ok := rt.(*http.Transport); ok {
 				key := fmt.Sprintf("rt:%p", tr)
 				cloned, err := devinTransportCache.Get(key, func() (*http.Transport, error) {
@@ -124,8 +124,8 @@ func (rt devinNoGzipRoundTripper) RoundTrip(req *http.Request) (*http.Response, 
 	return rt.base.RoundTrip(req)
 }
 
-func effectiveProxyURL(ctx context.Context, cfg *config.Config, auth *cliproxyauth.Auth) string {
-	if proxyURL := cliproxyexecutor.RequestProxyURL(ctx); proxyURL != "" {
+func effectiveProxyURL(ctx context.Context, cfg *config.Config, auth *xinugateauth.Auth) string {
+	if proxyURL := xinugateexecutor.RequestProxyURL(ctx); proxyURL != "" {
 		return proxyURL
 	}
 	if auth != nil {

@@ -11,11 +11,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-func (e *XAIExecutor) executeImages(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, endpointPath string) (resp cliproxyexecutor.Response, err error) {
+func (e *XAIExecutor) executeImages(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options, endpointPath string) (resp xinugateexecutor.Response, err error) {
 	model := strings.TrimSpace(gjson.GetBytes(req.Payload, "model").String())
 	if model == "" {
 		model = strings.TrimSpace(req.Model)
@@ -68,10 +68,10 @@ func (e *XAIExecutor) executeImages(ctx context.Context, auth *cliproxyauth.Auth
 
 	reporter.ObserveResponseModel(data)
 	reporter.EnsurePublished(ctx)
-	return cliproxyexecutor.Response{Payload: data, Headers: httpResp.Header.Clone()}, nil
+	return xinugateexecutor.Response{Payload: data, Headers: httpResp.Header.Clone()}, nil
 }
 
-func (e *XAIExecutor) executeVideos(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *XAIExecutor) executeVideos(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	model := strings.TrimSpace(gjson.GetBytes(req.Payload, "model").String())
 	if model == "" {
 		model = strings.TrimSpace(req.Model)
@@ -143,5 +143,5 @@ func (e *XAIExecutor) executeVideos(ctx context.Context, auth *cliproxyauth.Auth
 
 	reporter.ObserveResponseModel(data)
 	reporter.EnsurePublished(ctx)
-	return cliproxyexecutor.Response{Payload: data, Headers: httpResp.Header.Clone()}, nil
+	return xinugateexecutor.Response{Payload: data, Headers: httpResp.Header.Clone()}, nil
 }

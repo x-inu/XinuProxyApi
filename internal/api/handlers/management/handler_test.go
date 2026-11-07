@@ -61,8 +61,8 @@ func TestMiddlewareSetsSupportPluginHeader(t *testing.T) {
 		if rec.Code != http.StatusUnauthorized {
 			t.Fatalf("status = %d, want %d", rec.Code, http.StatusUnauthorized)
 		}
-		if got := rec.Header().Get("X-CPA-SUPPORT-PLUGIN"); got != pluginhost.SupportPluginHeaderValue() {
-			t.Fatalf("X-CPA-SUPPORT-PLUGIN = %q, want %q", got, pluginhost.SupportPluginHeaderValue())
+		if got := rec.Header().Get("X-XG-SUPPORT-PLUGIN"); got != pluginhost.SupportPluginHeaderValue() {
+			t.Fatalf("X-XG-SUPPORT-PLUGIN = %q, want %q", got, pluginhost.SupportPluginHeaderValue())
 		}
 	})
 
@@ -81,8 +81,8 @@ func TestMiddlewareSetsSupportPluginHeader(t *testing.T) {
 		if rec.Code != http.StatusOK {
 			t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
 		}
-		if got := rec.Header().Get("X-CPA-SUPPORT-PLUGIN"); got != pluginhost.SupportPluginHeaderValue() {
-			t.Fatalf("X-CPA-SUPPORT-PLUGIN = %q, want %q", got, pluginhost.SupportPluginHeaderValue())
+		if got := rec.Header().Get("X-XG-SUPPORT-PLUGIN"); got != pluginhost.SupportPluginHeaderValue() {
+			t.Fatalf("X-XG-SUPPORT-PLUGIN = %q, want %q", got, pluginhost.SupportPluginHeaderValue())
 		}
 	})
 }

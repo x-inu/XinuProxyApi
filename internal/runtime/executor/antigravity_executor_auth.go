@@ -14,11 +14,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // Refresh refreshes the authentication credentials using the refresh token.
-func (e *AntigravityExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (e *AntigravityExecutor) Refresh(ctx context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	if refreshed, handled, err := helps.RefreshAuthViaHome(ctx, e.cfg, auth); handled {
 		return refreshed, err
 	}
@@ -32,11 +32,11 @@ func (e *AntigravityExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Au
 	return updated, nil
 }
 
-func (e *AntigravityExecutor) ShouldPrepareRequestAuth(auth *cliproxyauth.Auth) bool {
+func (e *AntigravityExecutor) ShouldPrepareRequestAuth(auth *xinugateauth.Auth) bool {
 	return antigravityProjectIDFromAuth(auth) == ""
 }
 
-func (e *AntigravityExecutor) PrepareRequestAuth(ctx context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (e *AntigravityExecutor) PrepareRequestAuth(ctx context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	if auth == nil || !e.ShouldPrepareRequestAuth(auth) {
 		return nil, nil
 	}
@@ -67,7 +67,7 @@ func (e *AntigravityExecutor) PrepareRequestAuth(ctx context.Context, auth *clip
 	return updated, nil
 }
 
-func (e *AntigravityExecutor) ensureAccessToken(ctx context.Context, auth *cliproxyauth.Auth) (string, *cliproxyauth.Auth, error) {
+func (e *AntigravityExecutor) ensureAccessToken(ctx context.Context, auth *xinugateauth.Auth) (string, *xinugateauth.Auth, error) {
 	if auth == nil {
 		return "", nil, statusErr{code: http.StatusUnauthorized, msg: "missing auth"}
 	}
@@ -79,8 +79,8 @@ func (e *AntigravityExecutor) ensureAccessToken(ctx context.Context, auth *clipr
 	}
 	refreshCtx := context.Background()
 	if ctx != nil {
-		if rt, ok := ctx.Value("cliproxy.roundtripper").(http.RoundTripper); ok && rt != nil {
-			refreshCtx = context.WithValue(refreshCtx, "cliproxy.roundtripper", rt)
+		if rt, ok := ctx.Value("xinugate.roundtripper").(http.RoundTripper); ok && rt != nil {
+			refreshCtx = context.WithValue(refreshCtx, "xinugate.roundtripper", rt)
 		}
 	}
 	if refreshed, handled, err := helps.RefreshAuthViaHome(refreshCtx, e.cfg, auth); handled {
@@ -102,7 +102,7 @@ func (e *AntigravityExecutor) ensureAccessToken(ctx context.Context, auth *clipr
 	return metaStringValue(updated.Metadata, "access_token"), updated, nil
 }
 
-func (e *AntigravityExecutor) refreshToken(ctx context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (e *AntigravityExecutor) refreshToken(ctx context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	if auth == nil {
 		return nil, statusErr{code: http.StatusUnauthorized, msg: "missing auth"}
 	}
@@ -145,7 +145,7 @@ func (e *AntigravityExecutor) refreshToken(ctx context.Context, auth *cliproxyau
 	return auth, nil
 }
 
-func (e *AntigravityExecutor) refreshTokenSingleFlight(ctx context.Context, auth *cliproxyauth.Auth, refreshToken string) (*antigravityTokenRefreshData, error) {
+func (e *AntigravityExecutor) refreshTokenSingleFlight(ctx context.Context, auth *xinugateauth.Auth, refreshToken string) (*antigravityTokenRefreshData, error) {
 	form := url.Values{}
 	form.Set("client_id", antigravityClientID)
 	form.Set("client_secret", antigravityClientSecret)
@@ -195,7 +195,7 @@ func (e *AntigravityExecutor) refreshTokenSingleFlight(ctx context.Context, auth
 	return &tokenResp, nil
 }
 
-func (e *AntigravityExecutor) ensureAntigravityProjectID(ctx context.Context, auth *cliproxyauth.Auth, accessToken string) error {
+func (e *AntigravityExecutor) ensureAntigravityProjectID(ctx context.Context, auth *xinugateauth.Auth, accessToken string) error {
 	if auth == nil {
 		return nil
 	}
@@ -219,7 +219,7 @@ func (e *AntigravityExecutor) ensureAntigravityProjectID(ctx context.Context, au
 	return nil
 }
 
-func (e *AntigravityExecutor) fetchAntigravityProjectID(ctx context.Context, auth *cliproxyauth.Auth, accessToken string) (string, error) {
+func (e *AntigravityExecutor) fetchAntigravityProjectID(ctx context.Context, auth *xinugateauth.Auth, accessToken string) (string, error) {
 	token := strings.TrimSpace(accessToken)
 	if token == "" {
 		token = metaStringValue(auth.Metadata, "access_token")
@@ -236,14 +236,14 @@ func (e *AntigravityExecutor) fetchAntigravityProjectID(ctx context.Context, aut
 	return strings.TrimSpace(projectID), nil
 }
 
-func (e *AntigravityExecutor) projectIDForRequest(_ context.Context, auth *cliproxyauth.Auth, _ string) (string, error) {
+func (e *AntigravityExecutor) projectIDForRequest(_ context.Context, auth *xinugateauth.Auth, _ string) (string, error) {
 	if projectID := antigravityProjectIDFromAuth(auth); projectID != "" {
 		return projectID, nil
 	}
 	return "", missingAntigravityProjectIDError(nil)
 }
 
-func antigravityProjectIDFromAuth(auth *cliproxyauth.Auth) string {
+func antigravityProjectIDFromAuth(auth *xinugateauth.Auth) string {
 	if auth == nil || auth.Metadata == nil {
 		return ""
 	}

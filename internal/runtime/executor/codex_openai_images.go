@@ -22,9 +22,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 const (
@@ -55,7 +55,7 @@ type codexImageCallResult struct {
 	Quality       string
 }
 
-func isCodexOpenAIImageRequest(opts cliproxyexecutor.Options) bool {
+func isCodexOpenAIImageRequest(opts xinugateexecutor.Options) bool {
 	if !strings.EqualFold(strings.TrimSpace(opts.SourceFormat.String()), codexOpenAIImageSourceFormat) {
 		return false
 	}
@@ -84,7 +84,7 @@ func (e *CodexExecutor) resolveGPTImage2BaseModel() string {
 	return codexOpenAIImagesMainModel
 }
 
-func (e *CodexExecutor) executeOpenAIImage(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *CodexExecutor) executeOpenAIImage(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	if directEndpoint := codexDirectOpenAIImageEndpoint(req, opts); directEndpoint != "" {
 		return e.executeDirectOpenAIImage(ctx, auth, req, opts, directEndpoint)
 	}
@@ -174,7 +174,7 @@ func (e *CodexExecutor) executeOpenAIImage(ctx context.Context, auth *cliproxyau
 			if errOutput != nil {
 				return resp, errOutput
 			}
-			return cliproxyexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}, nil
+			return xinugateexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}, nil
 		}
 	}
 
@@ -182,7 +182,7 @@ func (e *CodexExecutor) executeOpenAIImage(ctx context.Context, auth *cliproxyau
 	return resp, err
 }
 
-func (e *CodexExecutor) executeOpenAIImageStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *CodexExecutor) executeOpenAIImageStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	if directEndpoint := codexDirectOpenAIImageEndpoint(req, opts); directEndpoint != "" {
 		return e.executeDirectOpenAIImageStream(ctx, auth, req, opts, directEndpoint)
 	}
@@ -242,7 +242,7 @@ func (e *CodexExecutor) executeOpenAIImageStream(ctx context.Context, auth *clip
 		return nil, err
 	}
 
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func() {
 		defer close(out)
 		defer func() {
@@ -253,7 +253,7 @@ func (e *CodexExecutor) executeOpenAIImageStream(ctx context.Context, auth *clip
 
 		sendPayload := func(payload []byte) bool {
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Payload: payload}:
+			case out <- xinugateexecutor.StreamChunk{Payload: payload}:
 				return true
 			case <-ctx.Done():
 				return false
@@ -261,7 +261,7 @@ func (e *CodexExecutor) executeOpenAIImageStream(ctx context.Context, auth *clip
 		}
 		sendError := func(errSend error) bool {
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errSend}:
+			case out <- xinugateexecutor.StreamChunk{Err: errSend}:
 				return true
 			case <-ctx.Done():
 				return false
@@ -317,10 +317,10 @@ func (e *CodexExecutor) executeOpenAIImageStream(ctx context.Context, auth *clip
 			sendError(errScan)
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }
 
-func (e *CodexExecutor) executeDirectOpenAIImage(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, endpointPath string) (resp cliproxyexecutor.Response, err error) {
+func (e *CodexExecutor) executeDirectOpenAIImage(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options, endpointPath string) (resp xinugateexecutor.Response, err error) {
 	body, contentType, model, errPrepare := codexPrepareDirectOpenAIImageBody(req, opts, false)
 	if errPrepare != nil {
 		return resp, errPrepare
@@ -378,10 +378,10 @@ func (e *CodexExecutor) executeDirectOpenAIImage(ctx context.Context, auth *clip
 
 	reporter.Publish(ctx, helps.ParseOpenAIUsage(data))
 	reporter.EnsurePublished(ctx)
-	return cliproxyexecutor.Response{Payload: data, Headers: httpResp.Header.Clone()}, nil
+	return xinugateexecutor.Response{Payload: data, Headers: httpResp.Header.Clone()}, nil
 }
 
-func (e *CodexExecutor) executeDirectOpenAIImageStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, endpointPath string) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *CodexExecutor) executeDirectOpenAIImageStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options, endpointPath string) (_ *xinugateexecutor.StreamResult, err error) {
 	body, contentType, model, errPrepare := codexPrepareDirectOpenAIImageBody(req, opts, true)
 	if errPrepare != nil {
 		return nil, errPrepare
@@ -434,7 +434,7 @@ func (e *CodexExecutor) executeDirectOpenAIImageStream(ctx context.Context, auth
 		return nil, err
 	}
 
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func() {
 		defer close(out)
 		var streamUsage helps.StreamUsageBuffer
@@ -457,7 +457,7 @@ func (e *CodexExecutor) executeDirectOpenAIImageStream(ctx context.Context, auth
 					streamUsage.ObserveOpenAIStream(bytes.TrimSpace(line))
 				}
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: chunk}:
+				case out <- xinugateexecutor.StreamChunk{Payload: chunk}:
 				case <-ctx.Done():
 					return
 				}
@@ -467,7 +467,7 @@ func (e *CodexExecutor) executeDirectOpenAIImageStream(ctx context.Context, auth
 					helps.RecordAPIResponseError(ctx, e.cfg, errRead)
 					reporter.PublishFailure(ctx, errRead)
 					select {
-					case out <- cliproxyexecutor.StreamChunk{Err: errRead}:
+					case out <- xinugateexecutor.StreamChunk{Err: errRead}:
 					case <-ctx.Done():
 					}
 				}
@@ -475,10 +475,10 @@ func (e *CodexExecutor) executeDirectOpenAIImageStream(ctx context.Context, auth
 			}
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }
 
-func codexDirectOpenAIImageEndpoint(req cliproxyexecutor.Request, opts cliproxyexecutor.Options) string {
+func codexDirectOpenAIImageEndpoint(req xinugateexecutor.Request, opts xinugateexecutor.Options) string {
 	if codexDirectOpenAIImageModel(req) == "" {
 		return ""
 	}
@@ -492,7 +492,7 @@ func codexDirectOpenAIImageEndpoint(req cliproxyexecutor.Request, opts cliproxye
 	return ""
 }
 
-func codexPrepareDirectOpenAIImageBody(req cliproxyexecutor.Request, opts cliproxyexecutor.Options, stream bool) ([]byte, string, string, error) {
+func codexPrepareDirectOpenAIImageBody(req xinugateexecutor.Request, opts xinugateexecutor.Options, stream bool) ([]byte, string, string, error) {
 	model := codexDirectOpenAIImageModel(req)
 	if model == "" {
 		return nil, "", "", fmt.Errorf("unsupported direct OpenAI image model %q", req.Model)
@@ -504,7 +504,7 @@ func codexPrepareDirectOpenAIImageBody(req cliproxyexecutor.Request, opts clipro
 	return body, contentType, model, nil
 }
 
-func codexPrepareDirectOpenAIImagePayload(req cliproxyexecutor.Request, opts cliproxyexecutor.Options, model string, stream bool) ([]byte, string, error) {
+func codexPrepareDirectOpenAIImagePayload(req xinugateexecutor.Request, opts xinugateexecutor.Options, model string, stream bool) ([]byte, string, error) {
 	contentType := opts.Headers.Get("Content-Type")
 	path := strings.TrimSpace(helps.PayloadRequestPath(opts))
 	if strings.HasSuffix(path, codexImagesEditsPath) {
@@ -645,7 +645,7 @@ func codexOpenAIImageEditFormJSONPath(key string) string {
 	}
 }
 
-func codexDirectOpenAIImageModel(req cliproxyexecutor.Request) string {
+func codexDirectOpenAIImageModel(req xinugateexecutor.Request) string {
 	for _, model := range []string{gjson.GetBytes(req.Payload, "model").String(), req.Model} {
 		baseModel := codexOpenAIImageBaseModel(model)
 		if codexIsDirectOpenAIImageModel(baseModel) {
@@ -672,7 +672,7 @@ func codexIsDirectOpenAIImageModel(model string) bool {
 	}
 }
 
-func (e *CodexExecutor) prepareCodexOpenAIImageBody(body []byte, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, mainModel string) ([]byte, error) {
+func (e *CodexExecutor) prepareCodexOpenAIImageBody(body []byte, req xinugateexecutor.Request, opts xinugateexecutor.Options, mainModel string) ([]byte, error) {
 	out := body
 	mainModel = strings.TrimSpace(mainModel)
 	if mainModel == "" {
@@ -696,7 +696,7 @@ func (e *CodexExecutor) prepareCodexOpenAIImageBody(body []byte, req cliproxyexe
 	return normalizeCodexInstructions(out), nil
 }
 
-func recordCodexOpenAIImageRequest(ctx context.Context, cfg *config.Config, provider string, auth *cliproxyauth.Auth, url string, headers http.Header, body []byte) {
+func recordCodexOpenAIImageRequest(ctx context.Context, cfg *config.Config, provider string, auth *xinugateauth.Auth, url string, headers http.Header, body []byte) {
 	var authID, authLabel, authType, authValue string
 	if auth != nil {
 		authID = auth.ID
@@ -716,7 +716,7 @@ func recordCodexOpenAIImageRequest(ctx context.Context, cfg *config.Config, prov
 	})
 }
 
-func codexPrepareOpenAIImageRequest(req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (codexOpenAIImagePreparedRequest, error) {
+func codexPrepareOpenAIImageRequest(req xinugateexecutor.Request, opts xinugateexecutor.Options) (codexOpenAIImagePreparedRequest, error) {
 	path := helps.PayloadRequestPath(opts)
 	if strings.HasSuffix(path, codexImagesGenerationsPath) {
 		return codexPrepareOpenAIImageGenerationJSON(req.Payload, req.Model)

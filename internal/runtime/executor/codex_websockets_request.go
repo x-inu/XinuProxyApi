@@ -13,17 +13,17 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-func applyCodexPromptCacheHeaders(from sdktranslator.Format, req cliproxyexecutor.Request, rawJSON []byte) ([]byte, http.Header) {
+func applyCodexPromptCacheHeaders(from sdktranslator.Format, req xinugateexecutor.Request, rawJSON []byte) ([]byte, http.Header) {
 	body, headers, _ := applyCodexPromptCacheHeadersWithContext(context.Background(), from, req, rawJSON)
 	return body, headers
 }
 
-func applyCodexPromptCacheHeadersWithContext(ctx context.Context, from sdktranslator.Format, req cliproxyexecutor.Request, rawJSON []byte, headerSets ...http.Header) ([]byte, http.Header, error) {
+func applyCodexPromptCacheHeadersWithContext(ctx context.Context, from sdktranslator.Format, req xinugateexecutor.Request, rawJSON []byte, headerSets ...http.Header) ([]byte, http.Header, error) {
 	headers := http.Header{}
 	if len(rawJSON) == 0 {
 		return rawJSON, headers, nil
@@ -64,7 +64,7 @@ func applyCodexPromptCacheHeadersWithContext(ctx context.Context, from sdktransl
 	return rawJSON, headers, nil
 }
 
-func applyCodexWebsocketHeaders(ctx context.Context, headers http.Header, auth *cliproxyauth.Auth, token string, cfg *config.Config, nativeRequest bool, clientHeaders ...http.Header) http.Header {
+func applyCodexWebsocketHeaders(ctx context.Context, headers http.Header, auth *xinugateauth.Auth, token string, cfg *config.Config, nativeRequest bool, clientHeaders ...http.Header) http.Header {
 	if headers == nil {
 		headers = http.Header{}
 	}
@@ -174,11 +174,11 @@ func codexSessionHeaderValue(headers http.Header) string {
 	return ""
 }
 
-func codexAuthUsesAPIKey(auth *cliproxyauth.Auth) bool {
+func codexAuthUsesAPIKey(auth *xinugateauth.Auth) bool {
 	if auth == nil {
 		return false
 	}
-	if auth.AuthKind() == cliproxyauth.AuthKindAPIKey {
+	if auth.AuthKind() == xinugateauth.AuthKindAPIKey {
 		return true
 	}
 	if auth.Attributes != nil {
@@ -292,7 +292,7 @@ func deleteHeaderCaseInsensitive(headers http.Header, key string) {
 	}
 }
 
-func codexHeaderDefaults(cfg *config.Config, auth *cliproxyauth.Auth) (string, string) {
+func codexHeaderDefaults(cfg *config.Config, auth *xinugateauth.Auth) (string, string) {
 	if cfg == nil || auth == nil || codexAuthUsesAPIKey(auth) {
 		return "", ""
 	}

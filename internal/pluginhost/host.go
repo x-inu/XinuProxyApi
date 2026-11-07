@@ -15,9 +15,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/interfaces"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginabi"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 type loadedPlugin struct {

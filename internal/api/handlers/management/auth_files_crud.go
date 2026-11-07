@@ -19,7 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/x-inu/XinuGate/v7/internal/util"
 	"github.com/x-inu/XinuGate/v7/internal/watcher/synthesizer"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // Download single auth file by name

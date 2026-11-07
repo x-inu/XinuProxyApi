@@ -9,9 +9,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexExecutorExecuteResponsesLiteHeaderDoesNotInjectImageGenerationTool(t *testing.T) {
@@ -28,7 +28,7 @@ func TestCodexExecutorExecuteResponsesLiteHeaderDoesNotInjectImageGenerationTool
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":   "test",
@@ -39,10 +39,10 @@ func TestCodexExecutorExecuteResponsesLiteHeaderDoesNotInjectImageGenerationTool
 	headers := make(http.Header)
 	headers.Set("X-OpenAI-Internal-Codex-Responses-Lite", "true")
 
-	_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.6-sol",
 		Payload: []byte(`{"model":"gpt-5.6-sol","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Headers:      headers,
 	})
@@ -72,7 +72,7 @@ func TestCodexExecutorExecuteStreamResponsesLiteHeaderForcesParallelToolCallsFal
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":   "test",
@@ -83,10 +83,10 @@ func TestCodexExecutorExecuteStreamResponsesLiteHeaderForcesParallelToolCallsFal
 	headers := make(http.Header)
 	headers.Set(codexResponsesLiteHeader, "true")
 
-	result, errExecute := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, errExecute := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.6-luna",
 		Payload: []byte(`{"model":"gpt-5.6-luna","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Headers:      headers,
 	})
@@ -273,7 +273,7 @@ func TestEnsureImageGenerationTool_GPT53CodexSparkDoesNotInjectTool(t *testing.T
 
 func TestEnsureImageGenerationTool_FreeCodexAuthDoesNotInjectTool(t *testing.T) {
 	body := []byte(`{"model":"gpt-5.4","input":"draw a cat"}`)
-	freeAuth := &cliproxyauth.Auth{
+	freeAuth := &xinugateauth.Auth{
 		Provider:   "codex",
 		Attributes: map[string]string{"plan_type": "free"},
 	}

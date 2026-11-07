@@ -27,8 +27,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/misc"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 
 	"github.com/gin-gonic/gin"
 )
@@ -1005,11 +1005,11 @@ func isZlibHeader(header []byte) bool {
 // claudeCredentialUsesOAuth classifies the selected upstream credential. It is the
 // single authority for every decision that has to agree with the OAuth beta
 // profile, including the extended-cache-ttl beta and the matching body cache ttl.
-func claudeCredentialUsesOAuth(auth *cliproxyauth.Auth, apiKey string) bool {
+func claudeCredentialUsesOAuth(auth *xinugateauth.Auth, apiKey string) bool {
 	if isClaudeOAuthToken(apiKey) {
 		return true
 	}
-	if auth != nil && auth.AuthKind() == cliproxyauth.AuthKindAPIKey {
+	if auth != nil && auth.AuthKind() == xinugateauth.AuthKindAPIKey {
 		return false
 	}
 	hasAPIKeyAttr := auth != nil && auth.Attributes != nil && strings.TrimSpace(auth.Attributes["api_key"]) != ""
@@ -1042,7 +1042,7 @@ func copyClaudeCallerFingerprintHeaders(dst, src http.Header, confirmedClaudeCod
 	}
 }
 
-func applyClaudeHeaders(r *http.Request, auth *cliproxyauth.Auth, apiKey string, stream bool, extraBetas []string, body []byte, cfg *config.Config, incomingHeaders http.Header, confirmedClaudeCode bool, sessionIDs ...string) error {
+func applyClaudeHeaders(r *http.Request, auth *xinugateauth.Auth, apiKey string, stream bool, extraBetas []string, body []byte, cfg *config.Config, incomingHeaders http.Header, confirmedClaudeCode bool, sessionIDs ...string) error {
 	return applyClaudeHeadersWithNativeProfile(
 		r,
 		auth,
@@ -1060,7 +1060,7 @@ func applyClaudeHeaders(r *http.Request, auth *cliproxyauth.Auth, apiKey string,
 
 func applyClaudeHeadersWithNativeProfile(
 	r *http.Request,
-	auth *cliproxyauth.Auth,
+	auth *xinugateauth.Auth,
 	apiKey string,
 	stream bool,
 	extraBetas []string,
@@ -1276,7 +1276,7 @@ func applyClaudeHeadersWithNativeProfile(
 		// sent none must not fall through to Go's transport default
 		// ("Go-http-client/1.1"), which upstreams read as a bot signature. Identify
 		// as CPA instead: honest about the hop, and not a fabricated client.
-		misc.EnsureHeader(r.Header, incomingHeaders, "User-Agent", "CLIProxyAPI/"+buildinfo.Version)
+		misc.EnsureHeader(r.Header, incomingHeaders, "User-Agent", "XinuGate/"+buildinfo.Version)
 		applyBetaHeader()
 		sessionID := ""
 		for _, candidate := range sessionIDs {
@@ -1468,7 +1468,7 @@ func applyClaudeHeadersWithNativeProfile(
 // exactly how the streaming and non-streaming beta sets diverged before.
 func doClaudeUpstreamRequest(client *http.Client, req *http.Request) (*http.Response, error) {
 	applyClaudeWireHeaderCasing(req)
-	cliproxyexecutor.MarkUpstreamAttempt(req.Context())
+	xinugateexecutor.MarkUpstreamAttempt(req.Context())
 	return client.Do(req)
 }
 
@@ -1517,7 +1517,7 @@ func applyClaudeWireHeaderCasing(r *http.Request) {
 	}
 }
 
-func claudeCreds(a *cliproxyauth.Auth) (apiKey, baseURL string) {
+func claudeCreds(a *xinugateauth.Auth) (apiKey, baseURL string) {
 	if a == nil {
 		return "", ""
 	}

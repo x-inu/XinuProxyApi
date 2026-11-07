@@ -14,7 +14,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/misc"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // ClaudeAuthenticator implements the OAuth login flow for Anthropic Claude accounts.
@@ -37,7 +37,7 @@ func (a *ClaudeAuthenticator) RefreshLead() *time.Duration {
 
 func (a *ClaudeAuthenticator) Login(ctx context.Context, cfg *config.Config, opts *LoginOptions) (*coreauth.Auth, error) {
 	if cfg == nil {
-		return nil, fmt.Errorf("cliproxy auth: configuration is required")
+		return nil, fmt.Errorf("xinugate auth: configuration is required")
 	}
 	if ctx == nil {
 		ctx = context.Background()

@@ -19,7 +19,7 @@ import (
 
 const (
 	antigravityCompactionCapsulePrefix = "cpa-ag-compact-v1:"
-	fixedCompactionKeySecret           = "CLIProxyAPI"
+	fixedCompactionKeySecret           = "XinuGate"
 )
 
 type antigravityCompactionCapsuleData struct {
@@ -102,7 +102,7 @@ func PrepareAntigravityCompactionSummaryPayload(payload []byte, modelName string
 	return out
 }
 
-// deriveAntigravityCompactionKey derives an AES-256 key from the fixed CLIProxyAPI secret.
+// deriveAntigravityCompactionKey derives an AES-256 key from the fixed XinuGate secret.
 func deriveAntigravityCompactionKey() []byte {
 	h := sha256.Sum256([]byte(fixedCompactionKeySecret))
 	return h[:]

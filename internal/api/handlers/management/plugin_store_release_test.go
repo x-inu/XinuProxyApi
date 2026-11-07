@@ -455,7 +455,7 @@ func TestListPluginStoreUsesCachedUninstalledVersionWithoutRefresh(t *testing.T)
 	t.Parallel()
 	httpClient := &countingPluginStoreHTTPClient{responses: fakePluginStoreHTTPClient{pluginstore.DefaultRegistryURL: registryJSON(t)}}
 	h := &Handler{cfg: &config.Config{Plugins: config.PluginsConfig{Dir: t.TempDir()}}, pluginStoreHTTPClient: httpClient}
-	plugin := pluginstore.Plugin{Repository: "https://github.com/author-name/cliproxy-sample-provider-plugin"}
+	plugin := pluginstore.Plugin{Repository: "https://github.com/author-name/xinugate-sample-provider-plugin"}
 	key := pluginReleaseKey(h.newPluginStoreClient("", "", nil), plugin)
 	h.pluginReleases.entries = map[string]pluginReleaseCacheEntry{key: {version: "2.0.0"}}
 	body := listPluginStoreForTest(t, h)

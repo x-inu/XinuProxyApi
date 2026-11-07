@@ -16,9 +16,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/proxyutil"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 	"golang.org/x/net/proxy"
 )
 
@@ -28,7 +28,7 @@ const (
 	codexResponsesWebsocketHandshakeTO     = 30 * time.Second
 )
 
-func (e *CodexWebsocketsExecutor) dialCodexWebsocket(ctx context.Context, auth *cliproxyauth.Auth, wsURL string, headers http.Header) (*websocket.Conn, *websocketConnectionCloser, *http.Response, error) {
+func (e *CodexWebsocketsExecutor) dialCodexWebsocket(ctx context.Context, auth *xinugateauth.Auth, wsURL string, headers http.Header) (*websocket.Conn, *websocketConnectionCloser, *http.Response, error) {
 	dialer := newProxyAwareWebsocketDialer(ctx, e.cfg, auth)
 	dialer.HandshakeTimeout = codexResponsesWebsocketHandshakeTO
 	dialer.EnableCompression = true
@@ -37,7 +37,7 @@ func (e *CodexWebsocketsExecutor) dialCodexWebsocket(ctx context.Context, auth *
 	}
 	conn, resp, err := dialer.DialContext(ctx, wsURL, headers)
 	if err != nil {
-		cliproxyexecutor.MarkUpstreamAttempt(ctx)
+		xinugateexecutor.MarkUpstreamAttempt(ctx)
 	}
 	closer := newWebsocketConnectionCloser(conn)
 	if conn != nil {
@@ -97,7 +97,7 @@ func shouldRetryCodexWebsocketSend(err error) bool {
 	if err == nil {
 		return false
 	}
-	var requestErr cliproxyexecutor.RequestScopedError
+	var requestErr xinugateexecutor.RequestScopedError
 	return !errors.As(err, &requestErr) || !requestErr.IsRequestScoped()
 }
 
@@ -181,8 +181,8 @@ func readCodexWebsocketMessage(ctx context.Context, sess *codexWebsocketSession,
 	}
 }
 
-func executionProxyURL(ctx context.Context, cfg *config.Config, auth *cliproxyauth.Auth) string {
-	proxyURL := cliproxyexecutor.RequestProxyURL(ctx)
+func executionProxyURL(ctx context.Context, cfg *config.Config, auth *xinugateauth.Auth) string {
+	proxyURL := xinugateexecutor.RequestProxyURL(ctx)
 	if proxyURL == "" && auth != nil {
 		proxyURL = strings.TrimSpace(auth.ProxyURL)
 	}
@@ -192,7 +192,7 @@ func executionProxyURL(ctx context.Context, cfg *config.Config, auth *cliproxyau
 	return proxyURL
 }
 
-func newProxyAwareWebsocketDialer(ctx context.Context, cfg *config.Config, auth *cliproxyauth.Auth) *websocket.Dialer {
+func newProxyAwareWebsocketDialer(ctx context.Context, cfg *config.Config, auth *xinugateauth.Auth) *websocket.Dialer {
 	dialer := &websocket.Dialer{
 		Proxy:             http.ProxyFromEnvironment,
 		HandshakeTimeout:  codexResponsesWebsocketHandshakeTO,

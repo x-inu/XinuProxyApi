@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestSqliteStoreLifecycle(t *testing.T) {
@@ -48,7 +48,7 @@ func TestSqliteStoreLifecycle(t *testing.T) {
 	}
 
 	// 2. Test Save Auth
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "test-account-1",
 		FileName: "antigravity-account-1.json",
 		Metadata: map[string]any{
@@ -91,7 +91,7 @@ func TestSqliteStoreLifecycle(t *testing.T) {
 		t.Fatal("expected CooldownStateStore to be non-nil")
 	}
 	retryAfter := time.Now().Add(10 * time.Minute).Truncate(time.Second)
-	testRecords := []cliproxyauth.CooldownStateRecord{
+	testRecords := []xinugateauth.CooldownStateRecord{
 		{
 			AuthID:         "test-account-1",
 			Model:          "gemini-3.8-flash-high",

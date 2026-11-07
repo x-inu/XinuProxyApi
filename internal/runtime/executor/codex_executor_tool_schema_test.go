@@ -9,9 +9,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // Issue #5551: Tool schema with 13-branch oneOf causes ChatGPT Codex upstream
@@ -31,7 +31,7 @@ func TestCodexExecutorSimplifiesComplexOneOfToolSchema(t *testing.T) {
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":   "test",
@@ -83,10 +83,10 @@ func TestCodexExecutorSimplifiesComplexOneOfToolSchema(t *testing.T) {
 		}]
 	}`)
 
-	_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: requestPayload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 		Stream:       false,
 	})
@@ -143,7 +143,7 @@ func TestCodexExecutorExecuteStream_ZeroTokenIncompleteResponseIsFailure(t *test
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -151,10 +151,10 @@ func TestCodexExecutorExecuteStream_ZeroTokenIncompleteResponseIsFailure(t *test
 		},
 	}
 
-	res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 		Stream:       true,
 	})
@@ -187,7 +187,7 @@ func TestCodexExecutorExecuteStream_PartialDeltasIncompleteResponseIsSuccessful(
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -195,10 +195,10 @@ func TestCodexExecutorExecuteStream_PartialDeltasIncompleteResponseIsSuccessful(
 		},
 	}
 
-	res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 		Stream:       true,
 	})
@@ -239,7 +239,7 @@ func TestCodexExecutorExecuteStream_BufferingPartialDeltasIncompleteResponseIsSu
 			StreamBootstrapBuffering: true,
 		},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -247,10 +247,10 @@ func TestCodexExecutorExecuteStream_BufferingPartialDeltasIncompleteResponseIsSu
 		},
 	}
 
-	res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 		Stream:       true,
 	})
@@ -287,7 +287,7 @@ func TestCodexExecutorExecuteStream_EmptyDeltaDoesNotBypassZeroTokenFailure(t *t
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -295,10 +295,10 @@ func TestCodexExecutorExecuteStream_EmptyDeltaDoesNotBypassZeroTokenFailure(t *t
 		},
 	}
 
-	res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 		Stream:       true,
 	})

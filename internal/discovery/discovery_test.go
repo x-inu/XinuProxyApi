@@ -121,8 +121,8 @@ func TestBuildTXTRecords_SizeAndKeys(t *testing.T) {
 	if parsed["version"] != "1" {
 		t.Errorf("expected version=1, got %s", parsed["version"])
 	}
-	if parsed["product"] != ProductCPA {
-		t.Errorf("expected product=%s, got %s", ProductCPA, parsed["product"])
+	if parsed["product"] != ProductXG {
+		t.Errorf("expected product=%s, got %s", ProductXG, parsed["product"])
 	}
 	if parsed["tls"] != "1" {
 		t.Errorf("expected tls=1, got %s", parsed["tls"])
@@ -159,8 +159,8 @@ func TestBuildTXTRecords_SizeAndKeys(t *testing.T) {
 }
 
 func TestParseTXTRecords_NormalizesKeys(t *testing.T) {
-	parsed := ParseTXTRecords([]string{"TLS=1", "API_OpenAI=/v1", "Product=cliproxyapi"})
-	if parsed["tls"] != "1" || parsed["api_openai"] != "/v1" || parsed["product"] != "cliproxyapi" {
+	parsed := ParseTXTRecords([]string{"TLS=1", "API_OpenAI=/v1", "Product=xinugate"})
+	if parsed["tls"] != "1" || parsed["api_openai"] != "/v1" || parsed["product"] != "xinugate" {
 		t.Fatalf("parsed TXT records = %#v", parsed)
 	}
 }
@@ -196,7 +196,7 @@ func TestValidation_ServiceTypeAndLabels(t *testing.T) {
 	if err := validateServiceType("_ai-gateway._tcp"); err != nil {
 		t.Errorf("expected valid, got: %v", err)
 	}
-	if err := validateServiceType("_cliproxy._tcp"); err != nil {
+	if err := validateServiceType("_xinugate._tcp"); err != nil {
 		t.Errorf("expected valid, got: %v", err)
 	}
 
@@ -325,7 +325,7 @@ func TestInterfaceFiltering_Helpers(t *testing.T) {
 }
 
 func TestBrowseEntryWithinLimits(t *testing.T) {
-	if !browseEntryWithinLimits(&zeroconf.ServiceEntry{Text: []string{"product=cliproxyapi"}}) {
+	if !browseEntryWithinLimits(&zeroconf.ServiceEntry{Text: []string{"product=xinugate"}}) {
 		t.Fatal("expected a small TXT entry to be accepted")
 	}
 	if browseEntryWithinLimits(&zeroconf.ServiceEntry{Text: []string{strings.Repeat("x", maxTXTRecordBytes+1)}}) {
@@ -353,7 +353,7 @@ func TestMergeDiscoveredService(t *testing.T) {
 		Port:         8317,
 		IPv4:         []net.IP{net.ParseIP("192.0.2.10"), net.ParseIP("192.0.2.11")},
 		IPv6:         []net.IP{net.ParseIP("2001:db8::10")},
-		Product:      ProductCPA,
+		Product:      ProductXG,
 		RawTXT:       map[string]string{"auth_required": "false", "tls": "1"},
 		Endpoints:    map[string]string{"anthropic": "/v1/messages"},
 	}
@@ -532,8 +532,8 @@ func TestAdvertiserAndBrowser_Integration(t *testing.T) {
 			if res.Port != 54321 {
 				t.Errorf("expected port 54321, got %d", res.Port)
 			}
-			if res.Product != ProductCPA {
-				t.Errorf("expected product %s, got %s", ProductCPA, res.Product)
+			if res.Product != ProductXG {
+				t.Errorf("expected product %s, got %s", ProductXG, res.Product)
 			}
 			break
 		}

@@ -7,28 +7,28 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tiktoken-go/tokenizer"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // CountTokens estimates token count for xAI Responses requests.
-func (e *XAIExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *XAIExecutor) CountTokens(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	prepared, err := e.prepareResponsesRequest(ctx, req, opts, false)
 	if err != nil {
-		return cliproxyexecutor.Response{}, err
+		return xinugateexecutor.Response{}, err
 	}
 	enc, err := tokenizer.Get(tokenizer.O200kBase)
 	if err != nil {
-		return cliproxyexecutor.Response{}, fmt.Errorf("xai executor: tokenizer init failed: %w", err)
+		return xinugateexecutor.Response{}, fmt.Errorf("xai executor: tokenizer init failed: %w", err)
 	}
 	count, err := countXAIInputTokens(enc, prepared.body)
 	if err != nil {
-		return cliproxyexecutor.Response{}, fmt.Errorf("xai executor: token counting failed: %w", err)
+		return xinugateexecutor.Response{}, fmt.Errorf("xai executor: token counting failed: %w", err)
 	}
 	usageJSON := fmt.Sprintf(`{"response":{"usage":{"input_tokens":%d,"output_tokens":0,"total_tokens":%d}}}`, count, count)
 	translated := sdktranslator.TranslateTokenCount(ctx, prepared.to, prepared.responseFormat, count, []byte(usageJSON))
-	return cliproxyexecutor.Response{Payload: translated}, nil
+	return xinugateexecutor.Response{Payload: translated}, nil
 }
 
 func countXAIInputTokens(enc tokenizer.Codec, body []byte) (int64, error) {

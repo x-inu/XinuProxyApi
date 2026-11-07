@@ -12,9 +12,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/redisqueue"
 	runtimeexecutor "github.com/x-inu/XinuGate/v7/internal/runtime/executor"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestGeminiExecutorRecordsSuccessfulZeroUsageInQueue(t *testing.T) {
@@ -32,7 +32,7 @@ func TestGeminiExecutorRecordsSuccessfulZeroUsageInQueue(t *testing.T) {
 	defer server.Close()
 
 	executor := runtimeexecutor.NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "gemini",
 		Attributes: map[string]string{
 			"api_key":  "test-upstream-key",
@@ -54,10 +54,10 @@ func TestGeminiExecutorRecordsSuccessfulZeroUsageInQueue(t *testing.T) {
 		redisqueue.SetUsageStatisticsEnabled(prevUsageEnabled)
 	})
 
-	_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   model,
 		Payload: []byte(`{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:    sdktranslator.FormatGemini,
 		OriginalRequest: []byte(`{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}`),
 	})

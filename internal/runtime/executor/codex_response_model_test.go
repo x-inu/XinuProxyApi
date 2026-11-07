@@ -8,8 +8,8 @@ import (
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 const codexResponseModelTestStream = `event: response.created
@@ -82,7 +82,7 @@ func TestCodexUsageRecordsCarryResponseModelPerModel(t *testing.T) {
 	})
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	auth := &cliproxyauth.Auth{ID: "codex-auth-1", Index: "auth-index-7", Provider: "codex"}
+	auth := &xinugateauth.Auth{ID: "codex-auth-1", Index: "auth-index-7", Provider: "codex"}
 	reporter := helps.NewExecutorUsageReporter(ctx, NewCodexExecutor(&config.Config{}), "gpt-5.4-mini", auth)
 
 	observeCodexTokenEvent(reporter, []byte(`{"type":"response.completed","response":{"model":"gpt-5.4-mini","usage":{"total_tokens":12}}}`))

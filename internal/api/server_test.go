@@ -31,12 +31,12 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor"
 	runtimehelps "github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	sdkaccess "github.com/x-inu/XinuGate/v7/sdk/access"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/executionregistry"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 	"gopkg.in/yaml.v3"
 )
 
@@ -941,7 +941,7 @@ func TestCodexAlphaSearchForwardsRequest(t *testing.T) {
 	if got := rr.Header().Get("Content-Type"); got != "application/json" {
 		t.Fatalf("response Content-Type = %q", got)
 	}
-	traceID := rr.Header().Get(internallogging.CPATraceIDHeader)
+	traceID := rr.Header().Get(internallogging.XGTraceIDHeader)
 	parts := strings.Split(traceID, "-")
 	if len(parts) != 3 || parts[1] != credential.Index || len(parts[2]) != 8 {
 		t.Fatalf("trace ID = %q, want timestamp-%s-requestID", traceID, credential.Index)
@@ -1576,8 +1576,8 @@ func TestManagementResponseExposesPluginSupportHeaderForCORS(t *testing.T) {
 	if rr.Code != http.StatusUnauthorized {
 		t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusUnauthorized, rr.Body.String())
 	}
-	if got := rr.Header().Get("X-CPA-SUPPORT-PLUGIN"); got != pluginhost.SupportPluginHeaderValue() {
-		t.Fatalf("X-CPA-SUPPORT-PLUGIN = %q, want %q", got, pluginhost.SupportPluginHeaderValue())
+	if got := rr.Header().Get("X-XG-SUPPORT-PLUGIN"); got != pluginhost.SupportPluginHeaderValue() {
+		t.Fatalf("X-XG-SUPPORT-PLUGIN = %q, want %q", got, pluginhost.SupportPluginHeaderValue())
 	}
 
 	exposedHeaders := make(map[string]struct{})
@@ -1974,8 +1974,8 @@ func TestExampleAPIKeySafeModeShowsWarningAndKeepsManagement(t *testing.T) {
 		if rr.Code != http.StatusForbidden {
 			t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusForbidden, rr.Body.String())
 		}
-		if got := rr.Header().Get("X-CPA-SAFE-MODE"); got != "example-api-key" {
-			t.Fatalf("X-CPA-SAFE-MODE = %q, want example-api-key", got)
+		if got := rr.Header().Get("X-XG-SAFE-MODE"); got != "example-api-key" {
+			t.Fatalf("X-XG-SAFE-MODE = %q, want example-api-key", got)
 		}
 		if !strings.Contains(rr.Body.String(), "unsafe_example_api_key") {
 			t.Fatalf("body missing safe-mode error: %s", rr.Body.String())
@@ -1986,7 +1986,7 @@ func TestExampleAPIKeySafeModeShowsWarningAndKeepsManagement(t *testing.T) {
 		if !strings.Contains(rr.Body.String(), "/management.html?safe-mode=configure") {
 			t.Fatalf("body missing management link in message: %s", rr.Body.String())
 		}
-		if got := rr.Header().Get(internallogging.CPATraceIDHeader); got != "" {
+		if got := rr.Header().Get(internallogging.XGTraceIDHeader); got != "" {
 			t.Fatalf("trace ID = %q, want empty before auth selection", got)
 		}
 	})
@@ -1999,7 +1999,7 @@ func TestExampleAPIKeySafeModeShowsWarningAndKeepsManagement(t *testing.T) {
 		if rr.Code != http.StatusOK {
 			t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusOK, rr.Body.String())
 		}
-		if got := rr.Header().Get(internallogging.CPATraceIDHeader); got != "" {
+		if got := rr.Header().Get(internallogging.XGTraceIDHeader); got != "" {
 			t.Fatalf("management trace ID = %q, want empty", got)
 		}
 	})

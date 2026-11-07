@@ -28,9 +28,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers/claude"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers/gemini"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers/openai"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 const oauthCallbackSuccessHTML = `<html><head><meta charset="utf-8"><title>Authentication successful</title><script>setTimeout(function(){window.close();},5000);</script></head><body><h1>Authentication successful!</h1><p>You can close this window.</p><p>This window will close automatically in 5 seconds.</p></body></html>`

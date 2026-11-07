@@ -9,8 +9,8 @@ import (
 	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type interactionsTranslateHooks struct {
@@ -55,7 +55,7 @@ func TestTranslateGeminiInteractionsRequestPairReusesSameSlice(t *testing.T) {
 	for i, payload := range payloads {
 		for _, stream := range []bool{false, true} {
 			for _, compat := range []bool{false, true} {
-				opts := cliproxyexecutor.Options{SourceFormat: formats[i]}
+				opts := xinugateexecutor.Options{SourceFormat: formats[i]}
 				base, work := translateGeminiInteractionsRequestPair(ctx, cfg, model, payload, opts, stream, compat)
 				want := translateGeminiInteractionsRequestBody(ctx, cfg, model, payload, opts, stream, compat)
 				if !bytes.Equal(base, want) || !bytes.Equal(work, want) {
@@ -102,7 +102,7 @@ func TestTranslateGeminiInteractionsRequestPairTranslatesSameSliceOnce(t *testin
 		for _, compat := range []bool{false, true} {
 			wantStream = stream
 			calls = 0
-			opts := cliproxyexecutor.Options{SourceFormat: from}
+			opts := xinugateexecutor.Options{SourceFormat: from}
 			base, work := translateGeminiInteractionsRequestPair(ctx, cfg, model, payload, opts, stream, compat)
 			if calls != 1 {
 				t.Fatalf("stream=%v compat=%v: same slice translations = %d, want 1", stream, compat, calls)
@@ -145,7 +145,7 @@ func TestTranslateGeminiInteractionsRequestPairTranslatesDistinctInputs(t *testi
 	detached := bytes.Clone(payload)
 
 	for _, original := range [][]byte{originalReq, detached} {
-		opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAI, OriginalRequest: original}
+		opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAI, OriginalRequest: original}
 		base, work := translateGeminiInteractionsRequestPair(ctx, cfg, model, payload, opts, true, false)
 		wantWork := translateGeminiInteractionsRequestBody(ctx, cfg, model, payload, opts, true, false)
 		wantBase := geminiInteractionsPayloadConfigSource(ctx, cfg, model, payload, opts, true, false)
@@ -165,7 +165,7 @@ func TestTranslateGeminiInteractionsRequestPairPreservesHookOrder(t *testing.T) 
 	cfg := &config.Config{}
 	const model = "gemini-3.1-flash-lite"
 	payload := []byte(`{"model":"gemini-3.1-flash-lite","messages":[{"role":"user","content":"same"}]}`)
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAI, OriginalRequest: payload}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAI, OriginalRequest: payload}
 	base, work := translateGeminiInteractionsRequestPair(ctx, cfg, model, payload, opts, false, true)
 	if hooks.calls != 2 {
 		t.Fatalf("plugin hook calls = %d, want 2", hooks.calls)
@@ -198,7 +198,7 @@ func TestTranslateGeminiInteractionsRequestPairNativeCopy(t *testing.T) {
 	cfg := &config.Config{}
 	payload := []byte(`{"model":"gemini-3.1-flash-lite","input":"hi"}`)
 	for _, format := range []sdktranslator.Format{"", sdktranslator.FormatInteractions} {
-		opts := cliproxyexecutor.Options{SourceFormat: format}
+		opts := xinugateexecutor.Options{SourceFormat: format}
 		base, work := translateGeminiInteractionsRequestPair(ctx, cfg, "gemini-3.1-flash-lite", payload, opts, false, false)
 		if !bytes.Equal(base, payload) || !bytes.Equal(work, payload) {
 			t.Fatalf("format=%q: native interactions payload was translated", format)
@@ -221,7 +221,7 @@ func TestTranslateGeminiInteractionsRequestPairNativeCopyIgnoresHooks(t *testing
 	t.Cleanup(func() { sdktranslator.SetPluginHooks(nil) })
 
 	payload := []byte(`{"model":"gemini-3.1-flash-lite","input":"hi"}`)
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatInteractions, OriginalRequest: payload}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatInteractions, OriginalRequest: payload}
 	base, work := translateGeminiInteractionsRequestPair(context.Background(), &config.Config{}, "gemini-3.1-flash-lite", payload, opts, true, false)
 	if hooks.calls != 0 {
 		t.Fatalf("native copy invoked plugin hooks %d times", hooks.calls)

@@ -11,11 +11,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-func (e *MetaExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *MetaExecutor) ExecuteStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	ctx = helps.EnsureSessionContext(ctx, opts, req.Payload)
 	if opts.Alt == "responses/compact" {
 		return nil, statusErr{code: http.StatusNotImplemented, msg: "/responses/compact not supported"}
@@ -70,7 +70,7 @@ func (e *MetaExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 		return nil, wrapMetaUpstreamError(httpResp.StatusCode, data)
 	}
 
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func() {
 		defer close(out)
 		defer func() {
@@ -88,7 +88,7 @@ func (e *MetaExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 			chunks := helps.TranslateStreamWithClaudeInputTokens(ctx, prepared.to, prepared.responseFormat, req.Model, prepared.originalPayload, prepared.body, translatedLine, &param, claudeInputTokens)
 			for i := range chunks {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: chunks[i]}:
+				case out <- xinugateexecutor.StreamChunk{Payload: chunks[i]}:
 				case <-ctx.Done():
 					return false
 				}
@@ -110,7 +110,7 @@ func (e *MetaExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 				helps.RecordAPIResponseError(ctx, e.cfg, errEvent)
 				reporter.PublishFailure(ctx, errEvent)
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Err: errEvent}:
+				case out <- xinugateexecutor.StreamChunk{Err: errEvent}:
 				case <-ctx.Done():
 				}
 				return
@@ -133,10 +133,10 @@ func (e *MetaExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 			helps.RecordAPIResponseError(ctx, e.cfg, errScan)
 			reporter.PublishFailure(ctx, errScan)
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errScan}:
+			case out <- xinugateexecutor.StreamChunk{Err: errScan}:
 			case <-ctx.Done():
 			}
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }

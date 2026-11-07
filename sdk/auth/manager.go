@@ -10,7 +10,7 @@ import (
 
 	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // Manager aggregates authenticators and coordinates persistence via a token store.
@@ -52,7 +52,7 @@ func (m *Manager) SetStore(store coreauth.Store) {
 func (m *Manager) Login(ctx context.Context, provider string, cfg *config.Config, opts *LoginOptions) (*coreauth.Auth, string, error) {
 	auth, ok := m.authenticators[provider]
 	if !ok {
-		return nil, "", fmt.Errorf("cliproxy auth: authenticator %s not registered", provider)
+		return nil, "", fmt.Errorf("xinugate auth: authenticator %s not registered", provider)
 	}
 
 	record, err := auth.Login(ctx, cfg, opts)
@@ -60,7 +60,7 @@ func (m *Manager) Login(ctx context.Context, provider string, cfg *config.Config
 		return nil, "", err
 	}
 	if record == nil {
-		return nil, "", fmt.Errorf("cliproxy auth: authenticator %s returned nil record", provider)
+		return nil, "", fmt.Errorf("xinugate auth: authenticator %s returned nil record", provider)
 	}
 
 	if m.store == nil {
@@ -101,14 +101,14 @@ func (m *Manager) Login(ctx context.Context, provider string, cfg *config.Config
 	}
 	if legacyClaudeCredential != nil {
 		if strings.TrimSpace(savedPath) == "" {
-			return record, "", fmt.Errorf("cliproxy auth: canonical Claude credential was not persisted; legacy credential retained")
+			return record, "", fmt.Errorf("xinugate auth: canonical Claude credential was not persisted; legacy credential retained")
 		}
 		legacyID := strings.TrimSpace(legacyClaudeCredential.ID)
 		if legacyID == "" {
 			legacyID = strings.TrimSpace(legacyClaudeCredential.FileName)
 		}
 		if errDelete := m.store.Delete(ctx, legacyID); errDelete != nil {
-			return record, savedPath, fmt.Errorf("cliproxy auth: canonical Claude credential saved but legacy credential cleanup failed: %w", errDelete)
+			return record, savedPath, fmt.Errorf("xinugate auth: canonical Claude credential saved but legacy credential cleanup failed: %w", errDelete)
 		}
 	}
 	return record, savedPath, nil

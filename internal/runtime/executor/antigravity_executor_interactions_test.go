@@ -11,9 +11,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestAntigravityExecutorExecuteStreamTranslatesInteractionsRequest(t *testing.T) {
@@ -36,7 +36,7 @@ func TestAntigravityExecutorExecuteStreamTranslatesInteractionsRequest(t *testin
 	defer server.Close()
 
 	exec := NewAntigravityExecutor(&config.Config{RequestRetry: 1})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "interactions-antigravity-stream-auth",
 		Provider: "antigravity",
 		Attributes: map[string]string{
@@ -49,10 +49,10 @@ func TestAntigravityExecutorExecuteStreamTranslatesInteractionsRequest(t *testin
 		},
 	}
 	payload := []byte(`{"model":"gemini-3.8-flash-high","input":[{"type":"user_input","content":[{"type":"text","text":"hi"}]}],"tools":[{"name":"get_weather","description":"weather","type":"function","parameters":{"type":"object","properties":{"location":{"type":"string"}},"required":["location"]}}],"generation_config":{"tool_choice":"auto","thinking_level":"high","thinking_summaries":"auto"},"stream":true,"store":false}`)
-	result, errExecute := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, errExecute := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gemini-3.8-flash-high",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:    sdktranslator.FormatInteractions,
 		ResponseFormat:  sdktranslator.FormatInteractions,
 		Stream:          true,

@@ -15,7 +15,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/httpfetch"
 )
 
-const userAgent = "CLIProxyAPI"
+const userAgent = "XinuGate"
 const maxPluginStoreRedirects = 10
 
 // HTTPDoer abstracts the HTTP client used to execute requests.

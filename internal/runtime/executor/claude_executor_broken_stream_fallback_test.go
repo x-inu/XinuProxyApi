@@ -11,16 +11,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestShouldForceClaudeNonStream(t *testing.T) {
 	cases := []struct {
 		name     string
 		cfg      *config.Config
-		auth     *cliproxyauth.Auth
+		auth     *xinugateauth.Auth
 		endpoint string
 		want     bool
 	}{
@@ -46,7 +46,7 @@ func TestShouldForceClaudeNonStream(t *testing.T) {
 		},
 		{
 			name: "JDW prefix on auth",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Prefix: "jdw",
 			},
 			endpoint: "https://custom-proxy.example.com/v1/messages",
@@ -54,7 +54,7 @@ func TestShouldForceClaudeNonStream(t *testing.T) {
 		},
 		{
 			name: "JDW prefix in auth attributes",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{"prefix": "jdw"},
 			},
 			endpoint: "https://custom-proxy.example.com/v1/messages",
@@ -62,7 +62,7 @@ func TestShouldForceClaudeNonStream(t *testing.T) {
 		},
 		{
 			name: "Force non-stream in auth attributes",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{"force_non_stream": "true"},
 			},
 			endpoint: "https://custom-proxy.example.com/v1/messages",
@@ -70,7 +70,7 @@ func TestShouldForceClaudeNonStream(t *testing.T) {
 		},
 		{
 			name: "Disable streaming in auth attributes",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{"disable_streaming": "true"},
 			},
 			endpoint: "https://custom-proxy.example.com/v1/messages",
@@ -87,7 +87,7 @@ func TestShouldForceClaudeNonStream(t *testing.T) {
 					},
 				},
 			},
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{"api_key": "sk-test-key"},
 			},
 			endpoint: "https://custom-proxy.example.com/v1/messages",
@@ -139,7 +139,7 @@ func TestClaudeExecutor_Execute_JustwokerNonStreamFallback(t *testing.T) {
 	}`
 
 	ctx := context.WithValue(context.Background(), "gin", ginCtx)
-	ctx = context.WithValue(ctx, "cliproxy.roundtripper", jdwRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx = context.WithValue(ctx, "xinugate.roundtripper", jdwRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		capturedUpstreamBody, _ = io.ReadAll(req.Body)
 		return &http.Response{
 			StatusCode: http.StatusOK,
@@ -151,7 +151,7 @@ func TestClaudeExecutor_Execute_JustwokerNonStreamFallback(t *testing.T) {
 	cfg := &config.Config{}
 	exec := NewClaudeExecutor(cfg)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "jdw-test-auth",
 		Provider: "claude",
 		Prefix:   "jdw",
@@ -168,10 +168,10 @@ func TestClaudeExecutor_Execute_JustwokerNonStreamFallback(t *testing.T) {
 		"stream": false
 	}`)
 
-	resp, err := exec.Execute(ctx, auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(ctx, auth, xinugateexecutor.Request{
 		Model:   "jdw/claude-opus-4-8",
 		Payload: clientRequest,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		Stream:          false,
 		SourceFormat:    sdktranslator.FormatOpenAI,
 		OriginalRequest: clientRequest,
@@ -221,7 +221,7 @@ func TestClaudeExecutor_ExecuteStream_JustwokerNonStreamFallback(t *testing.T) {
 	}`
 
 	ctx := context.WithValue(context.Background(), "gin", ginCtx)
-	ctx = context.WithValue(ctx, "cliproxy.roundtripper", jdwRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx = context.WithValue(ctx, "xinugate.roundtripper", jdwRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		capturedUpstreamBody, _ = io.ReadAll(req.Body)
 		return &http.Response{
 			StatusCode: http.StatusOK,
@@ -233,7 +233,7 @@ func TestClaudeExecutor_ExecuteStream_JustwokerNonStreamFallback(t *testing.T) {
 	cfg := &config.Config{}
 	exec := NewClaudeExecutor(cfg)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "jdw-test-auth",
 		Provider: "claude",
 		Prefix:   "jdw",
@@ -250,10 +250,10 @@ func TestClaudeExecutor_ExecuteStream_JustwokerNonStreamFallback(t *testing.T) {
 		"stream": true
 	}`)
 
-	streamResult, err := exec.ExecuteStream(ctx, auth, cliproxyexecutor.Request{
+	streamResult, err := exec.ExecuteStream(ctx, auth, xinugateexecutor.Request{
 		Model:   "jdw/claude-opus-4-8",
 		Payload: clientRequest,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		Stream:          true,
 		SourceFormat:    sdktranslator.FormatOpenAI,
 		OriginalRequest: clientRequest,

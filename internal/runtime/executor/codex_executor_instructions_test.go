@@ -9,9 +9,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexExecutorExecuteNormalizesNullInstructions(t *testing.T) {
@@ -27,15 +27,15 @@ func TestCodexExecutorExecuteNormalizesNullInstructions(t *testing.T) {
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.4",
 		Payload: []byte(`{"model":"gpt-5.4","instructions":null,"input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       false,
 	})
@@ -66,15 +66,15 @@ func TestCodexExecutorExecuteStreamNormalizesNullInstructions(t *testing.T) {
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	result, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.4",
 		Payload: []byte(`{"model":"gpt-5.4","instructions":null,"input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       true,
 	})
@@ -97,20 +97,20 @@ func TestCodexExecutorExecuteStreamNormalizesNullInstructions(t *testing.T) {
 func TestCodexExecutorCountTokensTreatsNullInstructionsAsEmpty(t *testing.T) {
 	executor := NewCodexExecutor(&config.Config{})
 
-	nullResp, err := executor.CountTokens(context.Background(), nil, cliproxyexecutor.Request{
+	nullResp, err := executor.CountTokens(context.Background(), nil, xinugateexecutor.Request{
 		Model:   "gpt-5.4",
 		Payload: []byte(`{"model":"gpt-5.4","instructions":null,"input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 	})
 	if err != nil {
 		t.Fatalf("CountTokens(null) error: %v", err)
 	}
 
-	emptyResp, err := executor.CountTokens(context.Background(), nil, cliproxyexecutor.Request{
+	emptyResp, err := executor.CountTokens(context.Background(), nil, xinugateexecutor.Request{
 		Model:   "gpt-5.4",
 		Payload: []byte(`{"model":"gpt-5.4","instructions":"","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 	})
 	if err != nil {

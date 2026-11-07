@@ -17,9 +17,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/clienterror"
 	"github.com/x-inu/XinuGate/v7/internal/interfaces"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type directResponseTestError struct {
@@ -74,7 +74,7 @@ func TestWriteErrorResponseDirectResponse(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
-	c.Writer.Header().Set("X-Cpa-Trace-Id", "local-trace")
+	c.Writer.Header().Set("X-Xg-Trace-Id", "local-trace")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "https://trusted.example")
 
 	handler := NewBaseAPIHandlers(nil, nil)
@@ -85,7 +85,7 @@ func TestWriteErrorResponseDirectResponse(t *testing.T) {
 		Headers: http.Header{
 			"Content-Type":                {"application/problem+json"},
 			"X-Plugin-Policy":             {"blocked"},
-			"X-Cpa-Trace-Id":              {"plugin-trace"},
+			"X-Xg-Trace-Id":               {"plugin-trace"},
 			"Access-Control-Allow-Origin": {"https://untrusted.example"},
 		},
 	})
@@ -102,8 +102,8 @@ func TestWriteErrorResponseDirectResponse(t *testing.T) {
 	if got := recorder.Header().Get("X-Plugin-Policy"); got != "blocked" {
 		t.Fatalf("X-Plugin-Policy = %q", got)
 	}
-	if got := recorder.Header().Get("X-Cpa-Trace-Id"); got != "local-trace" {
-		t.Fatalf("X-Cpa-Trace-Id = %q, want local value", got)
+	if got := recorder.Header().Get("X-Xg-Trace-Id"); got != "local-trace" {
+		t.Fatalf("X-Xg-Trace-Id = %q, want local value", got)
 	}
 	if got := recorder.Header().Get("Access-Control-Allow-Origin"); got != "https://trusted.example" {
 		t.Fatalf("Access-Control-Allow-Origin = %q, want trusted origin", got)
@@ -214,8 +214,8 @@ func TestWriteErrorResponse_AddonHeadersEnabled(t *testing.T) {
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
 	c.Writer.Header().Set("X-Request-Id", "old-value")
-	c.Writer.Header().Set("x-cpa-trace-id", "local-trace")
-	c.Writer.Header().Set("Access-Control-Expose-Headers", "x-cpa-trace-id")
+	c.Writer.Header().Set("x-xg-trace-id", "local-trace")
+	c.Writer.Header().Set("Access-Control-Expose-Headers", "x-xg-trace-id")
 
 	handler := NewBaseAPIHandlers(&sdkconfig.SDKConfig{PassthroughHeaders: true}, nil)
 	handler.WriteErrorResponse(c, &interfaces.ErrorMessage{
@@ -224,7 +224,7 @@ func TestWriteErrorResponse_AddonHeadersEnabled(t *testing.T) {
 		Addon: http.Header{
 			"Retry-After":                   {"30"},
 			"X-Request-Id":                  {"new-1", "new-2"},
-			"x-cpa-trace-id":                {"upstream-trace"},
+			"x-xg-trace-id":                 {"upstream-trace"},
 			"Access-Control-Expose-Headers": {"upstream-header"},
 		},
 	})
@@ -238,10 +238,10 @@ func TestWriteErrorResponse_AddonHeadersEnabled(t *testing.T) {
 	if got := recorder.Header().Values("X-Request-Id"); !reflect.DeepEqual(got, []string{"new-1", "new-2"}) {
 		t.Fatalf("X-Request-Id = %#v, want %#v", got, []string{"new-1", "new-2"})
 	}
-	if got := recorder.Header().Get("x-cpa-trace-id"); got != "local-trace" {
-		t.Fatalf("x-cpa-trace-id = %q, want local trace", got)
+	if got := recorder.Header().Get("x-xg-trace-id"); got != "local-trace" {
+		t.Fatalf("x-xg-trace-id = %q, want local trace", got)
 	}
-	if got := recorder.Header().Get("Access-Control-Expose-Headers"); got != "x-cpa-trace-id" {
+	if got := recorder.Header().Get("Access-Control-Expose-Headers"); got != "x-xg-trace-id" {
 		t.Fatalf("Access-Control-Expose-Headers = %q, want CPA value", got)
 	}
 }
@@ -600,7 +600,7 @@ func TestExtractUpstreamErrorSummary_SanitizationAndTruncation(t *testing.T) {
 		},
 		{
 			name:         "opt unix path redacted",
-			input:        `open /opt/cli-proxy/auth/alice.json: failed`,
+			input:        `open /opt/xinugate/auth/alice.json: failed`,
 			wantMask:     "[REDACTED_PATH]",
 			forbiddenRaw: "alice",
 		},

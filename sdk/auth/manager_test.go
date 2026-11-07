@@ -10,7 +10,7 @@ import (
 
 	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 type dummyAuthenticator struct {

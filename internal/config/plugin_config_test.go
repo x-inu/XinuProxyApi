@@ -97,7 +97,7 @@ plugins:
     - match: " https://plugins.example.com/ "
       apply-to: ["registry", "artifact", "registry"]
       type: bearer
-      token-env: " CLIPROXY_PLUGIN_STORE_TOKEN "
+      token-env: " XINUGATE_PLUGIN_STORE_TOKEN "
     - match: ""
       type: bearer
 `))
@@ -109,7 +109,7 @@ plugins:
 		t.Fatalf("Plugins.StoreAuth len = %d, want 1", len(cfg.Plugins.StoreAuth))
 	}
 	auth := cfg.Plugins.StoreAuth[0]
-	if auth.Match != "https://plugins.example.com/" || auth.Type != "bearer" || auth.TokenEnv != "CLIPROXY_PLUGIN_STORE_TOKEN" {
+	if auth.Match != "https://plugins.example.com/" || auth.Type != "bearer" || auth.TokenEnv != "XINUGATE_PLUGIN_STORE_TOKEN" {
 		t.Fatalf("Plugins.StoreAuth[0] = %#v", auth)
 	}
 	if len(auth.ApplyTo) != 2 || auth.ApplyTo[0] != "registry" || auth.ApplyTo[1] != "artifact" {

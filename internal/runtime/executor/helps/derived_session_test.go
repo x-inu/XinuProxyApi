@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestDerivedSessionProviderMappings(t *testing.T) {
 	t.Parallel()
 
-	metadata := map[string]any{cliproxyexecutor.DerivedSessionIDMetadataKey: "ctx:v1:test-root"}
+	metadata := map[string]any{xinugateexecutor.DerivedSessionIDMetadataKey: "ctx:v1:test-root"}
 	codexID := DerivedSessionUUID("codex", metadata)
 	xaiID := DerivedSessionUUID("xai", metadata)
 	if _, errParse := uuid.Parse(codexID); errParse != nil {
@@ -40,12 +40,12 @@ func TestProviderSessionUUIDPrefersExecutionSession(t *testing.T) {
 	t.Parallel()
 
 	first := map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "connection-1",
-		cliproxyexecutor.DerivedSessionIDMetadataKey: "ctx:v1:first-root",
+		xinugateexecutor.ExecutionSessionMetadataKey: "connection-1",
+		xinugateexecutor.DerivedSessionIDMetadataKey: "ctx:v1:first-root",
 	}
 	second := map[string]any{
-		cliproxyexecutor.ExecutionSessionMetadataKey: "connection-1",
-		cliproxyexecutor.DerivedSessionIDMetadataKey: "ctx:v1:second-root",
+		xinugateexecutor.ExecutionSessionMetadataKey: "connection-1",
+		xinugateexecutor.DerivedSessionIDMetadataKey: "ctx:v1:second-root",
 	}
 	firstID := ProviderSessionUUID("codex", first)
 	secondID := ProviderSessionUUID("codex", second)

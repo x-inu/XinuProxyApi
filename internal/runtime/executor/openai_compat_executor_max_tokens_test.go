@@ -9,9 +9,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
@@ -43,7 +43,7 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	}
 
 	executor := NewOpenAICompatExecutor("openai-compatibility", cfg)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "openai-compatibility",
 		Attributes: map[string]string{
 			"base_url":     server.URL + "/v1",
@@ -56,10 +56,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	t.Run("Execute responses request with use-max-completion-tokens=true sets max_completion_tokens", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-new","input":[{"role":"user","content":"hi"}],"max_output_tokens":1024}`)
-		_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+		_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-new",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Stream:       false,
 		})
@@ -78,10 +78,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	t.Run("Execute chat request with max_tokens and use-max-completion-tokens=true converts to max_completion_tokens", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-new","messages":[{"role":"user","content":"hi"}],"max_tokens":512}`)
-		_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+		_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-new",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai"),
 			Stream:       false,
 		})
@@ -100,10 +100,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	t.Run("Execute responses request with use-max-completion-tokens=false sets max_tokens", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-legacy","input":[{"role":"user","content":"hi"}],"max_output_tokens":1024}`)
-		_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+		_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-legacy",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Stream:       false,
 		})
@@ -122,10 +122,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	t.Run("Execute chat request with max_completion_tokens and use-max-completion-tokens=false converts to max_tokens", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-legacy","messages":[{"role":"user","content":"hi"}],"max_completion_tokens":512}`)
-		_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+		_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-legacy",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai"),
 			Stream:       false,
 		})
@@ -144,10 +144,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	t.Run("Execute responses request with max_output_tokens=null and use-max-completion-tokens=true preserves null", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-new","input":[{"role":"user","content":"hi"}],"max_output_tokens":null}`)
-		_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+		_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-new",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Stream:       false,
 		})
@@ -166,10 +166,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	t.Run("Execute responses request with max_output_tokens=null and use-max-completion-tokens=false preserves null", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-legacy","input":[{"role":"user","content":"hi"}],"max_output_tokens":null}`)
-		_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+		_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-legacy",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Stream:       false,
 		})
@@ -188,10 +188,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	t.Run("Execute chat request with max_tokens=null and use-max-completion-tokens=true preserves null", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-new","messages":[{"role":"user","content":"hi"}],"max_tokens":null}`)
-		_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+		_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-new",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai"),
 			Stream:       false,
 		})
@@ -210,10 +210,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalization(t *testing.T) {
 	t.Run("Execute chat request with max_completion_tokens=null and use-max-completion-tokens=false preserves null", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-legacy","messages":[{"role":"user","content":"hi"}],"max_completion_tokens":null}`)
-		_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+		_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-legacy",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai"),
 			Stream:       false,
 		})
@@ -259,7 +259,7 @@ func TestOpenAICompatExecutor_MaxTokensNormalizationStream(t *testing.T) {
 	}
 
 	executor := NewOpenAICompatExecutor("openai-compatibility", cfg)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "openai-compatibility",
 		Attributes: map[string]string{
 			"base_url":     server.URL + "/v1",
@@ -272,10 +272,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalizationStream(t *testing.T) {
 	t.Run("ExecuteStream with use-max-completion-tokens=true emits max_completion_tokens", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-new","messages":[{"role":"user","content":"hi"}],"max_tokens":256}`)
-		res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+		res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-new",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai"),
 			Stream:       true,
 		})
@@ -296,10 +296,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalizationStream(t *testing.T) {
 	t.Run("ExecuteStream with use-max-completion-tokens=false emits max_tokens", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-legacy","messages":[{"role":"user","content":"hi"}],"max_completion_tokens":256}`)
-		res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+		res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-legacy",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai"),
 			Stream:       true,
 		})
@@ -320,10 +320,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalizationStream(t *testing.T) {
 	t.Run("ExecuteStream responses request with max_output_tokens=null and use-max-completion-tokens=true preserves null", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-new","input":[{"role":"user","content":"hi"}],"max_output_tokens":null}`)
-		res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+		res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-new",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Stream:       true,
 		})
@@ -344,10 +344,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalizationStream(t *testing.T) {
 	t.Run("ExecuteStream responses request with max_output_tokens=null and use-max-completion-tokens=false preserves null", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-legacy","input":[{"role":"user","content":"hi"}],"max_output_tokens":null}`)
-		res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+		res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-legacy",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai-response"),
 			Stream:       true,
 		})
@@ -368,10 +368,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalizationStream(t *testing.T) {
 	t.Run("ExecuteStream chat request with max_tokens=null and use-max-completion-tokens=true preserves null", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-new","messages":[{"role":"user","content":"hi"}],"max_tokens":null}`)
-		res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+		res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-new",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai"),
 			Stream:       true,
 		})
@@ -392,10 +392,10 @@ func TestOpenAICompatExecutor_MaxTokensNormalizationStream(t *testing.T) {
 	t.Run("ExecuteStream chat request with max_completion_tokens=null and use-max-completion-tokens=false preserves null", func(t *testing.T) {
 		gotBody = nil
 		payload := []byte(`{"model":"alias-legacy","messages":[{"role":"user","content":"hi"}],"max_completion_tokens":null}`)
-		res, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+		res, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "alias-legacy",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat: sdktranslator.FromString("openai"),
 			Stream:       true,
 		})

@@ -11,10 +11,10 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/executionregistry"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type antigravityHomeModelCapabilityDispatcher struct {
@@ -36,12 +36,12 @@ func (d *antigravityHomeModelCapabilityDispatcher) RPopAuth(context.Context, str
 			},
 			"user_defined": false,
 		},
-		"auth": cliproxyauth.Auth{
+		"auth": xinugateauth.Auth{
 			ID:       "home-antigravity-3.8-auth",
 			Provider: "antigravity",
-			Status:   cliproxyauth.StatusActive,
+			Status:   xinugateauth.StatusActive,
 			Attributes: map[string]string{
-				cliproxyauth.AttributeAuthKind: cliproxyauth.AuthKindOAuth,
+				xinugateauth.AttributeAuthKind: xinugateauth.AuthKindOAuth,
 				"base_url":                     d.baseURL,
 			},
 			Metadata: map[string]any{
@@ -71,16 +71,16 @@ func TestAntigravityHomeModelThinkingLevelRemainsLevel(t *testing.T) {
 
 	cfg := &config.Config{RequestRetry: 1}
 	cfg.Home.Enabled = true
-	manager := cliproxyauth.NewManager(nil, nil, nil)
+	manager := xinugateauth.NewManager(nil, nil, nil)
 	manager.SetConfig(cfg)
 	manager.RegisterExecutor(NewAntigravityExecutor(cfg))
 	manager.PublishHomeDispatch(&antigravityHomeModelCapabilityDispatcher{baseURL: server.URL}, executionregistry.New(), 1)
 
 	payload := []byte(`{"model":"gemini-3.8-flash-high","reasoning_effort":"medium","messages":[{"role":"user","content":"hello"}]}`)
-	_, errExecute := manager.Execute(context.Background(), []string{"antigravity"}, cliproxyexecutor.Request{
+	_, errExecute := manager.Execute(context.Background(), []string{"antigravity"}, xinugateexecutor.Request{
 		Model:   "gemini-3.8-flash-high",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:    sdktranslator.FormatOpenAI,
 		ResponseFormat:  sdktranslator.FormatOpenAI,
 		OriginalRequest: payload,

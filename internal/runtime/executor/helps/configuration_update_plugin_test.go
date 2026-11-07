@@ -11,8 +11,8 @@ import (
 	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/claude"
 	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/codex"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type editUpdatePluginHooks struct {
@@ -42,8 +42,8 @@ func TestPluginConfigurationUpdateNormalizationIsAuthoritative(t *testing.T) {
 			if !translated.ConfigurationUpdatesChanged {
 				t.Fatal("plugin update edit not reported by translator")
 			}
-			req := cliproxyexecutor.Request{Model: "opaque-route", Payload: []byte(source), Metadata: map[string]any{"cliproxy.resolved_api_key_model_info": &registry.ModelInfo{ID: "opaque-route", Thinking: &registry.ThinkingSupport{Levels: []string{"low", "medium", "high"}}}}}
-			body, errApply := helps.ApplyRequestThinking(translated.Body, req, cliproxyexecutor.Options{}, "openai-response", "codex", "codex", translated.ConfigurationUpdatesChanged)
+			req := xinugateexecutor.Request{Model: "opaque-route", Payload: []byte(source), Metadata: map[string]any{"xinugate.resolved_api_key_model_info": &registry.ModelInfo{ID: "opaque-route", Thinking: &registry.ThinkingSupport{Levels: []string{"low", "medium", "high"}}}}}
+			body, errApply := helps.ApplyRequestThinking(translated.Body, req, xinugateexecutor.Options{}, "openai-response", "codex", "codex", translated.ConfigurationUpdatesChanged)
 			if errApply != nil {
 				t.Fatal(errApply)
 			}
@@ -63,8 +63,8 @@ func TestNativeCrossProtocolTranslationWithoutPluginRetainsSourceUpdate(t *testi
 	if translated.ConfigurationUpdatesChanged {
 		t.Fatal("native translation was incorrectly reported as a plugin edit")
 	}
-	req := cliproxyexecutor.Request{Model: "private-chat", Payload: []byte(source), Metadata: map[string]any{"cliproxy.resolved_api_key_model_info": &registry.ModelInfo{ID: "private-chat", Thinking: &registry.ThinkingSupport{Levels: []string{"low", "medium", "high"}}}}}
-	body, errApply := helps.ApplyRequestThinking(translated.Body, req, cliproxyexecutor.Options{}, "openai-response", "openai", "openai", translated.ConfigurationUpdatesChanged)
+	req := xinugateexecutor.Request{Model: "private-chat", Payload: []byte(source), Metadata: map[string]any{"xinugate.resolved_api_key_model_info": &registry.ModelInfo{ID: "private-chat", Thinking: &registry.ThinkingSupport{Levels: []string{"low", "medium", "high"}}}}}
+	body, errApply := helps.ApplyRequestThinking(translated.Body, req, xinugateexecutor.Options{}, "openai-response", "openai", "openai", translated.ConfigurationUpdatesChanged)
 	if errApply != nil {
 		t.Fatal(errApply)
 	}

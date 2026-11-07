@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 type testTokenStorage struct {
@@ -37,7 +37,7 @@ func TestFileTokenStore_Save_DisabledPersistsFlagForTokenStorage(t *testing.T) {
 	store.SetBaseDir(baseDir)
 	storage := &testTokenStorage{}
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "disabled.json",
 		Provider: "test",
 		FileName: "disabled.json",
@@ -69,7 +69,7 @@ func TestFileTokenStore_Save_DisabledLoginCreatesCanonicalFile(t *testing.T) {
 	store := NewFileTokenStore()
 	store.SetBaseDir(baseDir)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "canonical-disabled.json",
 		Provider: "test",
 		FileName: "canonical-disabled.json",
@@ -78,7 +78,7 @@ func TestFileTokenStore_Save_DisabledLoginCreatesCanonicalFile(t *testing.T) {
 		Metadata: map[string]any{"type": "test"},
 	}
 
-	ctx := cliproxyauth.WithAuthCreationIntent(context.Background())
+	ctx := xinugateauth.WithAuthCreationIntent(context.Background())
 	savedPath, err := store.Save(ctx, auth)
 	if err != nil {
 		t.Fatalf("Save() error = %v", err)
@@ -105,7 +105,7 @@ func TestFileTokenStore_Save_DisabledStorageBackedRuntimeDoesNotRecreateMissingF
 	store := NewFileTokenStore()
 	store.SetBaseDir(baseDir)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "removed-disabled.json",
 		Provider: "test",
 		FileName: "removed-disabled.json",

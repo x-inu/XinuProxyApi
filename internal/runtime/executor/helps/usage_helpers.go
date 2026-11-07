@@ -20,9 +20,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/clienterror"
 	internallogging "github.com/x-inu/XinuGate/v7/internal/logging"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 type UsageReporter struct {
@@ -72,7 +72,7 @@ type usageExecutor interface {
 	Identifier() string
 }
 
-func NewExecutorUsageReporter(ctx context.Context, executor usageExecutor, model string, auth *cliproxyauth.Auth) *UsageReporter {
+func NewExecutorUsageReporter(ctx context.Context, executor usageExecutor, model string, auth *xinugateauth.Auth) *UsageReporter {
 	provider := ""
 	if executor != nil {
 		provider = executor.Identifier()
@@ -82,7 +82,7 @@ func NewExecutorUsageReporter(ctx context.Context, executor usageExecutor, model
 	return reporter
 }
 
-func NewUsageReporter(ctx context.Context, provider, model string, auth *cliproxyauth.Auth) *UsageReporter {
+func NewUsageReporter(ctx context.Context, provider, model string, auth *xinugateauth.Auth) *UsageReporter {
 	apiKey := APIKeyFromContext(ctx)
 	alias := usage.RequestedModelAliasFromContext(ctx)
 	if alias == "" {
@@ -179,7 +179,7 @@ func isHierarchyParent(primary, parent string) bool {
 }
 
 // UpdateAccessTokenFingerprint records the token version actually used upstream.
-func (r *UsageReporter) UpdateAccessTokenFingerprint(auth *cliproxyauth.Auth) {
+func (r *UsageReporter) UpdateAccessTokenFingerprint(auth *xinugateauth.Auth) {
 	if r == nil {
 		return
 	}
@@ -738,7 +738,7 @@ type usageTTFTRoundTripper struct {
 }
 
 func (t usageTTFTRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	cliproxyexecutor.MarkUpstreamAttempt(req.Context())
+	xinugateexecutor.MarkUpstreamAttempt(req.Context())
 	t.reporter.StartResponseTTFT()
 	resp, errRoundTrip := t.base.RoundTrip(req)
 	if errRoundTrip != nil {
@@ -790,7 +790,7 @@ func APIKeyFromContext(ctx context.Context) string {
 	return ""
 }
 
-func resolveUsageSource(auth *cliproxyauth.Auth, ctxAPIKey string) string {
+func resolveUsageSource(auth *xinugateauth.Auth, ctxAPIKey string) string {
 	if auth != nil {
 		provider := strings.TrimSpace(auth.Provider)
 		if strings.EqualFold(provider, "vertex") {
@@ -829,7 +829,7 @@ func resolveUsageSource(auth *cliproxyauth.Auth, ctxAPIKey string) string {
 	return ""
 }
 
-func resolveUsageAuthType(auth *cliproxyauth.Auth) string {
+func resolveUsageAuthType(auth *xinugateauth.Auth) string {
 	if auth == nil {
 		return ""
 	}

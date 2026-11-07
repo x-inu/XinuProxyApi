@@ -3,7 +3,7 @@ package auth
 import (
 	"sync"
 
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 var (

@@ -22,7 +22,7 @@ import (
 	"github.com/klauspost/compress/zstd"
 	utls "github.com/refraction-networking/utls"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // OpenCode free-tier requests are only served to clients whose TLS
@@ -71,7 +71,7 @@ func OpencodeTLSUpstream(baseURL string) bool {
 // OpenCode CLI. When a proxy is configured for the request the regular
 // proxy-aware client is returned: proxying would replace the handshake with
 // the proxy's own, so the fingerprint cannot be carried through it.
-func NewOpencodeHTTPClient(ctx context.Context, cfg *config.Config, auth *cliproxyauth.Auth, timeout time.Duration) *http.Client {
+func NewOpencodeHTTPClient(ctx context.Context, cfg *config.Config, auth *xinugateauth.Auth, timeout time.Duration) *http.Client {
 	if effectiveProxyURL(ctx, cfg, auth) != "" {
 		return NewProxyAwareHTTPClient(ctx, cfg, auth, timeout)
 	}

@@ -15,8 +15,8 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // codexDuplexConnectionError keeps a connection failure from cooling the shared
@@ -34,13 +34,13 @@ func (e *codexDuplexConnectionError) IsRequestScoped() bool { return true }
 // There is no redial, credential selection, local acknowledgement, or replay
 // in this path. Only the upstream can take ownership of a steering submission.
 func (e *CodexWebsocketsExecutor) streamCodexDuplex(
-	ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options,
+	ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options,
 	sess *codexWebsocketSession, conn *websocket.Conn, readCh chan codexWebsocketRead,
-	input <-chan cliproxyexecutor.WebsocketInput, initial *codexWebsocketPrepared,
+	input <-chan xinugateexecutor.WebsocketInput, initial *codexWebsocketPrepared,
 	initialReporter *helps.UsageReporter, headers http.Header, unlock func(),
-) *cliproxyexecutor.StreamResult {
+) *xinugateexecutor.StreamResult {
 	streamCtx, cancel := context.WithCancel(ctx)
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	// This first frame was successfully written by ExecuteStream before handoff.
 	log.Infof("codex websockets: request forwarded session=%s auth=%s url=%s event=response.create", sess.sessionID, auth.ID, initial.wsURL)
 	writeErrors := make(chan error, 1)
@@ -129,7 +129,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 			// Reader cleanup joins this writer before closing out. Cancellation must
 			// also release a local error blocked behind a disconnected downstream.
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Payload: payload}:
+			case out <- xinugateexecutor.StreamChunk{Payload: payload}:
 				return true
 			case <-streamCtx.Done():
 				return false
@@ -153,7 +153,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 			}
 			model := strings.TrimSpace(gjson.GetBytes(payload, "model").String())
 			if model != "" && model != req.Model && model != gjson.GetBytes(initial.originalPayload, "model").String() {
-				fail(cliproxyexecutor.NewUpstreamWebsocketReplayRequiredError())
+				fail(xinugateexecutor.NewUpstreamWebsocketReplayRequiredError())
 				return false
 			}
 			if model == "" {
@@ -197,7 +197,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 				return false
 			}
 			if prepared.wsURL != initial.wsURL {
-				fail(cliproxyexecutor.NewUpstreamWebsocketReplayRequiredError())
+				fail(xinugateexecutor.NewUpstreamWebsocketReplayRequiredError())
 				return false
 			}
 			payload = buildCodexWebsocketRequestBody(prepared.upstreamBody)
@@ -212,7 +212,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 			if prepared.optimizeMultiAgentV2 || prepared.multiAgentV2Conflict {
 				sess.setMultiAgentV2Optimized(conn, prepared.optimizeMultiAgentV2 && !prepared.multiAgentV2Conflict)
 			}
-			if !cliproxyexecutor.WebsocketAuthEnabled(streamCtx, auth.ID) {
+			if !xinugateexecutor.WebsocketAuthEnabled(streamCtx, auth.ID) {
 				fail(fmt.Errorf("websocket credential is no longer enabled"))
 				return false
 			}
@@ -262,7 +262,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 					fail(message.Err)
 					return
 				}
-				if !cliproxyexecutor.WebsocketAuthEnabled(streamCtx, auth.ID) {
+				if !xinugateexecutor.WebsocketAuthEnabled(streamCtx, auth.ID) {
 					// A fresh client connection can select an enabled credential. Do not send
 					// this frame on a disabled account or replay it on a different socket.
 					fail(fmt.Errorf("websocket credential is no longer enabled"))
@@ -297,7 +297,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 					metadataMu.Unlock()
 					// Control frames bypass ALL response.create translations and defaults.
 					// Unknown fields and unsupported input are left to upstream validation.
-					if !cliproxyexecutor.WebsocketAuthEnabled(streamCtx, auth.ID) {
+					if !xinugateexecutor.WebsocketAuthEnabled(streamCtx, auth.ID) {
 						fail(fmt.Errorf("websocket credential is no longer enabled"))
 						return
 					}
@@ -345,7 +345,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 			sess.clearActive(conn, readCh)
 			unlock()
 		}()
-		send := func(chunk cliproxyexecutor.StreamChunk) bool {
+		send := func(chunk xinugateexecutor.StreamChunk) bool {
 			select {
 			case out <- chunk:
 				return true
@@ -369,7 +369,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 				if ctx.Err() == nil {
 					connectionErr := &codexDuplexConnectionError{cause: errRead}
 					reporter.PublishFailure(ctx, connectionErr)
-					send(cliproxyexecutor.StreamChunk{Err: connectionErr})
+					send(xinugateexecutor.StreamChunk{Err: connectionErr})
 				}
 				return
 			}
@@ -394,7 +394,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 						metadataMu.Unlock()
 						connectionErr := &codexDuplexConnectionError{cause: fmt.Errorf("automatic successor has no retained parent settings")}
 						reporter.PublishFailure(ctx, connectionErr)
-						send(cliproxyexecutor.StreamChunk{Err: connectionErr})
+						send(xinugateexecutor.StreamChunk{Err: connectionErr})
 						return
 					}
 					current = settings
@@ -478,7 +478,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 				}
 				metadataMu.Unlock()
 				wakeWriter()
-				if !send(cliproxyexecutor.StreamChunk{Payload: payload}) {
+				if !send(xinugateexecutor.StreamChunk{Payload: payload}) {
 					return
 				}
 				continue
@@ -496,8 +496,8 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 					// The conductor records the original classification without replaying
 					// this already-started stream on another credential.
 					reporter.PublishFailure(ctx, credentialErr)
-					if send(cliproxyexecutor.StreamChunk{Payload: payload}) {
-						send(cliproxyexecutor.StreamChunk{Err: credentialErr})
+					if send(xinugateexecutor.StreamChunk{Payload: payload}) {
+						send(xinugateexecutor.StreamChunk{Err: credentialErr})
 					}
 					return
 				}
@@ -530,8 +530,8 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 					// guessing a scope, replaying input, or cooling the credential.
 					connectionErr := &codexDuplexConnectionError{cause: fmt.Errorf("cannot associate websocket failure with a response or pending create")}
 					reporter.PublishFailure(ctx, connectionErr)
-					if send(cliproxyexecutor.StreamChunk{Payload: payload}) {
-						send(cliproxyexecutor.StreamChunk{Err: connectionErr})
+					if send(xinugateexecutor.StreamChunk{Payload: payload}) {
+						send(xinugateexecutor.StreamChunk{Err: connectionErr})
 					}
 					return
 				}
@@ -553,14 +553,14 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 			if replayErr != nil {
 				helps.RecordAPIWebsocketError(ctx, e.cfg, "replay_clear_error", replayErr)
 				eventReporter.PublishFailure(ctx, replayErr)
-				send(cliproxyexecutor.StreamChunk{Err: replayErr})
+				send(xinugateexecutor.StreamChunk{Err: replayErr})
 				return
 			}
 			if terminalErr != nil {
 				helps.RecordAPIWebsocketError(ctx, e.cfg, "upstream_error", terminalErr)
 				eventReporter.PublishFailure(ctx, terminalErr)
 				if firstResponse {
-					send(cliproxyexecutor.StreamChunk{Err: terminalErr})
+					send(xinugateexecutor.StreamChunk{Err: terminalErr})
 					return
 				}
 			}
@@ -587,7 +587,7 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 				}
 			}
 			payload = applyCodexIdentityExposeResponsePayload(payload, eventPrepared.identityState)
-			if !send(cliproxyexecutor.StreamChunk{Payload: helps.EnsureResponsesUsageDetails(payload)}) {
+			if !send(xinugateexecutor.StreamChunk{Payload: helps.EnsureResponsesUsageDetails(payload)}) {
 				return
 			}
 			if establishing {
@@ -597,5 +597,5 @@ func (e *CodexWebsocketsExecutor) streamCodexDuplex(
 			}
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: headers, Chunks: out}
+	return &xinugateexecutor.StreamResult{Headers: headers, Chunks: out}
 }

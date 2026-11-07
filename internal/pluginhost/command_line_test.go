@@ -9,8 +9,8 @@ import (
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestRegisterCommandLineFlagsSkipsNativeAndUsesPriority(t *testing.T) {
@@ -85,7 +85,7 @@ func TestExecuteCommandLinePassesAllArgsAndTriggeredFlags(t *testing.T) {
 		t.Fatal("HasTriggeredCommandLineFlags() = false, want true")
 	}
 
-	exitCode, handled := host.ExecuteCommandLine(context.Background(), "cliproxy", []string{"-plugin-command", "tail"}, "/tmp/config.yaml", flagSet)
+	exitCode, handled := host.ExecuteCommandLine(context.Background(), "xinugate", []string{"-plugin-command", "tail"}, "/tmp/config.yaml", flagSet)
 	if !handled {
 		t.Fatal("ExecuteCommandLine() handled = false, want true")
 	}
@@ -96,7 +96,7 @@ func TestExecuteCommandLinePassesAllArgsAndTriggeredFlags(t *testing.T) {
 		t.Fatalf("execute calls = %d, want 1", len(plugin.execRequests))
 	}
 	req := plugin.execRequests[0]
-	if req.Program != "cliproxy" || req.ConfigPath != "/tmp/config.yaml" {
+	if req.Program != "xinugate" || req.ConfigPath != "/tmp/config.yaml" {
 		t.Fatalf("execution request = %#v, want program and config path", req)
 	}
 	if req.Host.AuthDir != "/tmp/plugin-auth" {
@@ -146,7 +146,7 @@ func TestExecuteCommandLinePersistsReturnedAuths(t *testing.T) {
 		t.Fatalf("Parse() error = %v", errParse)
 	}
 
-	exitCode, handled := host.ExecuteCommandLine(context.Background(), "cliproxy", []string{"-plugin-login"}, "/tmp/config.yaml", flagSet)
+	exitCode, handled := host.ExecuteCommandLine(context.Background(), "xinugate", []string{"-plugin-login"}, "/tmp/config.yaml", flagSet)
 	if !handled {
 		t.Fatal("ExecuteCommandLine() handled = false, want true")
 	}

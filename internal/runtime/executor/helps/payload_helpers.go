@@ -11,7 +11,7 @@ import (
 	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // ApplyPayloadConfigWithRoot behaves like applyPayloadConfig but treats all parameter
@@ -927,12 +927,12 @@ func payloadRawValue(value any) ([]byte, bool) {
 	}
 }
 
-func PayloadRequestedModel(opts cliproxyexecutor.Options, fallback string) string {
+func PayloadRequestedModel(opts xinugateexecutor.Options, fallback string) string {
 	fallback = strings.TrimSpace(fallback)
 	if len(opts.Metadata) == 0 {
 		return fallback
 	}
-	raw, ok := opts.Metadata[cliproxyexecutor.RequestedModelMetadataKey]
+	raw, ok := opts.Metadata[xinugateexecutor.RequestedModelMetadataKey]
 	if !ok || raw == nil {
 		return fallback
 	}
@@ -956,11 +956,11 @@ func PayloadRequestedModel(opts cliproxyexecutor.Options, fallback string) strin
 	}
 }
 
-func PayloadRequestPath(opts cliproxyexecutor.Options) string {
+func PayloadRequestPath(opts xinugateexecutor.Options) string {
 	if len(opts.Metadata) == 0 {
 		return ""
 	}
-	raw, ok := opts.Metadata[cliproxyexecutor.RequestPathMetadataKey]
+	raw, ok := opts.Metadata[xinugateexecutor.RequestPathMetadataKey]
 	if !ok || raw == nil {
 		return ""
 	}

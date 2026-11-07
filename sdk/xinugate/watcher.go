@@ -1,0 +1,47 @@
+package xinugate
+
+import (
+	"context"
+
+	"github.com/x-inu/XinuGate/v7/internal/watcher"
+	"github.com/x-inu/XinuGate/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+)
+
+func defaultWatcherFactory(configPath, authDir string, reload func(*config.Config)) (*WatcherWrapper, error) {
+	w, err := watcher.NewWatcher(configPath, authDir, reload)
+	if err != nil {
+		return nil, err
+	}
+
+	return &WatcherWrapper{
+		start: func(ctx context.Context) error {
+			return w.Start(ctx)
+		},
+		stop: func() error {
+			return w.Stop()
+		},
+		setConfig: func(cfg *config.Config) {
+			w.SetConfig(cfg)
+		},
+		snapshotAuths: func() []*coreauth.Auth { return w.SnapshotCoreAuths() },
+		setUpdateQueue: func(queue chan<- watcher.AuthUpdate) {
+			w.SetAuthUpdateQueue(queue)
+		},
+		dispatchRuntimeUpdate: func(update watcher.AuthUpdate) bool {
+			return w.DispatchRuntimeAuthUpdate(update)
+		},
+		dispatchPersistedAuth: func(update watcher.AuthUpdate) bool {
+			return w.DispatchPersistedAuthUpdate(update)
+		},
+		dispatchPersistedAuthWithRev: func(update *watcher.AuthUpdate) (bool, uint64) {
+			return w.DispatchPersistedAuthUpdateWithRevision(update)
+		},
+		setPluginAuthParser: func(parser PluginAuthParser) {
+			w.SetPluginAuthParser(parser)
+		},
+		reloadConfigIfChanged: func() {
+			w.ReloadConfigIfChanged()
+		},
+	}, nil
+}

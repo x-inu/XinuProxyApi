@@ -16,12 +16,12 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	ctx = helps.EnsureSessionContext(ctx, opts, req.Payload)
 	if opts.Alt == "responses/compact" {
 		return nil, statusErr{code: http.StatusBadRequest, msg: "streaming not supported for /responses/compact"}
@@ -40,7 +40,7 @@ func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 	defer reporter.TrackFailure(ctx, &err)
 
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	preserveNativeOutput := helps.IsNativeCodexRequest(req.Payload, opts)
 	isGrokClient := grokbuild.IsGrokClientContext(ctx, opts.Headers)
 	to := sdktranslator.FromString("codex")
@@ -331,24 +331,24 @@ func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 	if bootstrapTerminalErr != nil {
 		chanCapacity++
 	}
-	out := make(chan cliproxyexecutor.StreamChunk, chanCapacity)
+	out := make(chan xinugateexecutor.StreamChunk, chanCapacity)
 	for _, chunk := range bufferedChunks {
-		out <- cliproxyexecutor.StreamChunk{Payload: chunk}
+		out <- xinugateexecutor.StreamChunk{Payload: chunk}
 	}
 	for _, chunk := range initialChunks {
-		out <- cliproxyexecutor.StreamChunk{Payload: chunk}
+		out <- xinugateexecutor.StreamChunk{Payload: chunk}
 	}
 	if bootstrapTerminalErr != nil {
 		// Buffered handshake payloads are flushed first so the conductor observes a committed
 		// stream and delivers this failure in-stream, exactly as the unbuffered path would.
-		out <- cliproxyexecutor.StreamChunk{Err: bootstrapTerminalErr}
+		out <- xinugateexecutor.StreamChunk{Err: bootstrapTerminalErr}
 		close(out)
-		return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+		return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 	}
 	if immediateTerminal {
 		closeBootstrapBody()
 		close(out)
-		return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+		return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 	}
 
 	go func() {
@@ -377,7 +377,7 @@ func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 						helps.RecordAPIResponseError(ctx, e.cfg, errClearReplay)
 						reporter.PublishFailure(ctx, errClearReplay)
 						select {
-						case out <- cliproxyexecutor.StreamChunk{Err: errClearReplay}:
+						case out <- xinugateexecutor.StreamChunk{Err: errClearReplay}:
 						case <-ctx.Done():
 						}
 						return
@@ -385,7 +385,7 @@ func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 					helps.RecordAPIResponseError(ctx, e.cfg, streamErr)
 					reporter.PublishFailure(ctx, streamErr)
 					select {
-					case out <- cliproxyexecutor.StreamChunk{Err: streamErr}:
+					case out <- xinugateexecutor.StreamChunk{Err: streamErr}:
 					case <-ctx.Done():
 					}
 					return
@@ -398,7 +398,7 @@ func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 					helps.RecordAPIResponseError(ctx, e.cfg, streamErr)
 					reporter.PublishFailure(ctx, streamErr)
 					select {
-					case out <- cliproxyexecutor.StreamChunk{Err: streamErr}:
+					case out <- xinugateexecutor.StreamChunk{Err: streamErr}:
 					case <-ctx.Done():
 					}
 					return
@@ -431,7 +431,7 @@ func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 			chunks := helps.TranslateStreamWithClaudeInputTokens(ctx, to, responseFormat, req.Model, originalPayload, body, translatedLine, &param, claudeInputTokens)
 			for i := range chunks {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: chunks[i]}:
+				case out <- xinugateexecutor.StreamChunk{Payload: chunks[i]}:
 				case <-ctx.Done():
 					return
 				}
@@ -450,9 +450,9 @@ func (e *CodexExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 		helps.RecordAPIResponseError(ctx, e.cfg, streamErr)
 		reporter.PublishFailure(ctx, streamErr)
 		select {
-		case out <- cliproxyexecutor.StreamChunk{Err: streamErr}:
+		case out <- xinugateexecutor.StreamChunk{Err: streamErr}:
 		case <-ctx.Done():
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }

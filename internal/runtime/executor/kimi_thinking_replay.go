@@ -15,8 +15,8 @@ import (
 	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type kimiThinkingReplayScope struct {
@@ -42,7 +42,7 @@ func kimiThinkingReplayModelFamily(model string) string {
 	}
 }
 
-func kimiThinkingReplayScopeFromRequest(ctx context.Context, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) kimiThinkingReplayScope {
+func kimiThinkingReplayScopeFromRequest(ctx context.Context, req xinugateexecutor.Request, opts xinugateexecutor.Options) kimiThinkingReplayScope {
 	sessionKey := codexReasoningReplaySessionKey(ctx, sdktranslator.FormatClaude, req, opts, req.Payload)
 	sessionKey = xaiReasoningReplayIsolateSessionKey(ctx, sessionKey)
 	return kimiThinkingReplayScope{
@@ -51,7 +51,7 @@ func kimiThinkingReplayScopeFromRequest(ctx context.Context, req cliproxyexecuto
 	}
 }
 
-func prepareKimiThinkingReplayRequest(ctx context.Context, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Request, kimiThinkingReplayScope) {
+func prepareKimiThinkingReplayRequest(ctx context.Context, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Request, kimiThinkingReplayScope) {
 	scope := kimiThinkingReplayScopeFromRequest(ctx, req, opts)
 	if !scope.valid() {
 		return req, scope
@@ -444,11 +444,11 @@ func (a *kimiThinkingReplayStreamAccumulator) content() ([]byte, bool) {
 type thinkingReplayContentCacheFunc func(context.Context, kimiThinkingReplayScope, []byte)
 type thinkingReplayContentClearFunc func(context.Context, kimiThinkingReplayScope)
 
-func wrapThinkingReplayStream(ctx context.Context, result *cliproxyexecutor.StreamResult, scope kimiThinkingReplayScope, cacheContent thinkingReplayContentCacheFunc, clearContent thinkingReplayContentClearFunc) *cliproxyexecutor.StreamResult {
+func wrapThinkingReplayStream(ctx context.Context, result *xinugateexecutor.StreamResult, scope kimiThinkingReplayScope, cacheContent thinkingReplayContentCacheFunc, clearContent thinkingReplayContentClearFunc) *xinugateexecutor.StreamResult {
 	if result == nil || !scope.valid() {
 		return result
 	}
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func() {
 		defer close(out)
 		accumulator := newKimiThinkingReplayStreamAccumulator()
@@ -476,9 +476,9 @@ func wrapThinkingReplayStream(ctx context.Context, result *cliproxyexecutor.Stre
 			clearContent(ctx, scope)
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: result.Headers.Clone(), Chunks: out}
+	return &xinugateexecutor.StreamResult{Headers: result.Headers.Clone(), Chunks: out}
 }
 
-func wrapKimiThinkingReplayStream(ctx context.Context, result *cliproxyexecutor.StreamResult, scope kimiThinkingReplayScope) *cliproxyexecutor.StreamResult {
+func wrapKimiThinkingReplayStream(ctx context.Context, result *xinugateexecutor.StreamResult, scope kimiThinkingReplayScope) *xinugateexecutor.StreamResult {
 	return wrapThinkingReplayStream(ctx, result, scope, cacheKimiThinkingReplayContent, clearKimiThinkingReplayContent)
 }

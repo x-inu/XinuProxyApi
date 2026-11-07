@@ -11,9 +11,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // antigravityNoFinishReasonSSE mirrors a real upstream stream captured from
@@ -39,17 +39,17 @@ func collectAntigravityStream(t *testing.T, baseURL string, sourceFormat, respon
 		Antigravity:  config.AntigravityConfig{},
 		RequestRetry: 1,
 	})
-	result, errExecute := executor.ExecuteStream(context.Background(), &cliproxyauth.Auth{
+	result, errExecute := executor.ExecuteStream(context.Background(), &xinugateauth.Auth{
 		Metadata: map[string]any{
 			"access_token": "token-123",
 			"expired":      time.Now().Add(24 * time.Hour).Format(time.RFC3339),
 			"project_id":   "project-1",
 		},
 		Attributes: map[string]string{"base_url": baseURL},
-	}, cliproxyexecutor.Request{
+	}, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: []byte(payload),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sourceFormat,
 		ResponseFormat: responseFormat,
 		Stream:         true,
@@ -99,17 +99,17 @@ func TestAntigravityStreamDoesNotEmitClaudeMessageStopOnReadError(t *testing.T) 
 		Antigravity:  config.AntigravityConfig{},
 		RequestRetry: 1,
 	})
-	result, errExecute := executor.ExecuteStream(context.Background(), &cliproxyauth.Auth{
+	result, errExecute := executor.ExecuteStream(context.Background(), &xinugateauth.Auth{
 		Metadata: map[string]any{
 			"access_token": "token-123",
 			"expired":      time.Now().Add(24 * time.Hour).Format(time.RFC3339),
 			"project_id":   "project-1",
 		},
 		Attributes: map[string]string{"base_url": server.URL},
-	}, cliproxyexecutor.Request{
+	}, xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: []byte(`{"model":"gemini-3.7-flash","max_tokens":256,"stream":true,"messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatClaude,
 		ResponseFormat: sdktranslator.FormatClaude,
 		Stream:         true,
@@ -159,17 +159,17 @@ func TestAntigravityStreamDoesNotFinalizeEmptyUpstreamStream(t *testing.T) {
 				Antigravity:  config.AntigravityConfig{},
 				RequestRetry: 1,
 			})
-			result, errExecute := executor.ExecuteStream(context.Background(), &cliproxyauth.Auth{
+			result, errExecute := executor.ExecuteStream(context.Background(), &xinugateauth.Auth{
 				Metadata: map[string]any{
 					"access_token": "token-123",
 					"expired":      time.Now().Add(24 * time.Hour).Format(time.RFC3339),
 					"project_id":   "project-1",
 				},
 				Attributes: map[string]string{"base_url": server.URL},
-			}, cliproxyexecutor.Request{
+			}, xinugateexecutor.Request{
 				Model:   "gemini-3.7-flash",
 				Payload: []byte(tc.payload),
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat:   tc.sourceFormat,
 				ResponseFormat: tc.responseFormat,
 				Stream:         true,

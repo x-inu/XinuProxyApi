@@ -13,9 +13,9 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/wsrelay"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCustomMagicHeaders_OpenAICompat(t *testing.T) {
@@ -32,7 +32,7 @@ func TestCustomMagicHeaders_OpenAICompat(t *testing.T) {
 			Name: "compat",
 		}},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "openai-compatibility",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
@@ -44,11 +44,11 @@ func TestCustomMagicHeaders_OpenAICompat(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gpt-4o",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 		Headers: http.Header{
 			"Abc":              []string{"session-abc-value"},
@@ -85,7 +85,7 @@ func TestCustomMagicHeaders_Gemini(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "gemini",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
@@ -96,11 +96,11 @@ func TestCustomMagicHeaders_Gemini(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: []byte(`{"contents":[{"parts":[{"text":"hi"}]}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 		Headers: http.Header{
 			"Abc": []string{"gemini-session-abc"},
@@ -133,7 +133,7 @@ func TestCustomMagicHeaders_GeminiInteractions(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "gemini-interactions",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
@@ -144,11 +144,11 @@ func TestCustomMagicHeaders_GeminiInteractions(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-3.1-flash-lite",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 		Headers: http.Header{
 			"Abc": []string{"interactions-session-123"},
@@ -181,7 +181,7 @@ func TestCustomMagicHeaders_GeminiVertex(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiVertexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "vertex",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
@@ -191,11 +191,11 @@ func TestCustomMagicHeaders_GeminiVertex(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: []byte(`{"contents":[{"parts":[{"text":"hi"}]}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 		Headers: http.Header{
 			"Abc": []string{"vertex-session-123"},
@@ -225,7 +225,7 @@ func TestCustomMagicHeaders_XAI(t *testing.T) {
 	defer server.Close()
 
 	executor := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
@@ -235,11 +235,11 @@ func TestCustomMagicHeaders_XAI(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "grok-2",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 		Headers: http.Header{
 			"ABC": []string{"xai-session-value"},
@@ -269,7 +269,7 @@ func TestCustomMagicHeaders_Claude(t *testing.T) {
 	defer server.Close()
 
 	executor := NewClaudeExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "claude",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
@@ -279,11 +279,11 @@ func TestCustomMagicHeaders_Claude(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "claude-3-7-sonnet-20250219",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Headers: http.Header{
 			"Abc": []string{"claude-session-value"},
@@ -317,7 +317,7 @@ func TestCustomMagicHeaders_OpenAICompat_Stream(t *testing.T) {
 			Name: "compat",
 		}},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "openai-compatibility",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
@@ -329,11 +329,11 @@ func TestCustomMagicHeaders_OpenAICompat_Stream(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gpt-4o",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 		Stream:       true,
 		Headers: http.Header{
@@ -378,7 +378,7 @@ func TestCustomMagicHeaders_Codex(t *testing.T) {
 			DisableCodexCloaking: true,
 		},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url":                        server.URL,
@@ -388,11 +388,11 @@ func TestCustomMagicHeaders_Codex(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gpt-5-codex",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatCodex,
 		Headers: http.Header{
 			"Abc": []string{"codex-session-value"},
@@ -426,22 +426,22 @@ func TestCustomMagicHeaders_CPASessionID_OpenAICompat(t *testing.T) {
 			Name: "compat",
 		}},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "openai-compatibility",
 		Attributes: map[string]string{
 			"base_url":             server.URL,
 			"api_key":              "test-key",
-			"header:X-Session":     "$CPA-SESSION-ID",
-			"header:Authorization": "Bearer $CPA-SESSION-ID",
-			"header:X-Lower-Case":  "$cpa-session-id",
+			"header:X-Session":     "$XG-SESSION-ID",
+			"header:Authorization": "Bearer $XG-SESSION-ID",
+			"header:X-Lower-Case":  "$xg-session-id",
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gpt-4o",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 		Headers: http.Header{
 			"Session-Id": []string{"codex-thread-abc"},
@@ -475,20 +475,20 @@ func TestCustomMagicHeaders_CPASessionID_Gemini(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "gemini",
 		Attributes: map[string]string{
 			"base_url":         server.URL,
 			"api_key":          "gemini-key",
-			"header:X-Session": "$CPA-SESSION-ID",
+			"header:X-Session": "$XG-SESSION-ID",
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: []byte(`{"contents":[{"parts":[{"text":"hi"}]}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 		Headers: http.Header{
 			"X-Session-ID": []string{"gemini-session-123"},
@@ -516,20 +516,20 @@ func TestCustomMagicHeaders_CPASessionID_GeminiInteractions(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "gemini-interactions",
 		Attributes: map[string]string{
 			"base_url":         server.URL,
 			"api_key":          "interactions-key",
-			"header:X-Session": "$CPA-SESSION-ID",
+			"header:X-Session": "$XG-SESSION-ID",
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-3.1-flash-lite",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 		Headers: http.Header{
 			"X-Session-Affinity": []string{"interactions-sess-456"},
@@ -557,20 +557,20 @@ func TestCustomMagicHeaders_CPASessionID_Claude(t *testing.T) {
 	defer server.Close()
 
 	executor := NewClaudeExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "claude",
 		Attributes: map[string]string{
 			"base_url":         server.URL,
 			"api_key":          "sk-ant-test",
-			"header:X-Session": "$CPA-SESSION-ID",
+			"header:X-Session": "$XG-SESSION-ID",
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "claude-3-7-sonnet-20250219",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Headers: http.Header{
 			"X-Claude-Code-Session-Id": []string{"claude-sess-789"},
@@ -603,20 +603,20 @@ func TestCustomMagicHeaders_CPASessionID_Codex(t *testing.T) {
 			DisableCodexCloaking: true,
 		},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url":         server.URL,
 			"api_key":          "codex-key",
-			"header:X-Session": "$CPA-SESSION-ID",
+			"header:X-Session": "$XG-SESSION-ID",
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gpt-5-codex",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatCodex,
 		Headers: http.Header{
 			"Session-Id": []string{"codex-sess-uuid"},
@@ -644,20 +644,20 @@ func TestCustomMagicHeaders_CPASessionID_XAI(t *testing.T) {
 	defer server.Close()
 
 	executor := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":         server.URL,
 			"api_key":          "xai-key",
-			"header:X-Session": "$CPA-SESSION-ID",
+			"header:X-Session": "$XG-SESSION-ID",
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "grok-2",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 		Headers: http.Header{
 			"X-Session-ID": []string{"xai-sess-111"},
@@ -694,27 +694,27 @@ func TestCustomMagicHeaders_CPASessionID_SessionAffinityOnAndOff(t *testing.T) {
 				OpenAICompatibility: []config.OpenAICompatibility{{
 					Name: "compat",
 					Headers: map[string]string{
-						"X-CPA-Session": "$CPA-SESSION-ID",
+						"X-XG-Session": "$XG-SESSION-ID",
 					},
 				}},
 			}
 
 			executor := NewOpenAICompatExecutor("openai-compatibility", cfg)
-			auth := &cliproxyauth.Auth{
+			auth := &xinugateauth.Auth{
 				ID:       "auth-compat-1",
 				Provider: "openai-compatibility",
 				Attributes: map[string]string{
-					"base_url":             server.URL,
-					"api_key":              "key-1",
-					"header:X-CPA-Session": "$CPA-SESSION-ID",
+					"base_url":            server.URL,
+					"api_key":             "key-1",
+					"header:X-XG-Session": "$XG-SESSION-ID",
 				},
 			}
 
-			req := cliproxyexecutor.Request{
+			req := xinugateexecutor.Request{
 				Model:   "gpt-4o",
 				Payload: []byte(`{"messages":[{"role":"user","content":"hi"}]}`),
 			}
-			opts := cliproxyexecutor.Options{
+			opts := xinugateexecutor.Options{
 				SourceFormat: sdktranslator.FormatOpenAI,
 				Headers: http.Header{
 					"X-Session-ID": []string{"aff-test-sess-99"},
@@ -727,8 +727,8 @@ func TestCustomMagicHeaders_CPASessionID_SessionAffinityOnAndOff(t *testing.T) {
 			}
 
 			wantSession := "header:aff-test-sess-99"
-			if got := gotHeaders.Get("X-CPA-Session"); got != wantSession {
-				t.Errorf("X-CPA-Session = %q, want %q (sessionAffinity=%v)", got, wantSession, sessionAffinity)
+			if got := gotHeaders.Get("X-XG-Session"); got != wantSession {
+				t.Errorf("X-XG-Session = %q, want %q (sessionAffinity=%v)", got, wantSession, sessionAffinity)
 			}
 		})
 	}
@@ -820,22 +820,22 @@ func TestCustomMagicHeaders_CPASessionID_AIStudio(t *testing.T) {
 	}()
 
 	executor := NewAIStudioExecutor(&config.Config{}, "aistudio", relay)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       authID,
 		Provider: "aistudio",
 		Attributes: map[string]string{
-			"header:X-Session":     "$CPA-SESSION-ID",
-			"header:Authorization": "Bearer $CPA-SESSION-ID",
-			"header:X-Lower-Case":  "$cpa-session-id",
+			"header:X-Session":     "$XG-SESSION-ID",
+			"header:Authorization": "Bearer $XG-SESSION-ID",
+			"header:X-Lower-Case":  "$xg-session-id",
 			"header:X-Custom-Dyn":  "$X-Client-Dyn",
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: []byte(`{"contents":[{"parts":[{"text":"hi"}]}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 		Headers: http.Header{
 			"X-Session-ID": []string{"aistudio-sess-456"},

@@ -13,12 +13,12 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -36,7 +36,7 @@ func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *cliproxyaut
 	defer reporter.TrackFailure(ctx, &err)
 
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	nativeRequest := helps.IsNativeCodexRequest(req.Payload, opts)
 	to := sdktranslator.FromString("codex")
 	originalPayloadSource := req.Payload
@@ -138,13 +138,13 @@ func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *cliproxyaut
 	var respHS *http.Response
 	var errDial error
 	dialCtx := ctx
-	if cliproxyexecutor.RequiredUpstreamWebsocket(ctx) {
+	if xinugateexecutor.RequiredUpstreamWebsocket(ctx) {
 		conn, closer = existingWebsocketSessionConn(sess, authID, wsURL, executionProxyURL(ctx, e.cfg, auth))
 		if conn == nil {
-			return resp, cliproxyexecutor.NewUpstreamWebsocketReplayRequiredError()
+			return resp, xinugateexecutor.NewUpstreamWebsocketReplayRequiredError()
 		}
 	} else {
-		dialCtx = cliproxyexecutor.WithUpstreamAttemptTracker(ctx)
+		dialCtx = xinugateexecutor.WithUpstreamAttemptTracker(ctx)
 		conn, closer, respHS, errDial = e.ensureUpstreamConn(dialCtx, auth, sess, authID, wsURL, wsHeaders)
 	}
 	if errDial != nil {
@@ -153,16 +153,16 @@ func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *cliproxyaut
 			helps.RecordAPIWebsocketUpgradeRejection(ctx, e.cfg, websocketUpgradeRequestLog(wsReqLog), respHS.StatusCode, respHS.Header.Clone(), bodyErr)
 		}
 		if respHS != nil && respHS.StatusCode == http.StatusUpgradeRequired {
-			if opts.ExecutionLifecycle == nil && !cliproxyexecutor.DownstreamWebsocket(ctx) {
+			if opts.ExecutionLifecycle == nil && !xinugateexecutor.DownstreamWebsocket(ctx) {
 				return e.CodexExecutor.Execute(ctx, auth, req, opts)
 			}
-			if cliproxyexecutor.UpstreamAttempted(dialCtx) {
-				cliproxyexecutor.MarkUpstreamAttempt(ctx)
+			if xinugateexecutor.UpstreamAttempted(dialCtx) {
+				xinugateexecutor.MarkUpstreamAttempt(ctx)
 			}
 			return resp, statusErr{code: respHS.StatusCode, msg: string(bodyErr)}
 		}
-		if cliproxyexecutor.UpstreamAttempted(dialCtx) {
-			cliproxyexecutor.MarkUpstreamAttempt(ctx)
+		if xinugateexecutor.UpstreamAttempted(dialCtx) {
+			xinugateexecutor.MarkUpstreamAttempt(ctx)
 		}
 		if respHS != nil && respHS.StatusCode > 0 {
 			return resp, newCodexStatusErrWithCooling(respHS.StatusCode, bodyErr, e.modelLevelCooling())
@@ -196,17 +196,17 @@ func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *cliproxyaut
 	}
 	restoreMultiAgentV2 := !multiAgentV2Conflict && (optimizeMultiAgentV2 || sess.isMultiAgentV2Optimized(conn))
 
-	cliproxyexecutor.MarkUpstreamAttempt(ctx)
+	xinugateexecutor.MarkUpstreamAttempt(ctx)
 	if errSend := writeCodexWebsocketMessage(sess, conn, wsReqBody); errSend != nil {
 		errSend = mapCodexWebsocketWriteError(sess, conn, errSend)
 		if sess != nil && !isEphemeralSession {
-			if cliproxyexecutor.RequiredUpstreamWebsocket(ctx) {
+			if xinugateexecutor.RequiredUpstreamWebsocket(ctx) {
 				e.invalidateUpstreamConnWithoutDisconnectNotify(sess, conn, "send_error", errSend)
 				if !shouldRetryCodexWebsocketSend(errSend) {
 					helps.RecordAPIWebsocketError(ctx, e.cfg, "send", errSend)
 					return resp, errSend
 				}
-				return resp, cliproxyexecutor.NewUpstreamWebsocketReplayRequiredError()
+				return resp, xinugateexecutor.NewUpstreamWebsocketReplayRequiredError()
 			}
 			e.invalidateUpstreamConn(sess, conn, "send_error", errSend)
 			if !shouldRetryCodexWebsocketSend(errSend) {
@@ -244,7 +244,7 @@ func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *cliproxyaut
 				})
 				recordAPIWebsocketHandshake(ctx, e.cfg, respHSRetry)
 				reporter.StartResponseTTFT()
-				cliproxyexecutor.MarkUpstreamAttempt(ctx)
+				xinugateexecutor.MarkUpstreamAttempt(ctx)
 				if errSendRetry := writeCodexWebsocketMessage(sess, conn, wsReqBodyRetry); errSendRetry == nil {
 					wsReqBody = wsReqBodyRetry
 				} else {
@@ -365,7 +365,7 @@ func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *cliproxyaut
 			if responseFormat == sdktranslator.FormatOpenAIResponse {
 				out = helps.EnsureResponsesUsageDetails(out)
 			}
-			resp = cliproxyexecutor.Response{Payload: out}
+			resp = xinugateexecutor.Response{Payload: out}
 			return resp, nil
 		}
 	}

@@ -9,9 +9,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexExecutorCompactAddsDefaultInstructionsWithoutInjectingImageTool(t *testing.T) {
@@ -43,15 +43,15 @@ func TestCodexExecutorCompactAddsDefaultInstructionsWithoutInjectingImageTool(t 
 			defer server.Close()
 
 			executor := NewCodexExecutor(&config.Config{})
-			auth := &cliproxyauth.Auth{Attributes: map[string]string{
+			auth := &xinugateauth.Auth{Attributes: map[string]string{
 				"base_url": server.URL,
 				"api_key":  "test",
 			}}
 
-			resp, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+			resp, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 				Model:   "gpt-5.4",
 				Payload: []byte(tc.payload),
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat: sdktranslator.FromString("openai-response"),
 				Alt:          "responses/compact",
 				Stream:       false,

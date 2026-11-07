@@ -14,9 +14,9 @@ import (
 	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/gemini"
 	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/openai"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type configuredThinkingExecutor struct {
@@ -37,11 +37,11 @@ func (e *configuredThinkingExecutor) Identifier() string {
 	return "claude"
 }
 
-func (e *configuredThinkingExecutor) Execute(_ context.Context, _ *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *configuredThinkingExecutor) Execute(_ context.Context, _ *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	e.seenModel = req.Model
-	modelInfo, resolved := cliproxyauth.ResolvedAPIKeyModelInfo(req)
+	modelInfo, resolved := xinugateauth.ResolvedAPIKeyModelInfo(req)
 	e.resolved = resolved && modelInfo != nil
-	e.selectedInfo, _ = cliproxyauth.ResolvedModelInfo(req)
+	e.selectedInfo, _ = xinugateauth.ResolvedModelInfo(req)
 	body := []byte(`{"thinking":{"type":"adaptive"},"output_config":{"effort":"low"}}`)
 	if e.body != nil {
 		body = e.body
@@ -55,29 +55,29 @@ func (e *configuredThinkingExecutor) Execute(_ context.Context, _ *cliproxyauth.
 		toFormat = "claude"
 	}
 	out, err := helps.ApplyRequestThinking(body, req, opts, opts.SourceFormat.String(), toFormat, e.Identifier())
-	return cliproxyexecutor.Response{Payload: out}, err
+	return xinugateexecutor.Response{Payload: out}, err
 }
 
-func (e *configuredThinkingExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
+func (e *configuredThinkingExecutor) ExecuteStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (*xinugateexecutor.StreamResult, error) {
 	response, err := e.Execute(ctx, auth, req, opts)
 	if err != nil {
 		return nil, err
 	}
-	chunks := make(chan cliproxyexecutor.StreamChunk, 1)
-	chunks <- cliproxyexecutor.StreamChunk{Payload: response.Payload}
+	chunks := make(chan xinugateexecutor.StreamChunk, 1)
+	chunks <- xinugateexecutor.StreamChunk{Payload: response.Payload}
 	close(chunks)
-	return &cliproxyexecutor.StreamResult{Chunks: chunks}, nil
+	return &xinugateexecutor.StreamResult{Chunks: chunks}, nil
 }
 
-func (*configuredThinkingExecutor) Refresh(_ context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (*configuredThinkingExecutor) Refresh(_ context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	return auth, nil
 }
 
-func (e *configuredThinkingExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *configuredThinkingExecutor) CountTokens(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	return e.Execute(ctx, auth, req, opts)
 }
 
-func (*configuredThinkingExecutor) HttpRequest(context.Context, *cliproxyauth.Auth, *http.Request) (*http.Response, error) {
+func (*configuredThinkingExecutor) HttpRequest(context.Context, *xinugateauth.Auth, *http.Request) (*http.Response, error) {
 	return nil, nil
 }
 
@@ -101,7 +101,7 @@ func TestApplyRequestThinkingConfigurationUpdateSelectedCodexModel(t *testing.T)
 		{name: "unsupported suffix overrides current update", model: "tenant/public(medium)", body: translated, wantTop: "medium"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			manager := cliproxyauth.NewManager(nil, nil, nil)
+			manager := xinugateauth.NewManager(nil, nil, nil)
 			manager.SetConfig(&internalconfig.Config{
 				SDKConfig: internalconfig.SDKConfig{ForceModelPrefix: true},
 				CodexKey: []internalconfig.CodexKey{{
@@ -114,12 +114,12 @@ func TestApplyRequestThinkingConfigurationUpdateSelectedCodexModel(t *testing.T)
 			})
 			executor := &configuredThinkingExecutor{provider: "codex", targetFormat: "codex", body: []byte(tc.body)}
 			manager.RegisterExecutor(executor)
-			auth := &cliproxyauth.Auth{
+			auth := &xinugateauth.Auth{
 				ID: "selected-update-auth", Provider: "codex", Prefix: "tenant",
 				Attributes: map[string]string{
-					cliproxyauth.AttributeAuthKind: cliproxyauth.AuthKindAPIKey,
-					cliproxyauth.AttributeAPIKey:   "selected-update-key",
-					cliproxyauth.AttributeSource:   "config:codex[0]",
+					xinugateauth.AttributeAuthKind: xinugateauth.AuthKindAPIKey,
+					xinugateauth.AttributeAPIKey:   "selected-update-key",
+					xinugateauth.AttributeSource:   "config:codex[0]",
 				},
 			}
 			modelRegistry := registry.GetGlobalRegistry()
@@ -129,9 +129,9 @@ func TestApplyRequestThinkingConfigurationUpdateSelectedCodexModel(t *testing.T)
 				t.Fatalf("Register() = (%+v, %v), want auth", registered, errRegister)
 			}
 
-			response, errExecute := manager.Execute(t.Context(), []string{"codex"}, cliproxyexecutor.Request{
+			response, errExecute := manager.Execute(t.Context(), []string{"codex"}, xinugateexecutor.Request{
 				Model: tc.model, Payload: []byte(current), Format: sdktranslator.FormatOpenAIResponse,
-			}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse, OriginalRequest: []byte(original)})
+			}, xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse, OriginalRequest: []byte(original)})
 			if errExecute != nil {
 				t.Fatalf("Execute() error = %v", errExecute)
 			}
@@ -182,11 +182,11 @@ func TestApplyRequestThinkingConfigurationUpdateCrossProtocol(t *testing.T) {
 		{name: "empty current payload falls back to original", format: "openai", body: `{"reasoning_effort":"medium","messages":[]}`, path: "reasoning_effort", want: "low", noSource: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			req := cliproxyexecutor.Request{Model: "task5-unknown-route", Payload: []byte(current)}
+			req := xinugateexecutor.Request{Model: "task5-unknown-route", Payload: []byte(current)}
 			if tc.noSource {
 				req.Payload = nil
 			}
-			out, err := helps.ApplyRequestThinking([]byte(tc.body), req, cliproxyexecutor.Options{OriginalRequest: []byte(original)}, "openai-response", tc.format, tc.format)
+			out, err := helps.ApplyRequestThinking([]byte(tc.body), req, xinugateexecutor.Options{OriginalRequest: []byte(original)}, "openai-response", tc.format, tc.format)
 			if err != nil {
 				t.Fatalf("ApplyRequestThinking() error = %v", err)
 			}
@@ -198,7 +198,7 @@ func TestApplyRequestThinkingConfigurationUpdateCrossProtocol(t *testing.T) {
 }
 
 func TestApplyRequestThinkingUsesExactClaudeModeForSummaryOnlyRequest(t *testing.T) {
-	manager := cliproxyauth.NewManager(nil, nil, nil)
+	manager := xinugateauth.NewManager(nil, nil, nil)
 	manager.SetConfig(&internalconfig.Config{
 		SDKConfig: internalconfig.SDKConfig{ForceModelPrefix: true},
 		ClaudeKey: []internalconfig.ClaudeKey{{
@@ -216,14 +216,14 @@ func TestApplyRequestThinkingUsesExactClaudeModeForSummaryOnlyRequest(t *testing
 	})
 	executor := &configuredThinkingExecutor{translateRequest: true}
 	manager.RegisterExecutor(executor)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "summary-selected-auth",
 		Provider: "claude",
 		Prefix:   "summary-tenant",
 		Attributes: map[string]string{
-			cliproxyauth.AttributeAuthKind: cliproxyauth.AuthKindAPIKey,
-			cliproxyauth.AttributeAPIKey:   "summary-selected-key",
-			cliproxyauth.AttributeSource:   "config:claude[0]",
+			xinugateauth.AttributeAuthKind: xinugateauth.AuthKindAPIKey,
+			xinugateauth.AttributeAPIKey:   "summary-selected-key",
+			xinugateauth.AttributeSource:   "config:claude[0]",
 		},
 	}
 
@@ -246,11 +246,11 @@ func TestApplyRequestThinkingUsesExactClaudeModeForSummaryOnlyRequest(t *testing
 	}
 
 	original := []byte(`{"model":"summary-tenant/summary-public-model","reasoning":{"summary":"auto"},"input":"hi"}`)
-	response, errExecute := manager.Execute(t.Context(), []string{"claude"}, cliproxyexecutor.Request{
+	response, errExecute := manager.Execute(t.Context(), []string{"claude"}, xinugateexecutor.Request{
 		Model:   "summary-tenant/summary-public-model",
 		Payload: original,
 		Format:  sdktranslator.FormatOpenAIResponse,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:    sdktranslator.FormatOpenAIResponse,
 		OriginalRequest: original,
 	})
@@ -275,7 +275,7 @@ func TestApplyRequestThinkingUsesExactClaudeModeForSummaryOnlyRequest(t *testing
 }
 
 func TestApplyRequestThinkingUsesSelectedPrefixedAPIKeyModel(t *testing.T) {
-	manager := cliproxyauth.NewManager(nil, nil, nil)
+	manager := xinugateauth.NewManager(nil, nil, nil)
 	manager.SetConfig(&internalconfig.Config{
 		SDKConfig: internalconfig.SDKConfig{ForceModelPrefix: true},
 		ClaudeKey: []internalconfig.ClaudeKey{{
@@ -289,14 +289,14 @@ func TestApplyRequestThinkingUsesSelectedPrefixedAPIKeyModel(t *testing.T) {
 	})
 	executor := &configuredThinkingExecutor{}
 	manager.RegisterExecutor(executor)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "selected-auth",
 		Provider: "claude",
 		Prefix:   "tenant",
 		Attributes: map[string]string{
-			cliproxyauth.AttributeAuthKind: cliproxyauth.AuthKindAPIKey,
-			cliproxyauth.AttributeAPIKey:   "selected-key",
-			cliproxyauth.AttributeSource:   "config:claude[0]",
+			xinugateauth.AttributeAuthKind: xinugateauth.AuthKindAPIKey,
+			xinugateauth.AttributeAPIKey:   "selected-key",
+			xinugateauth.AttributeSource:   "config:claude[0]",
 		},
 	}
 
@@ -320,12 +320,12 @@ func TestApplyRequestThinkingUsesSelectedPrefixedAPIKeyModel(t *testing.T) {
 	}
 
 	original := []byte(`{"model":"tenant/public-model","reasoning_effort":"max","messages":[{"role":"user","content":"hello"}]}`)
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "tenant/public-model",
 		Payload: original,
 		Format:  sdktranslator.FormatOpenAI,
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat:    sdktranslator.FormatOpenAI,
 		OriginalRequest: original,
 	}

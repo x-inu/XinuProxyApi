@@ -15,9 +15,9 @@ import (
 	"github.com/tidwall/gjson"
 	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	auth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	core "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	translator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	auth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	core "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // The server waits for all explicit creates before rejecting one. This makes

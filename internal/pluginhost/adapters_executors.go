@@ -14,10 +14,10 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type executorManager interface {

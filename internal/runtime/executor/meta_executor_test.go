@@ -23,10 +23,10 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
 	sdkauth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 func TestMetaExecutor_Identifier(t *testing.T) {
@@ -38,7 +38,7 @@ func TestMetaExecutor_Identifier(t *testing.T) {
 
 func TestMetaExecutor_MetaCredsResolution(t *testing.T) {
 	t.Run("from attributes", func(t *testing.T) {
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			Attributes: map[string]string{
 				"api_key":  "attr-key",
 				"base_url": "https://custom.meta.com/v1",
@@ -51,7 +51,7 @@ func TestMetaExecutor_MetaCredsResolution(t *testing.T) {
 	})
 
 	t.Run("from metadata", func(t *testing.T) {
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			Metadata: map[string]any{
 				"access_token": "meta-oauth-token",
 			},
@@ -80,7 +80,7 @@ func TestMetaExecutor_MetaCredsResolution(t *testing.T) {
 		}
 
 		// empty auth should NOT bleed to env or local file
-		emptyAuth := &cliproxyauth.Auth{}
+		emptyAuth := &xinugateauth.Auth{}
 		_, token = metaCreds(emptyAuth)
 		if token != "" {
 			t.Errorf("expected empty token for empty auth, got %s", token)
@@ -160,18 +160,18 @@ func TestMetaExecutor_ExecuteSuccessAndRateLimit(t *testing.T) {
 	cfg := &config.Config{}
 	exec := NewMetaExecutor(cfg)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "valid-token",
 			"base_url": server.URL,
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hello"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 	}
 
@@ -260,12 +260,12 @@ func TestMetaExecutor_Refresh_RequiresManagerAcceptance(t *testing.T) {
 
 	t.Setenv("META_MINT_URL", server.URL+"/key")
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "meta-test.json",
 		FileName: "meta-test.json",
 		Provider: "meta",
 		Attributes: map[string]string{
-			cliproxyauth.AttributePath: authFilePath,
+			xinugateauth.AttributePath: authFilePath,
 		},
 		Metadata: map[string]any{
 			"dca_token": "dca:initial-dca",
@@ -275,10 +275,10 @@ func TestMetaExecutor_Refresh_RequiresManagerAcceptance(t *testing.T) {
 
 	store := sdkauth.NewFileTokenStore()
 	store.SetBaseDir(tempDir)
-	manager := cliproxyauth.NewManager(store, nil, nil)
+	manager := xinugateauth.NewManager(store, nil, nil)
 	auth.Metadata["request-retry"] = float64(3)
 	auth.Storage = &metaauth.MetaTokenStorage{AccessToken: "dca:initial-dca", DCAToken: "dca:initial-dca", Expired: "2020-01-01T00:00:00Z"}
-	auth, errRegister := manager.Register(cliproxyauth.WithSkipPersist(context.Background()), auth)
+	auth, errRegister := manager.Register(xinugateauth.WithSkipPersist(context.Background()), auth)
 	if errRegister != nil {
 		t.Fatal(errRegister)
 	}
@@ -374,13 +374,13 @@ func TestMetaExecutor_PrepareConcurrentAccounts(t *testing.T) {
 
 	// 10 concurrent refreshes for account 1
 	var wg sync.WaitGroup
-	auth1 := &cliproxyauth.Auth{
+	auth1 := &xinugateauth.Auth{
 		ID:       "meta-acct1",
 		Provider: "meta",
 		Metadata: map[string]any{"dca_token": "dca:acct1"},
 	}
 
-	manager := cliproxyauth.NewManager(nil, nil, nil)
+	manager := xinugateauth.NewManager(nil, nil, nil)
 	if _, err := manager.Register(context.Background(), auth1); err != nil {
 		t.Fatal(err)
 	}
@@ -417,7 +417,7 @@ func TestMetaExecutor_PrepareConcurrentAccounts(t *testing.T) {
 	inFlight.Wait()
 
 	// A second account must complete while the first account's mint is blocked.
-	auth2 := &cliproxyauth.Auth{ID: "meta-acct2", Provider: "meta", Metadata: map[string]any{"dca_token": "dca:acct2"}}
+	auth2 := &xinugateauth.Auth{ID: "meta-acct2", Provider: "meta", Metadata: map[string]any{"dca_token": "dca:acct2"}}
 	if _, err := manager.Register(context.Background(), auth2); err != nil {
 		t.Fatal(err)
 	}
@@ -467,7 +467,7 @@ func TestMetaExecutor_Execute_DCARecovery(t *testing.T) {
 	exec := NewMetaExecutor(cfg)
 
 	// Auth has ONLY a DCA token
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Metadata: map[string]any{
 			"dca_token": "dca:execute-recover-me",
@@ -477,11 +477,11 @@ func TestMetaExecutor_Execute_DCARecovery(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hi"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 	}
 
@@ -515,16 +515,16 @@ func TestMetaExecutorManagerRecoversUnauthorizedKey(t *testing.T) {
 	}))
 	defer server.Close()
 	t.Setenv("META_MINT_URL", server.URL+"/key")
-	manager := cliproxyauth.NewManager(nil, nil, nil)
+	manager := xinugateauth.NewManager(nil, nil, nil)
 	manager.RegisterExecutor(NewMetaExecutor(&config.Config{}))
-	auth := &cliproxyauth.Auth{ID: "meta-401-recovery", Provider: "meta", Metadata: map[string]any{"access_token": "LLM|revoked", "api_key": "LLM|revoked", "dca_token": "dca:valid", "auth_kind": "oauth"}, Attributes: map[string]string{"base_url": server.URL}}
+	auth := &xinugateauth.Auth{ID: "meta-401-recovery", Provider: "meta", Metadata: map[string]any{"access_token": "LLM|revoked", "api_key": "LLM|revoked", "dca_token": "dca:valid", "auth_kind": "oauth"}, Attributes: map[string]string{"base_url": server.URL}}
 	if _, err := manager.Register(context.Background(), auth); err != nil {
 		t.Fatal(err)
 	}
 	registry.GetGlobalRegistry().RegisterClient(auth.ID, "meta", []*registry.ModelInfo{{ID: "muse-spark-1.3"}})
 	t.Cleanup(func() { registry.GetGlobalRegistry().UnregisterClient(auth.ID) })
-	req := cliproxyexecutor.Request{Model: "muse-spark-1.3", Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hi"}]}`)}
-	_, err := manager.Execute(context.Background(), []string{"meta"}, req, cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai")})
+	req := xinugateexecutor.Request{Model: "muse-spark-1.3", Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hi"}]}`)}
+	_, err := manager.Execute(context.Background(), []string{"meta"}, req, xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai")})
 	if err != nil {
 		t.Fatalf("401 recovery failed: %v", err)
 	}
@@ -545,7 +545,7 @@ func TestMetaExecutorRefreshUsesMintedBaseURL(t *testing.T) {
 			defer server.Close()
 			t.Setenv("META_MINT_URL", server.URL)
 			path := filepath.Join(t.TempDir(), "meta.json")
-			auth := &cliproxyauth.Auth{Provider: "meta", Metadata: map[string]any{"dca_token": "dca:test", "base_url": "https://previous.meta.example/v1"}, Attributes: map[string]string{"base_url": "https://previous.meta.example/v1", cliproxyauth.AttributePath: path}}
+			auth := &xinugateauth.Auth{Provider: "meta", Metadata: map[string]any{"dca_token": "dca:test", "base_url": "https://previous.meta.example/v1"}, Attributes: map[string]string{"base_url": "https://previous.meta.example/v1", xinugateauth.AttributePath: path}}
 			updated, err := NewMetaExecutor(nil).Refresh(context.Background(), auth)
 			if err != nil {
 				t.Fatal(err)
@@ -583,7 +583,7 @@ func TestMetaExecutor_ExecuteStreamRateLimit(t *testing.T) {
 	defer server.Close()
 
 	exec := NewMetaExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Attributes: map[string]string{
 			"api_key":  "test-key",
@@ -591,12 +591,12 @@ func TestMetaExecutor_ExecuteStreamRateLimit(t *testing.T) {
 		},
 	}
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hi"}]}`),
 	}
 
-	_, err := exec.ExecuteStream(context.Background(), auth, req, cliproxyexecutor.Options{})
+	_, err := exec.ExecuteStream(context.Background(), auth, req, xinugateexecutor.Options{})
 	if err == nil {
 		t.Fatalf("expected error from 429 streaming response")
 	}
@@ -639,28 +639,28 @@ func TestMetaExecutor_RequestAuthPreparer(t *testing.T) {
 	t.Setenv("META_MINT_URL", server.URL+"/key")
 	exec := NewMetaExecutor(&config.Config{})
 
-	authWithKey := &cliproxyauth.Auth{Provider: "meta", Attributes: map[string]string{"api_key": "exists"}}
+	authWithKey := &xinugateauth.Auth{Provider: "meta", Attributes: map[string]string{"api_key": "exists"}}
 	if exec.ShouldPrepareRequestAuth(authWithKey) {
 		t.Errorf("ShouldPrepareRequestAuth should be false when api_key is present")
 	}
 
-	authNoDCA := &cliproxyauth.Auth{Provider: "meta"}
+	authNoDCA := &xinugateauth.Auth{Provider: "meta"}
 	if exec.ShouldPrepareRequestAuth(authNoDCA) {
 		t.Errorf("ShouldPrepareRequestAuth should be false when dca_token is missing")
 	}
 
-	authConfigDCA := &cliproxyauth.Auth{
+	authConfigDCA := &xinugateauth.Auth{
 		Provider: "meta",
 		Attributes: map[string]string{
 			"api_key":                    "dca:invalid-for-config",
-			cliproxyauth.AttributeSource: "config:meta[0]",
+			xinugateauth.AttributeSource: "config:meta[0]",
 		},
 	}
 	if exec.ShouldPrepareRequestAuth(authConfigDCA) {
 		t.Errorf("ShouldPrepareRequestAuth should be false for config API key auths")
 	}
 
-	authDCAOnly := &cliproxyauth.Auth{
+	authDCAOnly := &xinugateauth.Auth{
 		ID:       "meta-prep-test.json",
 		Provider: "meta",
 		Metadata: map[string]any{
@@ -677,7 +677,7 @@ func TestMetaExecutor_RequestAuthPreparer(t *testing.T) {
 
 	store := sdkauth.NewFileTokenStore()
 	store.SetBaseDir(t.TempDir())
-	manager := cliproxyauth.NewManager(store, nil, nil)
+	manager := xinugateauth.NewManager(store, nil, nil)
 	manager.RegisterExecutor(exec)
 	if _, err := manager.Register(context.Background(), authDCAOnly); err != nil {
 		t.Fatal(err)
@@ -685,12 +685,12 @@ func TestMetaExecutor_RequestAuthPreparer(t *testing.T) {
 	registry.GetGlobalRegistry().RegisterClient(authDCAOnly.ID, "meta", []*registry.ModelInfo{{ID: "muse-spark-1.3"}})
 	t.Cleanup(func() { registry.GetGlobalRegistry().UnregisterClient(authDCAOnly.ID) })
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hi"}]}`),
 	}
 
-	resp, err := manager.Execute(context.Background(), []string{"meta"}, req, cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai")})
+	resp, err := manager.Execute(context.Background(), []string{"meta"}, req, xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai")})
 	if err != nil {
 		t.Fatalf("execute failed: %v", err)
 	}
@@ -717,7 +717,7 @@ func TestMetaExecutor_RequestAuthPreparer(t *testing.T) {
 		t.Fatal("minted key was not persisted for restart")
 	}
 
-	_, err = manager.Execute(context.Background(), []string{"meta"}, req, cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai")})
+	_, err = manager.Execute(context.Background(), []string{"meta"}, req, xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai")})
 	if err != nil {
 		t.Fatalf("second execute failed: %v", err)
 	}
@@ -748,9 +748,9 @@ func TestMetaMintRejectsRemovedOrReloadedCredential(t *testing.T) {
 				dir := t.TempDir()
 				store := sdkauth.NewFileTokenStore()
 				store.SetBaseDir(dir)
-				manager := cliproxyauth.NewManager(store, nil, nil)
+				manager := xinugateauth.NewManager(store, nil, nil)
 				storage := &metaauth.MetaTokenStorage{AccessToken: "dca:initial", DCAToken: "dca:initial"}
-				auth, err := manager.Register(context.Background(), &cliproxyauth.Auth{ID: "meta-lifecycle.json", Provider: "meta", Storage: storage, Metadata: map[string]any{"type": "meta", "access_token": "dca:initial", "dca_token": "dca:initial"}})
+				auth, err := manager.Register(context.Background(), &xinugateauth.Auth{ID: "meta-lifecycle.json", Provider: "meta", Storage: storage, Metadata: map[string]any{"type": "meta", "access_token": "dca:initial", "dca_token": "dca:initial"}})
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -776,7 +776,7 @@ func TestMetaMintRejectsRemovedOrReloadedCredential(t *testing.T) {
 						t.Fatal(err)
 					}
 				} else {
-					_, err := manager.Register(context.Background(), &cliproxyauth.Auth{ID: auth.ID, Provider: "meta", Metadata: map[string]any{"type": "meta", "api_key": "LLM|reloaded", "access_token": "LLM|reloaded", "dca_token": "dca:reloaded"}})
+					_, err := manager.Register(context.Background(), &xinugateauth.Auth{ID: auth.ID, Provider: "meta", Metadata: map[string]any{"type": "meta", "api_key": "LLM|reloaded", "access_token": "LLM|reloaded", "dca_token": "dca:reloaded"}})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -834,7 +834,7 @@ func TestMetaExecutor_ExecuteShapesResponsesRequest(t *testing.T) {
 	defer server.Close()
 
 	exec := NewMetaExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Attributes: map[string]string{
 			"api_key":  "meta-token",
@@ -842,10 +842,10 @@ func TestMetaExecutor_ExecuteShapesResponsesRequest(t *testing.T) {
 		},
 	}
 
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 	})
 	if err != nil {
@@ -886,7 +886,7 @@ func TestMetaExecutor_ExecuteStreamUsesResponses(t *testing.T) {
 	defer server.Close()
 
 	exec := NewMetaExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Attributes: map[string]string{
 			"api_key":  "meta-token",
@@ -894,10 +894,10 @@ func TestMetaExecutor_ExecuteStreamUsesResponses(t *testing.T) {
 		},
 	}
 
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 		Stream:       true,
 	})
@@ -932,12 +932,12 @@ func TestMetaExecutor_PreservesPreviousResponseID(t *testing.T) {
 	}))
 	defer server.Close()
 
-	_, err := NewMetaExecutor(&config.Config{}).Execute(context.Background(), &cliproxyauth.Auth{
+	_, err := NewMetaExecutor(&config.Config{}).Execute(context.Background(), &xinugateauth.Auth{
 		Attributes: map[string]string{"api_key": "meta-token", "base_url": server.URL},
-	}, cliproxyexecutor.Request{
+	}, xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","input":"hello","previous_response_id":"resp_prev"}`),
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response")})
+	}, xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response")})
 	if err != nil {
 		t.Fatalf("Execute() error = %v", err)
 	}
@@ -948,9 +948,9 @@ func TestMetaExecutor_PreservesPreviousResponseID(t *testing.T) {
 
 func TestMetaExecutor_CompactNotSupported(t *testing.T) {
 	exec := NewMetaExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{"api_key": "meta-token", "base_url": "https://api.meta.ai/v1"}}
-	req := cliproxyexecutor.Request{Model: "muse-spark-1.3", Payload: []byte(`{"model":"muse-spark-1.3"}`)}
-	opts := cliproxyexecutor.Options{Alt: "responses/compact", SourceFormat: sdktranslator.FromString("openai-response")}
+	auth := &xinugateauth.Auth{Attributes: map[string]string{"api_key": "meta-token", "base_url": "https://api.meta.ai/v1"}}
+	req := xinugateexecutor.Request{Model: "muse-spark-1.3", Payload: []byte(`{"model":"muse-spark-1.3"}`)}
+	opts := xinugateexecutor.Options{Alt: "responses/compact", SourceFormat: sdktranslator.FromString("openai-response")}
 
 	_, err := exec.Execute(context.Background(), auth, req, opts)
 	if err == nil {
@@ -998,7 +998,7 @@ func TestMetaExecutor_ExecuteNonStreamMultiEventSSE_RecordsModelAndWarnsOnSubsti
 	})
 
 	exec := NewMetaExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Attributes: map[string]string{
 			"api_key":  "meta-token",
@@ -1007,10 +1007,10 @@ func TestMetaExecutor_ExecuteNonStreamMultiEventSSE_RecordsModelAndWarnsOnSubsti
 	}
 
 	ctx := coreusage.WithRequestedModelAlias(context.Background(), alias)
-	resp, err := exec.Execute(ctx, auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(ctx, auth, xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 	})
 	if err != nil {
@@ -1046,7 +1046,7 @@ func TestMetaExecutor_PrepareRequest_ClientIdHeader_Issue6117(t *testing.T) {
 	if errReq != nil {
 		t.Fatal(errReq)
 	}
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Attributes: map[string]string{
 			"api_key": "test-key",
@@ -1068,7 +1068,7 @@ func TestMetaExecutor_ApplyMetaAPIHeaders_ClientIdHeader_Issue6117(t *testing.T)
 	if errReq != nil {
 		t.Fatal(errReq)
 	}
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Attributes: map[string]string{
 			"api_key": "test-key",
@@ -1089,17 +1089,17 @@ func TestMetaExecutor_Execute_SendsClientIdHeader_Issue6117(t *testing.T) {
 	defer server.Close()
 
 	exec := NewMetaExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Attributes: map[string]string{
 			"api_key":  "meta-token",
 			"base_url": server.URL,
 		},
 	}
-	_, errExec := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, errExec := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 	})
 	if errExec != nil {
@@ -1124,7 +1124,7 @@ func TestMetaExecutor_Refresh_PreservesSubscriptionMetadata_Issue6117(t *testing
 	defer server.Close()
 	t.Setenv("META_MINT_URL", server.URL)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Metadata: map[string]any{
 			"dca_token": "dca:test-sub",
@@ -1164,7 +1164,7 @@ func TestMetaExecutor_Refresh_ClearsStaleSubscriptionMetadata_Issue6117(t *testi
 	defer server.Close()
 	t.Setenv("META_MINT_URL", server.URL)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "meta",
 		Metadata: map[string]any{
 			"dca_token":      "dca:test-sub",
@@ -1192,9 +1192,9 @@ func TestMetaExecutor_Refresh_ClearsStaleSubscriptionMetadata_Issue6117(t *testi
 }
 
 func TestMetaExecutor_NotFoundCooldown_Shortened_Issue6117(t *testing.T) {
-	previous := cliproxyauth.QuotaCooldownDisabledForAuth(nil)
-	cliproxyauth.SetQuotaCooldownDisabled(false)
-	t.Cleanup(func() { cliproxyauth.SetQuotaCooldownDisabled(previous) })
+	previous := xinugateauth.QuotaCooldownDisabledForAuth(nil)
+	xinugateauth.SetQuotaCooldownDisabled(false)
+	t.Cleanup(func() { xinugateauth.SetQuotaCooldownDisabled(previous) })
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -1203,9 +1203,9 @@ func TestMetaExecutor_NotFoundCooldown_Shortened_Issue6117(t *testing.T) {
 	}))
 	defer server.Close()
 
-	manager := cliproxyauth.NewManager(nil, nil, nil)
+	manager := xinugateauth.NewManager(nil, nil, nil)
 	manager.RegisterExecutor(NewMetaExecutor(&config.Config{}))
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "meta-404-test",
 		Provider: "meta",
 		Metadata: map[string]any{
@@ -1222,11 +1222,11 @@ func TestMetaExecutor_NotFoundCooldown_Shortened_Issue6117(t *testing.T) {
 	registry.GetGlobalRegistry().RegisterClient(auth.ID, "meta", []*registry.ModelInfo{{ID: "muse-spark-1.3"}})
 	t.Cleanup(func() { registry.GetGlobalRegistry().UnregisterClient(auth.ID) })
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "muse-spark-1.3",
 		Payload: []byte(`{"model":"muse-spark-1.3","messages":[{"role":"user","content":"hi"}]}`),
 	}
-	_, _ = manager.Execute(context.Background(), []string{"meta"}, req, cliproxyexecutor.Options{
+	_, _ = manager.Execute(context.Background(), []string{"meta"}, req, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 	})
 

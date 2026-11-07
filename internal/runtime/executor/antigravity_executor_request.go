@@ -21,10 +21,10 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
-func (e *AntigravityExecutor) buildRequest(ctx context.Context, auth *cliproxyauth.Auth, token, modelName string, payload []byte, stream bool, alt, baseURL string, derivedSessionIDs ...string) (*http.Request, error) {
+func (e *AntigravityExecutor) buildRequest(ctx context.Context, auth *xinugateauth.Auth, token, modelName string, payload []byte, stream bool, alt, baseURL string, derivedSessionIDs ...string) (*http.Request, error) {
 	if token == "" {
 		return nil, statusErr{code: http.StatusUnauthorized, msg: "missing access token"}
 	}
@@ -386,14 +386,14 @@ func antigravityRequestNeedsSchemaSanitization(payload []byte) bool {
 
 // resolveAntigravityRequestBaseURL selects one request endpoint without cross-tier fallback.
 // Consumer credentials default to daily; enterprise/GCP credentials can set base_url explicitly.
-func resolveAntigravityRequestBaseURL(auth *cliproxyauth.Auth) string {
+func resolveAntigravityRequestBaseURL(auth *xinugateauth.Auth) string {
 	if base := resolveCustomAntigravityBaseURL(auth); base != "" {
 		return base
 	}
 	return antigravityBaseURLDaily
 }
 
-func antigravityLoadCodeAssistBaseURL(auth *cliproxyauth.Auth) string {
+func antigravityLoadCodeAssistBaseURL(auth *xinugateauth.Auth) string {
 	if base := resolveCustomAntigravityBaseURL(auth); base != "" {
 		return base
 	}
@@ -411,15 +411,15 @@ func resolveHost(base string) string {
 	return strings.TrimPrefix(strings.TrimPrefix(base, "https://"), "http://")
 }
 
-func resolveUserAgent(auth *cliproxyauth.Auth) string {
+func resolveUserAgent(auth *xinugateauth.Auth) string {
 	return misc.AntigravityRequestUserAgent(antigravityConfiguredUserAgent(auth))
 }
 
-func resolveLoadCodeAssistUserAgent(auth *cliproxyauth.Auth) string {
+func resolveLoadCodeAssistUserAgent(auth *xinugateauth.Auth) string {
 	return misc.AntigravityLoadCodeAssistUserAgent(antigravityConfiguredUserAgent(auth))
 }
 
-func antigravityConfiguredUserAgent(auth *cliproxyauth.Auth) string {
+func antigravityConfiguredUserAgent(auth *xinugateauth.Auth) string {
 	raw := ""
 	if auth != nil {
 		if auth.Attributes != nil {
@@ -436,7 +436,7 @@ func antigravityConfiguredUserAgent(auth *cliproxyauth.Auth) string {
 	return raw
 }
 
-func resolveCustomAntigravityBaseURL(auth *cliproxyauth.Auth) string {
+func resolveCustomAntigravityBaseURL(auth *xinugateauth.Auth) string {
 	if auth == nil {
 		return ""
 	}

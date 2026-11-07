@@ -7,8 +7,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestXAIResponsesPreparationStripsUnsupportedConfigurationUpdates(t *testing.T) {
@@ -22,7 +22,7 @@ func TestXAIResponsesPreparationStripsUnsupportedConfigurationUpdates(t *testing
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			exec := NewXAIExecutor(&config.Config{})
-			prepared, errPrepare := exec.prepareResponsesRequest(t.Context(), cliproxyexecutor.Request{Model: tc.model, Payload: []byte(source)}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}, tc.stream)
+			prepared, errPrepare := exec.prepareResponsesRequest(t.Context(), xinugateexecutor.Request{Model: tc.model, Payload: []byte(source)}, xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}, tc.stream)
 			if errPrepare != nil {
 				t.Fatalf("prepareResponsesRequest() error = %v", errPrepare)
 			}
@@ -54,7 +54,7 @@ func TestXAIResponsesPreparationHonorsExplicitSupportOnly(t *testing.T) {
 		{model: "opaque-xai-route(low)", top: "low"},
 	} {
 		exec := NewXAIExecutor(&config.Config{})
-		prepared, errPrepare := exec.prepareResponsesRequest(t.Context(), cliproxyexecutor.Request{Model: tc.model, Payload: []byte(source), Metadata: map[string]any{"cliproxy.resolved_api_key_model_info": info}}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}, false)
+		prepared, errPrepare := exec.prepareResponsesRequest(t.Context(), xinugateexecutor.Request{Model: tc.model, Payload: []byte(source), Metadata: map[string]any{"xinugate.resolved_api_key_model_info": info}}, xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}, false)
 		if errPrepare != nil {
 			t.Fatal(errPrepare)
 		}

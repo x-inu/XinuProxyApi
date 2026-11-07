@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	kimiauth "github.com/x-inu/XinuGate/v7/internal/auth/kimi"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // ResolveKimiBaseURL resolves the upstream API base URL for Kimi API requests based on auth.
-func ResolveKimiBaseURL(auth *cliproxyauth.Auth) string {
+func ResolveKimiBaseURL(auth *xinugateauth.Auth) string {
 	if auth != nil {
 		if auth.Attributes != nil {
 			if raw := strings.TrimRight(strings.TrimSpace(auth.Attributes["base_url"]), "/"); raw != "" {
@@ -28,7 +28,7 @@ func ResolveKimiBaseURL(auth *cliproxyauth.Auth) string {
 }
 
 // ResolveKimiResponsesURL resolves the upstream URL for Kimi Responses API requests.
-func ResolveKimiResponsesURL(auth *cliproxyauth.Auth) string {
+func ResolveKimiResponsesURL(auth *xinugateauth.Auth) string {
 	baseURL := ResolveKimiBaseURL(auth)
 	if strings.HasSuffix(baseURL, "/v1") {
 		return baseURL + "/responses"
@@ -37,7 +37,7 @@ func ResolveKimiResponsesURL(auth *cliproxyauth.Auth) string {
 }
 
 // ResolveKimiChatURL resolves the upstream URL for Kimi Chat Completions requests.
-func ResolveKimiChatURL(auth *cliproxyauth.Auth) string {
+func ResolveKimiChatURL(auth *xinugateauth.Auth) string {
 	baseURL := ResolveKimiBaseURL(auth)
 	if strings.HasSuffix(baseURL, "/v1") {
 		return baseURL + "/chat/completions"
@@ -46,7 +46,7 @@ func ResolveKimiChatURL(auth *cliproxyauth.Auth) string {
 }
 
 // ResolveKimiClaudeBaseURL resolves the base URL for Kimi Claude Messages delegation.
-func ResolveKimiClaudeBaseURL(auth *cliproxyauth.Auth) string {
+func ResolveKimiClaudeBaseURL(auth *xinugateauth.Auth) string {
 	baseURL := ResolveKimiBaseURL(auth)
 	return strings.TrimSuffix(baseURL, "/v1")
 }

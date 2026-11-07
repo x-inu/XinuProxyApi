@@ -17,8 +17,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestParseInteractionsRequestTarget(t *testing.T) {

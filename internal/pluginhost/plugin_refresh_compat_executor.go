@@ -8,8 +8,8 @@ import (
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // pluginRefreshCompatExecutor keeps native OpenAI-compat inference while
@@ -70,23 +70,23 @@ func (e *pluginRefreshCompatExecutor) Identifier() string {
 	return ""
 }
 
-func (e *pluginRefreshCompatExecutor) Execute(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *pluginRefreshCompatExecutor) Execute(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	if e == nil || e.inner == nil {
-		return cliproxyexecutor.Response{}, fmt.Errorf("plugin refresh compat executor is unavailable")
+		return xinugateexecutor.Response{}, fmt.Errorf("plugin refresh compat executor is unavailable")
 	}
 	return e.inner.Execute(ctx, auth, req, opts)
 }
 
-func (e *pluginRefreshCompatExecutor) ExecuteStream(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
+func (e *pluginRefreshCompatExecutor) ExecuteStream(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (*xinugateexecutor.StreamResult, error) {
 	if e == nil || e.inner == nil {
 		return nil, fmt.Errorf("plugin refresh compat executor is unavailable")
 	}
 	return e.inner.ExecuteStream(ctx, auth, req, opts)
 }
 
-func (e *pluginRefreshCompatExecutor) CountTokens(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *pluginRefreshCompatExecutor) CountTokens(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	if e == nil || e.inner == nil {
-		return cliproxyexecutor.Response{}, fmt.Errorf("plugin refresh compat executor is unavailable")
+		return xinugateexecutor.Response{}, fmt.Errorf("plugin refresh compat executor is unavailable")
 	}
 	return e.inner.CountTokens(ctx, auth, req, opts)
 }

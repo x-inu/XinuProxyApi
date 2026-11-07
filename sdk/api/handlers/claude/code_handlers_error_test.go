@@ -11,7 +11,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/interfaces"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestClaudeErrorExtractsOpenAIStyleUpstreamJSON(t *testing.T) {

@@ -25,10 +25,10 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 func testContextWithAPIKey(apiKey string) context.Context {
@@ -177,7 +177,7 @@ func TestXAIExecutorExecuteShapesResponsesRequest(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{XAI: config.XAIConfig{InjectXSearch: true}})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "xai-auth",
 		Provider: "xai",
 		Attributes: map[string]string{
@@ -190,14 +190,14 @@ func TestXAIExecutorExecuteShapesResponsesRequest(t *testing.T) {
 		},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","input":[{"type":"reasoning","summary":[{"type":"summary_text","text":"test"}],"content":null,"encrypted_content":null},{"type":"reasoning","summary":[{"type":"summary_text","text":"second"}]},{"role":"user","content":"hello"}],"include":["reasoning.encrypted_content"],"reasoning":{"effort":"high"},"tools":[{"type":"tool_search"},{"type":"image_generation"},{"type":"custom","name":"apply_patch"},{"type":"custom","name":"custom_lookup"},{"type":"function","name":"lookup"},{"type":"web_search","external_web_access":true,"search_content_types":["text","image"]},{"type":"namespace","name":"codex_app","description":"Tools in the codex_app namespace.","tools":[{"type":"function","name":"automation_update"},{"type":"custom","name":"namespace_custom"},{"type":"tool_search"}]}],"tool_choice":{"type":"allowed_tools","tools":[{"type":"function","name":"automation_update","namespace":"codex_app"},{"type":"function","name":"lookup"},{"type":"web_search"}]}}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: "conv-xai-1",
+			xinugateexecutor.ExecutionSessionMetadataKey: "conv-xai-1",
 		},
 	})
 	if err != nil {
@@ -350,10 +350,10 @@ func TestXAIExecutorPrepareResponsesRequestRewritesCodexAgentMessage(t *testing.
 			"internal_chat_message_metadata_passthrough":{"turn_id":"019f92c3-6772-7213-8aac-8bd154d528f1"}
 		}]
 	}`)
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Headers:      http.Header{"User-Agent": []string{"Codex Desktop/0.146.0-alpha.3.1"}},
 	}, true)
@@ -406,7 +406,7 @@ func TestXAIExecutorExecuteFoldsNamespacesWhenToolsExceed200(t *testing.T) {
 	}
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
@@ -418,10 +418,10 @@ func TestXAIExecutorExecuteFoldsNamespacesWhenToolsExceed200(t *testing.T) {
 		"input":[{"role":"user","content":"call tool_2"}]
 	}`, strings.Join(nsList, ","))
 
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.6",
 		Payload: []byte(turn1Payload),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         false,
@@ -463,10 +463,10 @@ func TestXAIExecutorExecuteFoldsNamespacesWhenToolsExceed200(t *testing.T) {
 		]
 	}`, strings.Join(nsList, ","))
 
-	_, err2 := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err2 := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.6",
 		Payload: []byte(turn2Payload),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         false,
@@ -515,7 +515,7 @@ func TestXAIExecutorExecuteStreamFoldsNamespacesWhenToolsExceed200(t *testing.T)
 	}
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
@@ -527,10 +527,10 @@ func TestXAIExecutorExecuteStreamFoldsNamespacesWhenToolsExceed200(t *testing.T)
 		"input":[{"role":"user","content":"call tool_2"}]
 	}`, strings.Join(nsList, ","))
 
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.6",
 		Payload: []byte(turn1Payload),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         true,
@@ -576,12 +576,12 @@ func TestXAIExecutorExecuteRestoresAdditionalToolsNamespaceCalls(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.3",
 		Payload: []byte(`{
 			"model":"grok-4.3",
@@ -590,7 +590,7 @@ func TestXAIExecutorExecuteRestoresAdditionalToolsNamespaceCalls(t *testing.T) {
 				{"role":"user","content":"use Exa"}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         false,
@@ -646,7 +646,7 @@ func TestXAIExecutorExecuteNormalizesCustomToolCallHistory(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":  server.URL,
@@ -669,10 +669,10 @@ func TestXAIExecutorExecuteNormalizesCustomToolCallHistory(t *testing.T) {
 		"tool_choice":"auto"
 	}`)
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -739,15 +739,15 @@ func TestXAIExecutorExecuteStreamFiltersInternalXSearchCalls(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","input":"search X","tools":[{"type":"x_search"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	})
@@ -812,15 +812,15 @@ func TestXAIExecutorExecuteFiltersInternalXSearchCalls(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","input":"search X","tools":[{"type":"x_search"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -847,15 +847,15 @@ func TestXAIExecutorExecuteAcceptsResponseIncomplete(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","input":"hi","max_output_tokens":1}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -882,15 +882,15 @@ func TestXAIExecutorExecuteStreamAcceptsResponseIncomplete(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","input":"hi","max_output_tokens":1}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	})
@@ -945,7 +945,7 @@ func TestXAIExecutorPrepareHonorsInjectXSearchConfig(t *testing.T) {
 			t.Parallel()
 
 			exec := NewXAIExecutor(tt.cfg)
-			prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+			prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 				Model: "grok-4.5",
 				Payload: []byte(`{
 					"model":"grok-4.5",
@@ -953,7 +953,7 @@ func TestXAIExecutorPrepareHonorsInjectXSearchConfig(t *testing.T) {
 					"tools":[{"type":"function","name":"web_search","parameters":{"type":"object"}}],
 					"tool_choice":{"type":"allowed_tools","tools":[{"type":"function","name":"web_search"}]}
 				}`),
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat: sdktranslator.FormatOpenAIResponse,
 				Stream:       false,
 			}, false)
@@ -1078,7 +1078,7 @@ func TestXAIExecutorPrepareNormalizesClaudeWebSearchToolChoice(t *testing.T) {
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.5",
 		Payload: []byte(`{
 			"model":"grok-4.5",
@@ -1090,7 +1090,7 @@ func TestXAIExecutorPrepareNormalizesClaudeWebSearchToolChoice(t *testing.T) {
 			"tool_choice":{"type":"tool","name":"web_search"},
 			"tools":[{"type":"web_search_20250305","name":"web_search","max_uses":8}]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Stream:       true,
 	}, true)
@@ -1115,7 +1115,7 @@ func TestXAIExecutorPrepareNormalizesClaudeWebSearchToolChoice_Grok46(t *testing
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1127,7 +1127,7 @@ func TestXAIExecutorPrepareNormalizesClaudeWebSearchToolChoice_Grok46(t *testing
 			"tool_choice":{"type":"tool","name":"web_search"},
 			"tools":[{"type":"web_search_20250305","name":"web_search","max_uses":8,"allowed_domains":["github.com"]}]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Stream:       true,
 	}, true)
@@ -1300,7 +1300,7 @@ func TestXAIExecutorPrepareKeepsNativeImageGenerationForGrok46(t *testing.T) {
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1308,7 +1308,7 @@ func TestXAIExecutorPrepareKeepsNativeImageGenerationForGrok46(t *testing.T) {
 			"tools":[{"type":"image_generation","action":"generate"}],
 			"tool_choice":{"type":"image_generation"}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1336,7 +1336,7 @@ func TestXAIExecutorPrepareRewritesImageGenerationAllowedToolsToRequired(t *test
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1344,7 +1344,7 @@ func TestXAIExecutorPrepareRewritesImageGenerationAllowedToolsToRequired(t *test
 			"tools":[{"type":"image_generation","action":"generate"},{"type":"web_search"}],
 			"tool_choice":{"type":"allowed_tools","mode":"required","tools":[{"type":"image_generation"}]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1369,7 +1369,7 @@ func TestXAIExecutorPrepareForcedImageGenerationDropsOtherToolsAndSkipsXSearchIn
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{XAI: config.XAIConfig{InjectXSearch: true}})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1377,7 +1377,7 @@ func TestXAIExecutorPrepareForcedImageGenerationDropsOtherToolsAndSkipsXSearchIn
 			"tools":[{"type":"image_generation","action":"generate"},{"type":"web_search"},{"type":"function","name":"lookup","parameters":{"type":"object"}}],
 			"tool_choice":{"type":"image_generation"}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1402,7 +1402,7 @@ func TestXAIExecutorPrepareRewritesImageOnlyAllowedToolsAutoToAuto(t *testing.T)
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1410,7 +1410,7 @@ func TestXAIExecutorPrepareRewritesImageOnlyAllowedToolsAutoToAuto(t *testing.T)
 			"tools":[{"type":"image_generation"},{"type":"web_search"}],
 			"tool_choice":{"type":"allowed_tools","mode":"auto","tools":[{"type":"image_generation"}]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1428,7 +1428,7 @@ func TestXAIExecutorPrepareStripsImageGenerationFromMixedAllowedTools(t *testing
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1439,7 +1439,7 @@ func TestXAIExecutorPrepareStripsImageGenerationFromMixedAllowedTools(t *testing
 				{"type":"function","name":"lookup"}
 			]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1469,7 +1469,7 @@ func TestXAIExecutorPrepareRewritesWebSearchAllowedToolsToRequired(t *testing.T)
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1477,7 +1477,7 @@ func TestXAIExecutorPrepareRewritesWebSearchAllowedToolsToRequired(t *testing.T)
 			"tools":[{"type":"web_search"},{"type":"function","name":"lookup","parameters":{"type":"object"}}],
 			"tool_choice":{"type":"allowed_tools","mode":"required","tools":[{"type":"web_search"}]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1502,7 +1502,7 @@ func TestXAIExecutorPrepareForcedWebSearchDropsOtherToolsAndSkipsXSearchInject(t
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{XAI: config.XAIConfig{InjectXSearch: true}})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1510,7 +1510,7 @@ func TestXAIExecutorPrepareForcedWebSearchDropsOtherToolsAndSkipsXSearchInject(t
 			"tools":[{"type":"web_search"},{"type":"function","name":"lookup","parameters":{"type":"object"}}],
 			"tool_choice":{"type":"web_search"}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1535,7 +1535,7 @@ func TestXAIExecutorPrepareRewritesWebSearchOnlyAllowedToolsAutoToAuto(t *testin
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1543,7 +1543,7 @@ func TestXAIExecutorPrepareRewritesWebSearchOnlyAllowedToolsAutoToAuto(t *testin
 			"tools":[{"type":"web_search"},{"type":"function","name":"lookup","parameters":{"type":"object"}}],
 			"tool_choice":{"type":"allowed_tools","mode":"auto","tools":[{"type":"web_search"}]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1568,7 +1568,7 @@ func TestXAIExecutorPrepareStripsWebSearchFromMixedAllowedTools(t *testing.T) {
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -1579,7 +1579,7 @@ func TestXAIExecutorPrepareStripsWebSearchFromMixedAllowedTools(t *testing.T) {
 				{"type":"function","name":"lookup"}
 			]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1609,7 +1609,7 @@ func TestXAIExecutorPrepareDropsOrphanedToolChoiceBeforeXSearchInject(t *testing
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{XAI: config.XAIConfig{InjectXSearch: true}})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.5",
 		// image_generation is stripped by normalizeXAITools; without pruning, the
 		// forced choice would survive next to the injected x_search tool.
@@ -1619,7 +1619,7 @@ func TestXAIExecutorPrepareDropsOrphanedToolChoiceBeforeXSearchInject(t *testing
 			"tools":[{"type":"image_generation"}],
 			"tool_choice":{"type":"image_generation"}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -1717,10 +1717,10 @@ func TestXAIExecutorPrepareResponsesRequestPreservesSupportedOutputControls(t *t
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+			prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 				Model:   "grok-4.5",
 				Payload: tt.payload,
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat: tt.sourceFormat,
 				Stream:       true,
 			}, true)
@@ -1755,10 +1755,10 @@ func TestXAIExecutorPrepareResponsesRequestDropsPayloadStopOverride(t *testing.T
 			},
 		},
 	})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	}, true)
@@ -1828,10 +1828,10 @@ func TestXAIExecutorPrepareResponsesRequestAddsObjectTypeToRootUnionBranches(t *
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+			prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 				Model:   "grok-4.5",
 				Payload: tt.payload,
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat: tt.sourceFormat,
 				Stream:       true,
 			}, true)
@@ -1879,7 +1879,7 @@ func TestXAIExecutorPrepareAllowedToolsSyncsInjectedXSearch(t *testing.T) {
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{XAI: config.XAIConfig{InjectXSearch: true}})
-	prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.5",
 		// Only image_generation remains after client filtering of tool_search-like
 		// tools is not relevant here: normalizeXAITools drops image_generation and
@@ -1894,7 +1894,7 @@ func TestXAIExecutorPrepareAllowedToolsSyncsInjectedXSearch(t *testing.T) {
 				{"type":"function","name":"lookup"}
 			]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -2097,12 +2097,12 @@ func TestXAIExecutorExecutePreservesClientSameNameToolsWithXSearch(t *testing.T)
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.5",
 		Payload: []byte(`{
 			"model":"grok-4.5",
@@ -2115,7 +2115,7 @@ func TestXAIExecutorExecutePreservesClientSameNameToolsWithXSearch(t *testing.T)
 				]}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -2169,12 +2169,12 @@ func TestXAIExecutorExecuteStreamPreservesClientSameNameToolsWithXSearch(t *test
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.5",
 		Payload: []byte(`{
 			"model":"grok-4.5",
@@ -2187,7 +2187,7 @@ func TestXAIExecutorExecuteStreamPreservesClientSameNameToolsWithXSearch(t *test
 				]}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	})
@@ -2292,12 +2292,12 @@ func TestXAIExecutorExecutePreservesNormalizedCustomSameNameToolWithXSearch(t *t
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.5",
 		Payload: []byte(`{
 			"model":"grok-4.5",
@@ -2307,7 +2307,7 @@ func TestXAIExecutorExecutePreservesNormalizedCustomSameNameToolWithXSearch(t *t
 				{"type":"custom","name":"x_keyword_search"}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -2383,12 +2383,12 @@ func TestXAIExecutorExecuteStreamPreservesNormalizedCustomSameNameToolWithXSearc
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.5",
 		Payload: []byte(`{
 			"model":"grok-4.5",
@@ -2398,7 +2398,7 @@ func TestXAIExecutorExecuteStreamPreservesNormalizedCustomSameNameToolWithXSearc
 				{"type":"custom","name":"x_keyword_search"}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	})
@@ -2491,7 +2491,7 @@ func TestXAIExecutorExecuteStreamPreservesNormalizedCustomSameNameToolWithXSearc
 
 func TestXAIExecutorComposerSessionIsolation(t *testing.T) {
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
@@ -2524,10 +2524,10 @@ func TestXAIExecutorComposerSessionIsolation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			prepared, err := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+			prepared, err := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 				Model:   tt.model,
 				Payload: tt.payload,
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat: sdktranslator.FormatOpenAIResponse,
 				Stream:       true,
 			}, true)
@@ -2586,10 +2586,10 @@ func TestXAIExecutorComposerSessionIsolation(t *testing.T) {
 func TestXAIExecutionSessionIDUsesDerivedStableUUID(t *testing.T) {
 	t.Parallel()
 
-	metadata := map[string]any{cliproxyexecutor.DerivedSessionIDMetadataKey: "ctx:v1:derived-root"}
-	req := cliproxyexecutor.Request{Metadata: metadata, Payload: []byte(`{"input":"hello"}`)}
-	first := xaiExecutionSessionID(req, cliproxyexecutor.Options{})
-	second := xaiExecutionSessionID(req, cliproxyexecutor.Options{})
+	metadata := map[string]any{xinugateexecutor.DerivedSessionIDMetadataKey: "ctx:v1:derived-root"}
+	req := xinugateexecutor.Request{Metadata: metadata, Payload: []byte(`{"input":"hello"}`)}
+	first := xaiExecutionSessionID(req, xinugateexecutor.Options{})
+	second := xaiExecutionSessionID(req, xinugateexecutor.Options{})
 	if first == "" || first != second {
 		t.Fatalf("derived xAI session is not stable: first=%q second=%q", first, second)
 	}
@@ -2598,12 +2598,12 @@ func TestXAIExecutionSessionIDUsesDerivedStableUUID(t *testing.T) {
 	}
 
 	req.Payload = []byte(`{"prompt_cache_key":"client-session","input":"hello"}`)
-	if got := xaiExecutionSessionID(req, cliproxyexecutor.Options{}); got != "client-session" {
+	if got := xaiExecutionSessionID(req, xinugateexecutor.Options{}); got != "client-session" {
 		t.Fatalf("explicit prompt_cache_key = %q, want client-session", got)
 	}
 
 	req.Payload = []byte(`{"prompt_cache_key":"   ","input":"hello"}`)
-	if got := xaiExecutionSessionID(req, cliproxyexecutor.Options{}); got != first {
+	if got := xaiExecutionSessionID(req, xinugateexecutor.Options{}); got != first {
 		t.Fatalf("blank prompt_cache_key session = %q, want derived UUID %q", got, first)
 	}
 }
@@ -2639,7 +2639,7 @@ func TestXAIExecutorCompactUsesCompactEndpoint(t *testing.T) {
 			},
 		},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -2649,10 +2649,10 @@ func TestXAIExecutorCompactUsesCompactEndpoint(t *testing.T) {
 
 	payload := []byte(`{"model":"grok-4.3","stream":true,"max_output_tokens":64,"temperature":0.3,"top_p":0.8,"stop":["END"],"input":[{"type":"compaction","encrypted_content":""},{"role":"user","content":"hello"}]}`)
 	payload, _ = sjson.SetBytes(payload, "input.0.encrypted_content", validEncryptedContent)
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Alt:          "responses/compact",
 		Stream:       false,
@@ -2697,7 +2697,7 @@ func TestXAIExecutorCompactDropsOrphanedImageGenerationToolChoice(t *testing.T) 
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -2705,7 +2705,7 @@ func TestXAIExecutorCompactDropsOrphanedImageGenerationToolChoice(t *testing.T) 
 		},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -2713,7 +2713,7 @@ func TestXAIExecutorCompactDropsOrphanedImageGenerationToolChoice(t *testing.T) 
 			"tools":[{"type":"image_generation","action":"generate"}],
 			"tool_choice":{"type":"image_generation"}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Alt:          "responses/compact",
 	})
@@ -2731,7 +2731,7 @@ func TestXAIExecutorCompactDropsOrphanedImageGenerationToolChoice(t *testing.T) 
 	}
 }
 
-func TestXAIExecutorCompactOAuthUsesOfficialAPIHeadersNotCLIProxy(t *testing.T) {
+func TestXAIExecutorCompactOAuthUsesOfficialAPIHeadersNotXinuGate(t *testing.T) {
 	var gotPath string
 	var gotHost string
 	var gotTokenAuth string
@@ -2750,7 +2750,7 @@ func TestXAIExecutorCompactOAuthUsesOfficialAPIHeadersNotCLIProxy(t *testing.T) 
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"auth_kind": "oauth",
@@ -2764,10 +2764,10 @@ func TestXAIExecutorCompactOAuthUsesOfficialAPIHeadersNotCLIProxy(t *testing.T) 
 		t.Fatalf("xaiCompactBaseURL() = %q, want %q", compactBase, server.URL)
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","input":[{"role":"user","content":"hi"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Alt:          "responses/compact",
 		Stream:       false,
@@ -2804,7 +2804,7 @@ func TestXAIExecutorCompactClearsReplayBeforePostCompactTurn(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -2812,7 +2812,7 @@ func TestXAIExecutorCompactClearsReplayBeforePostCompactTurn(t *testing.T) {
 		},
 	}
 	ctx := testContextWithAPIKey("xai-compact-caller")
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Alt:          "responses/compact",
 		Stream:       false,
@@ -2820,7 +2820,7 @@ func TestXAIExecutorCompactClearsReplayBeforePostCompactTurn(t *testing.T) {
 	compactEncryptedContent := testValidGrokEncryptedContentForSeed(41)
 	compactPayload := []byte(`{"model":"grok-4.3","prompt_cache_key":"compact-session","input":[{"type":"compaction","encrypted_content":""},{"type":"message","role":"user","content":[{"type":"input_text","text":"compact"}]}]}`)
 	compactPayload, _ = sjson.SetBytes(compactPayload, "input.0.encrypted_content", compactEncryptedContent)
-	compactReq := cliproxyexecutor.Request{Model: "grok-4.3", Payload: compactPayload}
+	compactReq := xinugateexecutor.Request{Model: "grok-4.3", Payload: compactPayload}
 	scope := xaiReasoningReplayScopeFromRequest(ctx, sdktranslator.FormatOpenAIResponse, compactReq, opts, compactPayload)
 	if !scope.valid() {
 		t.Fatal("compact replay scope must be valid")
@@ -2843,10 +2843,10 @@ func TestXAIExecutorCompactClearsReplayBeforePostCompactTurn(t *testing.T) {
 
 	postCompactPayload := []byte(`{"model":"grok-4.3","prompt_cache_key":"compact-session","input":[{"type":"compaction","encrypted_content":""},{"type":"message","role":"user","content":[{"type":"input_text","text":"after compact"}]}]}`)
 	postCompactPayload, _ = sjson.SetBytes(postCompactPayload, "input.0.encrypted_content", compactEncryptedContent)
-	prepared, errPrepare := exec.prepareResponsesRequest(ctx, cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(ctx, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: postCompactPayload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	}, false)
@@ -2871,7 +2871,7 @@ func TestXAIExecutorCompactFailureRetainsReplay(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -2879,9 +2879,9 @@ func TestXAIExecutorCompactFailureRetainsReplay(t *testing.T) {
 		},
 	}
 	ctx := testContextWithAPIKey("xai-compact-failure-caller")
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse, Alt: "responses/compact"}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse, Alt: "responses/compact"}
 	payload := []byte(`{"model":"grok-4.3","prompt_cache_key":"compact-failure-session","input":[{"type":"message","role":"user","content":"compact"}]}`)
-	req := cliproxyexecutor.Request{Model: "grok-4.3", Payload: payload}
+	req := xinugateexecutor.Request{Model: "grok-4.3", Payload: payload}
 	scope := xaiReasoningReplayScopeFromRequest(ctx, sdktranslator.FormatOpenAIResponse, req, opts, payload)
 	reasoning := []byte(`{"type":"reasoning","summary":[],"encrypted_content":""}`)
 	reasoning, _ = sjson.SetBytes(reasoning, "encrypted_content", testValidGrokEncryptedContentForSeed(43))
@@ -2916,7 +2916,7 @@ func TestXAIExecutorExecuteStreamCompactionTriggerUsesCompactEndpoint(t *testing
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url": server.URL,
@@ -2924,10 +2924,10 @@ func TestXAIExecutorExecuteStreamCompactionTriggerUsesCompactEndpoint(t *testing
 		},
 	}
 
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","stream":true,"input":[{"role":"user","content":"hello"},{"type":"compaction_trigger"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	})
@@ -2989,7 +2989,7 @@ func TestXAIExecutorOmitsUnsupportedReasoningEffort(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":  server.URL,
@@ -2998,10 +2998,10 @@ func TestXAIExecutorOmitsUnsupportedReasoningEffort(t *testing.T) {
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4",
 		Payload: []byte(`{"model":"grok-4","input":"hello","reasoning":{"effort":"high"}}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -3030,27 +3030,27 @@ func TestXAIExecutorThinkingPayloadOverride(t *testing.T) {
 	}{
 		{
 			name: "home-only model", model: remoteModel,
-			metadataKey: "cliproxy.resolved_home_model_info", thinking: levels, wantEffort: "high",
+			metadataKey: "xinugate.resolved_home_model_info", thinking: levels, wantEffort: "high",
 		},
 		{
 			name: "configured API-key model", model: remoteModel,
-			metadataKey: "cliproxy.resolved_api_key_model_info", thinking: levels, wantEffort: "high",
+			metadataKey: "xinugate.resolved_api_key_model_info", thinking: levels, wantEffort: "high",
 		},
 		{
 			name: "home disables local thinking support", model: "grok-4.5",
-			metadataKey: "cliproxy.resolved_home_model_info",
+			metadataKey: "xinugate.resolved_home_model_info",
 		},
 		{
 			name: "API-key disables local thinking support", model: "grok-4.5",
-			metadataKey: "cliproxy.resolved_api_key_model_info",
+			metadataKey: "xinugate.resolved_api_key_model_info",
 		},
 		{
 			name: "home supplies no thinking levels", model: "grok-4.5",
-			metadataKey: "cliproxy.resolved_home_model_info", thinking: &registry.ThinkingSupport{}, wantEffort: "high",
+			metadataKey: "xinugate.resolved_home_model_info", thinking: &registry.ThinkingSupport{}, wantEffort: "high",
 		},
 		{
 			name: "home restricts thinking levels", model: "grok-4.5",
-			metadataKey: "cliproxy.resolved_home_model_info", thinking: &registry.ThinkingSupport{Levels: []string{"low"}}, wantEffort: "low",
+			metadataKey: "xinugate.resolved_home_model_info", thinking: &registry.ThinkingSupport{Levels: []string{"low"}}, wantEffort: "low",
 		},
 		{name: "local supported fallback", model: "grok-4.5", wantEffort: "high"},
 		{name: "local unsupported fallback", model: "grok-build-0.1"},
@@ -3071,7 +3071,7 @@ func TestXAIExecutorThinkingPayloadOverride(t *testing.T) {
 					}}
 				}
 				exec := NewXAIExecutor(cfg)
-				req := cliproxyexecutor.Request{
+				req := xinugateexecutor.Request{
 					Model:   tt.model + tt.suffix,
 					Payload: []byte(fmt.Sprintf(`{"model":%q,"input":"hello","reasoning":{"effort":"high"}}`, tt.model)),
 				}
@@ -3080,7 +3080,7 @@ func TestXAIExecutorThinkingPayloadOverride(t *testing.T) {
 						tt.metadataKey: &registry.ModelInfo{ID: tt.model, Type: "xai", Thinking: tt.thinking},
 					}
 				}
-				prepared, errPrepare := exec.prepareResponsesRequest(t.Context(), req, cliproxyexecutor.Options{
+				prepared, errPrepare := exec.prepareResponsesRequest(t.Context(), req, xinugateexecutor.Options{
 					SourceFormat: sdktranslator.FormatOpenAIResponse,
 				}, false)
 				if errPrepare != nil {
@@ -3108,7 +3108,7 @@ func TestXAIExecutorKeepsReasoningEffortForGrok45(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":  server.URL,
@@ -3117,10 +3117,10 @@ func TestXAIExecutorKeepsReasoningEffortForGrok45(t *testing.T) {
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","input":"hello","reasoning":{"effort":"high"}}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -3159,7 +3159,7 @@ func TestXAIExecutorKeepsPayloadOverrideReasoningEffortForGrok45(t *testing.T) {
 			},
 		},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":  server.URL,
@@ -3168,10 +3168,10 @@ func TestXAIExecutorKeepsPayloadOverrideReasoningEffortForGrok45(t *testing.T) {
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -3198,7 +3198,7 @@ func TestXAIExecutorAppliesThinkingSuffix(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":  server.URL,
@@ -3207,10 +3207,10 @@ func TestXAIExecutorAppliesThinkingSuffix(t *testing.T) {
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3(low)",
 		Payload: []byte(`{"model":"grok-4.3","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -3240,16 +3240,16 @@ func TestXAIExecutorExecuteStreamFiltersToolSearchTool(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{XAI: config.XAIConfig{InjectXSearch: true}})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","input":[{"type":"reasoning","summary":[{"type":"summary_text","text":"test"}],"content":null,"encrypted_content":null},{"type":"reasoning","summary":[{"type":"summary_text","text":"second"}]},{"role":"user","content":"hello"},{"type":"reasoning","summary":[{"type":"summary_text","text":"separate"}]}],"tools":[{"type":"tool_search"},{"type":"image_generation"},{"type":"custom","name":"apply_patch"},{"type":"custom","name":"custom_lookup"},{"type":"function","name":"lookup"},{"type":"web_search","external_web_access":true,"search_content_types":["text","image"]},{"type":"namespace","name":"codex_app","description":"Tools in the codex_app namespace.","tools":[{"type":"function","name":"automation_update"},{"type":"custom","name":"namespace_custom"},{"type":"tool_search"}]}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	})
@@ -3349,16 +3349,16 @@ func TestXAIExecutorExecuteStreamNormalizesReasoningTextEvents(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatCodex,
 		Stream:         true,
@@ -3411,16 +3411,16 @@ func TestXAIExecutorExecuteNormalizesReasoningOutputForNonStreamTranslation(t *t
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatCodex,
 		Stream:         false,
@@ -3474,7 +3474,7 @@ func TestXAIExecutorExecuteImagesUsesImagesEndpointAndPublishesUsage(t *testing.
 	usage.RegisterPlugin(plugin)
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":  server.URL,
@@ -3483,13 +3483,13 @@ func TestXAIExecutorExecuteImagesUsesImagesEndpointAndPublishesUsage(t *testing.
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
 
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "image-model-alias",
 		Payload: []byte(`{"model":"grok-imagine-image-quality","prompt":"draw"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-image"),
 		Metadata: map[string]any{
-			cliproxyexecutor.RequestPathMetadataKey: "/v1/images/generations",
+			xinugateexecutor.RequestPathMetadataKey: "/v1/images/generations",
 		},
 	})
 	if err != nil {
@@ -3549,19 +3549,19 @@ func TestXAIExecutorExecuteImagesPublishesFailureUsage(t *testing.T) {
 	usage.RegisterPlugin(plugin)
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "image-model-alias",
 		Payload: []byte(`{"model":"grok-imagine-image-quality","prompt":"draw"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-image"),
 		Metadata: map[string]any{
-			cliproxyexecutor.RequestPathMetadataKey: "/v1/images/generations",
+			xinugateexecutor.RequestPathMetadataKey: "/v1/images/generations",
 		},
 	})
 	if err == nil {
@@ -3591,18 +3591,18 @@ func TestXAIExecutorExecuteImagesPublishesRequestBuildFailureUsage(t *testing.T)
 	usage.RegisterPlugin(plugin)
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": "://invalid"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   requestedModel,
 		Payload: []byte(`{"prompt":"draw"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-image"),
 		Metadata: map[string]any{
-			cliproxyexecutor.RequestPathMetadataKey: "/v1/images/generations",
+			xinugateexecutor.RequestPathMetadataKey: "/v1/images/generations",
 		},
 	})
 	if err == nil {
@@ -3681,19 +3681,19 @@ func TestXAIExecutorExecuteImagesUsesEditsEndpoint(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-imagine-image",
 		Payload: []byte(`{"model":"grok-imagine-image","prompt":"edit","image":{"type":"image_url","url":"https://example.com/a.png"}}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-image"),
 		Metadata: map[string]any{
-			cliproxyexecutor.RequestPathMetadataKey: "/v1/images/edits",
+			xinugateexecutor.RequestPathMetadataKey: "/v1/images/edits",
 		},
 	})
 	if err != nil {
@@ -3807,19 +3807,19 @@ func TestXAIExecutorExecuteImagesRewritesImageURLToURL(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-imagine-image",
 		Payload: []byte(`{"model":"grok-imagine-image","prompt":"edit","image":{"image_url":"https://example.com/a.png"}}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-image"),
 		Metadata: map[string]any{
-			cliproxyexecutor.RequestPathMetadataKey: "/v1/images/edits",
+			xinugateexecutor.RequestPathMetadataKey: "/v1/images/edits",
 		},
 	})
 	if err != nil {
@@ -3863,16 +3863,16 @@ func TestXAIExecutorExecuteVideosCreate(t *testing.T) {
 	usage.RegisterPlugin(plugin)
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   requestedModel,
 		Payload: []byte(`{"model":"grok-imagine-video","prompt":"animate","duration":4}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-video"),
 		Metadata: map[string]any{
 			"idempotency_key": "idem-123",
@@ -3932,16 +3932,16 @@ func TestXAIExecutorExecuteVideosPublishesFailureUsage(t *testing.T) {
 	usage.RegisterPlugin(plugin)
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "video-model-alias",
 		Payload: []byte(`{"model":"grok-imagine-video-failure","prompt":"animate"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-video"),
 	})
 	if err == nil {
@@ -3971,15 +3971,15 @@ func TestXAIExecutorExecuteVideosPublishesRequestBuildFailureUsage(t *testing.T)
 	usage.RegisterPlugin(plugin)
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": "://invalid"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   requestedModel,
 		Payload: []byte(`{"prompt":"animate"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-video"),
 	})
 	if err == nil {
@@ -4008,16 +4008,16 @@ func TestXAIExecutorExecuteVideosRetrieve(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-imagine-video",
 		Payload: []byte(`{"request_id":"vid_123"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-video"),
 	})
 	if err != nil {
@@ -4071,19 +4071,19 @@ func TestXAIExecutorExecuteVideosUsesNativeEndpointFromRequestPath(t *testing.T)
 			defer server.Close()
 
 			exec := NewXAIExecutor(&config.Config{})
-			auth := &cliproxyauth.Auth{
+			auth := &xinugateauth.Auth{
 				Provider:   "xai",
 				Attributes: map[string]string{"base_url": server.URL},
 				Metadata:   map[string]any{"access_token": "xai-token"},
 			}
 
-			_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+			_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 				Model:   "grok-imagine-video",
 				Payload: []byte(`{"model":"grok-imagine-video","prompt":"animate"}`),
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat: sdktranslator.FromString("openai-video"),
 				Metadata: map[string]any{
-					cliproxyexecutor.RequestPathMetadataKey: tt.requestPath,
+					xinugateexecutor.RequestPathMetadataKey: tt.requestPath,
 				},
 			})
 			if err != nil {
@@ -4122,10 +4122,10 @@ func TestXAIExecutorPrepareResponsesRequest_SimplifiesMCPCodexAppAutomationUpdat
 		}]
 	}`)
 
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model:   "grok-4.6",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	}, true)
@@ -4628,10 +4628,10 @@ func TestPrepareResponsesRequest_CapsAt200WithInjectXSearch(t *testing.T) {
 	exec := NewXAIExecutor(&config.Config{
 		XAI: config.XAIConfig{InjectXSearch: true},
 	})
-	prepared, err := exec.prepareResponsesRequestTo(context.Background(), cliproxyexecutor.Request{
+	prepared, err := exec.prepareResponsesRequestTo(context.Background(), xinugateexecutor.Request{
 		Model:   "grok-4.6",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	}, false, sdktranslator.FormatOpenAIResponse)
 	if err != nil {
@@ -5095,13 +5095,13 @@ func TestNormalizeXAIToolChoiceForTools_NoOpWhenBothAbsent(t *testing.T) {
 
 func TestXAIExecutorComposerReusesClaudeCodeSession(t *testing.T) {
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
 	payload := []byte(`{"model":"grok-composer-2.5-fast","metadata":{"user_id":"{\"session_id\":\"cache-session-1\"}"},"input":"hello"}`)
-	req := cliproxyexecutor.Request{Model: "grok-composer-2.5-fast", Payload: payload}
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude, Stream: true}
+	req := xinugateexecutor.Request{Model: "grok-composer-2.5-fast", Payload: payload}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatClaude, Stream: true}
 
 	first, err := exec.prepareResponsesRequest(context.Background(), req, opts, true)
 	if err != nil {
@@ -5137,7 +5137,7 @@ func TestApplyXAIHeaders_EmptyAPIKey_OmitsAuthorization(t *testing.T) {
 		t.Fatalf("NewRequest() error = %v", err)
 	}
 	req.Header.Set("Authorization", "Bearer preexisting-bearer")
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"auth_kind":           "apikey",
@@ -5204,20 +5204,20 @@ func TestXAIExecutorReMergesReasoningAfterDroppingInvalidEncryptedContent(t *tes
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","input":[` +
 			`{"type":"reasoning","summary":[{"type":"summary_text","text":"first"}]},` +
 			`{"type":"reasoning","summary":[{"type":"summary_text","text":"second"}],"encrypted_content":"gAAAAABforeign-codex-replay"},` +
 			`{"role":"user","content":"hi"}` +
 			`]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	})
 	if err != nil {
@@ -5252,16 +5252,16 @@ func TestXAIExecutorDropsInvalidCompactionItem(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","input":[{"type":"compaction","encrypted_content":"gAAAAABforeign-codex-replay"},{"role":"user","content":"hi"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	})
 	if err != nil {
@@ -5301,7 +5301,7 @@ func TestXAIExecutorReasoningReplayCacheStoresFinalDoneAndInjectsNextClaudeReque
 	defer server.Close()
 
 	executor := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "xai-auth-replay-1",
 		Provider: "xai",
 		Attributes: map[string]string{
@@ -5312,13 +5312,13 @@ func TestXAIExecutorReasoningReplayCacheStoresFinalDoneAndInjectsNextClaudeReque
 			"access_token": "xai-token",
 		},
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Stream:       false,
 	}
 	ctx := testContextWithAPIKey("xai-replay-caller")
 
-	_, err := executor.Execute(ctx, auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(ctx, auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","metadata":{"user_id":"{\"device_id\":\"device-test\",\"account_uuid\":\"\",\"session_id\":\"xai-session-1\"}"},"messages":[{"role":"user","content":[{"type":"text","text":"hello"}]}]}`),
 	}, opts)
@@ -5326,7 +5326,7 @@ func TestXAIExecutorReasoningReplayCacheStoresFinalDoneAndInjectsNextClaudeReque
 		t.Fatalf("first Execute error: %v", err)
 	}
 
-	_, err = executor.Execute(ctx, auth, cliproxyexecutor.Request{
+	_, err = executor.Execute(ctx, auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","metadata":{"user_id":"{\"device_id\":\"device-test\",\"account_uuid\":\"\",\"session_id\":\"xai-session-1\"}"},"messages":[{"role":"user","content":[{"type":"text","text":"next"}]}]}`),
 	}, opts)
@@ -5374,7 +5374,7 @@ func TestXAIExecutorResponsesSSEReplaysEncryptedReasoningAndAssistantMessage(t *
 	defer server.Close()
 
 	executor := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "xai-auth-responses-sse-replay",
 		Provider: "xai",
 		Attributes: map[string]string{
@@ -5382,7 +5382,7 @@ func TestXAIExecutorResponsesSSEReplaysEncryptedReasoningAndAssistantMessage(t *
 		},
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         true,
@@ -5393,7 +5393,7 @@ func TestXAIExecutorResponsesSSEReplaysEncryptedReasoningAndAssistantMessage(t *
 	streamedResponses := make([][]byte, 0, 2)
 	ctx := testContextWithAPIKey("codex-sse-api-key")
 	for _, payload := range [][]byte{firstPayload, secondPayload} {
-		result, err := executor.ExecuteStream(ctx, auth, cliproxyexecutor.Request{Model: "grok-4.5", Payload: payload}, opts)
+		result, err := executor.ExecuteStream(ctx, auth, xinugateexecutor.Request{Model: "grok-4.5", Payload: payload}, opts)
 		if err != nil {
 			t.Fatalf("ExecuteStream error: %v", err)
 		}
@@ -5587,17 +5587,17 @@ func TestXAIExecutorClaudeInjectsLatestCachedReasoningWhenHistoryHasOnlyOlderSig
 	defer server.Close()
 
 	executor := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:         "xai-auth-claude-missing-latest-sig",
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude, Stream: false}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatClaude, Stream: false}
 	ctx := testContextWithAPIKey("claude-missing-sig-key")
 
 	// Turn 1: user only -> cache latest R+M
-	_, err := executor.Execute(ctx, auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(ctx, auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: []byte(`{"model":"grok-4.5","metadata":{"user_id":"{\"session_id\":\"claude-missing-latest\"}"},"messages":[{"role":"user","content":[{"type":"text","text":"hello"}]}]}`),
 	}, opts)
@@ -5621,7 +5621,7 @@ func TestXAIExecutorClaudeInjectsLatestCachedReasoningWhenHistoryHasOnlyOlderSig
 	}`)
 	secondPayload, _ = sjson.SetBytes(secondPayload, "messages.1.content.0.signature", oldEncrypted)
 
-	_, err = executor.Execute(ctx, auth, cliproxyexecutor.Request{
+	_, err = executor.Execute(ctx, auth, xinugateexecutor.Request{
 		Model:   "grok-4.5",
 		Payload: secondPayload,
 	}, opts)
@@ -5693,8 +5693,8 @@ func TestCacheXAIReasoningReplayFromCompletedClearsPreviousEntryWhenNoReplayable
 
 func TestXAIReasoningReplayScopeIsolatesOpenAIResponsePromptCacheKeyByAPIKey(t *testing.T) {
 	payload := []byte(`{"model":"grok-4.5","prompt_cache_key":"shared-session","input":[]}`)
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}
-	req := cliproxyexecutor.Request{Model: "grok-4.5", Payload: payload}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}
+	req := xinugateexecutor.Request{Model: "grok-4.5", Payload: payload}
 
 	scopeA := xaiReasoningReplayScopeFromRequest(testContextWithAPIKey("api-key-a"), sdktranslator.FormatOpenAIResponse, req, opts, payload)
 	scopeB := xaiReasoningReplayScopeFromRequest(testContextWithAPIKey("api-key-b"), sdktranslator.FormatOpenAIResponse, req, opts, payload)
@@ -5716,8 +5716,8 @@ func TestXAIReasoningReplayScopeIsolatesOpenAIResponsePromptCacheKeyByAPIKey(t *
 
 func TestXAIReasoningReplayScopeDisablesClaudeWithoutAPIKey(t *testing.T) {
 	payload := []byte(`{"model":"grok-4.3","metadata":{"user_id":"{\"session_id\":\"shared-session\"}"},"messages":[{"role":"user","content":"hello"}]}`)
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude}
-	req := cliproxyexecutor.Request{Model: "grok-4.3", Payload: payload}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatClaude}
+	req := xinugateexecutor.Request{Model: "grok-4.3", Payload: payload}
 
 	scopeNoKey := xaiReasoningReplayScopeFromRequest(context.Background(), sdktranslator.FormatClaude, req, opts, payload)
 	if scopeNoKey.valid() {
@@ -5735,13 +5735,13 @@ func TestXAIReasoningReplayScopeDisablesClaudeWithoutAPIKey(t *testing.T) {
 
 func TestXAIReasoningReplayScopeAllowsTrustedExecutionSessionWithoutAPIKey(t *testing.T) {
 	payload := []byte(`{"model":"grok-4.3","messages":[{"role":"user","content":"hello"}]}`)
-	scope := xaiReasoningReplayScopeFromRequest(context.Background(), sdktranslator.FormatClaude, cliproxyexecutor.Request{
+	scope := xaiReasoningReplayScopeFromRequest(context.Background(), sdktranslator.FormatClaude, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: "trusted-session",
+			xinugateexecutor.ExecutionSessionMetadataKey: "trusted-session",
 		},
 	}, payload)
 	if !scope.valid() {
@@ -5754,13 +5754,13 @@ func TestXAIReasoningReplayScopeAllowsTrustedExecutionSessionWithoutAPIKey(t *te
 
 func TestXAIReasoningReplayScopeSkipsIncrementalWebsocketPreviousResponse(t *testing.T) {
 	scope := xaiReasoningReplayScopeFromRequest(
-		cliproxyexecutor.WithDownstreamWebsocket(context.Background()),
+		xinugateexecutor.WithDownstreamWebsocket(context.Background()),
 		sdktranslator.FormatOpenAIResponse,
-		cliproxyexecutor.Request{
+		xinugateexecutor.Request{
 			Model:   "grok-4.5",
 			Payload: []byte(`{"model":"grok-4.5","previous_response_id":"resp_1","prompt_cache_key":"codex-ws-session","input":[]}`),
 		},
-		cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse},
+		xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse},
 		[]byte(`{"model":"grok-4.5","prompt_cache_key":"codex-ws-session","input":[]}`),
 	)
 	if scope.valid() {
@@ -5778,13 +5778,13 @@ func TestApplyXAIReasoningReplayCacheFallsBackWhenReadFails(t *testing.T) {
 	})
 
 	body := []byte(`{"model":"grok-4.3","input":[{"role":"user","content":[{"type":"input_text","text":"hello"}]}]}`)
-	updated, scope, err := applyXAIReasoningReplayCacheRequired(context.Background(), sdktranslator.FormatClaude, cliproxyexecutor.Request{
+	updated, scope, err := applyXAIReasoningReplayCacheRequired(context.Background(), sdktranslator.FormatClaude, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: body,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: "xai-read-error",
+			xinugateexecutor.ExecutionSessionMetadataKey: "xai-read-error",
 		},
 	}, body)
 	if err != nil {
@@ -5809,13 +5809,13 @@ func TestXAIReasoningReplayCacheReplaysFunctionCallWithoutReasoning(t *testing.T
 	}, []byte(`{"response":{"output":[{"type":"function_call","call_id":"call_1","name":"lookup","arguments":"{\"q\":\"weather\"}"}]}}`))
 
 	body := []byte(`{"model":"grok-4.3","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"call lookup"}]},{"type":"function_call_output","call_id":"call_1","output":"sunny"}]}`)
-	updated, scope, errReplay := applyXAIReasoningReplayCacheRequired(context.Background(), sdktranslator.FormatClaude, cliproxyexecutor.Request{
+	updated, scope, errReplay := applyXAIReasoningReplayCacheRequired(context.Background(), sdktranslator.FormatClaude, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: body,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: executionSessionID,
+			xinugateexecutor.ExecutionSessionMetadataKey: executionSessionID,
 		},
 	}, body)
 	if errReplay != nil {
@@ -5861,7 +5861,7 @@ func TestXAIExecutorReasoningReplayCacheReplaysFunctionCallForClaudeToolResult(t
 	defer server.Close()
 
 	executor := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "xai-auth-replay-tool",
 		Provider: "xai",
 		Attributes: map[string]string{
@@ -5872,13 +5872,13 @@ func TestXAIExecutorReasoningReplayCacheReplaysFunctionCallForClaudeToolResult(t
 			"access_token": "xai-token",
 		},
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Stream:       false,
 	}
 	ctx := testContextWithAPIKey("xai-tool-replay-caller")
 
-	_, err := executor.Execute(ctx, auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(ctx, auth, xinugateexecutor.Request{
 		Model: "grok-4.3",
 		Payload: []byte(`{
 			"model":"grok-4.3",
@@ -5891,7 +5891,7 @@ func TestXAIExecutorReasoningReplayCacheReplaysFunctionCallForClaudeToolResult(t
 		t.Fatalf("first Execute error: %v", err)
 	}
 
-	_, err = executor.Execute(ctx, auth, cliproxyexecutor.Request{
+	_, err = executor.Execute(ctx, auth, xinugateexecutor.Request{
 		Model: "grok-4.3",
 		Payload: []byte(`{
 			"model":"grok-4.3",
@@ -5956,7 +5956,7 @@ func TestXAIBaseURLSource(t *testing.T) {
 func TestXAIChatBaseURL(t *testing.T) {
 	tests := []struct {
 		name string
-		auth *cliproxyauth.Auth
+		auth *xinugateauth.Auth
 		want string
 	}{
 		{
@@ -5966,19 +5966,19 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "empty base url defaults to official api without using_api",
-			auth: &cliproxyauth.Auth{Provider: "xai"},
+			auth: &xinugateauth.Auth{Provider: "xai"},
 			want: xaiauth.DefaultAPIBaseURL,
 		},
 		{
 			name: "official default stays official without using_api",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{"base_url": xaiauth.DefaultAPIBaseURL},
 			},
 			want: xaiauth.DefaultAPIBaseURL,
 		},
 		{
 			name: "OAuth credentials default to chat proxy without using_api",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
 					"base_url":  xaiauth.DefaultAPIBaseURL,
@@ -5988,7 +5988,7 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "metadata-only OAuth credentials default to chat proxy without using_api",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Metadata: map[string]any{
 					"auth_kind": "oauth",
 					"base_url":  xaiauth.DefaultAPIBaseURL,
@@ -5998,7 +5998,7 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "using_api false empty base url rewrites to chat proxy",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider:   "xai",
 				Attributes: map[string]string{xaiUsingAPIAttr: "false"},
 			},
@@ -6006,7 +6006,7 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "using_api false official default rewrites to chat proxy",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"base_url":      xaiauth.DefaultAPIBaseURL,
 					xaiUsingAPIAttr: "false",
@@ -6016,7 +6016,7 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "using_api false official default with trailing slash rewrites to chat proxy",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"base_url":      xaiauth.DefaultAPIBaseURL + "/",
 					xaiUsingAPIAttr: "false",
@@ -6026,7 +6026,7 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "metadata using_api false official default rewrites to chat proxy",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Metadata: map[string]any{
 					"base_url":      xaiauth.DefaultAPIBaseURL,
 					xaiUsingAPIAttr: false,
@@ -6036,7 +6036,7 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "using_api false custom base url is honored",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"base_url":      "https://gateway.example.com/v1",
 					xaiUsingAPIAttr: "false",
@@ -6046,14 +6046,14 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "custom base url is honored without using_api",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{"base_url": "https://gateway.example.com/v1"},
 			},
 			want: "https://gateway.example.com/v1",
 		},
 		{
 			name: "using_api false explicit chat proxy base url is preserved",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"base_url":      xaiauth.CLIChatProxyBaseURL,
 					xaiUsingAPIAttr: "false",
@@ -6063,7 +6063,7 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "using_api true keeps official api",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"base_url":      xaiauth.DefaultAPIBaseURL,
 					xaiUsingAPIAttr: "true",
@@ -6073,7 +6073,7 @@ func TestXAIChatBaseURL(t *testing.T) {
 		},
 		{
 			name: "OAuth using_api true keeps official api",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"auth_kind":     "oauth",
 					"base_url":      xaiauth.DefaultAPIBaseURL,
@@ -6096,17 +6096,17 @@ func TestXAIChatBaseURL(t *testing.T) {
 func TestXAICompactBaseURL(t *testing.T) {
 	tests := []struct {
 		name string
-		auth *cliproxyauth.Auth
+		auth *xinugateauth.Auth
 		want string
 	}{
 		{
 			name: "empty base url defaults to official api",
-			auth: &cliproxyauth.Auth{Provider: "xai"},
+			auth: &xinugateauth.Auth{Provider: "xai"},
 			want: xaiauth.DefaultAPIBaseURL,
 		},
 		{
 			name: "OAuth official default stays on official api for compact",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
 					"base_url":  xaiauth.DefaultAPIBaseURL,
@@ -6116,7 +6116,7 @@ func TestXAICompactBaseURL(t *testing.T) {
 		},
 		{
 			name: "metadata OAuth official default stays on official api for compact",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Metadata: map[string]any{
 					"auth_kind": "oauth",
 					"base_url":  xaiauth.DefaultAPIBaseURL,
@@ -6126,7 +6126,7 @@ func TestXAICompactBaseURL(t *testing.T) {
 		},
 		{
 			name: "using_api false official default stays on official api for compact",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"base_url":      xaiauth.DefaultAPIBaseURL,
 					xaiUsingAPIAttr: "false",
@@ -6136,7 +6136,7 @@ func TestXAICompactBaseURL(t *testing.T) {
 		},
 		{
 			name: "explicit CLI chat proxy is rewritten to official api for compact",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
 					"base_url":  xaiauth.CLIChatProxyBaseURL,
@@ -6146,7 +6146,7 @@ func TestXAICompactBaseURL(t *testing.T) {
 		},
 		{
 			name: "explicit CLI chat proxy trailing slash is rewritten",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"base_url": xaiauth.CLIChatProxyBaseURL + "/",
 				},
@@ -6155,7 +6155,7 @@ func TestXAICompactBaseURL(t *testing.T) {
 		},
 		{
 			name: "custom gateway is honored for compact",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
 					"base_url":  "https://gateway.example.com/v1",
@@ -6183,7 +6183,7 @@ func TestXAICompactBaseURL(t *testing.T) {
 func TestApplyXAIChatHeaders(t *testing.T) {
 	t.Run("non OAuth defaults to official API headers", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "https://example.invalid/responses", nil)
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			Attributes: map[string]string{"base_url": xaiauth.DefaultAPIBaseURL},
 		}
 		applyXAIChatHeaders(req, auth, "xai-token", true, "conv-1")
@@ -6212,7 +6212,7 @@ func TestApplyXAIChatHeaders(t *testing.T) {
 
 	t.Run("OAuth defaults to cli chat proxy headers", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "https://example.invalid/responses", nil)
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			Attributes: map[string]string{
 				"auth_kind": "oauth",
 				"base_url":  xaiauth.DefaultAPIBaseURL,
@@ -6245,7 +6245,7 @@ func TestApplyXAIChatHeaders(t *testing.T) {
 
 	t.Run("no cli headers on custom gateway with using_api false", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "https://gateway.example.com/responses", nil)
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			Attributes: map[string]string{
 				"base_url":      "https://gateway.example.com/v1",
 				xaiUsingAPIAttr: "false",
@@ -6271,7 +6271,7 @@ func TestApplyXAIChatHeaders(t *testing.T) {
 
 	t.Run("custom headers override cli chat proxy defaults", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, xaiauth.CLIChatProxyBaseURL+"/responses", nil)
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			Attributes: map[string]string{
 				"base_url":                         xaiauth.CLIChatProxyBaseURL,
 				xaiUsingAPIAttr:                    "false",
@@ -6299,7 +6299,7 @@ func TestApplyXAIChatHeaders(t *testing.T) {
 
 	t.Run("cli headers on explicit chat proxy base with using_api false", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, xaiauth.CLIChatProxyBaseURL+"/responses", nil)
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			Attributes: map[string]string{
 				"base_url":      xaiauth.CLIChatProxyBaseURL + "/",
 				xaiUsingAPIAttr: "false",
@@ -6328,7 +6328,7 @@ func TestXAIExecutorExecuteChatUsesProxyHeadersOnlyForChatProxy(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "xai",
 		Attributes: map[string]string{
 			"base_url":      server.URL,
@@ -6337,10 +6337,10 @@ func TestXAIExecutorExecuteChatUsesProxyHeadersOnlyForChatProxy(t *testing.T) {
 		Metadata: map[string]any{"access_token": "xai-token"},
 	}
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.3",
 		Payload: []byte(`{"model":"grok-4.3","input":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	})
 	if err != nil {
@@ -6395,12 +6395,12 @@ func TestXAIPatchCompletedOutput_EnsuresUsageDetails(t *testing.T) {
 func TestXAIExecutorExecuteImagesOAuthBaseURLResolution(t *testing.T) {
 	tests := []struct {
 		name    string
-		auth    *cliproxyauth.Auth
+		auth    *xinugateauth.Auth
 		wantURL string
 	}{
 		{
 			name: "oauth credential defaults to cli-chat-proxy",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "xai",
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
@@ -6412,7 +6412,7 @@ func TestXAIExecutorExecuteImagesOAuthBaseURLResolution(t *testing.T) {
 		},
 		{
 			name: "oauth credential with empty base_url defaults to cli-chat-proxy",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "xai",
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
@@ -6423,7 +6423,7 @@ func TestXAIExecutorExecuteImagesOAuthBaseURLResolution(t *testing.T) {
 		},
 		{
 			name: "api key credential defaults to official api",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "xai",
 				Attributes: map[string]string{
 					"api_key": "xai-api-key",
@@ -6433,7 +6433,7 @@ func TestXAIExecutorExecuteImagesOAuthBaseURLResolution(t *testing.T) {
 		},
 		{
 			name: "oauth credential with custom base_url honors custom base_url",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "xai",
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
@@ -6457,16 +6457,16 @@ func TestXAIExecutorExecuteImagesOAuthBaseURLResolution(t *testing.T) {
 				}, nil
 			})
 
-			ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", rt)
+			ctx := context.WithValue(context.Background(), "xinugate.roundtripper", rt)
 			exec := NewXAIExecutor(&config.Config{})
 
-			_, err := exec.Execute(ctx, tt.auth, cliproxyexecutor.Request{
+			_, err := exec.Execute(ctx, tt.auth, xinugateexecutor.Request{
 				Model:   "grok-imagine-image",
 				Payload: []byte(`{"model":"grok-imagine-image","prompt":"a red apple"}`),
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat: sdktranslator.FromString("openai-image"),
 				Metadata: map[string]any{
-					cliproxyexecutor.RequestPathMetadataKey: "/v1/images/generations",
+					xinugateexecutor.RequestPathMetadataKey: "/v1/images/generations",
 				},
 			})
 			if err != nil {
@@ -6482,12 +6482,12 @@ func TestXAIExecutorExecuteImagesOAuthBaseURLResolution(t *testing.T) {
 func TestXAIExecutorExecuteVideosOAuthBaseURLResolution(t *testing.T) {
 	tests := []struct {
 		name    string
-		auth    *cliproxyauth.Auth
+		auth    *xinugateauth.Auth
 		wantURL string
 	}{
 		{
 			name: "oauth credential defaults to cli-chat-proxy",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "xai",
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
@@ -6499,7 +6499,7 @@ func TestXAIExecutorExecuteVideosOAuthBaseURLResolution(t *testing.T) {
 		},
 		{
 			name: "oauth credential with empty base_url defaults to cli-chat-proxy",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "xai",
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
@@ -6510,7 +6510,7 @@ func TestXAIExecutorExecuteVideosOAuthBaseURLResolution(t *testing.T) {
 		},
 		{
 			name: "api key credential defaults to official api",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "xai",
 				Attributes: map[string]string{
 					"api_key": "xai-api-key",
@@ -6520,7 +6520,7 @@ func TestXAIExecutorExecuteVideosOAuthBaseURLResolution(t *testing.T) {
 		},
 		{
 			name: "oauth credential with custom base_url honors custom base_url",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "xai",
 				Attributes: map[string]string{
 					"auth_kind": "oauth",
@@ -6544,16 +6544,16 @@ func TestXAIExecutorExecuteVideosOAuthBaseURLResolution(t *testing.T) {
 				}, nil
 			})
 
-			ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", rt)
+			ctx := context.WithValue(context.Background(), "xinugate.roundtripper", rt)
 			exec := NewXAIExecutor(&config.Config{})
 
-			_, err := exec.Execute(ctx, tt.auth, cliproxyexecutor.Request{
+			_, err := exec.Execute(ctx, tt.auth, xinugateexecutor.Request{
 				Model:   "grok-imagine-video",
 				Payload: []byte(`{"model":"grok-imagine-video","prompt":"a flying bird"}`),
-			}, cliproxyexecutor.Options{
+			}, xinugateexecutor.Options{
 				SourceFormat: sdktranslator.FromString("openai-video"),
 				Metadata: map[string]any{
-					cliproxyexecutor.RequestPathMetadataKey: "/v1/videos/generations",
+					xinugateexecutor.RequestPathMetadataKey: "/v1/videos/generations",
 				},
 			})
 			if err != nil {
@@ -6570,7 +6570,7 @@ func TestXAIExecutorAliasesClientWebSearchFunctionInRequest(t *testing.T) {
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -6584,7 +6584,7 @@ func TestXAIExecutorAliasesClientWebSearchFunctionInRequest(t *testing.T) {
 			],
 			"tool_choice":{"type":"function","name":"web_search"}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	}, true)
@@ -6610,14 +6610,14 @@ func TestXAIExecutorAliasesClientWebSearchFunctionInRequest(t *testing.T) {
 	}
 
 	// Also verify allowed_tools mode
-	preparedAllowed, errAllowed := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	preparedAllowed, errAllowed := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
 			"tools":[{"type":"function","name":"web_search","parameters":{"type":"object"}}],
 			"tool_choice":{"type":"allowed_tools","tools":[{"type":"function","name":"web_search"}]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	}, true)
@@ -6633,7 +6633,7 @@ func TestXAIExecutorPreservesHostedWebSearchToolType(t *testing.T) {
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -6642,7 +6642,7 @@ func TestXAIExecutorPreservesHostedWebSearchToolType(t *testing.T) {
 				{"type":"web_search"}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	}, true)
@@ -6672,21 +6672,21 @@ func TestXAIExecutorRestoresAliasedWebSearchInStreamAndExecute(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
 	// 1. Verify streaming restoration
-	streamRes, errStream := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	streamRes, errStream := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
 			"tools":[{"type":"function","name":"web_search","parameters":{"type":"object"}}],
 			"input":"search query"
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	})
@@ -6711,14 +6711,14 @@ func TestXAIExecutorRestoresAliasedWebSearchInStreamAndExecute(t *testing.T) {
 	}
 
 	// 2. Verify non-streaming restoration
-	execRes, errExec := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	execRes, errExec := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
 			"tools":[{"type":"function","name":"web_search","parameters":{"type":"object"}}],
 			"input":"search query"
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       false,
 	})
@@ -6737,7 +6737,7 @@ func TestXAIExecutorAliasesClientWebSearchWithExistingAliasCollision(t *testing.
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -6750,7 +6750,7 @@ func TestXAIExecutorAliasesClientWebSearchWithExistingAliasCollision(t *testing.
 				{"type":"function_call","name":"web_search","call_id":"call_2","arguments":"{}"}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	}, true)
@@ -6796,7 +6796,7 @@ func TestXAIExecutorDoesNotAliasNamespacedWebSearchToolChoice(t *testing.T) {
 	t.Parallel()
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -6809,7 +6809,7 @@ func TestXAIExecutorDoesNotAliasNamespacedWebSearchToolChoice(t *testing.T) {
 				{"type":"function","name":"web_search"}
 			]}
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	}, true)
@@ -6845,10 +6845,10 @@ func TestXAIExecutorAliasesClientWebSearchBeyond100Collisions(t *testing.T) {
 	payload := fmt.Sprintf(`{"model":"grok-4.6","tools":[%s]}`, strings.Join(tools, ","))
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model:   "grok-4.6",
 		Payload: []byte(payload),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	}, true)
@@ -6874,13 +6874,13 @@ func TestXAIExecutorDoesNotRestoreNamespacedClientfnWebSearch(t *testing.T) {
 	defer server.Close()
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
 	}
 
-	result, errStream := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, errStream := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -6889,7 +6889,7 @@ func TestXAIExecutorDoesNotRestoreNamespacedClientfnWebSearch(t *testing.T) {
 				{"type":"namespace","name":"acme","tools":[{"type":"function","name":"clientfn_web_search","parameters":{"type":"object"}}]}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:       true,
 	})
@@ -6930,7 +6930,7 @@ func TestXAIExecutorAliasesReplayedReasoningCacheWebSearchCall(t *testing.T) {
 	}, []byte(`{"response":{"output":[{"type":"function_call","call_id":"call_search_1","name":"web_search","arguments":"{\"query\":\"artificial analysis ranking\"}"}]}}`))
 
 	exec := NewXAIExecutor(&config.Config{})
-	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), cliproxyexecutor.Request{
+	prepared, errPrepare := exec.prepareResponsesRequest(context.Background(), xinugateexecutor.Request{
 		Model: "grok-4.6",
 		Payload: []byte(`{
 			"model":"grok-4.6",
@@ -6940,10 +6940,10 @@ func TestXAIExecutorAliasesReplayedReasoningCacheWebSearchCall(t *testing.T) {
 				{"type":"function_call_output","call_id":"call_search_1","output":"rankings text"}
 			]
 		}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: executionSessionID,
+			xinugateexecutor.ExecutionSessionMetadataKey: executionSessionID,
 		},
 		Stream: true,
 	}, true)
@@ -6994,7 +6994,7 @@ func TestXAIExecutorFoldsNamespaceNamedWebSearchWithoutAliasing(t *testing.T) {
 	nsList = append(nsList, `{"type":"namespace","name":"web_search","tools":[{"type":"function","name":"query_web","parameters":{"type":"object"}}]}`)
 
 	exec := NewXAIExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider:   "xai",
 		Attributes: map[string]string{"base_url": server.URL},
 		Metadata:   map[string]any{"access_token": "xai-token"},
@@ -7006,10 +7006,10 @@ func TestXAIExecutorFoldsNamespaceNamedWebSearchWithoutAliasing(t *testing.T) {
 		"input":[{"role":"user","content":"search query"}]
 	}`, strings.Join(nsList, ","))
 
-	resp, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "grok-4.6",
 		Payload: []byte(turnPayload),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Stream:         false,

@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 type noopUsagePlugin struct{}

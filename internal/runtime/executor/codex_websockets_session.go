@@ -12,8 +12,8 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type codexWebsocketSessionStore struct {
@@ -61,7 +61,7 @@ type codexWebsocketSession struct {
 	proxyURL                  string
 	multiAgentV2OptimizedConn *websocket.Conn
 	lifecycleBindMu           sync.Mutex
-	lifecycle                 cliproxyexecutor.ExecutionLifecycle
+	lifecycle                 xinugateexecutor.ExecutionLifecycle
 	lifecycleModel            string
 
 	writeMu sync.Mutex
@@ -279,12 +279,12 @@ func (s *codexWebsocketSession) configureConn(conn *websocket.Conn) {
 	})
 }
 
-func (s *codexWebsocketSession) bindExecutionLifecycle(opts cliproxyexecutor.Options, conn *websocket.Conn, closer *websocketConnectionCloser, model string) error {
+func (s *codexWebsocketSession) bindExecutionLifecycle(opts xinugateexecutor.Options, conn *websocket.Conn, closer *websocketConnectionCloser, model string) error {
 	if closer == nil {
 		return fmt.Errorf("codex websockets executor: websocket connection closer is nil")
 	}
 	if s == nil {
-		return cliproxyexecutor.BindExecutionResource(opts, closer)
+		return xinugateexecutor.BindExecutionResource(opts, closer)
 	}
 	lifecycle := opts.ExecutionLifecycle
 	if lifecycle == nil || conn == nil {
@@ -328,7 +328,7 @@ func (s *codexWebsocketSession) bindExecutionLifecycle(opts cliproxyexecutor.Opt
 	return nil
 }
 
-func (s *codexWebsocketSession) closeBoundConnection(conn *websocket.Conn, closer *websocketConnectionCloser, lifecycle cliproxyexecutor.ExecutionLifecycle) error {
+func (s *codexWebsocketSession) closeBoundConnection(conn *websocket.Conn, closer *websocketConnectionCloser, lifecycle xinugateexecutor.ExecutionLifecycle) error {
 	if s == nil || conn == nil {
 		return nil
 	}
@@ -338,7 +338,7 @@ func (s *codexWebsocketSession) closeBoundConnection(conn *websocket.Conn, close
 	return errClose
 }
 
-func (s *codexWebsocketSession) detachConnection(conn *websocket.Conn, lifecycle cliproxyexecutor.ExecutionLifecycle) *websocketConnectionCloser {
+func (s *codexWebsocketSession) detachConnection(conn *websocket.Conn, lifecycle xinugateexecutor.ExecutionLifecycle) *websocketConnectionCloser {
 	if s == nil || conn == nil {
 		return nil
 	}
@@ -408,7 +408,7 @@ func websocketSessionTargetMatches(sess *codexWebsocketSession, authID string, w
 		strings.TrimSpace(sess.proxyURL) == strings.TrimSpace(proxyURL)
 }
 
-func detachMismatchedWebsocketSessionConn(sess *codexWebsocketSession, authID string, wsURL string, proxyURL string) (*websocket.Conn, *websocketConnectionCloser, string, string, cliproxyexecutor.ExecutionLifecycle) {
+func detachMismatchedWebsocketSessionConn(sess *codexWebsocketSession, authID string, wsURL string, proxyURL string) (*websocket.Conn, *websocketConnectionCloser, string, string, xinugateexecutor.ExecutionLifecycle) {
 	if sess == nil {
 		return nil, nil, "", "", nil
 	}
@@ -537,11 +537,11 @@ func (s *codexWebsocketSession) notifyUpstreamDisconnect(err error) {
 	})
 }
 
-func executionSessionIDFromOptions(opts cliproxyexecutor.Options) string {
+func executionSessionIDFromOptions(opts xinugateexecutor.Options) string {
 	if len(opts.Metadata) == 0 {
 		return ""
 	}
-	raw, ok := opts.Metadata[cliproxyexecutor.ExecutionSessionMetadataKey]
+	raw, ok := opts.Metadata[xinugateexecutor.ExecutionSessionMetadataKey]
 	if !ok || raw == nil {
 		return ""
 	}
@@ -591,7 +591,7 @@ func (e *CodexWebsocketsExecutor) UpstreamDisconnectChan(sessionID string) <-cha
 	return sess.upstreamDisconnectCh
 }
 
-func (e *CodexWebsocketsExecutor) ensureUpstreamConn(ctx context.Context, auth *cliproxyauth.Auth, sess *codexWebsocketSession, authID string, wsURL string, headers http.Header) (*websocket.Conn, *websocketConnectionCloser, *http.Response, error) {
+func (e *CodexWebsocketsExecutor) ensureUpstreamConn(ctx context.Context, auth *xinugateauth.Auth, sess *codexWebsocketSession, authID string, wsURL string, headers http.Header) (*websocket.Conn, *websocketConnectionCloser, *http.Response, error) {
 	if sess == nil {
 		conn, closer, resp, err := e.dialCodexWebsocket(ctx, auth, wsURL, headers)
 		if conn != nil {
@@ -785,7 +785,7 @@ func (e *CodexWebsocketsExecutor) CloseExecutionSession(sessionID string) {
 	if sessionID == "" {
 		return
 	}
-	if sessionID == cliproxyauth.CloseAllExecutionSessionsID {
+	if sessionID == xinugateauth.CloseAllExecutionSessionsID {
 		e.closeAllExecutionSessions("executor_shutdown")
 		return
 	}

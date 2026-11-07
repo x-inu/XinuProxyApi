@@ -16,9 +16,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type refreshRecordExecutor struct {
@@ -42,16 +42,16 @@ func (e *refreshRecordExecutor) Refresh(ctx context.Context, auth *coreauth.Auth
 	return auth, nil
 }
 
-func (e *refreshRecordExecutor) Execute(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-	return cliproxyexecutor.Response{}, nil
+func (e *refreshRecordExecutor) Execute(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
+	return xinugateexecutor.Response{}, nil
 }
 
-func (e *refreshRecordExecutor) ExecuteStream(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
+func (e *refreshRecordExecutor) ExecuteStream(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (*xinugateexecutor.StreamResult, error) {
 	return nil, nil
 }
 
-func (e *refreshRecordExecutor) CountTokens(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-	return cliproxyexecutor.Response{}, nil
+func (e *refreshRecordExecutor) CountTokens(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
+	return xinugateexecutor.Response{}, nil
 }
 
 func (e *refreshRecordExecutor) HttpRequest(ctx context.Context, auth *coreauth.Auth, req *http.Request) (*http.Response, error) {
@@ -299,16 +299,16 @@ func (e *pluginRefreshHostExecutor) Refresh(ctx context.Context, auth *coreauth.
 	return auth, nil
 }
 
-func (e *pluginRefreshHostExecutor) Execute(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-	return cliproxyexecutor.Response{}, nil
+func (e *pluginRefreshHostExecutor) Execute(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
+	return xinugateexecutor.Response{}, nil
 }
 
-func (e *pluginRefreshHostExecutor) ExecuteStream(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
+func (e *pluginRefreshHostExecutor) ExecuteStream(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (*xinugateexecutor.StreamResult, error) {
 	return nil, nil
 }
 
-func (e *pluginRefreshHostExecutor) CountTokens(ctx context.Context, auth *coreauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-	return cliproxyexecutor.Response{}, nil
+func (e *pluginRefreshHostExecutor) CountTokens(ctx context.Context, auth *coreauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
+	return xinugateexecutor.Response{}, nil
 }
 
 func (e *pluginRefreshHostExecutor) HttpRequest(ctx context.Context, auth *coreauth.Auth, req *http.Request) (*http.Response, error) {

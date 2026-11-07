@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/logging"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestRequestLoggingDoesNotMarkUpstreamAttempt(t *testing.T) {
@@ -34,9 +34,9 @@ func TestRequestLoggingDoesNotMarkUpstreamAttempt(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := cliproxyexecutor.WithUpstreamAttemptTracker(context.Background())
+			ctx := xinugateexecutor.WithUpstreamAttemptTracker(context.Background())
 			test.record(ctx)
-			if cliproxyexecutor.UpstreamAttempted(ctx) {
+			if xinugateexecutor.UpstreamAttempted(ctx) {
 				t.Fatal("request logging marked an upstream attempt before transport")
 			}
 		})

@@ -14,19 +14,19 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/wsrelay"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 func TestAIStudioTranslateRequestPreservesSummaryFromOriginalRequest(t *testing.T) {
 	executor := NewAIStudioExecutor(&config.Config{}, "aistudio", nil)
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-3.6-flash",
 		Payload: []byte(`{"model":"gemini-3.6-flash","input":"hi"}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat:    sdktranslator.FormatOpenAIResponse,
 		OriginalRequest: []byte(`{"model":"gemini-3.6-flash","reasoning":{"summary":"auto"},"input":"hi"}`),
 	}
@@ -41,7 +41,7 @@ func TestAIStudioTranslateRequestPreservesSummaryFromOriginalRequest(t *testing.
 
 func TestAIStudioTranslateRequestNormalizesThinkingLevel(t *testing.T) {
 	executor := NewAIStudioExecutor(&config.Config{}, "aistudio", nil)
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model: "gemini-3.8-flash",
 		Payload: []byte(`{
 			"contents":[{"role":"user","parts":[{"text":"Human: Hi"}]}],
@@ -49,7 +49,7 @@ func TestAIStudioTranslateRequestNormalizesThinkingLevel(t *testing.T) {
 			"generationConfig":{"thinkingConfig":{"thinkingLevel":"high","includeThoughts":true}}
 		}`),
 	}
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatGemini}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatGemini}
 
 	payload, _, err := executor.translateRequest(context.Background(), req, opts, false)
 	if err != nil {
@@ -68,11 +68,11 @@ func TestAIStudioTranslateRequestNormalizesThinkingLevelAfterPayloadOverride(t *
 		Models: []config.PayloadModelRule{{Name: "gemini-3.7-flash", Protocol: "gemini"}},
 		Params: map[string]any{"generationConfig.thinkingConfig.thinkingLevel": "medium"},
 	}}}}, "aistudio", nil)
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash",
 		Payload: []byte(`{"contents":[{"role":"user","parts":[{"text":"hi"}]}],"model":"gemini-3.7-flash"}`),
 	}
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatGemini}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatGemini}
 
 	payload, _, err := executor.translateRequest(context.Background(), req, opts, false)
 	if err != nil {
@@ -119,10 +119,10 @@ func TestNormalizeAIStudioThinkingLevel(t *testing.T) {
 
 func TestAIStudioTranslateRequestPrependsLeadingUserForIssue4959ResponsesHistory(t *testing.T) {
 	executor := NewAIStudioExecutor(&config.Config{}, "aistudio", nil)
-	_, body, err := executor.translateRequest(context.Background(), cliproxyexecutor.Request{
+	_, body, err := executor.translateRequest(context.Background(), xinugateexecutor.Request{
 		Model:   "gemini-3.7-flash-high",
 		Payload: issue4959ResponsesModelFirstPayload(),
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}, false)
+	}, xinugateexecutor.Options{SourceFormat: sdktranslator.FormatOpenAIResponse}, false)
 	if err != nil {
 		t.Fatalf("translateRequest() error = %v", err)
 	}
@@ -131,13 +131,13 @@ func TestAIStudioTranslateRequestPrependsLeadingUserForIssue4959ResponsesHistory
 
 func TestAIStudioTranslateRequestAppendsTrailingUserForTrailingModelTurn(t *testing.T) {
 	executor := NewAIStudioExecutor(&config.Config{}, "aistudio", nil)
-	_, body, err := executor.translateRequest(context.Background(), cliproxyexecutor.Request{
+	_, body, err := executor.translateRequest(context.Background(), xinugateexecutor.Request{
 		Model: "gemini-3.7-flash",
 		Payload: []byte(`{"contents":[` +
 			`{"role":"user","parts":[{"text":"hello"}]},` +
 			`{"role":"model","parts":[{"text":"answer"}]}` +
 			`]}`),
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatGemini}, false)
+	}, xinugateexecutor.Options{SourceFormat: sdktranslator.FormatGemini}, false)
 	if err != nil {
 		t.Fatalf("translateRequest() error = %v", err)
 	}
@@ -153,14 +153,14 @@ func TestAIStudioTranslateRequestAppendsTrailingUserForTrailingModelTurn(t *test
 func TestAIStudioTranslateRequestCountTokensPreservesTrailingModelTurn(t *testing.T) {
 	executor := NewAIStudioExecutor(&config.Config{}, "aistudio", nil)
 	// When action is countTokens, trailing model turn must not be modified
-	_, body, err := executor.translateRequest(context.Background(), cliproxyexecutor.Request{
+	_, body, err := executor.translateRequest(context.Background(), xinugateexecutor.Request{
 		Model: "gemini-3.7-flash",
 		Payload: []byte(`{"contents":[` +
 			`{"role":"user","parts":[{"text":"hello"}]},` +
 			`{"role":"model","parts":[{"text":"answer"}]}` +
 			`]}`),
 		Metadata: map[string]any{"action": "countTokens"},
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatGemini}, false)
+	}, xinugateexecutor.Options{SourceFormat: sdktranslator.FormatGemini}, false)
 	if err != nil {
 		t.Fatalf("translateRequest() error = %v", err)
 	}
@@ -174,12 +174,12 @@ func TestAIStudioExecutorWithoutRelaySessionDoesNotMarkUpstreamAttempt(t *testin
 	const authID = "aistudio-not-connected"
 	relay := wsrelay.NewManager(wsrelay.Options{})
 	exec := NewAIStudioExecutor(&config.Config{}, "aistudio", relay)
-	auth := &cliproxyauth.Auth{ID: authID, Provider: "aistudio"}
-	req := cliproxyexecutor.Request{
+	auth := &xinugateauth.Auth{ID: authID, Provider: "aistudio"}
+	req := xinugateexecutor.Request{
 		Model:   "gemini-3.1-pro-preview",
 		Payload: []byte(`{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}`),
 	}
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatGemini}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatGemini}
 
 	tests := []struct {
 		name string
@@ -220,12 +220,12 @@ func TestAIStudioExecutorWithoutRelaySessionDoesNotMarkUpstreamAttempt(t *testin
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := cliproxyexecutor.WithUpstreamAttemptTracker(context.Background())
+			ctx := xinugateexecutor.WithUpstreamAttemptTracker(context.Background())
 			errRun := test.run(ctx)
 			if errRun == nil || !strings.Contains(errRun.Error(), "not connected") {
 				t.Fatalf("request error = %v, want provider not connected", errRun)
 			}
-			if cliproxyexecutor.UpstreamAttempted(ctx) {
+			if xinugateexecutor.UpstreamAttempted(ctx) {
 				t.Fatal("missing relay session was marked as an upstream attempt")
 			}
 		})
@@ -304,15 +304,15 @@ func TestAIStudioExecutorExecuteStartsTTFTBeforeRelayWait(t *testing.T) {
 	plugin := &captureAIStudioUsagePlugin{records: make(chan usage.Record, 16)}
 	usage.RegisterPlugin(plugin)
 	exec := NewAIStudioExecutor(&config.Config{}, "aistudio", relay)
-	ctx := cliproxyexecutor.WithUpstreamAttemptTracker(context.Background())
-	_, errExecute := exec.Execute(ctx, &cliproxyauth.Auth{ID: authID, Provider: "aistudio"}, cliproxyexecutor.Request{
+	ctx := xinugateexecutor.WithUpstreamAttemptTracker(context.Background())
+	_, errExecute := exec.Execute(ctx, &xinugateauth.Auth{ID: authID, Provider: "aistudio"}, xinugateexecutor.Request{
 		Model:   "gemini-3.1-pro-preview",
 		Payload: []byte(`{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}`),
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatGemini})
+	}, xinugateexecutor.Options{SourceFormat: sdktranslator.FormatGemini})
 	if errExecute != nil {
 		t.Fatalf("Execute() error = %v", errExecute)
 	}
-	if !cliproxyexecutor.UpstreamAttempted(ctx) {
+	if !xinugateexecutor.UpstreamAttempted(ctx) {
 		t.Fatal("relay request did not mark an upstream attempt")
 	}
 	if errClient := <-clientDone; errClient != nil {

@@ -16,9 +16,9 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestHostHTTPClientMarksUpstreamAttempt(t *testing.T) {
@@ -55,11 +55,11 @@ func TestHostHTTPClientMarksUpstreamAttempt(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := cliproxyexecutor.WithUpstreamAttemptTracker(context.Background())
+			ctx := xinugateexecutor.WithUpstreamAttemptTracker(context.Background())
 			if errDo := test.do(ctx); errDo != nil {
 				t.Fatalf("host HTTP request error = %v", errDo)
 			}
-			if !cliproxyexecutor.UpstreamAttempted(ctx) {
+			if !xinugateexecutor.UpstreamAttempted(ctx) {
 				t.Fatal("host HTTP request did not mark an upstream attempt")
 			}
 		})
@@ -225,7 +225,7 @@ func TestHostHTTPClientWireProfile_CustomRoundTripperValidation(t *testing.T) {
 	t.Parallel()
 
 	client := New().newHTTPClient(nil)
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", &dummyRoundTripper{})
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", &dummyRoundTripper{})
 
 	_, errDo := client.Do(ctx, pluginapi.HTTPRequest{
 		URL: "http://example.com",
@@ -359,7 +359,7 @@ func TestHostHTTPClientWireProfile_ProxyPriorityOverContextRoundTripper(t *testi
 	client := New().newHTTPClient(auth)
 
 	// Context contains a dummy roundtripper
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", &dummyRoundTripper{})
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", &dummyRoundTripper{})
 
 	resp, errDo := client.Do(ctx, pluginapi.HTTPRequest{
 		URL: "http://example.org/priority-test",
@@ -403,7 +403,7 @@ func TestHostHTTPClientWireProfile_HTTPToHTTPSRedirect(t *testing.T) {
 
 	// Provide a base transport that trusts the test TLS certificate
 	customTransport := httpsServer.Client().Transport.(*http.Transport).Clone()
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", customTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", customTransport)
 
 	profile := &pluginapi.HTTPWireProfile{
 		HTTP1Only:     true,
@@ -568,7 +568,7 @@ func TestHostHTTPClientWireProfile_HTTPSTargetThroughSOCKS5Proxy(t *testing.T) {
 
 	// Trust the self-signed test TLS certificate
 	tlsTransport := httpsBackend.Client().Transport.(*http.Transport).Clone()
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", tlsTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", tlsTransport)
 
 	profile := &pluginapi.HTTPWireProfile{
 		HTTP1Only:     true,
@@ -717,7 +717,7 @@ func TestHostHTTPClientWireProfile_CustomTLSDialerRejectsHTTP2(t *testing.T) {
 	}
 
 	client := New().newHTTPClient(nil)
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", customTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", customTransport)
 
 	_, errDo := client.Do(ctx, pluginapi.HTTPRequest{
 		URL: server.URL + "/h2-test",
@@ -780,7 +780,7 @@ func TestHostHTTPClientWireProfile_LegacyDialHookSupported(t *testing.T) {
 		},
 	}
 	client := New().newHTTPClient(nil)
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", customTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", customTransport)
 
 	resp, errDo := client.Do(ctx, pluginapi.HTTPRequest{
 		URL: server.URL + "/legacy-test",
@@ -891,7 +891,7 @@ func TestHostHTTPClientWireProfile_HTTP1OnlyWithoutHeaderProfile_RejectsHTTP2(t 
 	}
 
 	client := New().newHTTPClient(nil)
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", customTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", customTransport)
 
 	_, errDo := client.Do(ctx, pluginapi.HTTPRequest{
 		URL: server.URL + "/h2-test",
@@ -1002,7 +1002,7 @@ func TestHostHTTPClientWireProfile_MixedCaseSOCKS5Scheme(t *testing.T) {
 	client := New().newHTTPClient(auth)
 
 	tlsTransport := httpsBackend.Client().Transport.(*http.Transport).Clone()
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", tlsTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", tlsTransport)
 
 	profile := &pluginapi.HTTPWireProfile{
 		HTTP1Only:     true,
@@ -1048,7 +1048,7 @@ func TestHostHTTPClientWireProfile_HTTPSProxyForwardingPlainHTTP(t *testing.T) {
 	client := New().newHTTPClient(auth)
 
 	proxyCertTransport := proxyServer.Client().Transport.(*http.Transport).Clone()
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", proxyCertTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", proxyCertTransport)
 
 	profile := &pluginapi.HTTPWireProfile{
 		HTTP1Only:     true,
@@ -1130,7 +1130,7 @@ func TestHostHTTPClientWireProfile_HTTPSProxyForwardingHTTPS(t *testing.T) {
 	baseTransport := backendServer.Client().Transport.(*http.Transport).Clone()
 	proxyCert := proxyServer.Certificate()
 	baseTransport.TLSClientConfig.RootCAs.AddCert(proxyCert)
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", baseTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", baseTransport)
 
 	profile := &pluginapi.HTTPWireProfile{
 		HTTP1Only:     true,
@@ -1187,7 +1187,7 @@ func TestHostHTTPClientWireProfile_CustomTLSDialerUsedForHTTPSProxy(t *testing.T
 			return tlsConn, nil
 		},
 	}
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", customTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", customTransport)
 
 	resp, errDo := client.Do(ctx, pluginapi.HTTPRequest{
 		URL: "http://example.com/test",
@@ -1278,7 +1278,7 @@ func TestHostHTTPClientWireProfile_HTTPSProxyForwardingHTTPS_WithCustomTLSDialer
 		},
 		TLSClientConfig: backendServer.Client().Transport.(*http.Transport).TLSClientConfig.Clone(),
 	}
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", customTransport)
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", customTransport)
 
 	resp, errDo := client.Do(ctx, pluginapi.HTTPRequest{
 		URL: backendServer.URL + "/test",
@@ -1424,17 +1424,17 @@ func TestHostHTTPClientWireProfile_DefaultTransportCustomTLSDialer(t *testing.T)
 }
 
 func TestHostHTTPClientOmittedProxyClearsAmbientRequestProxy(t *testing.T) {
-	ambient := cliproxyexecutor.WithRequestProxyURL(context.Background(), "http://ambient-proxy.example:8081")
+	ambient := xinugateexecutor.WithRequestProxyURL(context.Background(), "http://ambient-proxy.example:8081")
 	client := &hostHTTPClient{}
 	cleared := client.proxyContext(ambient)
-	if got := cliproxyexecutor.RequestProxyURL(cleared); got != "" {
+	if got := xinugateexecutor.RequestProxyURL(cleared); got != "" {
 		t.Fatalf("ambient proxy = %q, want cleared", got)
 	}
 
 	override := client
 	override.requestProxyURL = "http://request-proxy.example:8082"
 	replaced := override.proxyContext(ambient)
-	if got := cliproxyexecutor.RequestProxyURL(replaced); got != override.requestProxyURL {
+	if got := xinugateexecutor.RequestProxyURL(replaced); got != override.requestProxyURL {
 		t.Fatalf("request proxy = %q, want %q", got, override.requestProxyURL)
 	}
 }

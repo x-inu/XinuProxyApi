@@ -16,9 +16,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type metaPreparedRequest struct {
@@ -30,10 +30,10 @@ type metaPreparedRequest struct {
 	body            []byte
 }
 
-func (e *MetaExecutor) prepareResponsesRequest(ctx context.Context, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, stream bool) (*metaPreparedRequest, error) {
+func (e *MetaExecutor) prepareResponsesRequest(ctx context.Context, req xinugateexecutor.Request, opts xinugateexecutor.Options, stream bool) (*metaPreparedRequest, error) {
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 	from := opts.SourceFormat
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	to := sdktranslator.FromString("codex")
 
 	originalPayloadSource := req.Payload
@@ -74,7 +74,7 @@ func (e *MetaExecutor) prepareResponsesRequest(ctx context.Context, req cliproxy
 	}, nil
 }
 
-func (e *MetaExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *MetaExecutor) Execute(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	ctx = helps.EnsureSessionContext(ctx, opts, req.Payload)
 	if opts.Alt == "responses/compact" {
 		return resp, statusErr{code: http.StatusNotImplemented, msg: "/responses/compact not supported"}
@@ -149,7 +149,7 @@ func (e *MetaExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req
 	if prepared.responseFormat == sdktranslator.FormatOpenAIResponse {
 		payload = helps.EnsureResponsesUsageDetails(payload)
 	}
-	return cliproxyexecutor.Response{Payload: payload, Headers: httpResp.Header.Clone()}, nil
+	return xinugateexecutor.Response{Payload: payload, Headers: httpResp.Header.Clone()}, nil
 }
 
 type metaCompletedTranslation struct {
@@ -157,7 +157,7 @@ type metaCompletedTranslation struct {
 	sourceEvent []byte
 }
 
-func (e *MetaExecutor) translateMetaCompleted(ctx context.Context, req cliproxyexecutor.Request, prepared *metaPreparedRequest, data []byte) (metaCompletedTranslation, error) {
+func (e *MetaExecutor) translateMetaCompleted(ctx context.Context, req xinugateexecutor.Request, prepared *metaPreparedRequest, data []byte) (metaCompletedTranslation, error) {
 	outputItemsByIndex := make(map[int64][]byte)
 	var outputItemsFallback [][]byte
 	for _, line := range bytes.Split(data, []byte("\n")) {
@@ -190,28 +190,28 @@ func (e *MetaExecutor) translateMetaCompleted(ctx context.Context, req cliproxye
 	return metaCompletedTranslation{}, statusErr{code: http.StatusRequestTimeout, msg: "meta stream error: stream disconnected before response.completed or response.incomplete"}
 }
 
-func (e *MetaExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *MetaExecutor) CountTokens(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	if _, errAuth := e.ensureAuth(ctx, auth); errAuth != nil {
-		return cliproxyexecutor.Response{}, errAuth
+		return xinugateexecutor.Response{}, errAuth
 	}
 	prepared, errPrepare := e.prepareResponsesRequest(ctx, req, opts, false)
 	if errPrepare != nil {
-		return cliproxyexecutor.Response{}, errPrepare
+		return xinugateexecutor.Response{}, errPrepare
 	}
 	enc, errEnc := tokenizer.Get(tokenizer.O200kBase)
 	if errEnc != nil {
-		return cliproxyexecutor.Response{}, fmt.Errorf("meta executor: tokenizer init failed: %w", errEnc)
+		return xinugateexecutor.Response{}, fmt.Errorf("meta executor: tokenizer init failed: %w", errEnc)
 	}
 	count, errCount := countCodexInputTokens(enc, prepared.body)
 	if errCount != nil {
-		return cliproxyexecutor.Response{}, fmt.Errorf("meta executor: token counting failed: %w", errCount)
+		return xinugateexecutor.Response{}, fmt.Errorf("meta executor: token counting failed: %w", errCount)
 	}
 	usageJSON := fmt.Sprintf(`{"response":{"usage":{"input_tokens":%d,"output_tokens":0,"total_tokens":%d}}}`, count, count)
 	translated := sdktranslator.TranslateTokenCount(ctx, prepared.to, prepared.responseFormat, count, []byte(usageJSON))
-	return cliproxyexecutor.Response{Payload: translated}, nil
+	return xinugateexecutor.Response{Payload: translated}, nil
 }
 
-func (e *MetaExecutor) recordMetaRequest(ctx context.Context, auth *cliproxyauth.Auth, url string, headers http.Header, body []byte) {
+func (e *MetaExecutor) recordMetaRequest(ctx context.Context, auth *xinugateauth.Auth, url string, headers http.Header, body []byte) {
 	var authID, authLabel, authType, authValue string
 	if auth != nil {
 		authID = auth.ID
@@ -231,7 +231,7 @@ func (e *MetaExecutor) recordMetaRequest(ctx context.Context, auth *cliproxyauth
 	})
 }
 
-func applyMetaAPIHeaders(req *http.Request, auth *cliproxyauth.Auth, token string, stream bool, clientHeaders http.Header) {
+func applyMetaAPIHeaders(req *http.Request, auth *xinugateauth.Auth, token string, stream bool, clientHeaders http.Header) {
 	req.Header.Set("Content-Type", "application/json")
 	if strings.TrimSpace(token) != "" {
 		req.Header.Set("Authorization", "Bearer "+token)

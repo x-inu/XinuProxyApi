@@ -49,7 +49,7 @@ var SessionIDResolver func(ctx context.Context, clientHeaders http.Header) strin
 // whose value starts with "$" (e.g. "$ABC" or "$X-Claude-Code-Session-Id") is dynamically
 // resolved from the client's request headers. If the client did not provide that header,
 // the custom header is omitted from the outgoing request.
-// The magic variable $CPA-SESSION-ID expands to the internal session identifier used for
+// The magic variable $XG-SESSION-ID expands to the internal session identifier used for
 // session-affinity (regardless of whether session-affinity is enabled).
 func ApplyCustomHeadersFromAttrs(r *http.Request, attrs map[string]string, clientHeaders ...http.Header) {
 	if r == nil {
@@ -111,7 +111,7 @@ func resolveCPASessionID(ctx context.Context, clientHeaders http.Header) string 
 }
 
 func replaceCPASessionID(val, sessionID string) string {
-	target := "$CPA-SESSION-ID"
+	target := "$XG-SESSION-ID"
 	targetLen := len(target)
 	if len(val) < targetLen {
 		return val
@@ -152,13 +152,13 @@ func extractCustomHeaders(attrs map[string]string, clientHeaders http.Header, ct
 		if val == "" {
 			continue
 		}
-		if strings.HasPrefix(val, "$") && strings.EqualFold(strings.TrimSpace(strings.TrimPrefix(val, "$")), "CPA-SESSION-ID") {
+		if strings.HasPrefix(val, "$") && strings.EqualFold(strings.TrimSpace(strings.TrimPrefix(val, "$")), "XG-SESSION-ID") {
 			sessionID := resolveCPASessionID(ctx, clientHeaders)
 			if sessionID == "" {
 				continue
 			}
 			val = sessionID
-		} else if strings.Contains(strings.ToUpper(val), "$CPA-SESSION-ID") {
+		} else if strings.Contains(strings.ToUpper(val), "$XG-SESSION-ID") {
 			sessionID := resolveCPASessionID(ctx, clientHeaders)
 			if sessionID == "" {
 				continue

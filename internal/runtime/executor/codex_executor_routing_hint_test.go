@@ -10,9 +10,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type capturedCodexRequest struct {
@@ -42,16 +42,16 @@ func newCodexRoutingHintServer(t *testing.T, captured *capturedCodexRequest) *ht
 	}))
 }
 
-func codexOAuthTestAuth(baseURL string) *cliproxyauth.Auth {
-	return &cliproxyauth.Auth{
+func codexOAuthTestAuth(baseURL string) *xinugateauth.Auth {
+	return &xinugateauth.Auth{
 		Provider:   "codex",
 		Attributes: map[string]string{"base_url": baseURL},
 		Metadata:   map[string]any{"type": "codex", "access_token": "oauth-token", "account_id": "acct"},
 	}
 }
 
-func codexAPIKeyTestAuth(baseURL string) *cliproxyauth.Auth {
-	return &cliproxyauth.Auth{
+func codexAPIKeyTestAuth(baseURL string) *xinugateauth.Auth {
+	return &xinugateauth.Auth{
 		Provider:   "codex",
 		Attributes: map[string]string{"base_url": baseURL, "api_key": "sk-test"},
 	}
@@ -96,8 +96,8 @@ func TestCodexExecutorRoutingHintCarriesRequestedTier(t *testing.T) {
 			if model == "" {
 				model = "gpt-5.5"
 			}
-			req := cliproxyexecutor.Request{Model: model, Payload: []byte(tc.payload)}
-			opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("claude"), Stream: tc.stream}
+			req := xinugateexecutor.Request{Model: model, Payload: []byte(tc.payload)}
+			opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("claude"), Stream: tc.stream}
 
 			if tc.stream {
 				result, err := executor.ExecuteStream(context.Background(), auth, req, opts)
@@ -140,10 +140,10 @@ func TestCodexExecutorCompactRoutingHintCarriesRequestedTier(t *testing.T) {
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	_, err := executor.Execute(context.Background(), codexOAuthTestAuth(server.URL), cliproxyexecutor.Request{
+	_, err := executor.Execute(context.Background(), codexOAuthTestAuth(server.URL), xinugateexecutor.Request{
 		Model:   "gpt-5.5(low)",
 		Payload: []byte(`{"model":"client-alias","service_tier":"priority","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"hi"}]}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Alt:          "responses/compact",
 	})
@@ -174,10 +174,10 @@ func TestCodexExecutorOperatorRoutingHintRuleWins(t *testing.T) {
 	clientHeaders := http.Header{}
 	clientHeaders.Set(codexRoutingHintHeader, "model=gpt-5.4-client")
 	executor := NewCodexExecutor(&config.Config{})
-	result, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","max_tokens":64,"speed":"fast","messages":[{"role":"user","content":"hi"}]}`),
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("claude"), Stream: true, Headers: clientHeaders})
+	}, xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("claude"), Stream: true, Headers: clientHeaders})
 	if err != nil {
 		t.Fatalf("ExecuteStream error: %v", err)
 	}

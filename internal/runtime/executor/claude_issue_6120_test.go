@@ -10,8 +10,8 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // TestClaudeExecutor_DirectMessagesOAuthDefaultsToCloak_Issue6120 verifies Option A for Issue #6120:
@@ -48,7 +48,7 @@ func TestClaudeExecutor_DirectMessagesOAuthDefaultsToCloak_Issue6120(t *testing.
 		}, nil
 	})
 
-	execCtx := context.WithValue(context.Background(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	execCtx := context.WithValue(context.Background(), "xinugate.roundtripper", http.RoundTripper(transport))
 	incoming := http.Header{
 		"User-Agent":     {"pi (linux; x64)"},
 		"Anthropic-Beta": {"caller-beta-2099-01-01"},
@@ -56,10 +56,10 @@ func TestClaudeExecutor_DirectMessagesOAuthDefaultsToCloak_Issue6120(t *testing.
 	authWithURL := directClaudeOAuthAuth()
 	authWithURL.Attributes["base_url"] = "https://api.anthropic.com"
 
-	_, errExec := NewClaudeExecutor(&config.Config{}).Execute(execCtx, authWithURL, cliproxyexecutor.Request{
+	_, errExec := NewClaudeExecutor(&config.Config{}).Execute(execCtx, authWithURL, xinugateexecutor.Request{
 		Model:   "claude-opus-5-5",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Headers:      incoming,
 	})
@@ -101,7 +101,7 @@ func TestClaudeExecutor_DirectMessagesOAuthDefaultsToCloakStream_Issue6120(t *te
 		}, nil
 	})
 
-	execCtx := context.WithValue(context.Background(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	execCtx := context.WithValue(context.Background(), "xinugate.roundtripper", http.RoundTripper(transport))
 	incoming := http.Header{
 		"User-Agent":     {"pi (linux; x64)"},
 		"Anthropic-Beta": {"caller-beta-2099-01-01"},
@@ -110,10 +110,10 @@ func TestClaudeExecutor_DirectMessagesOAuthDefaultsToCloakStream_Issue6120(t *te
 	authWithURL.Attributes["base_url"] = "https://api.anthropic.com"
 	payload := []byte(`{"model":"claude-opus-5-5","system":[{"type":"text","text":"caller system"}],"messages":[{"role":"user","content":"hello"}]}`)
 
-	streamResp, errStream := NewClaudeExecutor(&config.Config{}).ExecuteStream(execCtx, authWithURL, cliproxyexecutor.Request{
+	streamResp, errStream := NewClaudeExecutor(&config.Config{}).ExecuteStream(execCtx, authWithURL, xinugateexecutor.Request{
 		Model:   "claude-opus-5-5",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Headers:      incoming,
 	})

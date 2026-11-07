@@ -10,7 +10,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/auth/kimi"
 	"github.com/x-inu/XinuGate/v7/internal/browser"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // kimiRefreshLead is the duration before token expiry when refresh should occur.
@@ -57,7 +57,7 @@ func (KimiAuthenticator) RefreshLead() *time.Duration {
 // Login initiates the Kimi device flow authentication.
 func (a KimiAuthenticator) Login(ctx context.Context, cfg *config.Config, opts *LoginOptions) (*coreauth.Auth, error) {
 	if cfg == nil {
-		return nil, fmt.Errorf("cliproxy auth: configuration is required")
+		return nil, fmt.Errorf("xinugate auth: configuration is required")
 	}
 	if opts == nil {
 		opts = &LoginOptions{}

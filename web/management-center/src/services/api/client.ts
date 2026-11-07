@@ -4,9 +4,9 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import type { ApiClientConfig, ApiError } from '@/types';
 import {
   BUILD_DATE_HEADER_KEYS,
-  CPA_BUILD_DATE_HEADER_KEYS,
-  CPA_SUPPORT_PLUGIN_HEADER_KEYS,
-  CPA_VERSION_HEADER_KEYS,
+  XG_BUILD_DATE_HEADER_KEYS,
+  XG_SUPPORT_PLUGIN_HEADER_KEYS,
+  XG_VERSION_HEADER_KEYS,
   REQUEST_TIMEOUT_MS,
   VERSION_HEADER_KEYS,
 } from '@/utils/constants';
@@ -114,11 +114,11 @@ class ApiClient {
     this.instance.interceptors.response.use(
       (response) => {
         const headers = response.headers as Record<string, string | undefined>;
-        const cpaVersion = this.readHeader(headers, CPA_VERSION_HEADER_KEYS);
-        const cpaBuildDate = this.readHeader(headers, CPA_BUILD_DATE_HEADER_KEYS);
+        const cpaVersion = this.readHeader(headers, XG_VERSION_HEADER_KEYS);
+        const cpaBuildDate = this.readHeader(headers, XG_BUILD_DATE_HEADER_KEYS);
         const version = cpaVersion || this.readHeader(headers, VERSION_HEADER_KEYS);
         const buildDate = cpaBuildDate || this.readHeader(headers, BUILD_DATE_HEADER_KEYS);
-        const supportsPlugin = this.readBooleanHeader(headers, CPA_SUPPORT_PLUGIN_HEADER_KEYS);
+        const supportsPlugin = this.readBooleanHeader(headers, XG_SUPPORT_PLUGIN_HEADER_KEYS);
 
 
         if (version || buildDate) {

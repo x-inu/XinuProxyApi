@@ -11,9 +11,9 @@ import (
 	"github.com/tidwall/gjson"
 	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type kimiLocalBadRequestError struct{}
@@ -100,13 +100,13 @@ func TestPrepareKimiThinkingReplayRequestSharesOnlyK3Variants(t *testing.T) {
 	}
 
 	payload := []byte(`{"model":"kimi-k3-256k","messages":[{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"Read","input":{"path":"README.md"}}]}]}`)
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: sessionID,
+			xinugateexecutor.ExecutionSessionMetadataKey: sessionID,
 		},
 	}
-	prepared, scope := prepareKimiThinkingReplayRequest(context.Background(), cliproxyexecutor.Request{Model: "kimi-k3-256k", Payload: payload}, opts)
+	prepared, scope := prepareKimiThinkingReplayRequest(context.Background(), xinugateexecutor.Request{Model: "kimi-k3-256k", Payload: payload}, opts)
 	if scope.modelFamily != "k3" {
 		t.Fatalf("K3 replay family = %q, want k3", scope.modelFamily)
 	}
@@ -115,7 +115,7 @@ func TestPrepareKimiThinkingReplayRequestSharesOnlyK3Variants(t *testing.T) {
 	}
 
 	k27Payload := []byte(`{"model":"kimi-k2.7-code-highspeed","messages":[{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"Read","input":{"path":"README.md"}}]}]}`)
-	preparedK27, scopeK27 := prepareKimiThinkingReplayRequest(context.Background(), cliproxyexecutor.Request{Model: "kimi-k2.7-code-highspeed", Payload: k27Payload}, opts)
+	preparedK27, scopeK27 := prepareKimiThinkingReplayRequest(context.Background(), xinugateexecutor.Request{Model: "kimi-k2.7-code-highspeed", Payload: k27Payload}, opts)
 	if scopeK27.modelFamily != "kimi-for-coding-highspeed" {
 		t.Fatalf("K2.7 replay family = %q, want kimi-for-coding-highspeed", scopeK27.modelFamily)
 	}
@@ -129,8 +129,8 @@ func TestKimiThinkingReplayScopeIsolatesClaudeCodeCallers(t *testing.T) {
 	t.Cleanup(internalcache.ClearKimiThinkingReplayCache)
 
 	payload := []byte(`{"model":"kimi-k3","metadata":{"user_id":"{\"session_id\":\"claude-session\"}"},"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"Read","input":{"path":"README.md"}}]}]}`)
-	req := cliproxyexecutor.Request{Model: "kimi-k3", Payload: payload}
-	opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FormatClaude}
+	req := xinugateexecutor.Request{Model: "kimi-k3", Payload: payload}
+	opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FormatClaude}
 	callerAContext := testContextWithAPIKey("caller-a")
 	callerAScope := kimiThinkingReplayScopeFromRequest(callerAContext, req, opts)
 	if !callerAScope.valid() || !strings.Contains(callerAScope.sessionKey, ":claude:claude-session:agent:main") {
@@ -165,7 +165,7 @@ func TestKimiExecutorClaudeNonStreamReplaysThinkingAcrossK3VariantSwitch(t *test
 	const cachedContent = `[{"type":"thinking","thinking":"full reasoning","signature":"kimi-signature"},{"type":"text","text":"Inspecting."},{"type":"tool_use","id":"toolu_1","name":"Read","input":{"path":"README.md"}}]`
 	var upstreamBodies [][]byte
 	callCount := 0
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", kimiRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", kimiRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		body, errRead := io.ReadAll(req.Body)
 		if errRead != nil {
 			return nil, errRead
@@ -184,22 +184,22 @@ func TestKimiExecutorClaudeNonStreamReplaysThinkingAcrossK3VariantSwitch(t *test
 	}))
 
 	executor := NewKimiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{}, Metadata: map[string]any{"access_token": "test-token"}}
-	opts := cliproxyexecutor.Options{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{}, Metadata: map[string]any{"access_token": "test-token"}}
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: "nonstream-switch",
+			xinugateexecutor.ExecutionSessionMetadataKey: "nonstream-switch",
 		},
 	}
 	firstPayload := []byte(`{"model":"kimi-k3-256k","max_tokens":32,"messages":[{"role":"user","content":"inspect"}]}`)
 	opts.OriginalRequest = firstPayload
-	if _, errExecute := executor.Execute(ctx, auth, cliproxyexecutor.Request{Model: "kimi-k3-256k", Payload: firstPayload}, opts); errExecute != nil {
+	if _, errExecute := executor.Execute(ctx, auth, xinugateexecutor.Request{Model: "kimi-k3-256k", Payload: firstPayload}, opts); errExecute != nil {
 		t.Fatalf("first Execute() error = %v", errExecute)
 	}
 
 	secondPayload := []byte(`{"model":"kimi-k3","max_tokens":32,"messages":[{"role":"user","content":"inspect"},{"role":"assistant","content":[{"type":"text","text":"Inspecting."},{"type":"tool_use","id":"toolu_1","name":"Read","input":{"path":"README.md"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"ok"}]}]}`)
 	opts.OriginalRequest = secondPayload
-	if _, errExecute := executor.Execute(ctx, auth, cliproxyexecutor.Request{Model: "kimi-k3", Payload: secondPayload}, opts); errExecute != nil {
+	if _, errExecute := executor.Execute(ctx, auth, xinugateexecutor.Request{Model: "kimi-k3", Payload: secondPayload}, opts); errExecute != nil {
 		t.Fatalf("second Execute() error = %v", errExecute)
 	}
 	if len(upstreamBodies) != 2 {
@@ -241,7 +241,7 @@ func TestKimiExecutorClaudeErrorClearsAppliedReplay(t *testing.T) {
 	if !internalcache.CacheKimiThinkingReplayBestEffort(context.Background(), "k3", sessionKey, []byte(cachedContent)) {
 		t.Fatal("failed to seed replay cache")
 	}
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", kimiRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", kimiRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusBadRequest,
 			Header:     http.Header{"Content-Type": []string{"application/json"}},
@@ -249,12 +249,12 @@ func TestKimiExecutorClaudeErrorClearsAppliedReplay(t *testing.T) {
 		}, nil
 	}))
 	executor := NewKimiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{}, Metadata: map[string]any{"access_token": "test-token"}}
+	auth := &xinugateauth.Auth{Attributes: map[string]string{}, Metadata: map[string]any{"access_token": "test-token"}}
 	payload := []byte(`{"model":"kimi-k3-256k","max_tokens":32,"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"Read","input":{"path":"README.md"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"ok"}]}]}`)
-	_, errExecute := executor.Execute(ctx, auth, cliproxyexecutor.Request{Model: "kimi-k3-256k", Payload: payload}, cliproxyexecutor.Options{
+	_, errExecute := executor.Execute(ctx, auth, xinugateexecutor.Request{Model: "kimi-k3-256k", Payload: payload}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: "error-clears-replay",
+			xinugateexecutor.ExecutionSessionMetadataKey: "error-clears-replay",
 		},
 	})
 	if errExecute == nil {
@@ -304,7 +304,7 @@ func TestKimiExecutorClaudeStreamReplaysThinkingAcrossK3VariantSwitch(t *testing
 
 	var upstreamBodies [][]byte
 	callCount := 0
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", kimiRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", kimiRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		body, errRead := io.ReadAll(req.Body)
 		if errRead != nil {
 			return nil, errRead
@@ -323,17 +323,17 @@ func TestKimiExecutorClaudeStreamReplaysThinkingAcrossK3VariantSwitch(t *testing
 	}))
 
 	executor := NewKimiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{}, Metadata: map[string]any{"access_token": "test-token"}}
-	opts := cliproxyexecutor.Options{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{}, Metadata: map[string]any{"access_token": "test-token"}}
+	opts := xinugateexecutor.Options{
 		Stream:       true,
 		SourceFormat: sdktranslator.FormatClaude,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: "stream-switch",
+			xinugateexecutor.ExecutionSessionMetadataKey: "stream-switch",
 		},
 	}
 	firstPayload := []byte(`{"model":"kimi-k3","max_tokens":32,"stream":true,"messages":[{"role":"user","content":"inspect"}]}`)
 	opts.OriginalRequest = firstPayload
-	firstResult, errExecute := executor.ExecuteStream(ctx, auth, cliproxyexecutor.Request{Model: "kimi-k3", Payload: firstPayload}, opts)
+	firstResult, errExecute := executor.ExecuteStream(ctx, auth, xinugateexecutor.Request{Model: "kimi-k3", Payload: firstPayload}, opts)
 	if errExecute != nil {
 		t.Fatalf("first ExecuteStream() error = %v", errExecute)
 	}
@@ -341,7 +341,7 @@ func TestKimiExecutorClaudeStreamReplaysThinkingAcrossK3VariantSwitch(t *testing
 
 	secondPayload := []byte(`{"model":"kimi-k3-256k","max_tokens":32,"stream":true,"messages":[{"role":"user","content":"inspect"},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_stream","name":"Read","input":{"path":"README.md"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_stream","content":"ok"}]}]}`)
 	opts.OriginalRequest = secondPayload
-	secondResult, errExecute := executor.ExecuteStream(ctx, auth, cliproxyexecutor.Request{Model: "kimi-k3-256k", Payload: secondPayload}, opts)
+	secondResult, errExecute := executor.ExecuteStream(ctx, auth, xinugateexecutor.Request{Model: "kimi-k3-256k", Payload: secondPayload}, opts)
 	if errExecute != nil {
 		t.Fatalf("second ExecuteStream() error = %v", errExecute)
 	}
@@ -373,19 +373,19 @@ func TestKimiThinkingReplayUnknownStreamDeltaPreservesPreviousCache(t *testing.T
 		t.Fatal("failed to seed replay cache")
 	}
 	payload := []byte(`{"model":"kimi-k3-256k","messages":[{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"Read","input":{"path":"README.md"}}]}]}`)
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: sessionID,
+			xinugateexecutor.ExecutionSessionMetadataKey: sessionID,
 		},
 	}
-	_, scope := prepareKimiThinkingReplayRequest(context.Background(), cliproxyexecutor.Request{Model: "kimi-k3-256k", Payload: payload}, opts)
+	_, scope := prepareKimiThinkingReplayRequest(context.Background(), xinugateexecutor.Request{Model: "kimi-k3-256k", Payload: payload}, opts)
 	if !scope.replayApplied {
 		t.Fatal("expected seeded replay to be applied")
 	}
 
-	chunks := make(chan cliproxyexecutor.StreamChunk, 1)
-	chunks <- cliproxyexecutor.StreamChunk{Payload: []byte(
+	chunks := make(chan xinugateexecutor.StreamChunk, 1)
+	chunks <- xinugateexecutor.StreamChunk{Payload: []byte(
 		"event: message_start\n" +
 			`data: {"type":"message_start","message":{"id":"msg_1","model":"k3"}}` + "\n\n" +
 			"event: content_block_start\n" +
@@ -398,7 +398,7 @@ func TestKimiThinkingReplayUnknownStreamDeltaPreservesPreviousCache(t *testing.T
 			`data: {"type":"message_stop"}` + "\n\n",
 	)}
 	close(chunks)
-	consumeKimiReplayStream(t, wrapKimiThinkingReplayStream(context.Background(), &cliproxyexecutor.StreamResult{Chunks: chunks}, scope))
+	consumeKimiReplayStream(t, wrapKimiThinkingReplayStream(context.Background(), &xinugateexecutor.StreamResult{Chunks: chunks}, scope))
 
 	got, found, errGet := internalcache.GetKimiThinkingReplayRequired(context.Background(), "k3", sessionKey)
 	if errGet != nil || !found || !kimiJSONEqual(got, cached) {
@@ -406,7 +406,7 @@ func TestKimiThinkingReplayUnknownStreamDeltaPreservesPreviousCache(t *testing.T
 	}
 }
 
-func consumeKimiReplayStream(t *testing.T, result *cliproxyexecutor.StreamResult) {
+func consumeKimiReplayStream(t *testing.T, result *xinugateexecutor.StreamResult) {
 	t.Helper()
 	if result == nil {
 		t.Fatal("stream result is nil")

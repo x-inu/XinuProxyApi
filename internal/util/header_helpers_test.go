@@ -115,13 +115,13 @@ func TestApplyCustomHeadersFromAttrs_MagicVariable(t *testing.T) {
 		}
 	})
 
-	t.Run("cpa-session-id resolved from context", func(t *testing.T) {
+	t.Run("xg-session-id resolved from context", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "https://api.example.com", nil)
 		req = req.WithContext(WithSessionID(req.Context(), "claude:session-xyz-123"))
 		attrs := map[string]string{
-			"header:X-Session-ID":  "$CPA-SESSION-ID",
-			"header:X-Auth-Token":  "Bearer $CPA-SESSION-ID",
-			"header:X-Lower-Case":  "$cpa-session-id",
+			"header:X-Session-ID":  "$XG-SESSION-ID",
+			"header:X-Auth-Token":  "Bearer $XG-SESSION-ID",
+			"header:X-Lower-Case":  "$xg-session-id",
 			"header:Static-Header": "static-val",
 		}
 
@@ -141,7 +141,7 @@ func TestApplyCustomHeadersFromAttrs_MagicVariable(t *testing.T) {
 		}
 	})
 
-	t.Run("cpa-session-id cleared via WithSessionID empty string", func(t *testing.T) {
+	t.Run("xg-session-id cleared via WithSessionID empty string", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "https://api.example.com", nil)
 		ctx := WithSessionID(req.Context(), "initial-session-123")
 		if got := SessionIDFromContext(ctx); got != "initial-session-123" {
@@ -155,8 +155,8 @@ func TestApplyCustomHeadersFromAttrs_MagicVariable(t *testing.T) {
 
 		req = req.WithContext(clearedCtx)
 		attrs := map[string]string{
-			"header:X-Session-ID": "$CPA-SESSION-ID",
-			"header:X-Auth-Token": "Bearer $CPA-SESSION-ID",
+			"header:X-Session-ID": "$XG-SESSION-ID",
+			"header:X-Auth-Token": "Bearer $XG-SESSION-ID",
 			"header:Static":       "ok",
 		}
 
@@ -173,7 +173,7 @@ func TestApplyCustomHeadersFromAttrs_MagicVariable(t *testing.T) {
 		}
 	})
 
-	t.Run("cpa-session-id resolved from SessionIDResolver", func(t *testing.T) {
+	t.Run("xg-session-id resolved from SessionIDResolver", func(t *testing.T) {
 		oldResolver := SessionIDResolver
 		defer func() { SessionIDResolver = oldResolver }()
 
@@ -186,7 +186,7 @@ func TestApplyCustomHeadersFromAttrs_MagicVariable(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "https://api.example.com", nil)
 		attrs := map[string]string{
-			"header:X-Forwarded-Session": "$CPA-SESSION-ID",
+			"header:X-Forwarded-Session": "$XG-SESSION-ID",
 		}
 		clientHeaders := http.Header{
 			"X-Client-Sess": []string{"sess-999"},
@@ -199,15 +199,15 @@ func TestApplyCustomHeadersFromAttrs_MagicVariable(t *testing.T) {
 		}
 	})
 
-	t.Run("cpa-session-id omitted when unresolvable", func(t *testing.T) {
+	t.Run("xg-session-id omitted when unresolvable", func(t *testing.T) {
 		oldResolver := SessionIDResolver
 		defer func() { SessionIDResolver = oldResolver }()
 		SessionIDResolver = nil
 
 		req := httptest.NewRequest(http.MethodPost, "https://api.example.com", nil)
 		attrs := map[string]string{
-			"header:X-Session-ID": "$CPA-SESSION-ID",
-			"header:X-Auth-Token": "Bearer $CPA-SESSION-ID",
+			"header:X-Session-ID": "$XG-SESSION-ID",
+			"header:X-Auth-Token": "Bearer $XG-SESSION-ID",
 			"header:Static":       "ok",
 		}
 
@@ -224,34 +224,34 @@ func TestApplyCustomHeadersFromAttrs_MagicVariable(t *testing.T) {
 		}
 	})
 
-	t.Run("cpa-session-id does not read literal client header CPA-SESSION-ID", func(t *testing.T) {
+	t.Run("xg-session-id does not read literal client header XG-SESSION-ID", func(t *testing.T) {
 		oldResolver := SessionIDResolver
 		defer func() { SessionIDResolver = oldResolver }()
 		SessionIDResolver = nil
 
 		req := httptest.NewRequest(http.MethodPost, "https://api.example.com", nil)
 		attrs := map[string]string{
-			"header:X-Session-ID": "$CPA-SESSION-ID",
+			"header:X-Session-ID": "$XG-SESSION-ID",
 		}
 		clientHeaders := http.Header{
-			"Cpa-Session-Id": []string{"attacker-spoofed-value"},
+			"Xg-Session-Id": []string{"attacker-spoofed-value"},
 		}
 
 		ApplyCustomHeadersFromAttrs(req, attrs, clientHeaders)
 
 		if _, exists := req.Header["X-Session-ID"]; exists {
-			t.Errorf("expected X-Session-ID not to inherit spoofed client header CPA-SESSION-ID, got %q", req.Header.Get("X-Session-ID"))
+			t.Errorf("expected X-Session-ID not to inherit spoofed client header XG-SESSION-ID, got %q", req.Header.Get("X-Session-ID"))
 		}
 	})
 
-	t.Run("cpa-session-id containing magic variable does not infinite loop", func(t *testing.T) {
+	t.Run("xg-session-id containing magic variable does not infinite loop", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "https://api.example.com", nil)
-		sessionWithToken := "header:$CPA-SESSION-ID"
+		sessionWithToken := "header:$XG-SESSION-ID"
 		req = req.WithContext(WithSessionID(req.Context(), sessionWithToken))
 		attrs := map[string]string{
-			"header:X-Session-ID":  "$CPA-SESSION-ID",
-			"header:X-Auth-Token":  "Bearer $CPA-SESSION-ID",
-			"header:X-Auth-Repeat": "Bearer $cpa-session-id-$CPA-SESSION-ID",
+			"header:X-Session-ID":  "$XG-SESSION-ID",
+			"header:X-Auth-Token":  "Bearer $XG-SESSION-ID",
+			"header:X-Auth-Repeat": "Bearer $xg-session-id-$XG-SESSION-ID",
 		}
 
 		ApplyCustomHeadersFromAttrs(req, attrs)

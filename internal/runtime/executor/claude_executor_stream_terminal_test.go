@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 type captureClaudeUsagePlugin struct {
@@ -76,7 +76,7 @@ func TestClaudeExecutor_ExecuteStream_Translated_ClientDisconnectAfterTerminalEv
 	})
 
 	exec := NewClaudeExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "key-123",
 			"base_url": server.URL,
@@ -87,10 +87,10 @@ func TestClaudeExecutor_ExecuteStream_Translated_ClientDisconnectAfterTerminalEv
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	result, err := exec.ExecuteStream(ctx, auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(ctx, auth, xinugateexecutor.Request{
 		Model:   "claude-opus-5",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 	})
@@ -172,7 +172,7 @@ func TestClaudeExecutor_ExecuteStream_Passthrough_ClientDisconnectAfterTerminalE
 	})
 
 	exec := NewClaudeExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "key-123",
 			"base_url": server.URL,
@@ -183,10 +183,10 @@ func TestClaudeExecutor_ExecuteStream_Passthrough_ClientDisconnectAfterTerminalE
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	result, err := exec.ExecuteStream(ctx, auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(ctx, auth, xinugateexecutor.Request{
 		Model:   "claude-opus-5",
 		Payload: payload,
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatClaude,
 		ResponseFormat: sdktranslator.FormatClaude,
 	})

@@ -23,7 +23,7 @@ import (
 	"github.com/go-git/go-git/v6/plumbing/transport/http"
 	"github.com/go-git/go-git/v6/storage/filesystem/dotgit"
 	log "github.com/sirupsen/logrus"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 const (
@@ -404,12 +404,12 @@ func (s *GitTokenStore) ensureRepositoryLocked() (errResult error) {
 }
 
 // Save persists token storage and metadata to the resolved auth file path.
-func (s *GitTokenStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (string, error) {
+func (s *GitTokenStore) Save(ctx context.Context, auth *xinugateauth.Auth) (string, error) {
 	if auth == nil {
 		return "", fmt.Errorf("auth filestore: auth is nil")
 	}
-	cliproxyauth.NormalizeCredentialMetadata(auth.Metadata)
-	if errWeight := cliproxyauth.ValidateAuthWeight(auth); errWeight != nil {
+	xinugateauth.NormalizeCredentialMetadata(auth.Metadata)
+	if errWeight := xinugateauth.ValidateAuthWeight(auth); errWeight != nil {
 		return "", fmt.Errorf("auth filestore: %w", errWeight)
 	}
 
@@ -427,7 +427,7 @@ func (s *GitTokenStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (stri
 	// Runtime updates must not recreate a disabled credential whose source file
 	// was deliberately removed. Login and migration callers explicitly mark the
 	// save when creating a missing disabled credential is intentional.
-	if auth.Disabled && !cliproxyauth.HasAuthCreationIntent(ctx) {
+	if auth.Disabled && !xinugateauth.HasAuthCreationIntent(ctx) {
 		if _, statErr := os.Stat(path); os.IsNotExist(statErr) {
 			return "", nil
 		}
@@ -484,8 +484,8 @@ func (s *GitTokenStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (stri
 	if auth.Attributes == nil {
 		auth.Attributes = make(map[string]string)
 	}
-	auth.Attributes[cliproxyauth.AttributePath] = path
-	auth.Attributes[cliproxyauth.AttributeSourceBackend] = cliproxyauth.AuthSourceGit
+	auth.Attributes[xinugateauth.AttributePath] = path
+	auth.Attributes[xinugateauth.AttributeSourceBackend] = xinugateauth.AuthSourceGit
 
 	if strings.TrimSpace(auth.FileName) == "" {
 		auth.FileName = auth.ID
@@ -503,7 +503,7 @@ func (s *GitTokenStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (stri
 }
 
 // List enumerates all auth JSON files under the configured directory.
-func (s *GitTokenStore) List(_ context.Context) ([]*cliproxyauth.Auth, error) {
+func (s *GitTokenStore) List(_ context.Context) ([]*xinugateauth.Auth, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -514,7 +514,7 @@ func (s *GitTokenStore) List(_ context.Context) ([]*cliproxyauth.Auth, error) {
 	if dir == "" {
 		return nil, fmt.Errorf("auth filestore: directory not configured")
 	}
-	entries := make([]*cliproxyauth.Auth, 0)
+	entries := make([]*xinugateauth.Auth, 0)
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
@@ -692,7 +692,7 @@ func (s *GitTokenStore) resolveDeletePath(id string) (string, error) {
 	return filepath.Join(dir, id), nil
 }
 
-func (s *GitTokenStore) readAuthFile(path, baseDir string) (*cliproxyauth.Auth, error) {
+func (s *GitTokenStore) readAuthFile(path, baseDir string) (*xinugateauth.Auth, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read file: %w", err)
@@ -704,8 +704,8 @@ func (s *GitTokenStore) readAuthFile(path, baseDir string) (*cliproxyauth.Auth, 
 	if err = json.Unmarshal(data, &metadata); err != nil {
 		return nil, fmt.Errorf("unmarshal auth json: %w", err)
 	}
-	cliproxyauth.NormalizeCredentialMetadata(metadata)
-	if errWeight := cliproxyauth.ValidateAuthWeight(&cliproxyauth.Auth{Metadata: metadata}); errWeight != nil {
+	xinugateauth.NormalizeCredentialMetadata(metadata)
+	if errWeight := xinugateauth.ValidateAuthWeight(&xinugateauth.Auth{Metadata: metadata}); errWeight != nil {
 		return nil, errWeight
 	}
 	provider, _ := metadata["type"].(string)
@@ -717,15 +717,15 @@ func (s *GitTokenStore) readAuthFile(path, baseDir string) (*cliproxyauth.Auth, 
 		return nil, fmt.Errorf("stat file: %w", err)
 	}
 	id := s.idFor(path, baseDir)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       id,
 		Provider: provider,
 		FileName: id,
 		Label:    s.labelFor(metadata),
-		Status:   cliproxyauth.StatusActive,
+		Status:   xinugateauth.StatusActive,
 		Attributes: map[string]string{
-			cliproxyauth.AttributePath:          path,
-			cliproxyauth.AttributeSourceBackend: cliproxyauth.AuthSourceGit,
+			xinugateauth.AttributePath:          path,
+			xinugateauth.AttributeSourceBackend: xinugateauth.AuthSourceGit,
 		},
 		Metadata:         metadata,
 		CreatedAt:        info.ModTime(),
@@ -736,10 +736,10 @@ func (s *GitTokenStore) readAuthFile(path, baseDir string) (*cliproxyauth.Auth, 
 	if email, ok := metadata["email"].(string); ok && email != "" {
 		auth.Attributes["email"] = email
 	}
-	cliproxyauth.ApplyCustomHeadersFromMetadata(auth)
+	xinugateauth.ApplyCustomHeadersFromMetadata(auth)
 	if disabled, ok := metadata["disabled"].(bool); ok && disabled {
 		auth.Disabled = true
-		auth.Status = cliproxyauth.StatusDisabled
+		auth.Status = xinugateauth.StatusDisabled
 	}
 	return auth, nil
 }
@@ -755,7 +755,7 @@ func (s *GitTokenStore) idFor(path, baseDir string) string {
 	return rel
 }
 
-func (s *GitTokenStore) resolveAuthPath(auth *cliproxyauth.Auth) (string, error) {
+func (s *GitTokenStore) resolveAuthPath(auth *xinugateauth.Auth) (string, error) {
 	if auth == nil {
 		return "", fmt.Errorf("auth filestore: auth is nil")
 	}
@@ -1732,8 +1732,8 @@ func (s *GitTokenStore) commitAndPushWithOptionsLocked(message string, allowMiss
 		message = "Update auth store"
 	}
 	signature := &object.Signature{
-		Name:  "CLIProxyAPI",
-		Email: "cliproxy@local",
+		Name:  "XinuGate",
+		Email: "xinugate@local",
 		When:  time.Now(),
 	}
 	commitHash, err := worktree.Commit(message, &git.CommitOptions{

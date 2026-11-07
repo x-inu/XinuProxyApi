@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
@@ -97,7 +97,7 @@ func TestClaudeThinkingSignaturesSurviveUpstreamPreparation(t *testing.T) {
 	}
 
 	cfg := &config.Config{}
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{"cloak_mode": "always"}}
+	auth := &xinugateauth.Auth{Metadata: map[string]any{"cloak_mode": "always"}}
 
 	cloaked, didCloak, errCloaking := applyCloaking(
 		context.Background(),
@@ -149,7 +149,7 @@ func TestClaudeThinkingSignaturesSurviveSensitiveWordObfuscation(t *testing.T) {
 			Cloak:  &config.CloakConfig{SensitiveWords: []string{sensitive}},
 		}},
 	}
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{"api_key": "key-123"}}
+	auth := &xinugateauth.Auth{Attributes: map[string]string{"api_key": "key-123"}}
 
 	out, didCloak, errCloaking := applyCloaking(context.Background(), cfg, auth, payload, "key-123", false, true)
 	if errCloaking != nil {

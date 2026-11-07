@@ -14,7 +14,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/api"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate"
 )
 
 // StartService builds and runs the proxy service using the exported SDK.
@@ -31,7 +31,7 @@ func StartService(cfg *config.Config, configPath string, localPassword string) {
 
 // StartServiceWithPluginHost builds and runs the proxy service with a shared plugin host.
 func StartServiceWithPluginHost(cfg *config.Config, configPath string, localPassword string, host *pluginhost.Host, serverOptions ...api.ServerOption) {
-	builder := cliproxy.NewBuilder().
+	builder := xinugate.NewBuilder().
 		WithConfig(cfg).
 		WithConfigPath(configPath).
 		WithLocalManagementPassword(localPassword)
@@ -75,7 +75,7 @@ func StartServiceBackground(cfg *config.Config, configPath string, localPassword
 
 // StartServiceBackgroundWithPluginHost starts the proxy service with a shared plugin host.
 func StartServiceBackgroundWithPluginHost(cfg *config.Config, configPath string, localPassword string, host *pluginhost.Host, serverOptions ...api.ServerOption) (cancel func(), done <-chan struct{}) {
-	builder := cliproxy.NewBuilder().
+	builder := xinugate.NewBuilder().
 		WithConfig(cfg).
 		WithConfigPath(configPath).
 		WithLocalManagementPassword(localPassword)

@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	_ "modernc.org/sqlite"
 )
 
@@ -362,12 +362,12 @@ func (s *SqliteStore) WorkDir() string {
 func (s *SqliteStore) SetBaseDir(string) {}
 
 // Save persists an Auth record into both the local workspace and the SQLite database.
-func (s *SqliteStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (string, error) {
+func (s *SqliteStore) Save(ctx context.Context, auth *xinugateauth.Auth) (string, error) {
 	if auth == nil {
 		return "", fmt.Errorf("sqlite store: auth is nil")
 	}
-	cliproxyauth.NormalizeCredentialMetadata(auth.Metadata)
-	if errWeight := cliproxyauth.ValidateAuthWeight(auth); errWeight != nil {
+	xinugateauth.NormalizeCredentialMetadata(auth.Metadata)
+	if errWeight := xinugateauth.ValidateAuthWeight(auth); errWeight != nil {
 		return "", fmt.Errorf("sqlite store: %w", errWeight)
 	}
 
@@ -379,7 +379,7 @@ func (s *SqliteStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (string
 		return "", fmt.Errorf("sqlite store: missing file path attribute for %s", auth.ID)
 	}
 
-	if auth.Disabled && !cliproxyauth.HasAuthCreationIntent(ctx) {
+	if auth.Disabled && !xinugateauth.HasAuthCreationIntent(ctx) {
 		if _, statErr := os.Stat(path); errors.Is(statErr, fs.ErrNotExist) {
 			return "", nil
 		}
@@ -423,8 +423,8 @@ func (s *SqliteStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (string
 	if auth.Attributes == nil {
 		auth.Attributes = make(map[string]string)
 	}
-	auth.Attributes[cliproxyauth.AttributePath] = path
-	auth.Attributes[cliproxyauth.AttributeSourceBackend] = cliproxyauth.AuthSourceSqlite
+	auth.Attributes[xinugateauth.AttributePath] = path
+	auth.Attributes[xinugateauth.AttributeSourceBackend] = xinugateauth.AuthSourceSqlite
 
 	relID, err := s.relativeAuthID(path)
 	if err != nil {
@@ -445,7 +445,7 @@ func (s *SqliteStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (string
 }
 
 // List enumerates all active auth records stored in the SQLite database.
-func (s *SqliteStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) {
+func (s *SqliteStore) List(ctx context.Context) ([]*xinugateauth.Auth, error) {
 	if s == nil || s.db == nil {
 		return nil, fmt.Errorf("sqlite store: not initialized")
 	}
@@ -457,19 +457,19 @@ func (s *SqliteStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) {
 	}
 	defer rows.Close()
 
-	var records []*cliproxyauth.Auth
+	var records []*xinugateauth.Auth
 	for rows.Next() {
 		var id, content string
 		if errScan := rows.Scan(&id, &content); errScan != nil {
 			return nil, fmt.Errorf("sqlite store: scan auth row: %w", errScan)
 		}
 		path := filepath.Join(s.authDir, filepath.FromSlash(id))
-		authRecord := &cliproxyauth.Auth{
+		authRecord := &xinugateauth.Auth{
 			ID:       id,
 			FileName: filepath.Base(path),
 			Attributes: map[string]string{
-				cliproxyauth.AttributePath:          path,
-				cliproxyauth.AttributeSourceBackend: cliproxyauth.AuthSourceSqlite,
+				xinugateauth.AttributePath:          path,
+				xinugateauth.AttributeSourceBackend: xinugateauth.AuthSourceSqlite,
 			},
 		}
 		var meta map[string]any
@@ -486,7 +486,7 @@ func (s *SqliteStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) {
 }
 
 // Get retrieves one auth record by ID.
-func (s *SqliteStore) Get(ctx context.Context, id string) (*cliproxyauth.Auth, error) {
+func (s *SqliteStore) Get(ctx context.Context, id string) (*xinugateauth.Auth, error) {
 	if s == nil || s.db == nil {
 		return nil, fmt.Errorf("sqlite store: not initialized")
 	}
@@ -502,12 +502,12 @@ func (s *SqliteStore) Get(ctx context.Context, id string) (*cliproxyauth.Auth, e
 	}
 
 	path := filepath.Join(s.authDir, filepath.FromSlash(id))
-	authRecord := &cliproxyauth.Auth{
+	authRecord := &xinugateauth.Auth{
 		ID:       id,
 		FileName: filepath.Base(path),
 		Attributes: map[string]string{
-			cliproxyauth.AttributePath:          path,
-			cliproxyauth.AttributeSourceBackend: cliproxyauth.AuthSourceSqlite,
+			xinugateauth.AttributePath:          path,
+			xinugateauth.AttributeSourceBackend: xinugateauth.AuthSourceSqlite,
 		},
 	}
 	var meta map[string]any
@@ -564,7 +564,7 @@ func (s *SqliteStore) UpdateConfig(ctx context.Context, content []byte) error {
 	return nil
 }
 
-func (s *SqliteStore) resolveAuthPath(auth *cliproxyauth.Auth) (string, error) {
+func (s *SqliteStore) resolveAuthPath(auth *xinugateauth.Auth) (string, error) {
 	fileName := strings.TrimSpace(auth.FileName)
 	if fileName == "" {
 		fileName = strings.TrimSpace(auth.ID)
@@ -654,7 +654,7 @@ func (s *SqliteStore) PersistAuthFiles(ctx context.Context, _ string, paths ...s
 }
 
 // CooldownStateStore returns the SQLite-backed runtime cooldown store.
-func (s *SqliteStore) CooldownStateStore() cliproxyauth.CooldownStateStore {
+func (s *SqliteStore) CooldownStateStore() xinugateauth.CooldownStateStore {
 	if s == nil {
 		return nil
 	}

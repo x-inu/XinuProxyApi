@@ -21,7 +21,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/credentialweight"
 	"github.com/x-inu/XinuGate/v7/internal/watcher/synthesizer"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // PatchAuthFileStatus toggles the disabled state of an auth file

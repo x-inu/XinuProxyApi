@@ -20,9 +20,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
 	"github.com/x-inu/XinuGate/v7/internal/wsrelay"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // AIStudioExecutor routes AI Studio requests through a websocket-backed transport.
@@ -49,7 +49,7 @@ func NewAIStudioExecutor(cfg *config.Config, provider string, relay *wsrelay.Man
 func (e *AIStudioExecutor) Identifier() string { return "aistudio" }
 
 // PrepareRequest prepares the HTTP request for execution.
-func (e *AIStudioExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth) error {
+func (e *AIStudioExecutor) PrepareRequest(req *http.Request, auth *xinugateauth.Auth) error {
 	if req == nil {
 		return nil
 	}
@@ -62,7 +62,7 @@ func (e *AIStudioExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.
 }
 
 // HttpRequest forwards an arbitrary HTTP request through the websocket relay.
-func (e *AIStudioExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth, req *http.Request) (*http.Response, error) {
+func (e *AIStudioExecutor) HttpRequest(ctx context.Context, auth *xinugateauth.Auth, req *http.Request) (*http.Response, error) {
 	if req == nil {
 		return nil, fmt.Errorf("aistudio executor: request is nil")
 	}
@@ -123,7 +123,7 @@ func (e *AIStudioExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.A
 }
 
 // Execute performs a non-streaming request to the AI Studio API.
-func (e *AIStudioExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *AIStudioExecutor) Execute(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	if opts.Alt == "responses/compact" {
 		return resp, statusErr{code: http.StatusNotImplemented, msg: "/responses/compact not supported"}
 	}
@@ -190,18 +190,18 @@ func (e *AIStudioExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth,
 	}
 	reporter.ObserveResponseModel(wsResp.Body)
 	reporter.Publish(ctx, helps.ParseGeminiUsage(wsResp.Body))
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	var param any
 	out := sdktranslator.TranslateNonStream(ctx, body.toFormat, responseFormat, req.Model, opts.OriginalRequest, translatedReq, wsResp.Body, &param)
 	if responseFormat == sdktranslator.FormatOpenAIResponse {
 		out = helps.EnsureResponsesUsageDetails(out)
 	}
-	resp = cliproxyexecutor.Response{Payload: ensureColonSpacedJSON(out), Headers: wsResp.Headers.Clone()}
+	resp = xinugateexecutor.Response{Payload: ensureColonSpacedJSON(out), Headers: wsResp.Headers.Clone()}
 	return resp, nil
 }
 
 // ExecuteStream performs a streaming request to the AI Studio API.
-func (e *AIStudioExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *AIStudioExecutor) ExecuteStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	if opts.Alt == "responses/compact" {
 		return nil, statusErr{code: http.StatusNotImplemented, msg: "/responses/compact not supported"}
 	}
@@ -301,11 +301,11 @@ func (e *AIStudioExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth
 		}
 		return nil, statusErr{code: firstEvent.Status, msg: body.String()}
 	}
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func(first wsrelay.StreamEvent) {
 		defer close(out)
 		defer reporter.EnsurePublished(ctx)
-		responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+		responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 		originalRequest := opts.OriginalRequest
 		if len(originalRequest) == 0 {
 			originalRequest = req.Payload
@@ -318,7 +318,7 @@ func (e *AIStudioExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth
 				helps.RecordAPIResponseError(ctx, e.cfg, event.Err)
 				reporter.PublishFailure(ctx, event.Err)
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Err: fmt.Errorf("wsrelay: %v", event.Err)}:
+				case out <- xinugateexecutor.StreamChunk{Err: fmt.Errorf("wsrelay: %v", event.Err)}:
 				case <-ctx.Done():
 				}
 				return false
@@ -342,7 +342,7 @@ func (e *AIStudioExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth
 					lines := helps.TranslateStreamWithClaudeInputTokens(ctx, body.toFormat, responseFormat, req.Model, opts.OriginalRequest, translatedReq, filtered, &param, claudeInputTokens)
 					for i := range lines {
 						select {
-						case out <- cliproxyexecutor.StreamChunk{Payload: ensureColonSpacedJSON(lines[i])}:
+						case out <- xinugateexecutor.StreamChunk{Payload: ensureColonSpacedJSON(lines[i])}:
 						case <-ctx.Done():
 							return false
 						}
@@ -364,7 +364,7 @@ func (e *AIStudioExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth
 				lines := helps.TranslateStreamWithClaudeInputTokens(ctx, body.toFormat, responseFormat, req.Model, opts.OriginalRequest, translatedReq, event.Payload, &param, claudeInputTokens)
 				for i := range lines {
 					select {
-					case out <- cliproxyexecutor.StreamChunk{Payload: ensureColonSpacedJSON(lines[i])}:
+					case out <- xinugateexecutor.StreamChunk{Payload: ensureColonSpacedJSON(lines[i])}:
 					case <-ctx.Done():
 						return false
 					}
@@ -376,7 +376,7 @@ func (e *AIStudioExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth
 				helps.RecordAPIResponseError(ctx, e.cfg, event.Err)
 				reporter.PublishFailure(ctx, event.Err)
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Err: fmt.Errorf("wsrelay: %v", event.Err)}:
+				case out <- xinugateexecutor.StreamChunk{Err: fmt.Errorf("wsrelay: %v", event.Err)}:
 				case <-ctx.Done():
 				}
 				return false
@@ -392,11 +392,11 @@ func (e *AIStudioExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth
 			}
 		}
 	}(firstEvent)
-	return &cliproxyexecutor.StreamResult{Headers: firstEvent.Headers.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: firstEvent.Headers.Clone(), Chunks: out}, nil
 }
 
 // CountTokens counts tokens for the given request using the AI Studio API.
-func (e *AIStudioExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *AIStudioExecutor) CountTokens(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 	countReq := req
 	countMetadata := make(map[string]any, len(req.Metadata)+1)
@@ -408,7 +408,7 @@ func (e *AIStudioExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.A
 
 	_, body, err := e.translateRequest(ctx, countReq, opts, false)
 	if err != nil {
-		return cliproxyexecutor.Response{}, err
+		return xinugateexecutor.Response{}, err
 	}
 
 	body.payload, _ = sjson.DeleteBytes(body.payload, "generationConfig")
@@ -442,26 +442,26 @@ func (e *AIStudioExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.A
 	resp, err := e.relay.NonStream(ctx, authID, wsReq)
 	if err != nil {
 		helps.RecordAPIResponseError(ctx, e.cfg, err)
-		return cliproxyexecutor.Response{}, err
+		return xinugateexecutor.Response{}, err
 	}
 	helps.RecordAPIResponseMetadata(ctx, e.cfg, resp.Status, resp.Headers.Clone())
 	if len(resp.Body) > 0 {
 		helps.AppendAPIResponseChunk(ctx, e.cfg, resp.Body)
 	}
 	if resp.Status < 200 || resp.Status >= 300 {
-		return cliproxyexecutor.Response{}, statusErr{code: resp.Status, msg: string(resp.Body)}
+		return xinugateexecutor.Response{}, statusErr{code: resp.Status, msg: string(resp.Body)}
 	}
 	totalTokens := gjson.GetBytes(resp.Body, "totalTokens").Int()
 	if totalTokens <= 0 {
-		return cliproxyexecutor.Response{}, fmt.Errorf("wsrelay: totalTokens missing in response")
+		return xinugateexecutor.Response{}, fmt.Errorf("wsrelay: totalTokens missing in response")
 	}
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	translated := sdktranslator.TranslateTokenCount(ctx, body.toFormat, responseFormat, totalTokens, resp.Body)
-	return cliproxyexecutor.Response{Payload: translated}, nil
+	return xinugateexecutor.Response{Payload: translated}, nil
 }
 
 // Refresh refreshes the authentication credentials (no-op for AI Studio).
-func (e *AIStudioExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (e *AIStudioExecutor) Refresh(ctx context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	if refreshed, handled, err := helps.RefreshAuthViaHome(ctx, e.cfg, auth); handled {
 		return refreshed, err
 	}
@@ -474,7 +474,7 @@ type translatedPayload struct {
 	toFormat sdktranslator.Format
 }
 
-func (e *AIStudioExecutor) translateRequest(ctx context.Context, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, stream bool) ([]byte, translatedPayload, error) {
+func (e *AIStudioExecutor) translateRequest(ctx context.Context, req xinugateexecutor.Request, opts xinugateexecutor.Options, stream bool) ([]byte, translatedPayload, error) {
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 
 	from := opts.SourceFormat

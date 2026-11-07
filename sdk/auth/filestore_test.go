@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestExtractAccessToken(t *testing.T) {
@@ -109,7 +109,7 @@ func TestFileTokenStoreSaveExistingMetadataSetsFileAttributes(t *testing.T) {
 
 			store := NewFileTokenStore()
 			store.SetBaseDir(baseDir)
-			auth := &cliproxyauth.Auth{
+			auth := &xinugateauth.Auth{
 				ID:       fileName,
 				FileName: fileName,
 				Metadata: map[string]any{
@@ -125,14 +125,14 @@ func TestFileTokenStoreSaveExistingMetadataSetsFileAttributes(t *testing.T) {
 			if savedPath != path {
 				t.Fatalf("Save() path = %q, want %q", savedPath, path)
 			}
-			if got := auth.Attributes[cliproxyauth.AttributePath]; got != path {
+			if got := auth.Attributes[xinugateauth.AttributePath]; got != path {
 				t.Errorf("path attribute = %q, want %q", got, path)
 			}
-			if got := auth.Attributes[cliproxyauth.AttributeSource]; got != path {
+			if got := auth.Attributes[xinugateauth.AttributeSource]; got != path {
 				t.Errorf("source attribute = %q, want %q", got, path)
 			}
-			if got := auth.Attributes[cliproxyauth.AttributeSourceBackend]; got != cliproxyauth.AuthSourceFile {
-				t.Errorf("source backend attribute = %q, want %q", got, cliproxyauth.AuthSourceFile)
+			if got := auth.Attributes[xinugateauth.AttributeSourceBackend]; got != xinugateauth.AuthSourceFile {
+				t.Errorf("source backend attribute = %q, want %q", got, xinugateauth.AuthSourceFile)
 			}
 			persisted, errRead := os.ReadFile(path)
 			if errRead != nil {
@@ -151,7 +151,7 @@ func TestFileTokenStoreNormalizesLegacyCredentialMetadata(t *testing.T) {
 		baseDir := t.TempDir()
 		store := NewFileTokenStore()
 		store.SetBaseDir(baseDir)
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			ID:       "legacy-save.json",
 			FileName: "legacy-save.json",
 			Metadata: map[string]any{
@@ -210,12 +210,12 @@ func TestFileTokenStoreSaveRejectsInvalidWeight(t *testing.T) {
 	baseDir := t.TempDir()
 	store := NewFileTokenStore()
 	store.SetBaseDir(baseDir)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "invalid.json",
 		FileName: "invalid.json",
 		Metadata: map[string]any{
 			"type":                       "test",
-			cliproxyauth.AttributeWeight: 1.5,
+			xinugateauth.AttributeWeight: 1.5,
 		},
 	}
 
@@ -235,9 +235,9 @@ func TestFileTokenStoreListSkipsInvalidPluginSourceWeight(t *testing.T) {
 	}
 
 	parserCalled := false
-	RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(context.Context, pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error) {
+	RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(context.Context, pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error) {
 		parserCalled = true
-		return []*cliproxyauth.Auth{{ID: "plugin.json", Provider: "plugin"}}, true, nil
+		return []*xinugateauth.Auth{{ID: "plugin.json", Provider: "plugin"}}, true, nil
 	}))
 	t.Cleanup(func() {
 		RegisterPluginAuthParser(nil)
@@ -264,11 +264,11 @@ func TestFileTokenStoreListExpandsPluginMultiAuths(t *testing.T) {
 		t.Fatalf("write auth file: %v", errWrite)
 	}
 
-	RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(ctx context.Context, req pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error) {
+	RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(ctx context.Context, req pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error) {
 		if req.Provider != "gemini-cli" || req.Path != path || req.FileName != "geminicli.json" {
 			t.Fatalf("ParseAuths request = %#v, want file context", req)
 		}
-		return []*cliproxyauth.Auth{
+		return []*xinugateauth.Auth{
 			{
 				ID:       "geminicli.json",
 				Provider: "gemini-cli",
@@ -310,11 +310,11 @@ func TestFileTokenStoreListExpandsPluginMultiAuths(t *testing.T) {
 		t.Fatalf("auth indexes = %q/%q, want distinct non-empty indexes", firstIndex, secondIndex)
 	}
 	for _, auth := range auths {
-		if !cliproxyauth.IsPluginVirtualAuth(auth) {
+		if !xinugateauth.IsPluginVirtualAuth(auth) {
 			t.Fatalf("auth attributes = %#v, want plugin virtual marker", auth.Attributes)
 		}
-		if auth.Attributes[cliproxyauth.AttributeVirtualSource] != path {
-			t.Fatalf("virtual_source = %q, want %q", auth.Attributes[cliproxyauth.AttributeVirtualSource], path)
+		if auth.Attributes[xinugateauth.AttributeVirtualSource] != path {
+			t.Fatalf("virtual_source = %q, want %q", auth.Attributes[xinugateauth.AttributeVirtualSource], path)
 		}
 		if auth.Attributes["path"] != path || auth.Attributes["source"] != path {
 			t.Fatalf("auth attributes = %#v, want source path", auth.Attributes)
@@ -322,7 +322,7 @@ func TestFileTokenStoreListExpandsPluginMultiAuths(t *testing.T) {
 		if gotHeader := auth.Attributes["header:X-Test"]; gotHeader != "value" {
 			t.Fatalf("header:X-Test = %q, want value", gotHeader)
 		}
-		if gotWeight := auth.Attributes[cliproxyauth.AttributeWeight]; gotWeight != "3" {
+		if gotWeight := auth.Attributes[xinugateauth.AttributeWeight]; gotWeight != "3" {
 			t.Fatalf("weight = %q, want 3", gotWeight)
 		}
 	}
@@ -347,8 +347,8 @@ func TestFileTokenStoreListAppliesSourcePriorityToPluginAuths(t *testing.T) {
 			if errWrite := os.WriteFile(path, []byte(testCase.raw), 0o600); errWrite != nil {
 				t.Fatalf("write auth file: %v", errWrite)
 			}
-			RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(context.Context, pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error) {
-				return []*cliproxyauth.Auth{
+			RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(context.Context, pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error) {
+				return []*xinugateauth.Auth{
 					{ID: "first", Provider: "plugin", Metadata: map[string]any{"project_id": "first"}},
 					{ID: "second", Provider: "plugin", Metadata: map[string]any{"project_id": "second"}},
 				}, true, nil
@@ -368,7 +368,7 @@ func TestFileTokenStoreListAppliesSourcePriorityToPluginAuths(t *testing.T) {
 				if got := auth.Attributes["priority"]; got != testCase.want {
 					t.Errorf("auth %s priority attribute = %q, want %q", auth.ID, got, testCase.want)
 				}
-				if got := auth.Attributes[cliproxyauth.AttributeFilePriority]; got != "true" {
+				if got := auth.Attributes[xinugateauth.AttributeFilePriority]; got != "true" {
 					t.Errorf("auth %s file priority marker = %q, want true", auth.ID, got)
 				}
 				if got := auth.Metadata["priority"]; got != testCase.wantMetadata {
@@ -386,8 +386,8 @@ func TestFileTokenStoreListAppliesSourceDisabledToPluginMultiAuths(t *testing.T)
 		t.Fatalf("write auth file: %v", errWrite)
 	}
 
-	RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(context.Context, pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error) {
-		return []*cliproxyauth.Auth{
+	RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(context.Context, pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error) {
+		return []*xinugateauth.Auth{
 			{ID: "geminicli.json", Provider: "gemini-cli", Metadata: map[string]any{"type": "gemini-cli"}},
 			{ID: "geminicli-project-a.json", Provider: "gemini-cli", Metadata: map[string]any{"type": "gemini-cli", "project_id": "project-a"}},
 		}, true, nil
@@ -406,7 +406,7 @@ func TestFileTokenStoreListAppliesSourceDisabledToPluginMultiAuths(t *testing.T)
 		t.Fatalf("List() len = %d, want two plugin auths", len(auths))
 	}
 	for _, auth := range auths {
-		if !auth.Disabled || auth.Status != cliproxyauth.StatusDisabled {
+		if !auth.Disabled || auth.Status != xinugateauth.StatusDisabled {
 			t.Fatalf("auth %s disabled/status = %v/%s, want disabled", auth.ID, auth.Disabled, auth.Status)
 		}
 		if got, _ := auth.Metadata["disabled"].(bool); !got {
@@ -422,7 +422,7 @@ func TestFileTokenStoreListPluginHandledEmptySuppressesBuiltin(t *testing.T) {
 		t.Fatalf("write auth file: %v", errWrite)
 	}
 
-	RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(context.Context, pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error) {
+	RegisterPluginAuthParser(fileStoreMultiAuthParserFunc(func(context.Context, pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error) {
 		return nil, true, nil
 	}))
 	t.Cleanup(func() {
@@ -440,12 +440,12 @@ func TestFileTokenStoreListPluginHandledEmptySuppressesBuiltin(t *testing.T) {
 	}
 }
 
-type fileStoreMultiAuthParserFunc func(context.Context, pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error)
+type fileStoreMultiAuthParserFunc func(context.Context, pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error)
 
-func (f fileStoreMultiAuthParserFunc) ParseAuth(context.Context, pluginapi.AuthParseRequest) (*cliproxyauth.Auth, bool, error) {
+func (f fileStoreMultiAuthParserFunc) ParseAuth(context.Context, pluginapi.AuthParseRequest) (*xinugateauth.Auth, bool, error) {
 	return nil, false, nil
 }
 
-func (f fileStoreMultiAuthParserFunc) ParseAuths(ctx context.Context, req pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error) {
+func (f fileStoreMultiAuthParserFunc) ParseAuths(ctx context.Context, req pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error) {
 	return f(ctx, req)
 }

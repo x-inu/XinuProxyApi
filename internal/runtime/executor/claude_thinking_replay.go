@@ -11,19 +11,19 @@ import (
 	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // claudeThinkingReplayScope reuses the bounded replay state shape shared with Kimi.
 type claudeThinkingReplayScope = kimiThinkingReplayScope
 
-func claudeThinkingReplayEnabled(auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) bool {
+func claudeThinkingReplayEnabled(auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) bool {
 	if auth == nil || !sourceFormatEqual(opts.SourceFormat, sdktranslator.FormatClaude) {
 		return false
 	}
-	if !strings.EqualFold(strings.TrimSpace(auth.Provider), "claude") || auth.AuthKind() != cliproxyauth.AuthKindAPIKey {
+	if !strings.EqualFold(strings.TrimSpace(auth.Provider), "claude") || auth.AuthKind() != xinugateauth.AuthKindAPIKey {
 		return false
 	}
 	if !helps.APIKeyModelIsCompat(req) {
@@ -34,7 +34,7 @@ func claudeThinkingReplayEnabled(auth *cliproxyauth.Auth, req cliproxyexecutor.R
 }
 
 // A missing session identity intentionally disables replay instead of sharing hidden reasoning across callers.
-func claudeThinkingReplayScopeFromRequest(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) claudeThinkingReplayScope {
+func claudeThinkingReplayScopeFromRequest(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) claudeThinkingReplayScope {
 	sessionKey := codexReasoningReplaySessionKey(ctx, sdktranslator.FormatClaude, req, opts, req.Payload)
 	sessionKey = xaiReasoningReplayIsolateSessionKey(ctx, sessionKey)
 	return claudeThinkingReplayScope{
@@ -43,7 +43,7 @@ func claudeThinkingReplayScopeFromRequest(ctx context.Context, auth *cliproxyaut
 	}
 }
 
-func claudeThinkingReplayModelFamily(auth *cliproxyauth.Auth, model string) string {
+func claudeThinkingReplayModelFamily(auth *xinugateauth.Auth, model string) string {
 	baseModel := thinking.ParseSuffix(strings.TrimSpace(model)).ModelName
 	if baseModel == "" {
 		return ""
@@ -66,7 +66,7 @@ func claudeThinkingReplayModelFamily(auth *cliproxyauth.Auth, model string) stri
 	return "claude:" + hex.EncodeToString(sum[:8]) + ":" + baseModel
 }
 
-func prepareClaudeThinkingReplayRequest(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Request, claudeThinkingReplayScope) {
+func prepareClaudeThinkingReplayRequest(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Request, claudeThinkingReplayScope) {
 	scope := claudeThinkingReplayScopeFromRequest(ctx, auth, req, opts)
 	if !scope.valid() {
 		return req, scope
@@ -135,6 +135,6 @@ func clearClaudeThinkingReplayContent(ctx context.Context, scope claudeThinkingR
 	}
 }
 
-func wrapClaudeThinkingReplayStream(ctx context.Context, result *cliproxyexecutor.StreamResult, scope claudeThinkingReplayScope) *cliproxyexecutor.StreamResult {
+func wrapClaudeThinkingReplayStream(ctx context.Context, result *xinugateexecutor.StreamResult, scope claudeThinkingReplayScope) *xinugateexecutor.StreamResult {
 	return wrapThinkingReplayStream(ctx, result, scope, cacheClaudeThinkingReplayContent, clearClaudeThinkingReplayContent)
 }

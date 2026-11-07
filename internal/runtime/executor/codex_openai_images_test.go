@@ -13,13 +13,13 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-func newCodexOpenAIImageTestAuth(serverURL string) *cliproxyauth.Auth {
-	return &cliproxyauth.Auth{
+func newCodexOpenAIImageTestAuth(serverURL string) *xinugateauth.Auth {
+	return &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"base_url": serverURL,
@@ -28,12 +28,12 @@ func newCodexOpenAIImageTestAuth(serverURL string) *cliproxyauth.Auth {
 	}
 }
 
-func codexOpenAIImageTestOptions(path string, stream bool) cliproxyexecutor.Options {
-	return cliproxyexecutor.Options{
+func codexOpenAIImageTestOptions(path string, stream bool) xinugateexecutor.Options {
+	return xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString(codexOpenAIImageSourceFormat),
 		Stream:       stream,
 		Metadata: map[string]any{
-			cliproxyexecutor.RequestPathMetadataKey: path,
+			xinugateexecutor.RequestPathMetadataKey: path,
 		},
 	}
 }
@@ -76,7 +76,7 @@ func TestCodexExecutorDirectOpenAIImageGenerationUsesImagesEndpoint(t *testing.T
 		"Originator":            "Codex Desktop",
 	})
 	executor := NewCodexExecutor(&config.Config{})
-	resp, errExecute := executor.Execute(ctx, newCodexOpenAIImageTestAuth(server.URL), cliproxyexecutor.Request{
+	resp, errExecute := executor.Execute(ctx, newCodexOpenAIImageTestAuth(server.URL), xinugateexecutor.Request{
 		Model:   "codex/gpt-image-1.5",
 		Payload: []byte(`{"model":"codex/gpt-image-1.5","prompt":"A cute baby sea otter","n":1,"size":"1024x1024","quality":"high","background":"opaque","output_format":"jpeg","output_compression":70,"moderation":"low","extra":{"preserve":true},"stream":false}`),
 	}, codexOpenAIImageTestOptions(codexImagesGenerationsPath, false))
@@ -144,7 +144,7 @@ func TestCodexExecutorDirectOpenAIImageGenerationStreamsImagesEndpoint(t *testin
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	stream, errStream := executor.ExecuteStream(context.Background(), newCodexOpenAIImageTestAuth(server.URL), cliproxyexecutor.Request{
+	stream, errStream := executor.ExecuteStream(context.Background(), newCodexOpenAIImageTestAuth(server.URL), xinugateexecutor.Request{
 		Model:   "gpt-image-2",
 		Payload: []byte(`{"model":"gpt-image-2","prompt":"A cute baby sea otter","partial_images":2}`),
 	}, codexOpenAIImageTestOptions(codexImagesGenerationsPath, true))
@@ -194,7 +194,7 @@ func TestCodexExecutorDirectOpenAIImageEditUsesImagesEditEndpointForJSON(t *test
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	_, errExecute := executor.Execute(context.Background(), newCodexOpenAIImageTestAuth(server.URL), cliproxyexecutor.Request{
+	_, errExecute := executor.Execute(context.Background(), newCodexOpenAIImageTestAuth(server.URL), xinugateexecutor.Request{
 		Model:   "gpt-image-2",
 		Payload: []byte(`{"model":"gpt-image-2","prompt":"Replace the background","images":[{"file_id":"file-abc123"}],"mask":{"file_id":"file-mask123"},"size":"1024x1024","quality":"high","output_format":"png","output_compression":100,"stream":false}`),
 	}, codexOpenAIImageTestOptions(codexImagesEditsPath, false))
@@ -274,7 +274,7 @@ func TestCodexExecutorDirectOpenAIImageEditUsesImagesEditEndpointForMultipart(t 
 	opts := codexOpenAIImageTestOptions(codexImagesEditsPath, false)
 	opts.Headers = http.Header{"Content-Type": []string{writer.FormDataContentType()}}
 	executor := NewCodexExecutor(&config.Config{})
-	_, errExecute := executor.Execute(context.Background(), newCodexOpenAIImageTestAuth(server.URL), cliproxyexecutor.Request{
+	_, errExecute := executor.Execute(context.Background(), newCodexOpenAIImageTestAuth(server.URL), xinugateexecutor.Request{
 		Model:   "codex/gpt-image-1.5",
 		Payload: body.Bytes(),
 	}, opts)
@@ -350,7 +350,7 @@ func TestCodexExecutorDirectOpenAIImage25Models(t *testing.T) {
 			defer server.Close()
 
 			executor := NewCodexExecutor(&config.Config{})
-			_, errExecute := executor.Execute(context.Background(), newCodexOpenAIImageTestAuth(server.URL), cliproxyexecutor.Request{
+			_, errExecute := executor.Execute(context.Background(), newCodexOpenAIImageTestAuth(server.URL), xinugateexecutor.Request{
 				Model:   model,
 				Payload: []byte(`{"model":"` + model + `","prompt":"draw something"}`),
 			}, codexOpenAIImageTestOptions(codexImagesGenerationsPath, false))
@@ -383,7 +383,7 @@ func TestCodexExecutorDirectOpenAIImage25Models(t *testing.T) {
 			defer server.Close()
 
 			executor := NewCodexExecutor(&config.Config{})
-			_, errExecute := executor.Execute(context.Background(), newCodexOpenAIImageTestAuth(server.URL), cliproxyexecutor.Request{
+			_, errExecute := executor.Execute(context.Background(), newCodexOpenAIImageTestAuth(server.URL), xinugateexecutor.Request{
 				Model:   model,
 				Payload: []byte(`{"model":"` + model + `","prompt":"edit something","images":[{"file_id":"f1"}]}`),
 			}, codexOpenAIImageTestOptions(codexImagesEditsPath, false))
@@ -416,7 +416,7 @@ func TestCodexExecutorDirectOpenAIImage25Models(t *testing.T) {
 			defer server.Close()
 
 			executor := NewCodexExecutor(&config.Config{})
-			stream, errStream := executor.ExecuteStream(context.Background(), newCodexOpenAIImageTestAuth(server.URL), cliproxyexecutor.Request{
+			stream, errStream := executor.ExecuteStream(context.Background(), newCodexOpenAIImageTestAuth(server.URL), xinugateexecutor.Request{
 				Model:   model,
 				Payload: []byte(`{"model":"` + model + `","prompt":"stream something"}`),
 			}, codexOpenAIImageTestOptions(codexImagesGenerationsPath, true))

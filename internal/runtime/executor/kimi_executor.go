@@ -22,9 +22,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 const kimiReasoningUnavailable = "[reasoning unavailable]"
@@ -51,7 +51,7 @@ func NewKimiExecutor(cfg *config.Config) *KimiExecutor {
 func (e *KimiExecutor) Identifier() string { return "kimi" }
 
 // RequestToFormat reports the upstream request format used after auth selection.
-func (e *KimiExecutor) RequestToFormat(_ cliproxyexecutor.Request, opts cliproxyexecutor.Options) sdktranslator.Format {
+func (e *KimiExecutor) RequestToFormat(_ xinugateexecutor.Request, opts xinugateexecutor.Options) sdktranslator.Format {
 	if opts.SourceFormat == sdktranslator.FormatClaude {
 		return sdktranslator.FormatClaude
 	}
@@ -62,7 +62,7 @@ func (e *KimiExecutor) RequestToFormat(_ cliproxyexecutor.Request, opts cliproxy
 }
 
 // PrepareRequest injects Kimi credentials into the outgoing HTTP request.
-func (e *KimiExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth) error {
+func (e *KimiExecutor) PrepareRequest(req *http.Request, auth *xinugateauth.Auth) error {
 	if req == nil {
 		return nil
 	}
@@ -79,7 +79,7 @@ func (e *KimiExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth
 }
 
 // HttpRequest injects Kimi credentials into the request and executes it.
-func (e *KimiExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth, req *http.Request) (*http.Response, error) {
+func (e *KimiExecutor) HttpRequest(ctx context.Context, auth *xinugateauth.Auth, req *http.Request) (*http.Response, error) {
 	if req == nil {
 		return nil, fmt.Errorf("kimi executor: request is nil")
 	}
@@ -95,7 +95,7 @@ func (e *KimiExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth,
 }
 
 // Execute performs a non-streaming chat completion request to Kimi.
-func (e *KimiExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *KimiExecutor) Execute(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	from := opts.SourceFormat
 	if from.String() == "claude" {
 		if auth != nil {
@@ -118,7 +118,7 @@ func (e *KimiExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req
 	if from == sdktranslator.FormatOpenAIResponse {
 		return e.executeResponses(ctx, auth, req, opts)
 	}
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 
@@ -224,12 +224,12 @@ func (e *KimiExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req
 	if responseFormat == sdktranslator.FormatOpenAIResponse {
 		out = helps.EnsureResponsesUsageDetails(out)
 	}
-	resp = cliproxyexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}
+	resp = xinugateexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}
 	return resp, nil
 }
 
 // ExecuteStream performs a streaming chat completion request to Kimi.
-func (e *KimiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *KimiExecutor) ExecuteStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	from := opts.SourceFormat
 	if from.String() == "claude" {
 		if auth != nil {
@@ -251,7 +251,7 @@ func (e *KimiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 	if from == sdktranslator.FormatOpenAIResponse {
 		return e.executeResponsesStream(ctx, auth, req, opts)
 	}
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 	token := kimiCreds(auth)
@@ -343,7 +343,7 @@ func (e *KimiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 		err = statusErr{code: httpResp.StatusCode, msg: string(b)}
 		return nil, err
 	}
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func() {
 		defer close(out)
 		defer func() {
@@ -365,7 +365,7 @@ func (e *KimiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 			chunks := helps.TranslateStreamWithClaudeInputTokens(ctx, to, responseFormat, req.Model, opts.OriginalRequest, body, bytes.Clone(line), &param, claudeInputTokens)
 			for i := range chunks {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: chunks[i]}:
+				case out <- xinugateexecutor.StreamChunk{Payload: chunks[i]}:
 				case <-ctx.Done():
 					return
 				}
@@ -374,7 +374,7 @@ func (e *KimiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 		doneChunks := helps.TranslateStreamWithClaudeInputTokens(ctx, to, responseFormat, req.Model, opts.OriginalRequest, body, []byte("[DONE]"), &param, claudeInputTokens)
 		for i := range doneChunks {
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Payload: doneChunks[i]}:
+			case out <- xinugateexecutor.StreamChunk{Payload: doneChunks[i]}:
 			case <-ctx.Done():
 				return
 			}
@@ -383,20 +383,20 @@ func (e *KimiExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Aut
 			helps.RecordAPIResponseError(ctx, e.cfg, errScan)
 			reporter.PublishFailure(ctx, errScan)
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errScan}:
+			case out <- xinugateexecutor.StreamChunk{Err: errScan}:
 			case <-ctx.Done():
 			}
 		}
 	}()
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }
 
-func (e *KimiExecutor) executeResponses(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {
+func (e *KimiExecutor) executeResponses(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (resp xinugateexecutor.Response, err error) {
 	if opts.Alt == "responses/compact" {
 		return resp, statusErr{code: http.StatusNotImplemented, msg: "/responses/compact not supported"}
 	}
 
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 	token := kimiCreds(auth)
 
@@ -498,16 +498,16 @@ func (e *KimiExecutor) executeResponses(ctx context.Context, auth *cliproxyauth.
 		var param any
 		out = sdktranslator.TranslateNonStream(ctx, sdktranslator.FormatOpenAIResponse, responseFormat, req.Model, opts.OriginalRequest, body, data, &param)
 	}
-	resp = cliproxyexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}
+	resp = xinugateexecutor.Response{Payload: out, Headers: httpResp.Header.Clone()}
 	return resp, nil
 }
 
-func (e *KimiExecutor) executeResponsesStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {
+func (e *KimiExecutor) executeResponsesStream(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (_ *xinugateexecutor.StreamResult, err error) {
 	if opts.Alt == "responses/compact" {
 		return nil, statusErr{code: http.StatusBadRequest, msg: "streaming not supported for /responses/compact"}
 	}
 
-	responseFormat := cliproxyexecutor.ResponseFormatOrSource(opts)
+	responseFormat := xinugateexecutor.ResponseFormatOrSource(opts)
 	baseModel := thinking.ParseSuffix(req.Model).ModelName
 	token := kimiCreds(auth)
 
@@ -588,7 +588,7 @@ func (e *KimiExecutor) executeResponsesStream(ctx context.Context, auth *cliprox
 		return nil, err
 	}
 
-	out := make(chan cliproxyexecutor.StreamChunk)
+	out := make(chan xinugateexecutor.StreamChunk)
 	go func() {
 		defer close(out)
 		defer func() {
@@ -607,7 +607,7 @@ func (e *KimiExecutor) executeResponsesStream(ctx context.Context, auth *cliprox
 				copy(chunkPayload, line)
 				chunkPayload[len(line)] = '\n'
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: chunkPayload}:
+				case out <- xinugateexecutor.StreamChunk{Payload: chunkPayload}:
 					return true
 				case <-ctx.Done():
 					return false
@@ -616,7 +616,7 @@ func (e *KimiExecutor) executeResponsesStream(ctx context.Context, auth *cliprox
 			chunks := sdktranslator.TranslateStream(ctx, sdktranslator.FormatOpenAIResponse, responseFormat, req.Model, opts.OriginalRequest, body, line, &param)
 			for i := range chunks {
 				select {
-				case out <- cliproxyexecutor.StreamChunk{Payload: chunks[i]}:
+				case out <- xinugateexecutor.StreamChunk{Payload: chunks[i]}:
 				case <-ctx.Done():
 					return false
 				}
@@ -650,17 +650,17 @@ func (e *KimiExecutor) executeResponsesStream(ctx context.Context, auth *cliprox
 			helps.RecordAPIResponseError(ctx, e.cfg, errScan)
 			reporter.PublishFailure(ctx, errScan)
 			select {
-			case out <- cliproxyexecutor.StreamChunk{Err: errScan}:
+			case out <- xinugateexecutor.StreamChunk{Err: errScan}:
 			case <-ctx.Done():
 			}
 		}
 	}()
 
-	return &cliproxyexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
+	return &xinugateexecutor.StreamResult{Headers: httpResp.Header.Clone(), Chunks: out}, nil
 }
 
 // CountTokens estimates token count for Kimi requests.
-func (e *KimiExecutor) CountTokens(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *KimiExecutor) CountTokens(ctx context.Context, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	if auth != nil {
 		if auth.Attributes == nil {
 			auth.Attributes = make(map[string]string)
@@ -940,7 +940,7 @@ func fallbackAssistantReasoning(msg gjson.Result, hasLatest bool, latest string)
 }
 
 // Refresh refreshes the Kimi token using the refresh token.
-func (e *KimiExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (e *KimiExecutor) Refresh(ctx context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	log.Debugf("kimi executor: refresh called")
 	if refreshed, handled, err := helps.RefreshAuthViaHome(ctx, e.cfg, auth); handled {
 		return refreshed, err
@@ -1016,13 +1016,13 @@ func (e *KimiExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*c
 }
 
 // applyKimiHeaders sets required headers for Kimi API requests.
-// Headers identify CLIProxyAPI with the current build version.
+// Headers identify XinuGate with the current build version.
 func applyKimiHeaders(r *http.Request, token string, stream bool) {
 	r.Header.Set("Content-Type", "application/json")
 	r.Header.Set("Authorization", "Bearer "+token)
-	// Identify requests with the current CLIProxyAPI version.
-	r.Header.Set("User-Agent", "CLIProxyAPI/"+buildinfo.Version)
-	r.Header.Set("X-Msh-Platform", "CLIProxyAPI")
+	// Identify requests with the current XinuGate version.
+	r.Header.Set("User-Agent", "XinuGate/"+buildinfo.Version)
+	r.Header.Set("X-Msh-Platform", "XinuGate")
 	r.Header.Set("X-Msh-Version", buildinfo.Version)
 	r.Header.Set("X-Msh-Device-Name", getKimiHostname())
 	r.Header.Set("X-Msh-Device-Model", getKimiDeviceModel())
@@ -1034,7 +1034,7 @@ func applyKimiHeaders(r *http.Request, token string, stream bool) {
 	r.Header.Set("Accept", "application/json")
 }
 
-func resolveKimiDeviceIDFromAuth(auth *cliproxyauth.Auth) string {
+func resolveKimiDeviceIDFromAuth(auth *xinugateauth.Auth) string {
 	if auth == nil || auth.Metadata == nil {
 		return ""
 	}
@@ -1052,7 +1052,7 @@ func resolveKimiDeviceIDFromAuth(auth *cliproxyauth.Auth) string {
 	return strings.TrimSpace(deviceID)
 }
 
-func resolveKimiDeviceIDFromStorage(auth *cliproxyauth.Auth) string {
+func resolveKimiDeviceIDFromStorage(auth *xinugateauth.Auth) string {
 	if auth == nil {
 		return ""
 	}
@@ -1065,7 +1065,7 @@ func resolveKimiDeviceIDFromStorage(auth *cliproxyauth.Auth) string {
 	return strings.TrimSpace(storage.DeviceID)
 }
 
-func resolveKimiDeviceID(auth *cliproxyauth.Auth) string {
+func resolveKimiDeviceID(auth *xinugateauth.Auth) string {
 	deviceID := resolveKimiDeviceIDFromAuth(auth)
 	if deviceID != "" {
 		return deviceID
@@ -1073,7 +1073,7 @@ func resolveKimiDeviceID(auth *cliproxyauth.Auth) string {
 	return resolveKimiDeviceIDFromStorage(auth)
 }
 
-func applyKimiHeadersWithAuth(r *http.Request, token string, stream bool, auth *cliproxyauth.Auth) {
+func applyKimiHeadersWithAuth(r *http.Request, token string, stream bool, auth *xinugateauth.Auth) {
 	applyKimiHeaders(r, token, stream)
 
 	if deviceID := resolveKimiDeviceID(auth); deviceID != "" {
@@ -1099,7 +1099,7 @@ func getKimiDeviceModel() string {
 func getKimiDeviceID() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "cli-proxy-api-device"
+		return "xinugate-device"
 	}
 	// Check kimi-cli's device_id location first (platform-specific)
 	var kimiShareDir string
@@ -1119,11 +1119,11 @@ func getKimiDeviceID() string {
 	if data, err := os.ReadFile(deviceIDPath); err == nil {
 		return strings.TrimSpace(string(data))
 	}
-	return "cli-proxy-api-device"
+	return "xinugate-device"
 }
 
 // kimiCreds extracts the access token from auth.
-func kimiCreds(a *cliproxyauth.Auth) (token string) {
+func kimiCreds(a *xinugateauth.Auth) (token string) {
 	if a == nil {
 		return ""
 	}
@@ -1155,7 +1155,7 @@ func stripKimiPrefix(model string) string {
 }
 
 // normalizeKimiUpstreamModel returns the canonical upstream model ID for Kimi.
-// It strips the CLIProxyAPI "kimi-" prefix and any Claude Code "[1m]" context
+// It strips the XinuGate "kimi-" prefix and any Claude Code "[1m]" context
 // suffix while preserving a trailing thinking suffix (e.g. "(1024)"), so that
 // the upstream API receives IDs such as "k3(1024)" instead of "kimi-k3[1m](1024)".
 // K2.8 and K2.7 Code aliases are remapped to the official Kimi Code model IDs before

@@ -7,10 +7,10 @@ import (
 	"sync"
 	"testing"
 
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginabi"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type mockPluginScheduler struct{}
@@ -90,7 +90,7 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 	})
 
 	t.Run("bound session lookup and payload hygiene without email leak", func(t *testing.T) {
-		opts := cliproxyexecutor.Options{
+		opts := xinugateexecutor.Options{
 			Headers:  map[string][]string{"X-Claude-Code-Session-Id": {"bound-session-1"}},
 			Metadata: make(map[string]any),
 		}
@@ -156,7 +156,7 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 
 	t.Run("long session ID normalization (> 256 bytes)", func(t *testing.T) {
 		longSessionID := strings.Repeat("s", 252) // prefix "claude:" + 252 chars = 259 chars > 256
-		opts := cliproxyexecutor.Options{
+		opts := xinugateexecutor.Options{
 			Headers:  map[string][]string{"X-Claude-Code-Session-Id": {longSessionID}},
 			Metadata: make(map[string]any),
 		}
@@ -185,7 +185,7 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 
 	t.Run("rebinding A to B reflects updated binding", func(t *testing.T) {
 		sessionID := "rebind-session"
-		opts := cliproxyexecutor.Options{
+		opts := xinugateexecutor.Options{
 			Headers:  map[string][]string{"X-Claude-Code-Session-Id": {sessionID}},
 			Metadata: make(map[string]any),
 		}
@@ -215,7 +215,7 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 	t.Run("unknown subagent does not guess parent binding", func(t *testing.T) {
 		// Parent is bound to authA
 		parentSession := "parent-main-thread-100"
-		opts := cliproxyexecutor.Options{
+		opts := xinugateexecutor.Options{
 			Headers:  map[string][]string{"Session-Id": {parentSession}},
 			Metadata: make(map[string]any),
 		}
@@ -236,13 +236,13 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 
 	t.Run("ambiguous unqualified session resolves to ambiguous across namespaces", func(t *testing.T) {
 		// Bind "ambig-sess" under claude to authA, and under codex to authB
-		optsClaude := cliproxyexecutor.Options{
+		optsClaude := xinugateexecutor.Options{
 			Headers:  map[string][]string{"X-Claude-Code-Session-Id": {"ambig-sess"}},
 			Metadata: make(map[string]any),
 		}
 		selector.Pick(context.Background(), "anthropic", "claude-3-7-sonnet", optsClaude, []*coreauth.Auth{authA})
 
-		optsCodex := cliproxyexecutor.Options{
+		optsCodex := xinugateexecutor.Options{
 			Headers:  map[string][]string{"Session-Id": {"ambig-sess"}},
 			Metadata: make(map[string]any),
 		}
@@ -276,14 +276,14 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 	t.Run("extended namespaces resolve bare ID (task, clientreq, geminicache, execution)", func(t *testing.T) {
 		testCases := []struct {
 			name   string
-			opts   cliproxyexecutor.Options
+			opts   xinugateexecutor.Options
 			bareID string
 			qualID string
 			auth   *coreauth.Auth
 		}{
 			{
 				name: "task header",
-				opts: cliproxyexecutor.Options{
+				opts: xinugateexecutor.Options{
 					Headers:  map[string][]string{"X-Task-ID": {"task-xyz-1"}},
 					Metadata: make(map[string]any),
 				},
@@ -293,7 +293,7 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 			},
 			{
 				name: "client request id header",
-				opts: cliproxyexecutor.Options{
+				opts: xinugateexecutor.Options{
 					Headers:  map[string][]string{"X-Client-Request-Id": {"crid-abc-2"}},
 					Metadata: make(map[string]any),
 				},
@@ -303,7 +303,7 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 			},
 			{
 				name: "gemini cache payload",
-				opts: cliproxyexecutor.Options{
+				opts: xinugateexecutor.Options{
 					OriginalRequest: []byte(`{"cachedContent":"cached-gemini-3"}`),
 					Metadata:        make(map[string]any),
 				},
@@ -313,9 +313,9 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 			},
 			{
 				name: "execution session metadata",
-				opts: cliproxyexecutor.Options{
+				opts: xinugateexecutor.Options{
 					Metadata: map[string]any{
-						cliproxyexecutor.ExecutionSessionMetadataKey: "exec-run-4",
+						xinugateexecutor.ExecutionSessionMetadataKey: "exec-run-4",
 					},
 				},
 				bareID: "exec-run-4",
@@ -361,12 +361,12 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 		}
 
 		// Conflict test: bind task:shared-clash to authA and claude:shared-clash to authB
-		optsClash1 := cliproxyexecutor.Options{
+		optsClash1 := xinugateexecutor.Options{
 			Headers:  map[string][]string{"X-Task-ID": {"shared-clash"}},
 			Metadata: make(map[string]any),
 		}
 		selector.Pick(context.Background(), "anthropic", "claude-3-7-sonnet", optsClash1, []*coreauth.Auth{authA})
-		optsClash2 := cliproxyexecutor.Options{
+		optsClash2 := xinugateexecutor.Options{
 			Headers:  map[string][]string{"X-Claude-Code-Session-Id": {"shared-clash"}},
 			Metadata: make(map[string]any),
 		}
@@ -386,7 +386,7 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 
 	t.Run("disabled credential returns bound with disabled flag", func(t *testing.T) {
 		sessionID := "disabled-cred-session"
-		opts := cliproxyexecutor.Options{
+		opts := xinugateexecutor.Options{
 			Headers:  map[string][]string{"X-Claude-Code-Session-Id": {sessionID}},
 			Metadata: make(map[string]any),
 		}
@@ -472,17 +472,17 @@ func TestHostAffinityLookupCallback_Contract(t *testing.T) {
 	})
 
 	t.Run("LCP session binding observation", func(t *testing.T) {
-		lcpOpts := cliproxyexecutor.Options{
+		lcpOpts := xinugateexecutor.Options{
 			OriginalRequest: []byte(`{"messages":[{"role":"system","content":"host-lcp-sys"},{"role":"user","content":"host-lcp-user"}]}`),
 			Metadata: map[string]any{
-				cliproxyexecutor.CallerScopeMetadataKey: "plugin-caller",
+				xinugateexecutor.CallerScopeMetadataKey: "plugin-caller",
 			},
 		}
 		picked, errPick := selector.Pick(context.Background(), "anthropic", "claude-3-7-sonnet", lcpOpts, []*coreauth.Auth{authA})
 		if errPick != nil || picked.ID != authA.ID {
 			t.Fatalf("LCP Pick failed: %v", errPick)
 		}
-		lcpSessionID, _ := lcpOpts.Metadata[cliproxyexecutor.LCPAffinitySessionIDMetadataKey].(string)
+		lcpSessionID, _ := lcpOpts.Metadata[xinugateexecutor.LCPAffinitySessionIDMetadataKey].(string)
 		if lcpSessionID == "" {
 			t.Fatalf("missing LCP session ID in metadata")
 		}

@@ -11,10 +11,10 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/executionregistry"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type kimiHomeModelCapabilityDispatcher struct{}
@@ -34,10 +34,10 @@ func (*kimiHomeModelCapabilityDispatcher) RPopAuth(context.Context, string, stri
 			},
 			"user_defined": false,
 		},
-		"auth": cliproxyauth.Auth{
+		"auth": xinugateauth.Auth{
 			ID:         "home-kimi-k3-auth",
 			Provider:   "kimi",
-			Status:     cliproxyauth.StatusActive,
+			Status:     xinugateauth.StatusActive,
 			Attributes: map[string]string{},
 			Metadata: map[string]any{
 				"access_token": "token",
@@ -61,7 +61,7 @@ func TestKimiHomeModelThinkingCapabilitiesOverrideLocalRegistry(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var upstreamBody []byte
-			ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", kimiRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
+			ctx := context.WithValue(context.Background(), "xinugate.roundtripper", kimiRoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				var errRead error
 				upstreamBody, errRead = io.ReadAll(req.Body)
 				if errRead != nil {
@@ -88,14 +88,14 @@ func TestKimiHomeModelThinkingCapabilitiesOverrideLocalRegistry(t *testing.T) {
 
 			cfg := &config.Config{RequestRetry: 1}
 			cfg.Home.Enabled = true
-			manager := cliproxyauth.NewManager(nil, nil, nil)
+			manager := xinugateauth.NewManager(nil, nil, nil)
 			manager.SetConfig(cfg)
 			manager.RegisterExecutor(NewKimiExecutor(cfg))
 			manager.PublishHomeDispatch(&kimiHomeModelCapabilityDispatcher{}, executionregistry.New(), 1)
 
 			payload := []byte(`{"model":"kimi-k3","reasoning_effort":"max","messages":[{"role":"user","content":"hello"}]}`)
-			req := cliproxyexecutor.Request{Model: "kimi-k3", Payload: payload}
-			opts := cliproxyexecutor.Options{
+			req := xinugateexecutor.Request{Model: "kimi-k3", Payload: payload}
+			opts := xinugateexecutor.Options{
 				Stream:          tt.stream,
 				SourceFormat:    sdktranslator.FormatOpenAI,
 				ResponseFormat:  sdktranslator.FormatOpenAI,

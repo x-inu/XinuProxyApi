@@ -21,8 +21,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/interfaces"
 	"github.com/x-inu/XinuGate/v7/internal/util"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 const (
@@ -72,7 +72,7 @@ func websocketClosePayloadForUpstreamError(err error) (bool, []byte) {
 	}
 
 	errText := err.Error()
-	if cliproxyexecutor.IsUpstreamWebsocketReplayRequired(err) {
+	if xinugateexecutor.IsUpstreamWebsocketReplayRequired(err) {
 		return true, websocket.FormatCloseMessage(
 			websocket.CloseServiceRestart,
 			truncateWebsocketCloseReason(wsHTTPReplayRequiredCloseReason, wsCloseReasonMaxBytes),
@@ -270,7 +270,7 @@ func (h *OpenAIResponsesAPIHandler) ResponsesWebsocket(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	var duplexInput <-chan cliproxyexecutor.WebsocketInput
+	var duplexInput <-chan xinugateexecutor.WebsocketInput
 	if h != nil && h.Cfg != nil && h.Cfg.CodexResponseSteering {
 		socketCtx, cancelSocket := context.WithCancel(c.Request.Context())
 		defer cancelSocket()
@@ -688,16 +688,16 @@ func (h *OpenAIResponsesAPIHandler) ResponsesWebsocket(c *gin.Context) {
 		var codexDuplexStream atomic.Bool
 		pinnedAuthAttempted := false
 		cliCtx, cliCancel := h.GetContextWithCancel(h, c, executionParent)
-		cliCtx = cliproxyexecutor.WithDownstreamWebsocket(cliCtx)
+		cliCtx = xinugateexecutor.WithDownstreamWebsocket(cliCtx)
 		if duplexInput != nil {
-			cliCtx = cliproxyexecutor.WithWebsocketInput(cliCtx, duplexInput)
-			cliCtx = cliproxyexecutor.WithWebsocketAuthCheck(cliCtx, func(authID string) bool {
+			cliCtx = xinugateexecutor.WithWebsocketInput(cliCtx, duplexInput)
+			cliCtx = xinugateexecutor.WithWebsocketAuthCheck(cliCtx, func(authID string) bool {
 				current, ok := sessionAuthByID(authID)
 				return ok && current != nil && !current.Disabled && current.Status != coreauth.StatusDisabled
 			})
 		}
 		if nativeWebsocketPassthrough && requestRequiresCurrentUpstreamWebsocket {
-			cliCtx = cliproxyexecutor.WithRequiredUpstreamWebsocket(cliCtx)
+			cliCtx = xinugateexecutor.WithRequiredUpstreamWebsocket(cliCtx)
 		}
 		cliCtx = handlers.WithExecutionSessionID(cliCtx, passthroughSessionID)
 		cliCtx = handlers.WithSelectedAuthIDCallback(cliCtx, func(authID string) {
@@ -863,7 +863,7 @@ func (s *responsesWebsocketObservedCompactionState) clear() {
 }
 
 func responsesWebsocketHTTPReplayRequiredError() error {
-	return cliproxyexecutor.NewUpstreamWebsocketReplayRequiredError()
+	return xinugateexecutor.NewUpstreamWebsocketReplayRequiredError()
 }
 
 func responsesWebsocketRequestRequiresCurrentUpstream(payload []byte) bool {

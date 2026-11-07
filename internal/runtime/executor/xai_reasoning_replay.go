@@ -11,8 +11,8 @@ import (
 	internalcache "github.com/x-inu/XinuGate/v7/internal/cache"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type xaiReasoningReplayScope struct {
@@ -26,7 +26,7 @@ func (s xaiReasoningReplayScope) valid() bool {
 	return strings.TrimSpace(s.modelName) != "" && strings.TrimSpace(s.sessionKey) != ""
 }
 
-func applyXAIReasoningReplayCacheRequired(ctx context.Context, from sdktranslator.Format, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, body []byte) ([]byte, xaiReasoningReplayScope, error) {
+func applyXAIReasoningReplayCacheRequired(ctx context.Context, from sdktranslator.Format, req xinugateexecutor.Request, opts xinugateexecutor.Options, body []byte) ([]byte, xaiReasoningReplayScope, error) {
 	scope := xaiReasoningReplayScopeFromRequest(ctx, from, req, opts, body)
 	if !scope.valid() {
 		return body, scope, nil
@@ -50,13 +50,13 @@ func applyXAIReasoningReplayCacheRequired(ctx context.Context, from sdktranslato
 	return updated, scope, nil
 }
 
-func xaiReasoningReplayScopeFromRequest(ctx context.Context, from sdktranslator.Format, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, body []byte) xaiReasoningReplayScope {
+func xaiReasoningReplayScopeFromRequest(ctx context.Context, from sdktranslator.Format, req xinugateexecutor.Request, opts xinugateexecutor.Options, body []byte) xaiReasoningReplayScope {
 	if !xaiReasoningReplayEnabledForSource(from) {
 		return xaiReasoningReplayScope{}
 	}
 	// End-to-end WebSocket requests use upstream previous_response_id state.
 	// Replaying encrypted reasoning as input as well would duplicate the turn.
-	if cliproxyexecutor.DownstreamWebsocket(ctx) && strings.TrimSpace(gjson.GetBytes(req.Payload, "previous_response_id").String()) != "" {
+	if xinugateexecutor.DownstreamWebsocket(ctx) && strings.TrimSpace(gjson.GetBytes(req.Payload, "previous_response_id").String()) != "" {
 		return xaiReasoningReplayScope{}
 	}
 	sessionKey := codexReasoningReplaySessionKey(ctx, from, req, opts, body)

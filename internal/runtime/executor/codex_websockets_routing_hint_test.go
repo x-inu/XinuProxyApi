@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type codexWebsocketHintFrame struct {
@@ -78,13 +78,13 @@ func TestCodexWebsocketsFastToggleKeepsIncrementalConnection(t *testing.T) {
 	t.Cleanup(func() { exec.CloseExecutionSession(executionSessionID) })
 	auth := codexOAuthTestAuth(server.URL)
 	auth.ID = "codex-oauth-test"
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
-		Metadata:     map[string]any{cliproxyexecutor.ExecutionSessionMetadataKey: executionSessionID},
+		Metadata:     map[string]any{xinugateexecutor.ExecutionSessionMetadataKey: executionSessionID},
 	}
 	execute := func(payload string) {
 		t.Helper()
-		if _, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{Model: "gpt-5.5", Payload: []byte(payload)}, opts); err != nil {
+		if _, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{Model: "gpt-5.5", Payload: []byte(payload)}, opts); err != nil {
 			t.Fatalf("Execute(%s) error: %v", payload, err)
 		}
 	}
@@ -149,10 +149,10 @@ func TestCodexWebsocketsRoutingHintDynamicOperatorRule(t *testing.T) {
 				clientHeaders.Set("X-Operator-Hint", tc.operatorHint)
 			}
 
-			_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+			_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 				Model:   "gpt-5.5",
 				Payload: []byte(`{"model":"gpt-5.4-client","service_tier":"priority","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"hi"}]}]}`),
-			}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Headers: clientHeaders})
+			}, xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Headers: clientHeaders})
 			if err != nil {
 				t.Fatalf("Execute error: %v", err)
 			}
@@ -190,10 +190,10 @@ func TestCodexWebsocketsRoutingHintOverridesForwardedClientHint(t *testing.T) {
 	clientHeaders.Set("X-OpenAI-Internal-Codex-Responses-Lite", "true")
 	clientHeaders.Set(codexRoutingHintHeader, "model=gpt-5.4-client")
 
-	_, err := exec.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := exec.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5(low)",
 		Payload: []byte(`{"model":"gpt-5.4-client","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"hi"}]}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Headers:      clientHeaders,
 	})
@@ -222,10 +222,10 @@ func TestCodexWebsocketsStreamRoutingHintMatchesBodyModel(t *testing.T) {
 	exec := NewCodexWebsocketsExecutor(&config.Config{SDKConfig: config.SDKConfig{DisableImageGeneration: config.DisableImageGenerationAll}})
 	auth := codexOAuthTestAuth(server.URL)
 	auth.ID = "codex-oauth-stream-test"
-	result, err := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5(low)",
 		Payload: []byte(`{"model":"client-alias","service_tier":"priority","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"hi"}]}]}`),
-	}, cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Stream: true})
+	}, xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Stream: true})
 	if err != nil {
 		t.Fatalf("ExecuteStream error: %v", err)
 	}

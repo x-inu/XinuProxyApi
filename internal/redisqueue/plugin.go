@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	internallogging "github.com/x-inu/XinuGate/v7/internal/logging"
-	coresession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
-	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
+	coresession "github.com/x-inu/XinuGate/v7/sdk/xinugate/session"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 func init() {

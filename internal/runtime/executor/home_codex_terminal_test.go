@@ -10,14 +10,14 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/executionregistry"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type terminalCodexHomeDispatcher struct {
-	auth  cliproxyauth.Auth
+	auth  xinugateauth.Auth
 	calls atomic.Int32
 }
 
@@ -55,30 +55,30 @@ func TestHomeCodexTerminalStreamFailureUsesFreshDispatchOnNextRequest(t *testing
 	}))
 	defer server.Close()
 
-	dispatcher := &terminalCodexHomeDispatcher{auth: cliproxyauth.Auth{
+	dispatcher := &terminalCodexHomeDispatcher{auth: xinugateauth.Auth{
 		ID:       "home-codex",
 		Provider: "codex",
-		Status:   cliproxyauth.StatusActive,
+		Status:   xinugateauth.StatusActive,
 		Attributes: map[string]string{
 			"api_key":  "test-key",
 			"base_url": server.URL,
 		},
 	}}
-	manager := cliproxyauth.NewManager(nil, nil, nil)
+	manager := xinugateauth.NewManager(nil, nil, nil)
 	manager.SetConfig(&config.Config{Home: config.HomeConfig{Enabled: true}})
 	manager.PublishHomeDispatch(dispatcher, executionregistry.New(), 1)
 	manager.RegisterExecutor(NewCodexWebsocketsExecutor(&config.Config{}))
 
-	ctx := cliproxyexecutor.WithDownstreamWebsocket(context.Background())
-	opts := cliproxyexecutor.Options{
+	ctx := xinugateexecutor.WithDownstreamWebsocket(context.Background())
+	opts := xinugateexecutor.Options{
 		Stream:         true,
 		SourceFormat:   sdktranslator.FormatOpenAIResponse,
 		ResponseFormat: sdktranslator.FormatOpenAIResponse,
 		Metadata: map[string]any{
-			cliproxyexecutor.ExecutionSessionMetadataKey: "terminal-home-session",
+			xinugateexecutor.ExecutionSessionMetadataKey: "terminal-home-session",
 		},
 	}
-	request := cliproxyexecutor.Request{Model: "gpt-5-codex", Payload: []byte(`{"model":"gpt-5-codex","input":[]}`)}
+	request := xinugateexecutor.Request{Model: "gpt-5-codex", Payload: []byte(`{"model":"gpt-5-codex","input":[]}`)}
 
 	first, errFirst := manager.ExecuteStream(ctx, []string{"codex"}, request, opts)
 	if errFirst != nil {

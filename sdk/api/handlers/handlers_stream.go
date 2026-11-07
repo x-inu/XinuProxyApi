@@ -8,10 +8,10 @@ import (
 
 	"github.com/x-inu/XinuGate/v7/internal/interfaces"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 	"golang.org/x/net/context"
 )
 

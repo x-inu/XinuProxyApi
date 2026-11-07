@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	kimiauth "github.com/x-inu/XinuGate/v7/internal/auth/kimi"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestResolveKimiResponsesURL(t *testing.T) {
 	tests := []struct {
 		name string
-		auth *cliproxyauth.Auth
+		auth *xinugateauth.Auth
 		want string
 	}{
 		{
@@ -20,42 +20,42 @@ func TestResolveKimiResponsesURL(t *testing.T) {
 		},
 		{
 			name: "empty attributes",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{}},
 			want: kimiauth.KimiAPIBaseURL + "/v1/responses",
 		},
 		{
 			name: "base_url without v1",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.com/coding"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.com/coding"}},
 			want: "https://api.kimi.com/coding/v1/responses",
 		},
 		{
 			name: "base_url with trailing slash",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.com/coding/"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.com/coding/"}},
 			want: "https://api.kimi.com/coding/v1/responses",
 		},
 		{
 			name: "base_url with v1",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.com/coding/v1"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.com/coding/v1"}},
 			want: "https://api.kimi.com/coding/v1/responses",
 		},
 		{
 			name: "base_url with v1 and trailing slash",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.com/coding/v1/"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.com/coding/v1/"}},
 			want: "https://api.kimi.com/coding/v1/responses",
 		},
 		{
 			name: "kimi.ai auth by provider",
-			auth: &cliproxyauth.Auth{Provider: "kimi-ai"},
+			auth: &xinugateauth.Auth{Provider: "kimi-ai"},
 			want: kimiauth.KimiAIAPIBaseURL + "/v1/responses",
 		},
 		{
 			name: "kimi.ai auth by domain attribute",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"domain": "kimi.ai"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"domain": "kimi.ai"}},
 			want: kimiauth.KimiAIAPIBaseURL + "/v1/responses",
 		},
 		{
 			name: "kimi.ai base_url in attributes",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding"}},
 			want: "https://api.kimi.ai/coding/v1/responses",
 		},
 	}
@@ -73,7 +73,7 @@ func TestResolveKimiResponsesURL(t *testing.T) {
 func TestResolveKimiChatURL(t *testing.T) {
 	tests := []struct {
 		name string
-		auth *cliproxyauth.Auth
+		auth *xinugateauth.Auth
 		want string
 	}{
 		{
@@ -83,17 +83,17 @@ func TestResolveKimiChatURL(t *testing.T) {
 		},
 		{
 			name: "base_url without v1",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding"}},
 			want: "https://api.kimi.ai/coding/v1/chat/completions",
 		},
 		{
 			name: "base_url with trailing v1",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding/v1"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding/v1"}},
 			want: "https://api.kimi.ai/coding/v1/chat/completions",
 		},
 		{
 			name: "base_url with trailing slash after v1",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding/v1/"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding/v1/"}},
 			want: "https://api.kimi.ai/coding/v1/chat/completions",
 		},
 	}
@@ -111,7 +111,7 @@ func TestResolveKimiChatURL(t *testing.T) {
 func TestResolveKimiClaudeBaseURL(t *testing.T) {
 	tests := []struct {
 		name string
-		auth *cliproxyauth.Auth
+		auth *xinugateauth.Auth
 		want string
 	}{
 		{
@@ -121,12 +121,12 @@ func TestResolveKimiClaudeBaseURL(t *testing.T) {
 		},
 		{
 			name: "base_url with v1",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding/v1"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding/v1"}},
 			want: "https://api.kimi.ai/coding",
 		},
 		{
 			name: "base_url without v1",
-			auth: &cliproxyauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding"}},
+			auth: &xinugateauth.Auth{Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding"}},
 			want: "https://api.kimi.ai/coding",
 		},
 	}

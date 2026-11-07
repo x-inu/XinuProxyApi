@@ -20,7 +20,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/pluginhost"
 	"github.com/x-inu/XinuGate/v7/internal/pluginstore"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -265,10 +265,10 @@ func (h *Handler) SetPostAuthPersistHook(hook coreauth.PostAuthHook) {
 // Additionally, remote access requires allow-remote-management=true.
 func (h *Handler) Middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("X-CPA-VERSION", buildinfo.Version)
-		c.Header("X-CPA-COMMIT", buildinfo.Commit)
-		c.Header("X-CPA-BUILD-DATE", buildinfo.BuildDate)
-		c.Header("X-CPA-SUPPORT-PLUGIN", pluginhost.SupportPluginHeaderValue())
+		c.Header("X-XG-VERSION", buildinfo.Version)
+		c.Header("X-XG-COMMIT", buildinfo.Commit)
+		c.Header("X-XG-BUILD-DATE", buildinfo.BuildDate)
+		c.Header("X-XG-SUPPORT-PLUGIN", pluginhost.SupportPluginHeaderValue())
 
 		clientIP := c.ClientIP()
 		localClient := clientIP == "127.0.0.1" || clientIP == "::1"

@@ -9,7 +9,7 @@ package pluginhost
 typedef struct {
 	void* ptr;
 	size_t len;
-} cliproxy_buffer;
+} xinugate_buffer;
 */
 import "C"
 
@@ -20,8 +20,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/clienterror"
 )
 
-//export cliproxyHostCall
-func cliproxyHostCall(hostCtx unsafe.Pointer, method *C.char, request *C.uint8_t, requestLen C.size_t, response *C.cliproxy_buffer) C.int {
+//export xinugateHostCall
+func xinugateHostCall(hostCtx unsafe.Pointer, method *C.char, request *C.uint8_t, requestLen C.size_t, response *C.xinugate_buffer) C.int {
 	if response != nil {
 		response.ptr = nil
 		response.len = 0
@@ -59,8 +59,8 @@ func cliproxyHostCall(hostCtx unsafe.Pointer, method *C.char, request *C.uint8_t
 	return 0
 }
 
-//export cliproxyHostFree
-func cliproxyHostFree(ptr unsafe.Pointer, len C.size_t) {
+//export xinugateHostFree
+func xinugateHostFree(ptr unsafe.Pointer, len C.size_t) {
 	if ptr != nil {
 		C.free(ptr)
 	}

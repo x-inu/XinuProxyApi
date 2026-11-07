@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/x-inu/XinuGate/v7/internal/auth/vertex"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // ImportVertexCredential handles uploading a Vertex service account JSON and saving it as an auth record.

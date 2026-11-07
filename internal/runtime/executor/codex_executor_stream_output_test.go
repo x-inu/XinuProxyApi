@@ -13,9 +13,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexExecutorExecute_NonEmptyCompletionOutputHydratesMissingItemID(t *testing.T) {
@@ -28,15 +28,15 @@ func TestCodexExecutorExecute_NonEmptyCompletionOutputHydratesMissingItemID(t *t
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	resp, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.4",
 		Payload: []byte(`{"model":"gpt-5.4","input":"What is the weather?"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       false,
 	})
@@ -64,15 +64,15 @@ func TestCodexExecutorExecute_EmptyStreamCompletionOutputUsesOutputItemDone(t *t
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	resp, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.4-mini",
 		Payload: []byte(`{"model":"gpt-5.4-mini","messages":[{"role":"user","content":"Say ok"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai"),
 		Stream:       false,
 	})
@@ -99,15 +99,15 @@ func TestCodexExecutorExecuteSurfacesTerminalStreamError(t *testing.T) {
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       false,
 	})
@@ -131,15 +131,15 @@ func TestCodexExecutorExecuteIncompleteResponseIsSuccessful(t *testing.T) {
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	resp, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	resp, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","messages":[{"role":"user","content":"hello"}]}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("claude"),
 		Stream:       false,
 	})
@@ -159,15 +159,15 @@ func TestCodexExecutorExecuteExplicitTerminalFailureIsNotRequestScoped(t *testin
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       false,
 	})
@@ -188,15 +188,15 @@ func TestCodexExecutorExecuteMissingCompletionIsRequestScoped(t *testing.T) {
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	_, err := executor.Execute(context.Background(), auth, cliproxyexecutor.Request{
+	_, err := executor.Execute(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       false,
 	})
@@ -217,15 +217,15 @@ func TestCodexExecutorExecuteStreamMissingCompletionIsRequestScoped(t *testing.T
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	result, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       true,
 	})
@@ -257,15 +257,15 @@ func TestCodexExecutorExecuteStreamExplicitTerminalFailureIsNotSuccessful(t *tes
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	result, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       true,
 	})
@@ -310,14 +310,14 @@ func TestCodexAutoExecutorHTTPFallbackForwardsSequentialCutoffReasoningSummaryDe
 	defer server.Close()
 
 	executor := NewCodexAutoExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
-	result, err := executor.ExecuteStream(cliproxyexecutor.WithDownstreamWebsocket(context.Background()), auth, cliproxyexecutor.Request{
+	result, err := executor.ExecuteStream(xinugateexecutor.WithDownstreamWebsocket(context.Background()), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.6-sol",
 		Payload: []byte(`{"model":"gpt-5.6-sol","input":"hello","reasoning":{"summary":"detailed"},"stream_options":{"reasoning_summary_delivery":"sequential_cutoff","include_usage":true}}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FromString("openai-response"),
 		ResponseFormat: sdktranslator.FromString("openai-response"),
 		Stream:         true,
@@ -350,7 +350,7 @@ func TestCodexExecutorTransportFailureBeforeTerminalIsRequestScoped(t *testing.T
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			created := []byte("data: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_1\",\"model\":\"gpt-5.5\"}}\n\n")
-			ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+			ctx := context.WithValue(context.Background(), "xinugate.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
 					Header:     http.Header{"Content-Type": {"text/event-stream"}},
@@ -360,12 +360,12 @@ func TestCodexExecutorTransportFailureBeforeTerminalIsRequestScoped(t *testing.T
 			}))
 
 			executor := NewCodexExecutor(&config.Config{})
-			auth := &cliproxyauth.Auth{Attributes: map[string]string{
+			auth := &xinugateauth.Auth{Attributes: map[string]string{
 				"base_url": "http://codex.test",
 				"api_key":  "test",
 			}}
-			req := cliproxyexecutor.Request{Model: "gpt-5.5", Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`)}
-			opts := cliproxyexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Stream: tc.stream}
+			req := xinugateexecutor.Request{Model: "gpt-5.5", Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`)}
+			opts := xinugateexecutor.Options{SourceFormat: sdktranslator.FromString("openai-response"), Stream: tc.stream}
 
 			var terminalErr error
 			if tc.stream {
@@ -394,7 +394,7 @@ func TestCodexExecutorTransportFailureBeforeTerminalIsRequestScoped(t *testing.T
 
 func TestCodexExecutorExecuteIgnoresTransportErrorAfterCompletion(t *testing.T) {
 	completed := []byte("data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"model\":\"gpt-5.5\",\"status\":\"completed\",\"output\":[],\"usage\":{\"input_tokens\":1,\"output_tokens\":1,\"total_tokens\":2}}}\n\n")
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Header:     http.Header{"Content-Type": {"text/event-stream"}},
@@ -404,15 +404,15 @@ func TestCodexExecutorExecuteIgnoresTransportErrorAfterCompletion(t *testing.T) 
 	}))
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": "http://codex.test",
 		"api_key":  "test",
 	}}
 
-	resp, err := executor.Execute(ctx, auth, cliproxyexecutor.Request{
+	resp, err := executor.Execute(ctx, auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       false,
 	})
@@ -426,7 +426,7 @@ func TestCodexExecutorExecuteIgnoresTransportErrorAfterCompletion(t *testing.T) 
 
 func TestCodexExecutorExecuteStreamIgnoresTransportErrorAfterCompletion(t *testing.T) {
 	completed := []byte("data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"model\":\"gpt-5.5\",\"output\":[],\"usage\":{\"input_tokens\":1,\"output_tokens\":1,\"total_tokens\":2}}}\n\n")
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", roundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Header:     http.Header{"Content-Type": {"text/event-stream"}},
@@ -436,15 +436,15 @@ func TestCodexExecutorExecuteStreamIgnoresTransportErrorAfterCompletion(t *testi
 	}))
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": "http://codex.test",
 		"api_key":  "test",
 	}}
 
-	result, err := executor.ExecuteStream(ctx, auth, cliproxyexecutor.Request{
+	result, err := executor.ExecuteStream(ctx, auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       true,
 	})
@@ -474,15 +474,15 @@ func TestCodexExecutorExecuteStreamSurfacesTerminalStreamError(t *testing.T) {
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	result, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.5",
 		Payload: []byte(`{"model":"gpt-5.5","input":"hello"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       true,
 	})
@@ -679,15 +679,15 @@ func TestCodexExecutorExecuteStream_EmptyStreamCompletionOutputUsesOutputItemDon
 	defer server.Close()
 
 	executor := NewCodexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL,
 		"api_key":  "test",
 	}}
 
-	result, err := executor.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+	result, err := executor.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 		Model:   "gpt-5.4-mini",
 		Payload: []byte(`{"model":"gpt-5.4-mini","input":"Say ok"}`),
-	}, cliproxyexecutor.Options{
+	}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FromString("openai-response"),
 		Stream:       true,
 	})

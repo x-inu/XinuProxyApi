@@ -13,8 +13,8 @@ import (
 	geminiclaude "github.com/x-inu/XinuGate/v7/internal/translator/gemini/claude"
 	interactionsclaude "github.com/x-inu/XinuGate/v7/internal/translator/interactions/claude"
 	openaiclaude "github.com/x-inu/XinuGate/v7/internal/translator/openai/claude"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // RewriteCodexSpawnAgentDescription optimizes spawn_agent definitions for
@@ -169,9 +169,9 @@ func OptimizeCodexMultiAgentV2Request(ctx context.Context, headers http.Header, 
 // request optimization and, when the selected codex-api-key model has is-compat
 // enabled, also converts agent_message items into portable message/user input,
 // proactively stripping author, recipient, and internal passthrough metadata.
-func OptimizeCodexMultiAgentV2RequestForAuth(ctx context.Context, headers http.Header, payload []byte, cfg *config.Config, auth *cliproxyauth.Auth, model string) ([]byte, bool) {
+func OptimizeCodexMultiAgentV2RequestForAuth(ctx context.Context, headers http.Header, payload []byte, cfg *config.Config, auth *xinugateauth.Auth, model string) ([]byte, bool) {
 	updated, optimized := multiagentv2.OptimizeCodexMultiAgentV2Request(ctx, headers, payload, cfg)
-	if cliproxyauth.CodexAPIKeyModelIsCompat(cfg, auth, model) {
+	if xinugateauth.CodexAPIKeyModelIsCompat(cfg, auth, model) {
 		updated = multiagentv2.RewriteCodexMultiAgentV2Input(ctx, headers, updated, cfg, true)
 	}
 	return updated, optimized

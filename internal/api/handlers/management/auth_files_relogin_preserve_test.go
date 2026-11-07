@@ -16,7 +16,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/auth/codex"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestSaveTokenRecord_PostPersistHookReceivesCanonicalClaudeOAuth(t *testing.T) {

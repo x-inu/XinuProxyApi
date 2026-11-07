@@ -12,9 +12,9 @@ import (
 	"testing"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestClaudeExecutorFastHTTPErrorPassesThroughWithoutRetry(t *testing.T) {
@@ -83,8 +83,8 @@ func TestClaudeExecutorFastHTTPErrorPassesThroughWithoutRetry(t *testing.T) {
 				}, nil
 			})
 
-			ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", http.RoundTripper(transport))
-			auth := &cliproxyauth.Auth{ID: "fast-error-test", Metadata: claudeOAuthTestMetadata()}
+			ctx := context.WithValue(t.Context(), "xinugate.roundtripper", http.RoundTripper(transport))
+			auth := &xinugateauth.Auth{ID: "fast-error-test", Metadata: claudeOAuthTestMetadata()}
 			if testCase.oauth {
 				auth.Attributes = map[string]string{"api_key": "sk-ant-oat-fast-error", "cloak_mode": "always"}
 			} else {
@@ -92,7 +92,7 @@ func TestClaudeExecutorFastHTTPErrorPassesThroughWithoutRetry(t *testing.T) {
 				auth.Metadata = nil
 			}
 			requestPayload := []byte(`{"model":"claude-opus-5","max_tokens":16,"speed":"fast","messages":[{"role":"user","content":"reply OK"}]}`)
-			options := cliproxyexecutor.Options{
+			options := xinugateexecutor.Options{
 				Stream:         testCase.stream,
 				SourceFormat:   sdktranslator.FormatClaude,
 				ResponseFormat: sdktranslator.FormatClaude,
@@ -101,7 +101,7 @@ func TestClaudeExecutorFastHTTPErrorPassesThroughWithoutRetry(t *testing.T) {
 				requestPayload = []byte(`{"model":"claude-opus-5","max_tokens":16,"messages":[{"role":"user","content":"reply OK"}]}`)
 				options.Headers = http.Header{"Anthropic-Beta": []string{claudeFastModeBeta}}
 			}
-			request := cliproxyexecutor.Request{Model: "claude-opus-5", Payload: requestPayload}
+			request := xinugateexecutor.Request{Model: "claude-opus-5", Payload: requestPayload}
 
 			executor := NewClaudeExecutor(&config.Config{})
 			var errExecute error
@@ -116,7 +116,7 @@ func TestClaudeExecutorFastHTTPErrorPassesThroughWithoutRetry(t *testing.T) {
 			if got := attempts.Load(); got != 1 {
 				t.Fatalf("upstream attempts = %d, want 1", got)
 			}
-			var direct *cliproxyexecutor.RequestTerminatedError
+			var direct *xinugateexecutor.RequestTerminatedError
 			if !errors.As(errExecute, &direct) || direct == nil {
 				t.Fatalf("error = %T %v, want direct response", errExecute, errExecute)
 			}
@@ -129,7 +129,7 @@ func TestClaudeExecutorFastHTTPErrorPassesThroughWithoutRetry(t *testing.T) {
 			if got := direct.ResponseHeaders().Get("Content-Encoding"); got != "" {
 				t.Fatalf("direct Content-Encoding = %q, want absent after decode", got)
 			}
-			requestScoped, ok := errExecute.(cliproxyexecutor.RequestScopedError)
+			requestScoped, ok := errExecute.(xinugateexecutor.RequestScopedError)
 			if !ok || !requestScoped.IsRequestScoped() {
 				t.Fatalf("Fast direct response error = %T, want request-scoped", errExecute)
 			}
@@ -140,18 +140,18 @@ func TestClaudeExecutorFastHTTPErrorPassesThroughWithoutRetry(t *testing.T) {
 func TestClaudeExecutorFastSuccessfulHTTPDecodeErrorDoesNotExposeSuccessStatus(t *testing.T) {
 	testCases := []struct {
 		name string
-		run  func(context.Context, *ClaudeExecutor, *cliproxyauth.Auth, cliproxyexecutor.Request, cliproxyexecutor.Options) error
+		run  func(context.Context, *ClaudeExecutor, *xinugateauth.Auth, xinugateexecutor.Request, xinugateexecutor.Options) error
 	}{
 		{
 			name: "execute",
-			run: func(ctx context.Context, executor *ClaudeExecutor, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) error {
+			run: func(ctx context.Context, executor *ClaudeExecutor, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) error {
 				_, errExecute := executor.Execute(ctx, auth, req, opts)
 				return errExecute
 			},
 		},
 		{
 			name: "stream",
-			run: func(ctx context.Context, executor *ClaudeExecutor, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) error {
+			run: func(ctx context.Context, executor *ClaudeExecutor, auth *xinugateauth.Auth, req xinugateexecutor.Request, opts xinugateexecutor.Options) error {
 				_, errStream := executor.ExecuteStream(ctx, auth, req, opts)
 				return errStream
 			},
@@ -170,17 +170,17 @@ func TestClaudeExecutorFastSuccessfulHTTPDecodeErrorDoesNotExposeSuccessStatus(t
 					Request:    req,
 				}, nil
 			})
-			ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", http.RoundTripper(transport))
-			auth := &cliproxyauth.Auth{
+			ctx := context.WithValue(t.Context(), "xinugate.roundtripper", http.RoundTripper(transport))
+			auth := &xinugateauth.Auth{
 				ID:         "fast-success-decode-error",
 				Attributes: map[string]string{"api_key": "sk-ant-oat-fast-success-decode-error"},
 				Metadata:   claudeOAuthTestMetadata(),
 			}
-			request := cliproxyexecutor.Request{
+			request := xinugateexecutor.Request{
 				Model:   "claude-opus-5",
 				Payload: []byte(`{"model":"claude-opus-5","max_tokens":16,"speed":"fast","messages":[{"role":"user","content":"reply OK"}]}`),
 			}
-			errRun := testCase.run(ctx, NewClaudeExecutor(&config.Config{}), auth, request, cliproxyexecutor.Options{
+			errRun := testCase.run(ctx, NewClaudeExecutor(&config.Config{}), auth, request, xinugateexecutor.Options{
 				Stream:         testCase.name == "stream",
 				SourceFormat:   sdktranslator.FormatClaude,
 				ResponseFormat: sdktranslator.FormatClaude,
@@ -191,7 +191,7 @@ func TestClaudeExecutorFastSuccessfulHTTPDecodeErrorDoesNotExposeSuccessStatus(t
 			if got := attempts.Load(); got != 1 {
 				t.Fatalf("upstream attempts = %d, want 1", got)
 			}
-			var requestErr cliproxyexecutor.RequestScopedError
+			var requestErr xinugateexecutor.RequestScopedError
 			if !errors.As(errRun, &requestErr) || requestErr == nil || !requestErr.IsRequestScoped() {
 				t.Fatalf("Fast decode error = %T %v, want request-scoped", errRun, errRun)
 			}
@@ -213,18 +213,18 @@ func TestClaudeExecutorFastTransportErrorIsRequestScopedWithoutRetry(t *testing.
 		attempts.Add(1)
 		return nil, upstreamErr
 	})
-	ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", http.RoundTripper(transport))
-	auth := &cliproxyauth.Auth{
+	ctx := context.WithValue(t.Context(), "xinugate.roundtripper", http.RoundTripper(transport))
+	auth := &xinugateauth.Auth{
 		ID:         "fast-transport-error",
 		Attributes: map[string]string{"api_key": "sk-ant-oat-fast-transport"},
 		Metadata:   claudeOAuthTestMetadata(),
 	}
-	request := cliproxyexecutor.Request{
+	request := xinugateexecutor.Request{
 		Model:   "claude-opus-5",
 		Payload: []byte(`{"model":"claude-opus-5","max_tokens":16,"speed":"fast","messages":[{"role":"user","content":"reply OK"}]}`),
 	}
 
-	_, errExecute := NewClaudeExecutor(&config.Config{}).Execute(ctx, auth, request, cliproxyexecutor.Options{
+	_, errExecute := NewClaudeExecutor(&config.Config{}).Execute(ctx, auth, request, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatClaude,
 		ResponseFormat: sdktranslator.FormatClaude,
 	})
@@ -234,7 +234,7 @@ func TestClaudeExecutorFastTransportErrorIsRequestScopedWithoutRetry(t *testing.
 	if got := attempts.Load(); got != 1 {
 		t.Fatalf("upstream attempts = %d, want 1", got)
 	}
-	requestScoped, ok := errExecute.(cliproxyexecutor.RequestScopedError)
+	requestScoped, ok := errExecute.(xinugateexecutor.RequestScopedError)
 	if !ok || !requestScoped.IsRequestScoped() {
 		t.Fatalf("Fast transport error = %T, want request-scoped", errExecute)
 	}
@@ -251,18 +251,18 @@ func TestClaudeExecutorNonFastErrorKeepsCredentialScopedBehavior(t *testing.T) {
 			Request:    req,
 		}, nil
 	})
-	ctx := context.WithValue(t.Context(), "cliproxy.roundtripper", http.RoundTripper(transport))
-	auth := &cliproxyauth.Auth{
+	ctx := context.WithValue(t.Context(), "xinugate.roundtripper", http.RoundTripper(transport))
+	auth := &xinugateauth.Auth{
 		ID:         "standard-rate-limit",
 		Attributes: map[string]string{"api_key": "sk-ant-oat-standard-rate-limit"},
 		Metadata:   claudeOAuthTestMetadata(),
 	}
-	request := cliproxyexecutor.Request{
+	request := xinugateexecutor.Request{
 		Model:   "claude-opus-5",
 		Payload: []byte(`{"model":"claude-opus-5","max_tokens":16,"messages":[{"role":"user","content":"reply OK"}]}`),
 	}
 
-	_, errExecute := NewClaudeExecutor(&config.Config{}).Execute(ctx, auth, request, cliproxyexecutor.Options{
+	_, errExecute := NewClaudeExecutor(&config.Config{}).Execute(ctx, auth, request, xinugateexecutor.Options{
 		SourceFormat:   sdktranslator.FormatClaude,
 		ResponseFormat: sdktranslator.FormatClaude,
 	})
@@ -270,11 +270,11 @@ func TestClaudeExecutorNonFastErrorKeepsCredentialScopedBehavior(t *testing.T) {
 	if !errors.As(errExecute, &statusError) || statusError.StatusCode() != http.StatusTooManyRequests {
 		t.Fatalf("error = %v, want status 429", errExecute)
 	}
-	var direct *cliproxyexecutor.RequestTerminatedError
+	var direct *xinugateexecutor.RequestTerminatedError
 	if errors.As(errExecute, &direct) {
 		t.Fatal("non-Fast error unexpectedly became a direct response")
 	}
-	if requestScoped, ok := errExecute.(cliproxyexecutor.RequestScopedError); ok && requestScoped.IsRequestScoped() {
+	if requestScoped, ok := errExecute.(xinugateexecutor.RequestScopedError); ok && requestScoped.IsRequestScoped() {
 		t.Fatal("non-Fast rate limit unexpectedly became request-scoped")
 	}
 	if got := attempts.Load(); got != 1 {

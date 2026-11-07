@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestRemoteStoresDisabledLoginReachesTokenStorage(t *testing.T) {
 	tests := []struct {
 		name  string
-		store cliproxyauth.Store
+		store xinugateauth.Store
 	}{
 		{
 			name: "postgres",
@@ -32,7 +32,7 @@ func TestRemoteStoresDisabledLoginReachesTokenStorage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			errReachedStorage := errors.New("reached token storage")
 			storageReached := false
-			auth := &cliproxyauth.Auth{
+			auth := &xinugateauth.Auth{
 				ID:       "canonical-disabled.json",
 				FileName: "canonical-disabled.json",
 				Provider: "claude",
@@ -55,7 +55,7 @@ func TestRemoteStoresDisabledLoginReachesTokenStorage(t *testing.T) {
 				t.Fatal("runtime Save() reached token storage for a missing disabled credential")
 			}
 
-			ctx := cliproxyauth.WithAuthCreationIntent(context.Background())
+			ctx := xinugateauth.WithAuthCreationIntent(context.Background())
 			_, errSave = tt.store.Save(ctx, auth)
 			if !errors.Is(errSave, errReachedStorage) {
 				t.Fatalf("Save() error = %v, want token storage sentinel", errSave)

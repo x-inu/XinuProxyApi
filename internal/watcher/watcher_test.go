@@ -19,7 +19,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/watcher/diff"
 	"github.com/x-inu/XinuGate/v7/internal/watcher/synthesizer"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	"gopkg.in/yaml.v3"
 )
 

@@ -13,19 +13,19 @@ import (
 	"sync/atomic"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // PluginAuthParser parses auth JSON owned by plugin providers.
 type PluginAuthParser interface {
-	ParseAuth(context.Context, pluginapi.AuthParseRequest) (*cliproxyauth.Auth, bool, error)
+	ParseAuth(context.Context, pluginapi.AuthParseRequest) (*xinugateauth.Auth, bool, error)
 }
 
 // PluginMultiAuthParser expands one auth JSON payload into multiple plugin auth records.
 // Returning handled=true with an empty slice means the plugin intentionally suppresses built-in parsing.
 type PluginMultiAuthParser interface {
-	ParseAuths(context.Context, pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error)
+	ParseAuths(context.Context, pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error)
 }
 
 type pluginAuthParserHolder struct {
@@ -72,12 +72,12 @@ func (s *FileTokenStore) SetBaseDir(dir string) {
 }
 
 // Save persists token storage and metadata to the resolved auth file path.
-func (s *FileTokenStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (string, error) {
+func (s *FileTokenStore) Save(ctx context.Context, auth *xinugateauth.Auth) (string, error) {
 	if auth == nil {
 		return "", fmt.Errorf("auth filestore: auth is nil")
 	}
-	cliproxyauth.NormalizeCredentialMetadata(auth.Metadata)
-	if errWeight := cliproxyauth.ValidateAuthWeight(auth); errWeight != nil {
+	xinugateauth.NormalizeCredentialMetadata(auth.Metadata)
+	if errWeight := xinugateauth.ValidateAuthWeight(auth); errWeight != nil {
 		return "", fmt.Errorf("auth filestore: %w", errWeight)
 	}
 
@@ -92,7 +92,7 @@ func (s *FileTokenStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (str
 	// Runtime updates must not recreate a disabled credential whose source file
 	// was deliberately removed. Login and migration callers explicitly mark the
 	// save when creating a missing disabled credential is intentional.
-	if auth.Disabled && !cliproxyauth.HasAuthCreationIntent(ctx) {
+	if auth.Disabled && !xinugateauth.HasAuthCreationIntent(ctx) {
 		if _, statErr := os.Stat(path); os.IsNotExist(statErr) {
 			return "", nil
 		}
@@ -157,9 +157,9 @@ func (s *FileTokenStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (str
 	if auth.Attributes == nil {
 		auth.Attributes = make(map[string]string)
 	}
-	auth.Attributes[cliproxyauth.AttributePath] = path
-	auth.Attributes[cliproxyauth.AttributeSource] = path
-	auth.Attributes[cliproxyauth.AttributeSourceBackend] = cliproxyauth.AuthSourceFile
+	auth.Attributes[xinugateauth.AttributePath] = path
+	auth.Attributes[xinugateauth.AttributeSource] = path
+	auth.Attributes[xinugateauth.AttributeSourceBackend] = xinugateauth.AuthSourceFile
 
 	if strings.TrimSpace(auth.FileName) == "" {
 		auth.FileName = auth.ID
@@ -169,12 +169,12 @@ func (s *FileTokenStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (str
 }
 
 // List enumerates all auth JSON files under the configured directory.
-func (s *FileTokenStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) {
+func (s *FileTokenStore) List(ctx context.Context) ([]*xinugateauth.Auth, error) {
 	dir := s.baseDirSnapshot()
 	if dir == "" {
 		return nil, fmt.Errorf("auth filestore: directory not configured")
 	}
-	entries := make([]*cliproxyauth.Auth, 0)
+	entries := make([]*xinugateauth.Auth, 0)
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
@@ -227,7 +227,7 @@ func (s *FileTokenStore) resolveDeletePath(id string) (string, error) {
 	return filepath.Join(dir, id), nil
 }
 
-func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*cliproxyauth.Auth, error) {
+func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*xinugateauth.Auth, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read file: %w", err)
@@ -239,8 +239,8 @@ func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*cliproxyauth.Au
 	if err = json.Unmarshal(data, &metadata); err != nil {
 		return nil, fmt.Errorf("unmarshal auth json: %w", err)
 	}
-	cliproxyauth.NormalizeCredentialMetadata(metadata)
-	if errWeight := cliproxyauth.ValidateAuthWeight(&cliproxyauth.Auth{Metadata: metadata}); errWeight != nil {
+	xinugateauth.NormalizeCredentialMetadata(metadata)
+	if errWeight := xinugateauth.ValidateAuthWeight(&xinugateauth.Auth{Metadata: metadata}); errWeight != nil {
 		return nil, errWeight
 	}
 	provider, _ := metadata["type"].(string)
@@ -269,21 +269,21 @@ func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*cliproxyauth.Au
 				if auth == nil {
 					continue
 				}
-				cliproxyauth.NormalizeCredentialMetadata(auth.Metadata)
+				xinugateauth.NormalizeCredentialMetadata(auth.Metadata)
 				if len(auths) > 1 {
-					cliproxyauth.MarkPluginVirtualAuth(auth, path, index)
+					xinugateauth.MarkPluginVirtualAuth(auth, path, index)
 				}
 				auth.CreatedAt = info.ModTime()
 				auth.UpdatedAt = info.ModTime()
 				if auth.Attributes == nil {
 					auth.Attributes = make(map[string]string)
 				}
-				auth.Attributes[cliproxyauth.AttributePath] = path
-				auth.Attributes[cliproxyauth.AttributeSource] = path
-				auth.Attributes[cliproxyauth.AttributeSourceBackend] = cliproxyauth.AuthSourceFile
+				auth.Attributes[xinugateauth.AttributePath] = path
+				auth.Attributes[xinugateauth.AttributeSource] = path
+				auth.Attributes[xinugateauth.AttributeSourceBackend] = xinugateauth.AuthSourceFile
 				if disabled {
 					auth.Disabled = true
-					auth.Status = cliproxyauth.StatusDisabled
+					auth.Status = xinugateauth.StatusDisabled
 					if auth.Metadata == nil {
 						auth.Metadata = make(map[string]any)
 					}
@@ -295,16 +295,16 @@ func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*cliproxyauth.Au
 				if pref, ok := metadata["prefix"].(string); ok && auth.Prefix == "" {
 					auth.Prefix = strings.Trim(strings.TrimSpace(pref), "/")
 				}
-				if errWeight := cliproxyauth.ApplyAuthWeightMetadata(auth, metadata); errWeight != nil {
+				if errWeight := xinugateauth.ApplyAuthWeightMetadata(auth, metadata); errWeight != nil {
 					return nil, errWeight
 				}
-				cliproxyauth.ApplyAuthPriorityMetadata(auth, metadata)
-				if _, inherited := auth.Attributes[cliproxyauth.AttributeFilePriority]; inherited {
+				xinugateauth.ApplyAuthPriorityMetadata(auth, metadata)
+				if _, inherited := auth.Attributes[xinugateauth.AttributeFilePriority]; inherited {
 					if setter, ok := auth.Storage.(interface{ SetMetadata(map[string]any) }); ok {
 						setter.SetMetadata(auth.Metadata)
 					}
 				}
-				cliproxyauth.ApplyCustomHeadersFromMetadata(auth)
+				xinugateauth.ApplyCustomHeadersFromMetadata(auth)
 			}
 			return auths, nil
 		}
@@ -318,9 +318,9 @@ func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*cliproxyauth.Au
 	}
 	id := s.idFor(path, baseDir)
 	disabled, _ := metadata["disabled"].(bool)
-	status := cliproxyauth.StatusActive
+	status := xinugateauth.StatusActive
 	if disabled {
-		status = cliproxyauth.StatusDisabled
+		status = xinugateauth.StatusDisabled
 	}
 	proxyURL := ""
 	if p, ok := metadata["proxy_url"].(string); ok {
@@ -334,7 +334,7 @@ func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*cliproxyauth.Au
 			prefix = trimmed
 		}
 	}
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       id,
 		Provider: provider,
 		FileName: id,
@@ -344,9 +344,9 @@ func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*cliproxyauth.Au
 		Status:   status,
 		Disabled: disabled,
 		Attributes: map[string]string{
-			cliproxyauth.AttributePath:          path,
-			cliproxyauth.AttributeSource:        path,
-			cliproxyauth.AttributeSourceBackend: cliproxyauth.AuthSourceFile,
+			xinugateauth.AttributePath:          path,
+			xinugateauth.AttributeSource:        path,
+			xinugateauth.AttributeSourceBackend: xinugateauth.AuthSourceFile,
 		},
 		Metadata:         metadata,
 		CreatedAt:        info.ModTime(),
@@ -357,11 +357,11 @@ func (s *FileTokenStore) readAuthFiles(path, baseDir string) ([]*cliproxyauth.Au
 	if email, ok := metadata["email"].(string); ok && email != "" {
 		auth.Attributes["email"] = email
 	}
-	cliproxyauth.ApplyCustomHeadersFromMetadata(auth)
-	return []*cliproxyauth.Auth{auth}, nil
+	xinugateauth.ApplyCustomHeadersFromMetadata(auth)
+	return []*xinugateauth.Auth{auth}, nil
 }
 
-func (s *FileTokenStore) readAuthFile(path, baseDir string) (*cliproxyauth.Auth, error) {
+func (s *FileTokenStore) readAuthFile(path, baseDir string) (*xinugateauth.Auth, error) {
 	auths, errReadAuths := s.readAuthFiles(path, baseDir)
 	if errReadAuths != nil || len(auths) == 0 {
 		return nil, errReadAuths
@@ -369,7 +369,7 @@ func (s *FileTokenStore) readAuthFile(path, baseDir string) (*cliproxyauth.Auth,
 	return auths[0], nil
 }
 
-func parsePluginAuthFile(parser PluginAuthParser, req pluginapi.AuthParseRequest) ([]*cliproxyauth.Auth, bool, error) {
+func parsePluginAuthFile(parser PluginAuthParser, req pluginapi.AuthParseRequest) ([]*xinugateauth.Auth, bool, error) {
 	if parser == nil {
 		return nil, false, nil
 	}
@@ -380,10 +380,10 @@ func parsePluginAuthFile(parser PluginAuthParser, req pluginapi.AuthParseRequest
 	if errParse != nil || !handled || auth == nil {
 		return nil, handled, errParse
 	}
-	return []*cliproxyauth.Auth{auth}, true, nil
+	return []*xinugateauth.Auth{auth}, true, nil
 }
 
-func compactPluginAuths(auths []*cliproxyauth.Auth) []*cliproxyauth.Auth {
+func compactPluginAuths(auths []*xinugateauth.Auth) []*xinugateauth.Auth {
 	if len(auths) == 0 {
 		return nil
 	}
@@ -392,7 +392,7 @@ func compactPluginAuths(auths []*cliproxyauth.Auth) []*cliproxyauth.Auth {
 		if auth == nil {
 			continue
 		}
-		if errWeight := cliproxyauth.ValidateAuthWeight(auth); errWeight != nil {
+		if errWeight := xinugateauth.ValidateAuthWeight(auth); errWeight != nil {
 			continue
 		}
 		out = append(out, auth)
@@ -414,7 +414,7 @@ func (s *FileTokenStore) idFor(path, baseDir string) string {
 	return id
 }
 
-func (s *FileTokenStore) resolveAuthPath(auth *cliproxyauth.Auth) (string, error) {
+func (s *FileTokenStore) resolveAuthPath(auth *xinugateauth.Auth) (string, error) {
 	if auth == nil {
 		return "", fmt.Errorf("auth filestore: auth is nil")
 	}

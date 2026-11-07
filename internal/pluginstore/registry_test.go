@@ -16,9 +16,9 @@ func TestParseRegistryValidatesRegistry(t *testing.T) {
 			"description": "Adds sample provider support.",
 			"author": "author-name",
 			"version": "0.1.0",
-			"repository": "https://github.com/author-name/cliproxy-sample-provider-plugin",
+			"repository": "https://github.com/author-name/xinugate-sample-provider-plugin",
 			"logo": "https://example.com/logo.png",
-			"homepage": "https://github.com/author-name/cliproxy-sample-provider-plugin",
+			"homepage": "https://github.com/author-name/xinugate-sample-provider-plugin",
 			"license": "MIT",
 			"tags": ["provider"]
 		}]
@@ -46,9 +46,9 @@ func TestParseRegistryNormalizesPluginFields(t *testing.T) {
 			"description": " Adds sample provider support. ",
 			"author": " author-name ",
 			"version": " 0.1.0 ",
-			"repository": " https://github.com/author-name/cliproxy-sample-provider-plugin ",
+			"repository": " https://github.com/author-name/xinugate-sample-provider-plugin ",
 			"logo": " https://example.com/logo.png ",
-			"homepage": " https://github.com/author-name/cliproxy-sample-provider-plugin ",
+			"homepage": " https://github.com/author-name/xinugate-sample-provider-plugin ",
 			"license": " MIT ",
 			"tags": [" provider "]
 		}]
@@ -60,7 +60,7 @@ func TestParseRegistryNormalizesPluginFields(t *testing.T) {
 	if !ok {
 		t.Fatal("PluginByID(sample-provider) missing")
 	}
-	if plugin.ID != "sample-provider" || plugin.Version != "0.1.0" || plugin.Repository != "https://github.com/author-name/cliproxy-sample-provider-plugin" {
+	if plugin.ID != "sample-provider" || plugin.Version != "0.1.0" || plugin.Repository != "https://github.com/author-name/xinugate-sample-provider-plugin" {
 		t.Fatalf("plugin not normalized: %#v", plugin)
 	}
 	if plugin.Name != "Sample Provider" || plugin.Tags[0] != "provider" {
@@ -76,7 +76,7 @@ func TestValidateRegistryAllowsMissingVersion(t *testing.T) {
 		Name:        "Sample Provider",
 		Description: "Adds sample provider support.",
 		Author:      "author-name",
-		Repository:  "https://github.com/author-name/cliproxy-sample-provider-plugin",
+		Repository:  "https://github.com/author-name/xinugate-sample-provider-plugin",
 	}}}
 	if errValidate := ValidateRegistry(registry); errValidate != nil {
 		t.Fatalf("ValidateRegistry() error = %v, want nil for missing version", errValidate)
@@ -213,7 +213,7 @@ func TestValidateRegistryRejectsInvalidEntries(t *testing.T) {
 		Description: "Adds sample provider support.",
 		Author:      "author-name",
 		Version:     "0.1.0",
-		Repository:  "https://github.com/author-name/cliproxy-sample-provider-plugin",
+		Repository:  "https://github.com/author-name/xinugate-sample-provider-plugin",
 	}
 	tests := []struct {
 		name    string

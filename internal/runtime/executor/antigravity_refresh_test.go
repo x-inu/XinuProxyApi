@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -49,7 +49,7 @@ func TestAntigravityEnsureAccessTokenUsesFiveMinuteSafetyWindow(t *testing.T) {
 	now := time.Now()
 
 	t.Run("uses token outside safety window", func(t *testing.T) {
-		auth := &cliproxyauth.Auth{Metadata: map[string]any{
+		auth := &xinugateauth.Auth{Metadata: map[string]any{
 			"access_token": "still-valid-access",
 			"expired":      now.Add(antigravityRequestTokenSafetyWindow + time.Minute).Format(time.RFC3339),
 		}}
@@ -65,7 +65,7 @@ func TestAntigravityEnsureAccessTokenUsesFiveMinuteSafetyWindow(t *testing.T) {
 
 	t.Run("uses relative expiry with issued_at seconds", func(t *testing.T) {
 		issuedAt := now.Add(-10 * time.Minute).Truncate(time.Second)
-		auth := &cliproxyauth.Auth{Metadata: map[string]any{
+		auth := &xinugateauth.Auth{Metadata: map[string]any{
 			"access_token": "relative-expiry-access",
 			"expires_in":   3600,
 			"issued_at":    issuedAt.Unix(),
@@ -81,7 +81,7 @@ func TestAntigravityEnsureAccessTokenUsesFiveMinuteSafetyWindow(t *testing.T) {
 	})
 
 	t.Run("refreshes token inside safety window", func(t *testing.T) {
-		auth := &cliproxyauth.Auth{Metadata: map[string]any{
+		auth := &xinugateauth.Auth{Metadata: map[string]any{
 			"access_token": "expiring-access",
 			"expired":      now.Add(antigravityRequestTokenSafetyWindow - time.Minute).Format(time.RFC3339),
 		}}
@@ -137,7 +137,7 @@ func TestAntigravityRefresh_DeduplicatesConcurrentRefresh(t *testing.T) {
 	useAntigravityRefreshTestTransport(t, serverURL.Host)
 
 	executor := &AntigravityExecutor{}
-	authA := &cliproxyauth.Auth{
+	authA := &xinugateauth.Auth{
 		ID:       "auth-a",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -145,7 +145,7 @@ func TestAntigravityRefresh_DeduplicatesConcurrentRefresh(t *testing.T) {
 			"project_id":    "project-a",
 		},
 	}
-	authB := &cliproxyauth.Auth{
+	authB := &xinugateauth.Auth{
 		ID:       "auth-b",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -154,9 +154,9 @@ func TestAntigravityRefresh_DeduplicatesConcurrentRefresh(t *testing.T) {
 		},
 	}
 
-	results := make(chan *cliproxyauth.Auth, 2)
+	results := make(chan *xinugateauth.Auth, 2)
 	errs := make(chan error, 2)
-	runRefresh := func(auth *cliproxyauth.Auth, launched chan<- struct{}) {
+	runRefresh := func(auth *xinugateauth.Auth, launched chan<- struct{}) {
 		if launched != nil {
 			close(launched)
 		}

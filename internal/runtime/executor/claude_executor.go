@@ -15,7 +15,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	sigcompat "github.com/x-inu/XinuGate/v7/internal/signature"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // ClaudeExecutor is a stateless executor for Anthropic Claude over the messages API.
@@ -211,12 +211,12 @@ func setClaudeResponseModel(payload []byte, model string) ([]byte, bool) {
 }
 
 // PrepareRequest injects Claude credentials into the outgoing HTTP request.
-func (e *ClaudeExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth) error {
+func (e *ClaudeExecutor) PrepareRequest(req *http.Request, auth *xinugateauth.Auth) error {
 	if req == nil {
 		return nil
 	}
 	apiKey, _ := claudeCreds(auth)
-	useAPIKey := auth != nil && (auth.AuthKind() == cliproxyauth.AuthKindAPIKey || (auth.Attributes != nil && strings.TrimSpace(auth.Attributes["api_key"]) != ""))
+	useAPIKey := auth != nil && (auth.AuthKind() == xinugateauth.AuthKindAPIKey || (auth.Attributes != nil && strings.TrimSpace(auth.Attributes["api_key"]) != ""))
 	isAnthropicBase := isAnthropicUpstreamURL(req.URL)
 	if strings.TrimSpace(apiKey) != "" {
 		if isAnthropicBase && useAPIKey {
@@ -239,7 +239,7 @@ func (e *ClaudeExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Au
 }
 
 // HttpRequest injects Claude credentials into the request and executes it.
-func (e *ClaudeExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth, req *http.Request) (*http.Response, error) {
+func (e *ClaudeExecutor) HttpRequest(ctx context.Context, auth *xinugateauth.Auth, req *http.Request) (*http.Response, error) {
 	if req == nil {
 		return nil, fmt.Errorf("claude executor: request is nil")
 	}

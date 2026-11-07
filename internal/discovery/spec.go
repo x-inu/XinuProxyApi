@@ -41,7 +41,7 @@ type TXTOptions struct {
 func DefaultTXTOptions() TXTOptions {
 	return TXTOptions{
 		Version:          "1",
-		Product:          ProductCPA,
+		Product:          ProductXG,
 		Protocols:        []string{"chat-completions", "responses", "messages", "generate-content", "interactions"},
 		Features:         []string{"chat", "responses", "messages", "generate_content", "interactions"},
 		APIPathOpenAI:    "/v1",
@@ -61,7 +61,7 @@ func BuildTXTRecords(opts TXTOptions) []string {
 		opts.Version = "1"
 	}
 	if opts.Product == "" {
-		opts.Product = ProductCPA
+		opts.Product = ProductXG
 	}
 	if opts.APIPathOpenAI == "" {
 		opts.APIPathOpenAI = "/v1"

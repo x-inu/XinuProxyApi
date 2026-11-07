@@ -22,7 +22,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	internalsignature "github.com/x-inu/XinuGate/v7/internal/signature"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // antigravityReplayLogKey returns a short, non-reversible tag for a replay
@@ -96,7 +96,7 @@ func antigravityReasoningReplayScopeFromPayload(modelName string, payload []byte
 	}
 }
 
-func antigravityReasoningReplayScopeFromRequest(ctx context.Context, modelName string, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, payload []byte) antigravityReasoningReplayScope {
+func antigravityReasoningReplayScopeFromRequest(ctx context.Context, modelName string, req xinugateexecutor.Request, opts xinugateexecutor.Options, payload []byte) antigravityReasoningReplayScope {
 	// Prefer an explicit downstream session over a provider sessionId synthesized
 	// from request text. This keeps identical prompts in separate client sessions
 	// from sharing an opaque Gemini reasoning chain.
@@ -134,7 +134,7 @@ func antigravitySessionHeaderValue(headers http.Header, names ...string) string 
 	return ""
 }
 
-func antigravityReasoningReplayClientSessionKey(ctx context.Context, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) string {
+func antigravityReasoningReplayClientSessionKey(ctx context.Context, req xinugateexecutor.Request, opts xinugateexecutor.Options) string {
 	for _, raw := range [][]byte{opts.OriginalRequest, req.Payload} {
 		if scope, ok := helps.ClaudeCodeExecutionScope(ctx, raw, opts.Headers); ok {
 			if lane := antigravityClaudeReplaySystemLane(raw); lane != "" {
@@ -156,10 +156,10 @@ func antigravityReasoningReplayClientSessionKey(ctx context.Context, req cliprox
 			}
 		}
 	}
-	if value := metadataString(opts.Metadata, cliproxyexecutor.ExecutionSessionMetadataKey); value != "" {
+	if value := metadataString(opts.Metadata, xinugateexecutor.ExecutionSessionMetadataKey); value != "" {
 		return "execution:" + value
 	}
-	if value := metadataString(req.Metadata, cliproxyexecutor.ExecutionSessionMetadataKey); value != "" {
+	if value := metadataString(req.Metadata, xinugateexecutor.ExecutionSessionMetadataKey); value != "" {
 		return "execution:" + value
 	}
 	for _, raw := range [][]byte{opts.OriginalRequest, req.Payload} {
@@ -254,7 +254,7 @@ func logAntigravityReasoningReplayDegraded(scope antigravityReasoningReplayScope
 		stage, antigravityReplayLogKey(scope.sessionKey), err)
 }
 
-func prepareAntigravityGeminiReasoningReplayPayload(ctx context.Context, modelName string, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, payload []byte) ([]byte, antigravityReasoningReplayScope, error) {
+func prepareAntigravityGeminiReasoningReplayPayload(ctx context.Context, modelName string, req xinugateexecutor.Request, opts xinugateexecutor.Options, payload []byte) ([]byte, antigravityReasoningReplayScope, error) {
 	if !antigravityUsesReasoningReplayCache(modelName) {
 		return payload, antigravityReasoningReplayScope{}, nil
 	}
@@ -312,7 +312,7 @@ func clearAntigravityReasoningReplayOnInvalidSignature(ctx context.Context, scop
 	return errDelete
 }
 
-func applyAntigravityReasoningReplayCache(ctx context.Context, modelName string, req cliproxyexecutor.Request, opts cliproxyexecutor.Options, payload []byte) ([]byte, antigravityReasoningReplayScope, bool, error) {
+func applyAntigravityReasoningReplayCache(ctx context.Context, modelName string, req xinugateexecutor.Request, opts xinugateexecutor.Options, payload []byte) ([]byte, antigravityReasoningReplayScope, bool, error) {
 	scope := antigravityReasoningReplayScopeFromRequest(ctx, modelName, req, opts, payload)
 	if !scope.valid() {
 		return payload, scope, false, nil

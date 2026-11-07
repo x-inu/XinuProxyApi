@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 var cooldownTestDriverID atomic.Uint64
@@ -136,7 +136,7 @@ func (r *cooldownTestRows) Next(dest []driver.Value) error {
 
 func TestPostgresCooldownStateStore_SaveLoad(t *testing.T) {
 	state := &cooldownTestState{rows: make(map[string]cooldownTestRow)}
-	driverName := fmt.Sprintf("cliproxy_postgres_cooldown_test_%d", cooldownTestDriverID.Add(1))
+	driverName := fmt.Sprintf("xinugate_postgres_cooldown_test_%d", cooldownTestDriverID.Add(1))
 	sql.Register(driverName, &cooldownTestDriver{state: state})
 	db, errOpen := sql.Open(driverName, "")
 	if errOpen != nil {
@@ -167,12 +167,12 @@ func TestPostgresCooldownStateStore_SaveLoad(t *testing.T) {
 	}
 
 	nextRetry := time.Date(2026, time.March, 15, 12, 0, 0, 0, time.UTC)
-	records := []cliproxyauth.CooldownStateRecord{
+	records := []xinugateauth.CooldownStateRecord{
 		{
 			Provider:       "codex",
 			AuthID:         "account-1",
 			Model:          "gpt-test",
-			Status:         string(cliproxyauth.StatusError),
+			Status:         string(xinugateauth.StatusError),
 			NextRetryAfter: nextRetry,
 			Reason:         "rate limited",
 			UpdatedAt:      nextRetry.Add(-time.Minute),
@@ -189,8 +189,8 @@ func TestPostgresCooldownStateStore_SaveLoad(t *testing.T) {
 		t.Fatalf("Load() = %#v, want %#v", loaded, records)
 	}
 
-	zeroTimeRecord := cliproxyauth.CooldownStateRecord{AuthID: "account-2", Model: "gpt-test"}
-	if errSave := cooldownStore.Save(context.Background(), []cliproxyauth.CooldownStateRecord{zeroTimeRecord}); errSave != nil {
+	zeroTimeRecord := xinugateauth.CooldownStateRecord{AuthID: "account-2", Model: "gpt-test"}
+	if errSave := cooldownStore.Save(context.Background(), []xinugateauth.CooldownStateRecord{zeroTimeRecord}); errSave != nil {
 		t.Fatalf("Save() with zero UpdatedAt error = %v", errSave)
 	}
 	loaded, errLoad = cooldownStore.Load(context.Background())
@@ -222,7 +222,7 @@ func TestPostgresCooldownStateStore_SaveLoad(t *testing.T) {
 
 func TestPostgresCooldownStateStore_MergesConcurrentInstances(t *testing.T) {
 	state := &cooldownTestState{rows: make(map[string]cooldownTestRow)}
-	driverName := fmt.Sprintf("cliproxy_postgres_cooldown_merge_test_%d", cooldownTestDriverID.Add(1))
+	driverName := fmt.Sprintf("xinugate_postgres_cooldown_merge_test_%d", cooldownTestDriverID.Add(1))
 	sql.Register(driverName, &cooldownTestDriver{state: state})
 	db, errOpen := sql.Open(driverName, "")
 	if errOpen != nil {
@@ -247,12 +247,12 @@ func TestPostgresCooldownStateStore_MergesConcurrentInstances(t *testing.T) {
 		}
 	}
 	updatedAt := time.Now().UTC().Add(-time.Minute)
-	recordA := cliproxyauth.CooldownStateRecord{AuthID: "account-a", Model: "model-a", UpdatedAt: updatedAt}
-	recordB := cliproxyauth.CooldownStateRecord{AuthID: "account-b", Model: "model-b", UpdatedAt: updatedAt}
-	if errSave := storeA.Save(context.Background(), []cliproxyauth.CooldownStateRecord{recordA}); errSave != nil {
+	recordA := xinugateauth.CooldownStateRecord{AuthID: "account-a", Model: "model-a", UpdatedAt: updatedAt}
+	recordB := xinugateauth.CooldownStateRecord{AuthID: "account-b", Model: "model-b", UpdatedAt: updatedAt}
+	if errSave := storeA.Save(context.Background(), []xinugateauth.CooldownStateRecord{recordA}); errSave != nil {
 		t.Fatalf("storeA.Save() error = %v", errSave)
 	}
-	if errSave := storeB.Save(context.Background(), []cliproxyauth.CooldownStateRecord{recordB}); errSave != nil {
+	if errSave := storeB.Save(context.Background(), []xinugateauth.CooldownStateRecord{recordB}); errSave != nil {
 		t.Fatalf("storeB.Save() error = %v", errSave)
 	}
 	staleRecords, errLoad := staleStore.Load(context.Background())
@@ -265,10 +265,10 @@ func TestPostgresCooldownStateStore_MergesConcurrentInstances(t *testing.T) {
 
 	newerRecordA := recordA
 	newerRecordA.UpdatedAt = updatedAt.Add(time.Hour)
-	if errSave := storeA.Save(context.Background(), []cliproxyauth.CooldownStateRecord{newerRecordA}); errSave != nil {
+	if errSave := storeA.Save(context.Background(), []xinugateauth.CooldownStateRecord{newerRecordA}); errSave != nil {
 		t.Fatalf("storeA.Save(newer) error = %v", errSave)
 	}
-	if errSave := staleStore.Save(context.Background(), []cliproxyauth.CooldownStateRecord{recordB}); errSave != nil {
+	if errSave := staleStore.Save(context.Background(), []xinugateauth.CooldownStateRecord{recordB}); errSave != nil {
 		t.Fatalf("staleStore.Save(without newer record) error = %v", errSave)
 	}
 	resurrectStore := &postgresCooldownStateStore{store: postgresStore}

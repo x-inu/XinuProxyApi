@@ -16,7 +16,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuGate/v7/internal/misc"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 const (
@@ -207,12 +207,12 @@ func (s *PostgresStore) WorkDir() string {
 func (s *PostgresStore) SetBaseDir(string) {}
 
 // Save persists authentication metadata to disk and PostgreSQL.
-func (s *PostgresStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (string, error) {
+func (s *PostgresStore) Save(ctx context.Context, auth *xinugateauth.Auth) (string, error) {
 	if auth == nil {
 		return "", fmt.Errorf("postgres store: auth is nil")
 	}
-	cliproxyauth.NormalizeCredentialMetadata(auth.Metadata)
-	if errWeight := cliproxyauth.ValidateAuthWeight(auth); errWeight != nil {
+	xinugateauth.NormalizeCredentialMetadata(auth.Metadata)
+	if errWeight := xinugateauth.ValidateAuthWeight(auth); errWeight != nil {
 		return "", fmt.Errorf("postgres store: %w", errWeight)
 	}
 
@@ -227,7 +227,7 @@ func (s *PostgresStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (stri
 	// Runtime updates must not recreate a disabled credential whose source file
 	// was deliberately removed. Login and migration callers explicitly mark the
 	// save when creating a missing disabled credential is intentional.
-	if auth.Disabled && !cliproxyauth.HasAuthCreationIntent(ctx) {
+	if auth.Disabled && !xinugateauth.HasAuthCreationIntent(ctx) {
 		if _, statErr := os.Stat(path); errors.Is(statErr, fs.ErrNotExist) {
 			return "", nil
 		}
@@ -279,8 +279,8 @@ func (s *PostgresStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (stri
 	if auth.Attributes == nil {
 		auth.Attributes = make(map[string]string)
 	}
-	auth.Attributes[cliproxyauth.AttributePath] = path
-	auth.Attributes[cliproxyauth.AttributeSourceBackend] = cliproxyauth.AuthSourcePostgres
+	auth.Attributes[xinugateauth.AttributePath] = path
+	auth.Attributes[xinugateauth.AttributeSourceBackend] = xinugateauth.AuthSourcePostgres
 
 	if strings.TrimSpace(auth.FileName) == "" {
 		auth.FileName = auth.ID
@@ -297,7 +297,7 @@ func (s *PostgresStore) Save(ctx context.Context, auth *cliproxyauth.Auth) (stri
 }
 
 // List enumerates all auth records stored in PostgreSQL.
-func (s *PostgresStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) {
+func (s *PostgresStore) List(ctx context.Context) ([]*xinugateauth.Auth, error) {
 	query := fmt.Sprintf("SELECT id, content, created_at, updated_at FROM %s ORDER BY id", s.fullTableName(s.cfg.AuthTable))
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
@@ -305,7 +305,7 @@ func (s *PostgresStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) 
 	}
 	defer rows.Close()
 
-	auths := make([]*cliproxyauth.Auth, 0, 32)
+	auths := make([]*xinugateauth.Auth, 0, 32)
 	for rows.Next() {
 		var (
 			id        string
@@ -326,8 +326,8 @@ func (s *PostgresStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) 
 			log.WithError(err).Warnf("postgres store: skipping auth %s with invalid json", id)
 			continue
 		}
-		cliproxyauth.NormalizeCredentialMetadata(metadata)
-		if errWeight := cliproxyauth.ValidateAuthWeight(&cliproxyauth.Auth{Metadata: metadata}); errWeight != nil {
+		xinugateauth.NormalizeCredentialMetadata(metadata)
+		if errWeight := xinugateauth.ValidateAuthWeight(&xinugateauth.Auth{Metadata: metadata}); errWeight != nil {
 			log.WithError(errWeight).Warnf("postgres store: skipping auth %s with invalid weight", id)
 			continue
 		}
@@ -336,18 +336,18 @@ func (s *PostgresStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) 
 			provider = "unknown"
 		}
 		attr := map[string]string{
-			cliproxyauth.AttributePath:          path,
-			cliproxyauth.AttributeSourceBackend: cliproxyauth.AuthSourcePostgres,
+			xinugateauth.AttributePath:          path,
+			xinugateauth.AttributeSourceBackend: xinugateauth.AuthSourcePostgres,
 		}
 		if email := strings.TrimSpace(valueAsString(metadata["email"])); email != "" {
 			attr["email"] = email
 		}
-		auth := &cliproxyauth.Auth{
+		auth := &xinugateauth.Auth{
 			ID:               normalizeAuthID(id),
 			Provider:         provider,
 			FileName:         normalizeAuthID(id),
 			Label:            labelFor(metadata),
-			Status:           cliproxyauth.StatusActive,
+			Status:           xinugateauth.StatusActive,
 			Attributes:       attr,
 			Metadata:         metadata,
 			CreatedAt:        createdAt,
@@ -355,10 +355,10 @@ func (s *PostgresStore) List(ctx context.Context) ([]*cliproxyauth.Auth, error) 
 			LastRefreshedAt:  time.Time{},
 			NextRefreshAfter: time.Time{},
 		}
-		cliproxyauth.ApplyCustomHeadersFromMetadata(auth)
+		xinugateauth.ApplyCustomHeadersFromMetadata(auth)
 		if disabled, ok := metadata["disabled"].(bool); ok && disabled {
 			auth.Disabled = true
-			auth.Status = cliproxyauth.StatusDisabled
+			auth.Status = xinugateauth.StatusDisabled
 		}
 		auths = append(auths, auth)
 	}
@@ -594,7 +594,7 @@ func (s *PostgresStore) deleteConfigRecord(ctx context.Context) error {
 	return nil
 }
 
-func (s *PostgresStore) resolveAuthPath(auth *cliproxyauth.Auth) (string, error) {
+func (s *PostgresStore) resolveAuthPath(auth *xinugateauth.Auth) (string, error) {
 	if auth == nil {
 		return "", fmt.Errorf("postgres store: auth is nil")
 	}

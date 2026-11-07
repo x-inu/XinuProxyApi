@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // claudeFastRequestError marks a Fast request failure as request-scoped. Fast
@@ -79,7 +79,7 @@ func (e *claudeFastRequestError) RetryAfter() *time.Duration {
 // the auth manager and protocol handlers without retrying or rebuilding its
 // status and JSON body.
 type claudeFastDirectResponseError struct {
-	response         *cliproxyexecutor.RequestTerminatedError
+	response         *xinugateexecutor.RequestTerminatedError
 	retryAfter       *time.Duration
 	credentialScoped bool
 }
@@ -153,7 +153,7 @@ func newClaudeFastDirectResponseError(resp *http.Response, body []byte) error {
 	}
 
 	return &claudeFastDirectResponseError{
-		response: &cliproxyexecutor.RequestTerminatedError{
+		response: &xinugateexecutor.RequestTerminatedError{
 			HTTPStatus: resp.StatusCode,
 			Header:     headers,
 			Body:       bytes.Clone(body),
@@ -171,7 +171,7 @@ func claudeRequestIsFast(req *http.Request, body []byte) bool {
 	return claudeRequestUsesFastMode(body, claudeRequestedBetas(betas, nil))
 }
 
-func claudeAuthLogIdentity(auth *cliproxyauth.Auth) (id, label, authType, authValue string) {
+func claudeAuthLogIdentity(auth *xinugateauth.Auth) (id, label, authType, authValue string) {
 	if auth == nil {
 		return "", "", "", ""
 	}

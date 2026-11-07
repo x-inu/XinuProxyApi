@@ -12,9 +12,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexExecutorCacheHelper_OpenAIChatCompletions_StablePromptCacheKeyFromAPIKey(t *testing.T) {
@@ -25,7 +25,7 @@ func TestCodexExecutorCacheHelper_OpenAIChatCompletions_StablePromptCacheKeyFrom
 	ctx := context.WithValue(context.Background(), "gin", ginCtx)
 	executor := &CodexExecutor{}
 	rawJSON := []byte(`{"model":"gpt-5.3-codex","stream":true}`)
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gpt-5.3-codex",
 		Payload: []byte(`{"model":"gpt-5.3-codex"}`),
 	}
@@ -41,7 +41,7 @@ func TestCodexExecutorCacheHelper_OpenAIChatCompletions_StablePromptCacheKeyFrom
 		t.Fatalf("read request body: %v", errRead)
 	}
 
-	expectedKey := uuid.NewSHA1(uuid.NameSpaceOID, []byte("cli-proxy-api:codex:prompt-cache:test-api-key")).String()
+	expectedKey := uuid.NewSHA1(uuid.NameSpaceOID, []byte("xinugate:codex:prompt-cache:test-api-key")).String()
 	gotKey := gjson.GetBytes(body, "prompt_cache_key").String()
 	if gotKey != expectedKey {
 		t.Fatalf("prompt_cache_key = %q, want %q", gotKey, expectedKey)
@@ -74,10 +74,10 @@ func TestCodexExecutorCacheHelper_UsesDerivedSessionUUID(t *testing.T) {
 	t.Parallel()
 
 	executor := &CodexExecutor{}
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:    "gpt-5.4",
 		Payload:  []byte(`{"model":"gpt-5.4","messages":[{"role":"user","content":"hello"}]}`),
-		Metadata: map[string]any{cliproxyexecutor.DerivedSessionIDMetadataKey: "ctx:v1:derived-root"},
+		Metadata: map[string]any{xinugateexecutor.DerivedSessionIDMetadataKey: "ctx:v1:derived-root"},
 	}
 	expectedKey := helps.DerivedSessionUUID("codex", req.Metadata)
 
@@ -101,7 +101,7 @@ func TestCodexExecutorCacheHelper_ClaudeUsesClaudeCodeSessionID(t *testing.T) {
 	ctx := context.Background()
 	url := "https://example.com/responses"
 	rawJSON := []byte(`{"model":"gpt-5.4","stream":true}`)
-	firstReq := cliproxyexecutor.Request{
+	firstReq := xinugateexecutor.Request{
 		Model: "gpt-5.4-claude-cache-session",
 		Payload: []byte(`{
 			"model":"gpt-5.4",
@@ -109,7 +109,7 @@ func TestCodexExecutorCacheHelper_ClaudeUsesClaudeCodeSessionID(t *testing.T) {
 			"messages":[{"role":"user","content":[{"type":"text","text":"first"}]}]
 		}`),
 	}
-	secondReq := cliproxyexecutor.Request{
+	secondReq := xinugateexecutor.Request{
 		Model: "gpt-5.4-claude-cache-session",
 		Payload: []byte(`{
 			"model":"gpt-5.4",
@@ -153,7 +153,7 @@ func TestCodexExecutorCacheHelper_ClaudeUsesClaudeCodeSessionID(t *testing.T) {
 
 func TestCodexExecutorCacheHelper_ClaudeRejectsBareUserID(t *testing.T) {
 	executor := &CodexExecutor{}
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gpt-5.4-claude-cache-bare-user",
 		Payload: []byte(`{"model":"gpt-5.4","metadata":{"user_id":"same-user-across-chats"},"messages":[{"role":"user","content":[{"type":"text","text":"first"}]}]}`),
 	}
@@ -190,9 +190,9 @@ func TestCodexExecutorCacheHelper_IdentityConfuseRemapsBodyAndHeaders(t *testing
 		Routing: config.RoutingConfig{Strategy: "fill-first"},
 		Codex:   config.CodexConfig{IdentityConfuse: true},
 	}}
-	auth := &cliproxyauth.Auth{ID: "auth-1", Provider: "codex"}
+	auth := &xinugateauth.Auth{ID: "auth-1", Provider: "codex"}
 	rawJSON := []byte(`{"model":"gpt-5-codex","stream":true,"client_metadata":{"x-codex-turn-metadata":"{\"prompt_cache_key\":\"cache-1\",\"turn_id\":\"turn-1\",\"window_id\":\"cache-1:0\"}","x-codex-window-id":"cache-1:0"}}`)
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gpt-5-codex",
 		Payload: []byte(`{"model":"gpt-5-codex","prompt_cache_key":"cache-1","client_metadata":{"x-codex-installation-id":"install-1"}}`),
 	}
@@ -255,7 +255,7 @@ func TestCodexExecutorCacheHelper_IdentityConfuseRemapsBodyAndHeaders(t *testing
 
 func TestApplyCodexHeadersUsesAccountHeaderForOAuth(t *testing.T) {
 	httpReq := httptest.NewRequest("POST", "https://example.com/responses", nil)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Metadata: map[string]any{"account_id": "acct-1"},
 	}
@@ -272,7 +272,7 @@ func TestCodexIdentityConfuseKeepsClientBodySeparateFromUpstreamBody(t *testing.
 		Routing: config.RoutingConfig{Strategy: "fill-first"},
 		Codex:   config.CodexConfig{IdentityConfuse: true},
 	}
-	auth := &cliproxyauth.Auth{ID: "auth-1", Provider: "codex"}
+	auth := &xinugateauth.Auth{ID: "auth-1", Provider: "codex"}
 	clientBody := []byte(`{"model":"gpt-5-codex","prompt_cache_key":"cache-1"}`)
 
 	upstreamBody, identityState := applyCodexIdentityConfuseBody(cfg, auth, clientBody, clientBody)
@@ -296,11 +296,11 @@ func TestCodexExecutorCacheHelper_ClaudeUsesSessionHeader(t *testing.T) {
 	ginCtx.Request.Header.Set(helps.ClaudeCodeSessionHeader, "cache-session-header")
 	ctx := context.WithValue(context.Background(), "gin", ginCtx)
 
-	firstReq := cliproxyexecutor.Request{
+	firstReq := xinugateexecutor.Request{
 		Model:   "gpt-5.4-claude-cache-header",
 		Payload: []byte(`{"model":"gpt-5.4","messages":[{"role":"user","content":[{"type":"text","text":"first"}]}]}`),
 	}
-	secondReq := cliproxyexecutor.Request{
+	secondReq := xinugateexecutor.Request{
 		Model:   "gpt-5.4-claude-cache-header",
 		Payload: []byte(`{"model":"gpt-5.4","messages":[{"role":"user","content":[{"type":"text","text":"next"}]}]}`),
 	}
@@ -337,7 +337,7 @@ func TestCodexExecutorCacheHelper_ClaudeUsesSessionHeader(t *testing.T) {
 func TestCodexExecutorCacheHelper_ClaudeAgentScopeUsesResolvedModelAcrossHTTPAndWebsocket(t *testing.T) {
 	executor := &CodexExecutor{}
 	url := "https://example.com/responses"
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "requested-alias-high",
 		Payload: []byte(`{"model":"requested-alias","messages":[{"role":"user","content":"hello"}]}`),
 	}

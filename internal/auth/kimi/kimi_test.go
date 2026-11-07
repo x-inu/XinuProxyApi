@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestKimiDomainResolution(t *testing.T) {
@@ -88,7 +88,7 @@ func TestKimiDomainResolution(t *testing.T) {
 func TestResolveKimiDomainFromAuth(t *testing.T) {
 	tests := []struct {
 		name string
-		auth *cliproxyauth.Auth
+		auth *xinugateauth.Auth
 		want string
 	}{
 		{
@@ -98,22 +98,22 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "default kimi provider",
-			auth: &cliproxyauth.Auth{Provider: "kimi"},
+			auth: &xinugateauth.Auth{Provider: "kimi"},
 			want: KimiDefaultDomain,
 		},
 		{
 			name: "kimi-ai provider",
-			auth: &cliproxyauth.Auth{Provider: "kimi-ai"},
+			auth: &xinugateauth.Auth{Provider: "kimi-ai"},
 			want: KimiAIDomain,
 		},
 		{
 			name: "kimi.ai provider",
-			auth: &cliproxyauth.Auth{Provider: "kimi.ai"},
+			auth: &xinugateauth.Auth{Provider: "kimi.ai"},
 			want: KimiAIDomain,
 		},
 		{
 			name: "attributes domain kimi.ai",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider:   "kimi",
 				Attributes: map[string]string{"domain": "kimi.ai"},
 			},
@@ -121,7 +121,7 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "attributes base_url api.kimi.ai",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider:   "kimi",
 				Attributes: map[string]string{"base_url": "https://api.kimi.ai/coding"},
 			},
@@ -129,7 +129,7 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "metadata domain kimi.ai",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "kimi",
 				Metadata: map[string]any{"domain": "kimi.ai"},
 			},
@@ -137,7 +137,7 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "metadata type kimi-ai",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "kimi",
 				Metadata: map[string]any{"type": "kimi-ai"},
 			},
@@ -145,7 +145,7 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "storage with domain kimi.ai",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Provider: "kimi",
 				Storage:  &KimiTokenStorage{Domain: "kimi.ai"},
 			},
@@ -153,7 +153,7 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "explicit com domain in attributes overrides kimi-ai in filename",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				ID:         "kimi-ai-backup.json",
 				FileName:   "kimi-ai-backup.json",
 				Attributes: map[string]string{"domain": "kimi.com"},
@@ -162,7 +162,7 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "explicit com base_url in attributes overrides kimi-ai in filename",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				ID:         "kimi-ai-backup.json",
 				FileName:   "kimi-ai-backup.json",
 				Attributes: map[string]string{"base_url": "https://api.kimi.com/coding"},
@@ -171,7 +171,7 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "explicit com in storage domain overrides kimi-ai in filename",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				ID:       "kimi-ai-backup.json",
 				FileName: "kimi-ai-backup.json",
 				Storage:  &KimiTokenStorage{Domain: "kimi.com"},
@@ -180,14 +180,14 @@ func TestResolveKimiDomainFromAuth(t *testing.T) {
 		},
 		{
 			name: "unrelated hostname does not trigger kimi.ai",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				Attributes: map[string]string{"base_url": "https://example.com/kimi.ai"},
 			},
 			want: KimiDefaultDomain,
 		},
 		{
 			name: "file name containing kimi-ai",
-			auth: &cliproxyauth.Auth{
+			auth: &xinugateauth.Auth{
 				ID:       "kimi-ai-12345.json",
 				FileName: "kimi-ai-12345.json",
 			},

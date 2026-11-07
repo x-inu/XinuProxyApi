@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/x-inu/XinuGate/v7/internal/clienterror"
 	"github.com/x-inu/XinuGate/v7/internal/interfaces"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 	"golang.org/x/net/context"
 )
 

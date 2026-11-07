@@ -13,8 +13,8 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/auth/codex"
 	kimiauth "github.com/x-inu/XinuGate/v7/internal/auth/kimi"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // FileSynthesizer generates Auth entries from OAuth JSON files.

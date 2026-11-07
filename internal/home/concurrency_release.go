@@ -6,7 +6,7 @@ import (
 	"time"
 
 	internalconfig "github.com/x-inu/XinuGate/v7/internal/config"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/executionregistry"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/executionregistry"
 )
 
 // ConcurrencyReleaseFrame is the cumulative release accepted by Home for one credential and model.

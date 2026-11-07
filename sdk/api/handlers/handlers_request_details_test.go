@@ -12,8 +12,8 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func TestGetRequestDetails_PreservesSuffix(t *testing.T) {

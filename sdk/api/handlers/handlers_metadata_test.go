@@ -8,9 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/x-inu/XinuGate/v7/internal/logging"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	coresession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
 	"github.com/x-inu/XinuGate/v7/sdk/config"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	coresession "github.com/x-inu/XinuGate/v7/sdk/xinugate/session"
 	"golang.org/x/net/context"
 )
 

@@ -17,9 +17,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	_ "github.com/x-inu/XinuGate/v7/internal/thinking/provider/codex"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	"github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	"github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 )
 
 func TestParseOpenAIUsageChatCompletions(t *testing.T) {
@@ -584,7 +584,7 @@ func TestUsageReporterBuildRecordIncludesLatency(t *testing.T) {
 
 func TestUsageReporterTrackHTTPClientStartsTTFTBeforeRoundTrip(t *testing.T) {
 	delay := 40 * time.Millisecond
-	ctx := cliproxyexecutor.WithUpstreamAttemptTracker(context.Background())
+	ctx := xinugateexecutor.WithUpstreamAttemptTracker(context.Background())
 	reporter := NewUsageReporter(ctx, "openai", "gpt-5.4", nil)
 	client := reporter.TrackHTTPClient(&http.Client{
 		Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
@@ -616,7 +616,7 @@ func TestUsageReporterTrackHTTPClientStartsTTFTBeforeRoundTrip(t *testing.T) {
 	if got := reporter.ttftDuration(); got < delay {
 		t.Fatalf("ttft = %v, want >= %v", got, delay)
 	}
-	if !cliproxyexecutor.UpstreamAttempted(ctx) {
+	if !xinugateexecutor.UpstreamAttempted(ctx) {
 		t.Fatal("HTTP RoundTrip did not mark an upstream attempt")
 	}
 }
@@ -1148,7 +1148,7 @@ func TestUsageReporterPropagatesSessionHierarchy(t *testing.T) {
 
 func TestUsageReporterPropagatesBaseURL(t *testing.T) {
 	ctx := context.Background()
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "auth-base-url-test",
 		Provider: "codex",
 		Attributes: map[string]string{
@@ -1162,7 +1162,7 @@ func TestUsageReporterPropagatesBaseURL(t *testing.T) {
 		t.Fatalf("record.BaseURL = %q, want %q", record.BaseURL, "https://custom.endpoint.example.com/v1")
 	}
 
-	authMeta := &cliproxyauth.Auth{
+	authMeta := &xinugateauth.Auth{
 		ID:       "auth-meta-base-url-test",
 		Provider: "openai",
 		Metadata: map[string]any{
@@ -1176,7 +1176,7 @@ func TestUsageReporterPropagatesBaseURL(t *testing.T) {
 	}
 
 	// Attribute precedence over metadata
-	authBoth := &cliproxyauth.Auth{
+	authBoth := &xinugateauth.Auth{
 		ID:       "auth-both-test",
 		Provider: "openai",
 		Attributes: map[string]string{
@@ -1193,7 +1193,7 @@ func TestUsageReporterPropagatesBaseURL(t *testing.T) {
 	}
 
 	// Blank attribute falls back to metadata
-	authBlankAttr := &cliproxyauth.Auth{
+	authBlankAttr := &xinugateauth.Auth{
 		ID:       "auth-blank-test",
 		Provider: "openai",
 		Attributes: map[string]string{

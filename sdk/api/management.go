@@ -9,8 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	internalmanagement "github.com/x-inu/XinuGate/v7/internal/api/handlers/management"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // Handler re-exports the management handler used by the internal HTTP API.

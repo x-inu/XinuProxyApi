@@ -184,7 +184,7 @@ func TestRunDiscoverClampsTimeoutAndPrintsText(t *testing.T) {
 	code := runDiscover(2*time.Minute, false, &stdout, &stderr, func() (discovery.Browser, error) {
 		return &fakeBrowser{result: []discovery.DiscoveredService{{
 			InstanceName: "office-gateway",
-			Product:      "cliproxyapi",
+			Product:      "xinugate",
 			Version:      "1",
 			Port:         8317,
 			IPv4:         []net.IP{net.ParseIP("192.0.2.10")},

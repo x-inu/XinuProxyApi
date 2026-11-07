@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 type stubCompatExecutor struct {
@@ -20,13 +20,13 @@ type stubCompatExecutor struct {
 
 func (e *stubCompatExecutor) Identifier() string { return e.id }
 
-func (e *stubCompatExecutor) Execute(context.Context, *coreauth.Auth, cliproxyexecutor.Request, cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
+func (e *stubCompatExecutor) Execute(context.Context, *coreauth.Auth, xinugateexecutor.Request, xinugateexecutor.Options) (xinugateexecutor.Response, error) {
 	e.executeCalls++
-	return cliproxyexecutor.Response{Payload: []byte(`{"ok":true}`)}, nil
+	return xinugateexecutor.Response{Payload: []byte(`{"ok":true}`)}, nil
 }
 
-func (e *stubCompatExecutor) ExecuteStream(context.Context, *coreauth.Auth, cliproxyexecutor.Request, cliproxyexecutor.Options) (*cliproxyexecutor.StreamResult, error) {
-	return &cliproxyexecutor.StreamResult{}, nil
+func (e *stubCompatExecutor) ExecuteStream(context.Context, *coreauth.Auth, xinugateexecutor.Request, xinugateexecutor.Options) (*xinugateexecutor.StreamResult, error) {
+	return &xinugateexecutor.StreamResult{}, nil
 }
 
 func (e *stubCompatExecutor) Refresh(_ context.Context, auth *coreauth.Auth) (*coreauth.Auth, error) {
@@ -34,8 +34,8 @@ func (e *stubCompatExecutor) Refresh(_ context.Context, auth *coreauth.Auth) (*c
 	return auth, nil
 }
 
-func (e *stubCompatExecutor) CountTokens(context.Context, *coreauth.Auth, cliproxyexecutor.Request, cliproxyexecutor.Options) (cliproxyexecutor.Response, error) {
-	return cliproxyexecutor.Response{}, nil
+func (e *stubCompatExecutor) CountTokens(context.Context, *coreauth.Auth, xinugateexecutor.Request, xinugateexecutor.Options) (xinugateexecutor.Response, error) {
+	return xinugateexecutor.Response{}, nil
 }
 
 func (e *stubCompatExecutor) HttpRequest(context.Context, *coreauth.Auth, *http.Request) (*http.Response, error) {
@@ -105,7 +105,7 @@ func TestPluginRefreshCompatExecutorDelegatesExecuteAndRefresh(t *testing.T) {
 		},
 	}
 
-	if _, errExecute := wrapped.Execute(context.Background(), auth, cliproxyexecutor.Request{}, cliproxyexecutor.Options{}); errExecute != nil {
+	if _, errExecute := wrapped.Execute(context.Background(), auth, xinugateexecutor.Request{}, xinugateexecutor.Options{}); errExecute != nil {
 		t.Fatalf("Execute() error = %v", errExecute)
 	}
 	if inner.executeCalls != 1 {

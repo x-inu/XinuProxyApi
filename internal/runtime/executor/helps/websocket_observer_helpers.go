@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/tidwall/gjson"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // EmitWebSocketResponseEvent delivers an upstream WebSocket response frame to any configured observer.
-func EmitWebSocketResponseEvent(ctx context.Context, opts cliproxyexecutor.Options, auth *cliproxyauth.Auth, provider, model string, payload []byte) {
+func EmitWebSocketResponseEvent(ctx context.Context, opts xinugateexecutor.Options, auth *xinugateauth.Auth, provider, model string, payload []byte) {
 	if opts.WebSocketResponseObserver == nil || len(payload) == 0 {
 		return
 	}
@@ -31,7 +31,7 @@ func EmitWebSocketResponseEvent(ctx context.Context, opts cliproxyexecutor.Optio
 		}
 	}
 	requestedModel := PayloadRequestedModel(opts, model)
-	opts.WebSocketResponseObserver(ctx, cliproxyexecutor.WebSocketResponseEvent{
+	opts.WebSocketResponseObserver(ctx, xinugateexecutor.WebSocketResponseEvent{
 		RequestID:      requestID,
 		TraceID:        traceID,
 		SourceFormat:   opts.SourceFormat.String(),

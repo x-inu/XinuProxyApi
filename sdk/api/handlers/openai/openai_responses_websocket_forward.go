@@ -18,7 +18,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/clienterror"
 	"github.com/x-inu/XinuGate/v7/internal/interfaces"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 type responsesWebsocketForwardOptions struct {

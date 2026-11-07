@@ -10,11 +10,11 @@ import (
 	codexauth "github.com/x-inu/XinuGate/v7/internal/auth/codex"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
-func (e *CodexExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*cliproxyauth.Auth, error) {
+func (e *CodexExecutor) Refresh(ctx context.Context, auth *xinugateauth.Auth) (*xinugateauth.Auth, error) {
 	log.Debugf("codex executor: refresh called")
 	if refreshed, handled, err := helps.RefreshAuthViaHome(ctx, e.cfg, auth); handled {
 		return refreshed, err
@@ -56,7 +56,7 @@ func (e *CodexExecutor) Refresh(ctx context.Context, auth *cliproxyauth.Auth) (*
 	return auth, nil
 }
 
-func codexCreds(a *cliproxyauth.Auth) (apiKey, baseURL string) {
+func codexCreds(a *xinugateauth.Auth) (apiKey, baseURL string) {
 	if a == nil {
 		return "", ""
 	}
@@ -72,14 +72,14 @@ func codexCreds(a *cliproxyauth.Auth) (apiKey, baseURL string) {
 	return
 }
 
-func (e *CodexExecutor) resolveCodexConfig(auth *cliproxyauth.Auth) *config.CodexKey {
+func (e *CodexExecutor) resolveCodexConfig(auth *xinugateauth.Auth) *config.CodexKey {
 	if e == nil {
 		return nil
 	}
 	return resolveCodexKeyConfig(e.cfg, auth)
 }
 
-func resolveCodexKeyConfig(cfg *config.Config, auth *cliproxyauth.Auth) *config.CodexKey {
+func resolveCodexKeyConfig(cfg *config.Config, auth *xinugateauth.Auth) *config.CodexKey {
 	if auth == nil || cfg == nil {
 		return nil
 	}
@@ -87,7 +87,7 @@ func resolveCodexKeyConfig(cfg *config.Config, auth *cliproxyauth.Auth) *config.
 	if auth.Attributes != nil {
 		attrKey = strings.TrimSpace(auth.Attributes["api_key"])
 		attrBase = strings.TrimSpace(auth.Attributes["base_url"])
-		if index, errIndex := strconv.Atoi(strings.TrimSpace(auth.Attributes[cliproxyauth.AttributeConfigIndex])); errIndex == nil && index >= 0 && index < len(cfg.CodexKey) {
+		if index, errIndex := strconv.Atoi(strings.TrimSpace(auth.Attributes[xinugateauth.AttributeConfigIndex])); errIndex == nil && index >= 0 && index < len(cfg.CodexKey) {
 			entry := &cfg.CodexKey[index]
 			cfgKey := strings.TrimSpace(entry.APIKey)
 			cfgBase := strings.TrimSpace(entry.BaseURL)
@@ -126,8 +126,8 @@ func resolveCodexKeyConfig(cfg *config.Config, auth *cliproxyauth.Auth) *config.
 	return nil
 }
 
-func (e *CodexExecutor) resolveCodexModelIsCompat(auth *cliproxyauth.Auth, req cliproxyexecutor.Request, baseModel string) bool {
-	if modelInfo, ok := cliproxyauth.ResolvedModelInfo(req); ok && modelInfo != nil {
+func (e *CodexExecutor) resolveCodexModelIsCompat(auth *xinugateauth.Auth, req xinugateexecutor.Request, baseModel string) bool {
+	if modelInfo, ok := xinugateauth.ResolvedModelInfo(req); ok && modelInfo != nil {
 		return modelInfo.IsCompat
 	}
 	entry := e.resolveCodexConfig(auth)
@@ -144,7 +144,7 @@ func (e *CodexExecutor) resolveCodexModelIsCompat(auth *cliproxyauth.Auth, req c
 		}
 		return false
 	}
-	if cliproxyauth.CodexAPIKeyModelIsCompat(e.cfg, auth, baseModel) || cliproxyauth.CodexAPIKeyModelIsCompat(e.cfg, auth, req.Model) {
+	if xinugateauth.CodexAPIKeyModelIsCompat(e.cfg, auth, baseModel) || xinugateauth.CodexAPIKeyModelIsCompat(e.cfg, auth, req.Model) {
 		return true
 	}
 	return false

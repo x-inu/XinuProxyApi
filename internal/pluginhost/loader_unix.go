@@ -12,71 +12,71 @@ package pluginhost
 typedef struct {
 	void* ptr;
 	size_t len;
-} cliproxy_buffer;
+} xinugate_buffer;
 
-typedef int (*cliproxy_host_call_fn)(void*, const char*, const uint8_t*, size_t, cliproxy_buffer*);
-typedef void (*cliproxy_host_free_fn)(void*, size_t);
+typedef int (*xinugate_host_call_fn)(void*, const char*, const uint8_t*, size_t, xinugate_buffer*);
+typedef void (*xinugate_host_free_fn)(void*, size_t);
 
 typedef struct {
 	uint32_t abi_version;
 	void* host_ctx;
-	cliproxy_host_call_fn call;
-	cliproxy_host_free_fn free_buffer;
-} cliproxy_host_api;
+	xinugate_host_call_fn call;
+	xinugate_host_free_fn free_buffer;
+} xinugate_host_api;
 
-typedef int (*cliproxy_plugin_call_fn)(const char*, const uint8_t*, size_t, cliproxy_buffer*);
-typedef void (*cliproxy_plugin_free_fn)(void*, size_t);
-typedef void (*cliproxy_plugin_shutdown_fn)(void);
+typedef int (*xinugate_plugin_call_fn)(const char*, const uint8_t*, size_t, xinugate_buffer*);
+typedef void (*xinugate_plugin_free_fn)(void*, size_t);
+typedef void (*xinugate_plugin_shutdown_fn)(void);
 
 typedef struct {
 	uint32_t abi_version;
-	cliproxy_plugin_call_fn call;
-	cliproxy_plugin_free_fn free_buffer;
-	cliproxy_plugin_shutdown_fn shutdown;
-} cliproxy_plugin_api;
+	xinugate_plugin_call_fn call;
+	xinugate_plugin_free_fn free_buffer;
+	xinugate_plugin_shutdown_fn shutdown;
+} xinugate_plugin_api;
 
-typedef int (*cliproxy_plugin_init_fn)(const cliproxy_host_api*, cliproxy_plugin_api*);
+typedef int (*xinugate_plugin_init_fn)(const xinugate_host_api*, xinugate_plugin_api*);
 
-extern int cliproxyHostCall(void*, const char*, const uint8_t*, size_t, cliproxy_buffer*);
-extern void cliproxyHostFree(void*, size_t);
+extern int xinugateHostCall(void*, const char*, const uint8_t*, size_t, xinugate_buffer*);
+extern void xinugateHostFree(void*, size_t);
 
-static void* cliproxy_dlopen(const char* path) {
+static void* xinugate_dlopen(const char* path) {
 	return dlopen(path, RTLD_NOW | RTLD_LOCAL);
 }
 
-static void* cliproxy_dlsym(void* handle, const char* name) {
+static void* xinugate_dlsym(void* handle, const char* name) {
 	return dlsym(handle, name);
 }
 
-static const char* cliproxy_dlerror(void) {
+static const char* xinugate_dlerror(void) {
 	return dlerror();
 }
 
-static int cliproxy_dlclose(void* handle) {
+static int xinugate_dlclose(void* handle) {
 	return dlclose(handle);
 }
 
-static int cliproxy_call_init(void* fn, const cliproxy_host_api* host, cliproxy_plugin_api* plugin) {
-	return ((cliproxy_plugin_init_fn)fn)(host, plugin);
+static int xinugate_call_init(void* fn, const xinugate_host_api* host, xinugate_plugin_api* plugin) {
+	return ((xinugate_plugin_init_fn)fn)(host, plugin);
 }
 
-static int cliproxy_call_plugin(cliproxy_plugin_call_fn fn, const char* method, const uint8_t* request, size_t request_len, cliproxy_buffer* response) {
+static int xinugate_call_plugin(xinugate_plugin_call_fn fn, const char* method, const uint8_t* request, size_t request_len, xinugate_buffer* response) {
 	return fn(method, request, request_len, response);
 }
 
-static void cliproxy_free_plugin_buffer(cliproxy_plugin_free_fn fn, void* ptr, size_t len) {
+static void xinugate_free_plugin_buffer(xinugate_plugin_free_fn fn, void* ptr, size_t len) {
 	fn(ptr, len);
 }
 
-static void cliproxy_shutdown_plugin(cliproxy_plugin_shutdown_fn fn) {
+static void xinugate_shutdown_plugin(xinugate_plugin_shutdown_fn fn) {
 	fn();
 }
 
-static void cliproxy_set_host_api(cliproxy_host_api* api, uint32_t abi_version, void* host_ctx) {
+static void xinugate_set_host_api(xinugate_host_api* api, uint32_t abi_version, void* host_ctx) {
 	api->abi_version = abi_version;
 	api->host_ctx = host_ctx;
-	api->call = cliproxyHostCall;
-	api->free_buffer = cliproxyHostFree;
+	api->call = xinugateHostCall;
+	api->free_buffer = xinugateHostFree;
 }
 
 */
@@ -99,9 +99,9 @@ type dynamicLibraryLoader struct{}
 
 type dynamicLibraryClient struct {
 	handle   unsafe.Pointer
-	hostAPI  *C.cliproxy_host_api
+	hostAPI  *C.xinugate_host_api
 	hostCtx  unsafe.Pointer
-	api      C.cliproxy_plugin_api
+	api      C.xinugate_plugin_api
 	host     *Host
 	pluginID string
 	instance *hostCallbackInstance
@@ -115,28 +115,28 @@ func (dynamicLibraryLoader) Open(file pluginFile, host *Host) (pluginClient, err
 	cPath := C.CString(file.Path)
 	defer C.free(unsafe.Pointer(cPath))
 
-	handle := C.cliproxy_dlopen(cPath)
+	handle := C.xinugate_dlopen(cPath)
 	if handle == nil {
 		return nil, fmt.Errorf("dlopen %s: %s", file.Path, dlerrorString())
 	}
 
-	cSymbol := C.CString("cliproxy_plugin_init")
-	initSymbol := C.cliproxy_dlsym(handle, cSymbol)
+	cSymbol := C.CString("xinugate_plugin_init")
+	initSymbol := C.xinugate_dlsym(handle, cSymbol)
 	C.free(unsafe.Pointer(cSymbol))
 	if initSymbol == nil {
-		C.cliproxy_dlclose(handle)
-		return nil, fmt.Errorf("missing cliproxy_plugin_init: %s", dlerrorString())
+		C.xinugate_dlclose(handle)
+		return nil, fmt.Errorf("missing xinugate_plugin_init: %s", dlerrorString())
 	}
 
-	hostAPI := (*C.cliproxy_host_api)(C.malloc(C.size_t(unsafe.Sizeof(C.cliproxy_host_api{}))))
+	hostAPI := (*C.xinugate_host_api)(C.malloc(C.size_t(unsafe.Sizeof(C.xinugate_host_api{}))))
 	if hostAPI == nil {
-		C.cliproxy_dlclose(handle)
+		C.xinugate_dlclose(handle)
 		return nil, fmt.Errorf("allocate host api")
 	}
 	hostCtx := C.malloc(C.size_t(unsafe.Sizeof(C.uintptr_t(0))))
 	if hostCtx == nil {
 		C.free(unsafe.Pointer(hostAPI))
-		C.cliproxy_dlclose(handle)
+		C.xinugate_dlclose(handle)
 		return nil, fmt.Errorf("allocate host context")
 	}
 	id := hostCallbackID.Add(1)
@@ -144,7 +144,7 @@ func (dynamicLibraryLoader) Open(file pluginFile, host *Host) (pluginClient, err
 	host.registerHostCallbackInstance(file.ID, instance)
 	*(*C.uintptr_t)(hostCtx) = C.uintptr_t(id)
 	hostCallbackEntries.Store(id, dynamicHostCallbackEntry{host: host, pluginID: file.ID, instance: instance})
-	C.cliproxy_set_host_api(hostAPI, C.uint32_t(pluginHostABIVersion), hostCtx)
+	C.xinugate_set_host_api(hostAPI, C.uint32_t(pluginHostABIVersion), hostCtx)
 
 	client := &dynamicLibraryClient{
 		handle:   handle,
@@ -154,10 +154,10 @@ func (dynamicLibraryLoader) Open(file pluginFile, host *Host) (pluginClient, err
 		pluginID: file.ID,
 		instance: instance,
 	}
-	rc := C.cliproxy_call_init(initSymbol, hostAPI, &client.api)
+	rc := C.xinugate_call_init(initSymbol, hostAPI, &client.api)
 	if rc != 0 {
 		client.Shutdown()
-		return nil, fmt.Errorf("cliproxy_plugin_init returned %d", int(rc))
+		return nil, fmt.Errorf("xinugate_plugin_init returned %d", int(rc))
 	}
 	if uint32(client.api.abi_version) != pluginHostABIVersion {
 		client.Shutdown()
@@ -196,14 +196,14 @@ func (c *dynamicLibraryClient) Call(ctx context.Context, method string, request 
 		cRequest = C.CBytes(request)
 		defer C.free(cRequest)
 	}
-	var response C.cliproxy_buffer
-	rc := C.cliproxy_call_plugin(c.api.call, cMethod, (*C.uint8_t)(cRequest), C.size_t(len(request)), &response)
+	var response C.xinugate_buffer
+	rc := C.xinugate_call_plugin(c.api.call, cMethod, (*C.uint8_t)(cRequest), C.size_t(len(request)), &response)
 	var out []byte
 	if response.ptr != nil && response.len > 0 {
 		out = C.GoBytes(response.ptr, C.int(response.len))
 	}
 	if response.ptr != nil {
-		C.cliproxy_free_plugin_buffer(c.api.free_buffer, response.ptr, response.len)
+		C.xinugate_free_plugin_buffer(c.api.free_buffer, response.ptr, response.len)
 	}
 	if rc != 0 {
 		if isPluginErrorEnvelope(out) {
@@ -223,7 +223,7 @@ func (c *dynamicLibraryClient) Shutdown() {
 		c.host = nil
 	}
 	if c.api.shutdown != nil {
-		C.cliproxy_shutdown_plugin(c.api.shutdown)
+		C.xinugate_shutdown_plugin(c.api.shutdown)
 		c.api.shutdown = nil
 	}
 	if c.hostCtx != nil {
@@ -237,13 +237,13 @@ func (c *dynamicLibraryClient) Shutdown() {
 		c.hostAPI = nil
 	}
 	if c.handle != nil {
-		C.cliproxy_dlclose(c.handle)
+		C.xinugate_dlclose(c.handle)
 		c.handle = nil
 	}
 }
 
 func dlerrorString() string {
-	errText := C.cliproxy_dlerror()
+	errText := C.xinugate_dlerror()
 	if errText == nil {
 		return ""
 	}

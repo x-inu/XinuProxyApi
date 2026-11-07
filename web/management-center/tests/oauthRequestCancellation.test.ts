@@ -31,7 +31,7 @@ describe('OAuth transport cancellation', () => {
                   data: { status: 'ok' },
                   status,
                   statusText: String(status),
-                  headers: { 'X-CPA-Version': 'old-server', 'X-CPA-Support-Plugin': 'true' },
+                  headers: { 'X-XG-Version': 'old-server', 'X-XG-Support-Plugin': 'true' },
                 };
                 if (status === 401)
                   reject(

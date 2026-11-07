@@ -9,7 +9,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/constant"
 	"github.com/x-inu/XinuGate/v7/internal/util"
 	"github.com/x-inu/XinuGate/v7/internal/watcher/diff"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // ConfigSynthesizer generates Auth entries from configuration API keys.

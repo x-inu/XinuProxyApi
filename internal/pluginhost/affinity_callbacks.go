@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuGate/v7/sdk/pluginapi"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func (h *Host) callHostAffinityLookup(ctx context.Context, request []byte) ([]byte, error) {

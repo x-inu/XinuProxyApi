@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // TestAntigravityBuildRequestKeepsConnectionAlive guards the regression where the
@@ -23,7 +23,7 @@ import (
 // client omits the Connection header entirely.
 func TestAntigravityBuildRequestKeepsConnectionAlive(t *testing.T) {
 	e := &AntigravityExecutor{}
-	auth := &cliproxyauth.Auth{Metadata: map[string]any{"project_id": "project-1"}}
+	auth := &xinugateauth.Auth{Metadata: map[string]any{"project_id": "project-1"}}
 	payload := []byte(`{"request":{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}}`)
 
 	for _, stream := range []bool{false, true} {
@@ -72,7 +72,7 @@ func TestAntigravityExecuteStreamReusesUpstreamConnection(t *testing.T) {
 			},
 		},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:         "antigravity-keepalive-auth",
 		Provider:   "antigravity",
 		Attributes: map[string]string{"base_url": server.URL},
@@ -86,10 +86,10 @@ func TestAntigravityExecuteStreamReusesUpstreamConnection(t *testing.T) {
 	const requests = 6
 	payload := []byte(`{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}`)
 	for i := 0; i < requests; i++ {
-		result, errExecute := exec.ExecuteStream(context.Background(), auth, cliproxyexecutor.Request{
+		result, errExecute := exec.ExecuteStream(context.Background(), auth, xinugateexecutor.Request{
 			Model:   "gemini-3.6-flash-high",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat:    sdktranslator.FormatGemini,
 			ResponseFormat:  sdktranslator.FormatGemini,
 			Stream:          true,
@@ -152,7 +152,7 @@ func TestAntigravityCountTokensReusesUpstreamConnection(t *testing.T) {
 			},
 		},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:         "antigravity-counttokens-auth",
 		Provider:   "antigravity",
 		Attributes: map[string]string{"base_url": server.URL},
@@ -166,18 +166,18 @@ func TestAntigravityCountTokensReusesUpstreamConnection(t *testing.T) {
 	const requests = 4
 	payload := []byte(`{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}`)
 	for i := 0; i < requests; i++ {
-		ctx := cliproxyexecutor.WithUpstreamAttemptTracker(context.Background())
-		if _, errCount := exec.CountTokens(ctx, auth, cliproxyexecutor.Request{
+		ctx := xinugateexecutor.WithUpstreamAttemptTracker(context.Background())
+		if _, errCount := exec.CountTokens(ctx, auth, xinugateexecutor.Request{
 			Model:   "gemini-3.6-flash-high",
 			Payload: payload,
-		}, cliproxyexecutor.Options{
+		}, xinugateexecutor.Options{
 			SourceFormat:    sdktranslator.FormatGemini,
 			ResponseFormat:  sdktranslator.FormatGemini,
 			OriginalRequest: payload,
 		}); errCount != nil {
 			t.Fatalf("request %d: CountTokens() error = %v", i, errCount)
 		}
-		if !cliproxyexecutor.UpstreamAttempted(ctx) {
+		if !xinugateexecutor.UpstreamAttempted(ctx) {
 			t.Fatalf("request %d: CountTokens() did not mark the upstream attempt", i)
 		}
 	}
@@ -222,7 +222,7 @@ func TestAntigravityHTTPRequestReusesUpstreamConnection(t *testing.T) {
 			},
 		},
 	})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "antigravity-http-request-auth",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -301,7 +301,7 @@ func TestAntigravityHTTPRequestConcurrentSessionsStayIsolated(t *testing.T) {
 	defer server.Close()
 
 	exec := NewAntigravityExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "antigravity-concurrent-sessions-auth",
 		Provider: "antigravity",
 		Metadata: map[string]any{
@@ -385,7 +385,7 @@ func TestAntigravityDefaultConfigDisablesPoolingAndClosesConnections(t *testing.
 
 	// Default config has ConnectionPool.Enabled = nil, which defaults to false (disabled)
 	exec := NewAntigravityExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "antigravity-default-short-auth",
 		Provider: "antigravity",
 		Metadata: map[string]any{

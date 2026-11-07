@@ -21,11 +21,11 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/logging"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
-	coresession "github.com/x-inu/XinuGate/v7/sdk/cliproxy/session"
-	coreusage "github.com/x-inu/XinuGate/v7/sdk/cliproxy/usage"
 	"github.com/x-inu/XinuGate/v7/sdk/config"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	coreexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
+	coresession "github.com/x-inu/XinuGate/v7/sdk/xinugate/session"
+	coreusage "github.com/x-inu/XinuGate/v7/sdk/xinugate/usage"
 	"golang.org/x/net/context"
 )
 

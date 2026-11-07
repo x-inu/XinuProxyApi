@@ -12,8 +12,8 @@ import (
 	"github.com/tidwall/sjson"
 	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
 	homekv "github.com/x-inu/XinuGate/v7/internal/home"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // ClaudeAgentSessionUUID maps the downstream agent conversation to one stable UUID,
@@ -58,7 +58,7 @@ func ClaudeExecutionMetadataFromContext(ctx context.Context) bool {
 // an internal execution session metadata key.
 func ClaudeRequestHasExecutionMetadata(metadataSets ...map[string]any) bool {
 	for _, metadata := range metadataSets {
-		if val, ok := metadata[cliproxyexecutor.ExecutionSessionMetadataKey].(string); ok && strings.TrimSpace(val) != "" {
+		if val, ok := metadata[xinugateexecutor.ExecutionSessionMetadataKey].(string); ok && strings.TrimSpace(val) != "" {
 			return true
 		}
 	}
@@ -67,9 +67,9 @@ func ClaudeRequestHasExecutionMetadata(metadataSets ...map[string]any) bool {
 
 func claudeAgentSessionUUID(headers http.Header, originalPayload, translatedPayload []byte, metadataSets ...map[string]any) string {
 	metadata := mergeClaudeSessionMetadata(metadataSets...)
-	identity := cliproxyauth.ExtractSessionID(headers, originalPayload, metadata)
+	identity := xinugateauth.ExtractSessionID(headers, originalPayload, metadata)
 	if identity == "" && len(translatedPayload) > 0 {
-		identity = cliproxyauth.ExtractSessionID(headers, translatedPayload, metadata)
+		identity = xinugateauth.ExtractSessionID(headers, translatedPayload, metadata)
 	}
 	if identity == "" {
 		return uuid.NewString()
@@ -82,7 +82,7 @@ func claudeAgentSessionUUID(headers http.Header, originalPayload, translatedPayl
 	if parsed, errParse := uuid.Parse(identity); errParse == nil {
 		return parsed.String()
 	}
-	stableInput := "cli-proxy-api\x00claude\x00agent-conversation\x00" + identity
+	stableInput := "xinugate\x00claude\x00agent-conversation\x00" + identity
 	return uuid.NewSHA1(uuid.NameSpaceOID, []byte(stableInput)).String()
 }
 
@@ -127,7 +127,7 @@ var currentClaudeCredentialDevicePoolKVClient = func() (claudeCredentialDevicePo
 
 // EnsureClaudeCredentialDevicePoolRequired initializes a credential pool locally,
 // or coordinates it through Home KV when the selected auth is a remote dispatch clone.
-func EnsureClaudeCredentialDevicePoolRequired(ctx context.Context, auth *cliproxyauth.Auth) ([]string, error) {
+func EnsureClaudeCredentialDevicePoolRequired(ctx context.Context, auth *xinugateauth.Auth) ([]string, error) {
 	if auth == nil {
 		return nil, fmt.Errorf("ensure Claude credential device pool: auth is nil")
 	}
@@ -213,7 +213,7 @@ func EnsureClaudeCredentialDevicePoolRequired(ctx context.Context, auth *cliprox
 }
 
 // ClaudeCredentialAccountUUID returns the selected upstream credential's account UUID.
-func ClaudeCredentialAccountUUID(auth *cliproxyauth.Auth) string {
+func ClaudeCredentialAccountUUID(auth *xinugateauth.Auth) string {
 	if auth == nil {
 		return ""
 	}
@@ -263,7 +263,7 @@ func newClaudeCredentialMetadataRequestError(err error) error {
 }
 
 // ApplyClaudeCredentialMetadata rewrites the identity exception shared by native and cloaked OAuth requests.
-func ApplyClaudeCredentialMetadata(payload []byte, auth *cliproxyauth.Auth, sessionID string) ([]byte, string, error) {
+func ApplyClaudeCredentialMetadata(payload []byte, auth *xinugateauth.Auth, sessionID string) ([]byte, string, error) {
 	if auth == nil {
 		return nil, "", fmt.Errorf("apply Claude credential metadata: auth is nil")
 	}

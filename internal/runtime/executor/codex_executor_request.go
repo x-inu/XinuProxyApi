@@ -18,9 +18,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/thinking"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 const (
@@ -57,7 +57,7 @@ func translateCodexRequestPairWithUpdateIntent(from, to sdktranslator.Format, mo
 }
 
 // PrepareRequest injects Codex credentials into the outgoing HTTP request.
-func (e *CodexExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Auth) error {
+func (e *CodexExecutor) PrepareRequest(req *http.Request, auth *xinugateauth.Auth) error {
 	if req == nil {
 		return nil
 	}
@@ -76,7 +76,7 @@ func (e *CodexExecutor) PrepareRequest(req *http.Request, auth *cliproxyauth.Aut
 }
 
 // HttpRequest injects Codex credentials into the request and executes it.
-func (e *CodexExecutor) HttpRequest(ctx context.Context, auth *cliproxyauth.Auth, req *http.Request) (*http.Response, error) {
+func (e *CodexExecutor) HttpRequest(ctx context.Context, auth *xinugateauth.Auth, req *http.Request) (*http.Response, error) {
 	if req == nil {
 		return nil, fmt.Errorf("codex executor: request is nil")
 	}
@@ -104,7 +104,7 @@ type codexIdentityReplacement struct {
 	confused string
 }
 
-func (e *CodexExecutor) cacheHelper(ctx context.Context, from sdktranslator.Format, url string, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, userPayload []byte, rawJSON []byte, headerSets ...http.Header) (*http.Request, []byte, codexIdentityConfuseState, error) {
+func (e *CodexExecutor) cacheHelper(ctx context.Context, from sdktranslator.Format, url string, auth *xinugateauth.Auth, req xinugateexecutor.Request, userPayload []byte, rawJSON []byte, headerSets ...http.Header) (*http.Request, []byte, codexIdentityConfuseState, error) {
 	var headers http.Header
 	if len(headerSets) > 0 {
 		headers = headerSets[0]
@@ -136,7 +136,7 @@ func (e *CodexExecutor) cacheHelper(ctx context.Context, from sdktranslator.Form
 		}
 		if cache.ID == "" {
 			if apiKey := strings.TrimSpace(helps.APIKeyFromContext(ctx)); apiKey != "" {
-				cache.ID = uuid.NewSHA1(uuid.NameSpaceOID, []byte("cli-proxy-api:codex:prompt-cache:"+apiKey)).String()
+				cache.ID = uuid.NewSHA1(uuid.NameSpaceOID, []byte("xinugate:codex:prompt-cache:"+apiKey)).String()
 			}
 		}
 	}
@@ -163,7 +163,7 @@ func (e *CodexExecutor) cacheHelper(ctx context.Context, from sdktranslator.Form
 	return httpReq, rawJSON, identityState, nil
 }
 
-func applyCodexIdentityConfuseBody(cfg *config.Config, auth *cliproxyauth.Auth, userPayload []byte, rawJSON []byte) ([]byte, codexIdentityConfuseState) {
+func applyCodexIdentityConfuseBody(cfg *config.Config, auth *xinugateauth.Auth, userPayload []byte, rawJSON []byte) ([]byte, codexIdentityConfuseState) {
 	if !codexIdentityConfuseEnabled(cfg) || auth == nil || strings.TrimSpace(auth.ID) == "" || len(rawJSON) == 0 {
 		return rawJSON, codexIdentityConfuseState{}
 	}
@@ -281,11 +281,11 @@ func codexIdentityConfuseEnabled(cfg *config.Config) bool {
 }
 
 func codexIdentityConfuseUUID(authID string, kind string, value string) string {
-	name := strings.Join([]string{"cli-proxy-api", "codex", "identity-confuse", kind, strings.TrimSpace(authID), strings.TrimSpace(value)}, ":")
+	name := strings.Join([]string{"xinugate", "codex", "identity-confuse", kind, strings.TrimSpace(authID), strings.TrimSpace(value)}, ":")
 	return uuid.NewSHA1(uuid.NameSpaceOID, []byte(name)).String()
 }
 
-func applyCodexHeaders(r *http.Request, auth *cliproxyauth.Auth, token string, stream bool, cfg *config.Config, clientHeaders ...http.Header) {
+func applyCodexHeaders(r *http.Request, auth *xinugateauth.Auth, token string, stream bool, cfg *config.Config, clientHeaders ...http.Header) {
 	var ginHeaders http.Header
 	if len(clientHeaders) > 0 && clientHeaders[0] != nil {
 		ginHeaders = clientHeaders[0]
@@ -314,7 +314,7 @@ func applyModelHeaderOverrides(headers http.Header, modelName string) {
 
 // applyCodexDirectImageHeaders sets Codex upstream headers for direct /images/* calls.
 // Downstream client User-Agent values are not forwarded to reduce Cloudflare 1010 blocks.
-func applyCodexDirectImageHeaders(r *http.Request, auth *cliproxyauth.Auth, token string, stream bool, cfg *config.Config, clientHeaders ...http.Header) {
+func applyCodexDirectImageHeaders(r *http.Request, auth *xinugateauth.Auth, token string, stream bool, cfg *config.Config, clientHeaders ...http.Header) {
 	var ginHeaders http.Header
 	if len(clientHeaders) > 0 && clientHeaders[0] != nil {
 		ginHeaders = clientHeaders[0].Clone()
@@ -326,7 +326,7 @@ func applyCodexDirectImageHeaders(r *http.Request, auth *cliproxyauth.Auth, toke
 	applyCodexHeadersFromSources(r, auth, token, stream, cfg, ginHeaders)
 }
 
-func applyCodexHeadersFromSources(r *http.Request, auth *cliproxyauth.Auth, token string, stream bool, cfg *config.Config, ginHeaders http.Header) {
+func applyCodexHeadersFromSources(r *http.Request, auth *xinugateauth.Auth, token string, stream bool, cfg *config.Config, ginHeaders http.Header) {
 	r.Header.Set("Content-Type", "application/json")
 	if strings.TrimSpace(token) != "" {
 		r.Header.Set("Authorization", "Bearer "+token)
@@ -395,7 +395,7 @@ const codexRoutingHintHeader = "X-Codex-Routing-Hint"
 // afterwards. A rule that resolves to nothing falls back to the derived hint.
 // API-key requests are not touched, matching native Codex, which sends no hint
 // to API-key providers.
-func applyCodexRoutingHint(ctx context.Context, headers http.Header, auth *cliproxyauth.Auth, baseModel string, upstreamBody []byte, clientHeaders http.Header) {
+func applyCodexRoutingHint(ctx context.Context, headers http.Header, auth *xinugateauth.Auth, baseModel string, upstreamBody []byte, clientHeaders http.Header) {
 	if codexAuthUsesAPIKey(auth) {
 		return
 	}
@@ -420,7 +420,7 @@ func applyCodexRoutingHint(ctx context.Context, headers http.Header, auth *clipr
 // codexOperatorHeaderValue returns the value the auth's "header:" rules
 // resolve to for name, using the same resolver that applied them to the
 // request, so dynamic references that resolve to nothing report "".
-func codexOperatorHeaderValue(ctx context.Context, auth *cliproxyauth.Auth, clientHeaders http.Header, name string) string {
+func codexOperatorHeaderValue(ctx context.Context, auth *xinugateauth.Auth, clientHeaders http.Header, name string) string {
 	if auth == nil || len(auth.Attributes) == 0 {
 		return ""
 	}
@@ -429,9 +429,9 @@ func codexOperatorHeaderValue(ctx context.Context, auth *cliproxyauth.Auth, clie
 	return strings.TrimSpace(resolved.Header.Get(name))
 }
 
-func isCodexCloakingDisabled(cfg *config.Config, auth *cliproxyauth.Auth) bool {
+func isCodexCloakingDisabled(cfg *config.Config, auth *xinugateauth.Auth) bool {
 	if auth != nil && len(auth.Attributes) > 0 {
-		if val, ok := auth.Attributes[cliproxyauth.AttributeCodexDisableCloaking]; ok {
+		if val, ok := auth.Attributes[xinugateauth.AttributeCodexDisableCloaking]; ok {
 			if parsed, errParse := strconv.ParseBool(strings.TrimSpace(val)); errParse == nil {
 				return parsed
 			}
@@ -446,7 +446,7 @@ func isCodexCloakingDisabled(cfg *config.Config, auth *cliproxyauth.Auth) bool {
 	return false
 }
 
-func applyCodexCloakingHeaders(headers http.Header, cfg *config.Config, auth *cliproxyauth.Auth) {
+func applyCodexCloakingHeaders(headers http.Header, cfg *config.Config, auth *xinugateauth.Auth) {
 	if headers == nil || cfg == nil || isCodexCloakingDisabled(cfg, auth) {
 		return
 	}
@@ -468,7 +468,7 @@ func normalizeCodexInstructions(body []byte, nativeRequest ...bool) []byte {
 var imageGenToolJSON = []byte(`{"type":"image_generation","output_format":"png"}`)
 var imageGenToolArrayJSON = []byte(`[{"type":"image_generation","output_format":"png"}]`)
 
-func isCodexFreePlanAuth(auth *cliproxyauth.Auth) bool {
+func isCodexFreePlanAuth(auth *xinugateauth.Auth) bool {
 	if auth == nil || auth.Attributes == nil {
 		return false
 	}
@@ -499,7 +499,7 @@ func isImageGenerationFunctionTool(tool gjson.Result) bool {
 	return false
 }
 
-func ensureImageGenerationTool(body []byte, baseModel string, auth *cliproxyauth.Auth, headers http.Header) []byte {
+func ensureImageGenerationTool(body []byte, baseModel string, auth *xinugateauth.Auth, headers http.Header) []byte {
 	if util.IsCodexResponsesLiteRequest(body, headers) {
 		return body
 	}

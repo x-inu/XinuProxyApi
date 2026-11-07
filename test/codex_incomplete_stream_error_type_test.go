@@ -16,7 +16,7 @@ import (
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
 	"github.com/x-inu/XinuGate/v7/sdk/api/handlers"
 	openaihandlers "github.com/x-inu/XinuGate/v7/sdk/api/handlers/openai"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // TestCodexIncompleteStreamIsNotTypedAsInvalidRequest drives the real /v1/responses
@@ -51,7 +51,7 @@ func TestCodexIncompleteStreamIsNotTypedAsInvalidRequest(t *testing.T) {
 	}))
 	defer server.Close()
 
-	manager := cliproxyauth.NewManager(nil, &cliproxyauth.RoundRobinSelector{}, nil)
+	manager := xinugateauth.NewManager(nil, &xinugateauth.RoundRobinSelector{}, nil)
 	manager.SetRetryConfig(0, 0, 0)
 	cfg := &config.Config{}
 	manager.RegisterExecutor(runtimeexecutor.NewCodexExecutor(cfg))
@@ -59,8 +59,8 @@ func TestCodexIncompleteStreamIsNotTypedAsInvalidRequest(t *testing.T) {
 	const authID = "codex-incomplete-stream"
 	registry.GetGlobalRegistry().RegisterClient(authID, "codex", []*registry.ModelInfo{{ID: model}})
 	t.Cleanup(func() { registry.GetGlobalRegistry().UnregisterClient(authID) })
-	if _, errRegister := manager.Register(context.Background(), &cliproxyauth.Auth{
-		ID: authID, Provider: "codex", Status: cliproxyauth.StatusActive,
+	if _, errRegister := manager.Register(context.Background(), &xinugateauth.Auth{
+		ID: authID, Provider: "codex", Status: xinugateauth.StatusActive,
 		Attributes: map[string]string{"base_url": server.URL, "api_key": "incomplete"},
 		Metadata:   map[string]any{"disable_cooling": true},
 	}); errRegister != nil {

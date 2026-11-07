@@ -8,7 +8,7 @@ import (
 	"github.com/tidwall/sjson"
 	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 type claudeDiagnosticsRequestState struct {
@@ -17,7 +17,7 @@ type claudeDiagnosticsRequestState struct {
 	promptID string
 }
 
-func injectClaudeDiagnostics(body []byte, auth *cliproxyauth.Auth, sessionID string) ([]byte, claudeDiagnosticsRequestState) {
+func injectClaudeDiagnostics(body []byte, auth *xinugateauth.Auth, sessionID string) ([]byte, claudeDiagnosticsRequestState) {
 	key, sequence, previousMessageID, _, promptID := helps.BeginClaudeContinuity(claudeDiagnosticsCredentialIdentity(auth), sessionID, false, "")
 	return injectClaudeDiagnosticsWithState(body, key, sequence, previousMessageID, promptID)
 }
@@ -68,7 +68,7 @@ func commitClaudeDiagnostics(state claudeDiagnosticsRequestState, messageID stri
 	commitClaudeContinuity(state, messageID, "")
 }
 
-func claudeDiagnosticsCredentialIdentity(auth *cliproxyauth.Auth) string {
+func claudeDiagnosticsCredentialIdentity(auth *xinugateauth.Auth) string {
 	if auth == nil {
 		return ""
 	}

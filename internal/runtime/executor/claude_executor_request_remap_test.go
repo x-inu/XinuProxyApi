@@ -10,7 +10,7 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestRemapOAuthToolNamesWithBatchedEditsMatchesLegacyBytes(t *testing.T) {
@@ -349,7 +349,7 @@ func TestReverseRemapOAuthToolNamesRejectsUnsafeMangledAliases(t *testing.T) {
 			if errReverse == nil || !strings.Contains(errReverse.Error(), test.wantError) {
 				t.Fatalf("reverseRemapOAuthToolNames() error = %v, want %q", errReverse, test.wantError)
 			}
-			var requestErr cliproxyexecutor.RequestScopedError
+			var requestErr xinugateexecutor.RequestScopedError
 			if !errors.As(errReverse, &requestErr) || !requestErr.IsRequestScoped() {
 				t.Fatalf("reverseRemapOAuthToolNames() error = %T %v, want request-scoped", errReverse, errReverse)
 			}
@@ -568,7 +568,7 @@ func TestReverseRemapOAuthToolNamesMarksTrailingMarkupFailureRequestScoped(t *te
 	if !bytes.Equal(restored, response) {
 		t.Fatalf("reverseRemapOAuthToolNames() returned modified response: %s", restored)
 	}
-	var requestErr cliproxyexecutor.RequestScopedError
+	var requestErr xinugateexecutor.RequestScopedError
 	if !errors.As(errReverse, &requestErr) || !requestErr.IsRequestScoped() {
 		t.Fatalf("reverseRemapOAuthToolNames() error = %T %v, want request-scoped", errReverse, errReverse)
 	}

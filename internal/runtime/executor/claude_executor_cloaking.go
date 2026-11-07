@@ -20,7 +20,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,7 +44,7 @@ func detectIncomingClaudeCodeRequest(ctx context.Context, incoming http.Header, 
 // getWorkloadFromContext extracts workload identifier from the gin request headers.
 func getWorkloadFromContext(ctx context.Context) string {
 	if ginCtx, ok := ctx.Value("gin").(*gin.Context); ok && ginCtx != nil && ginCtx.Request != nil {
-		return strings.TrimSpace(ginCtx.GetHeader("X-CPA-Claude-Workload"))
+		return strings.TrimSpace(ginCtx.GetHeader("X-XG-Claude-Workload"))
 	}
 	return ""
 }
@@ -53,7 +53,7 @@ func getWorkloadFromContext(ctx context.Context) string {
 // falling back to its stored metadata (the raw OAuth/token JSON). Returns
 // (cloakMode, strictMode, sensitiveWords, cacheUserID); an empty cloakMode means
 // the credential did not explicitly configure a mode.
-func getCloakConfigFromAuth(auth *cliproxyauth.Auth) (cloakMode string, strictMode bool, sensitiveWords []string, cacheUserID bool) {
+func getCloakConfigFromAuth(auth *xinugateauth.Auth) (cloakMode string, strictMode bool, sensitiveWords []string, cacheUserID bool) {
 	if auth == nil {
 		return "", false, nil, false
 	}
@@ -194,7 +194,7 @@ func generateBillingHeader(cchSigning bool, version, messageText, entrypoint, wo
 
 func resolveClaudeContinuityTags(
 	ctx context.Context,
-	auth *cliproxyauth.Auth,
+	auth *xinugateauth.Auth,
 	incomingHeaders http.Header,
 	payload []byte,
 	confirmedClaudeCode bool,
@@ -1081,11 +1081,11 @@ func claudeCodeLocalDate(now time.Time) string {
 	return fmt.Sprintf("%04d-%02d-%02d", year, int(month), day)
 }
 
-func claudeCodeCurrentTime(cfg *config.Config, auth *cliproxyauth.Auth) time.Time {
+func claudeCodeCurrentTime(cfg *config.Config, auth *xinugateauth.Auth) time.Time {
 	return time.Now().In(claudeCodeTimezone(cfg, auth))
 }
 
-func claudeCodeTimezone(cfg *config.Config, auth *cliproxyauth.Auth) *time.Location {
+func claudeCodeTimezone(cfg *config.Config, auth *xinugateauth.Auth) *time.Location {
 	if timezone := claudeCredentialTimezone(auth); timezone != "" {
 		if location, errLocation := time.LoadLocation(timezone); errLocation == nil {
 			return location
@@ -1105,7 +1105,7 @@ func claudeCodeTimezone(cfg *config.Config, auth *cliproxyauth.Auth) *time.Locat
 	return location
 }
 
-func claudeCredentialTimezone(auth *cliproxyauth.Auth) string {
+func claudeCredentialTimezone(auth *xinugateauth.Auth) string {
 	if auth == nil {
 		return ""
 	}
@@ -1315,7 +1315,7 @@ type claudeCloakSettings struct {
 	cacheUserID    bool
 }
 
-func resolveClaudeWirePolicy(cfg *config.Config, auth *cliproxyauth.Auth, apiKey string, confirmedClaudeCode bool) (claudeWirePolicy, claudeCloakSettings) {
+func resolveClaudeWirePolicy(cfg *config.Config, auth *xinugateauth.Auth, apiKey string, confirmedClaudeCode bool) (claudeWirePolicy, claudeCloakSettings) {
 	cloakCfg := resolveClaudeKeyCloakConfig(cfg, auth)
 	attrMode, attrStrict, attrWords, attrCache := getCloakConfigFromAuth(auth)
 
@@ -1379,7 +1379,7 @@ func resolveClaudeWirePolicy(cfg *config.Config, auth *cliproxyauth.Auth, apiKey
 func applyCloaking(
 	ctx context.Context,
 	cfg *config.Config,
-	auth *cliproxyauth.Auth,
+	auth *xinugateauth.Auth,
 	payload []byte,
 	apiKey string,
 	confirmedClaudeCode bool,
@@ -1391,7 +1391,7 @@ func applyCloaking(
 func applyCloakingInternal(
 	ctx context.Context,
 	cfg *config.Config,
-	auth *cliproxyauth.Auth,
+	auth *xinugateauth.Auth,
 	payload []byte,
 	apiKey string,
 	confirmedClaudeCode bool,

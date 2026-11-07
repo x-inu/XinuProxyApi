@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestOpenAICompatRetryAfter(t *testing.T) {
@@ -91,11 +91,11 @@ func TestOpenAICompatExecutorPropagatesRetryAfter(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	executor := NewOpenAICompatExecutor("openai-compatibility", &config.Config{})
-	auth := &cliproxyauth.Auth{Attributes: map[string]string{
+	auth := &xinugateauth.Auth{Attributes: map[string]string{
 		"base_url": server.URL + "/v1",
 		"api_key":  "test",
 	}}
-	request := cliproxyexecutor.Request{
+	request := xinugateexecutor.Request{
 		Model:   "compatible-model",
 		Payload: []byte(`{"model":"compatible-model","messages":[{"role":"user","content":"hi"}]}`),
 	}
@@ -106,7 +106,7 @@ func TestOpenAICompatExecutorPropagatesRetryAfter(t *testing.T) {
 		{
 			name: "nonstream",
 			invoke: func() error {
-				_, errExecute := executor.Execute(context.Background(), auth, request, cliproxyexecutor.Options{
+				_, errExecute := executor.Execute(context.Background(), auth, request, xinugateexecutor.Options{
 					SourceFormat: sdktranslator.FromString("openai"),
 				})
 				return errExecute
@@ -115,7 +115,7 @@ func TestOpenAICompatExecutorPropagatesRetryAfter(t *testing.T) {
 		{
 			name: "stream bootstrap",
 			invoke: func() error {
-				_, errExecute := executor.ExecuteStream(context.Background(), auth, request, cliproxyexecutor.Options{
+				_, errExecute := executor.ExecuteStream(context.Background(), auth, request, xinugateexecutor.Options{
 					SourceFormat: sdktranslator.FromString("openai"),
 					Stream:       true,
 				})

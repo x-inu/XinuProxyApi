@@ -14,9 +14,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/registry"
 	internalsignature "github.com/x-inu/XinuGate/v7/internal/signature"
 	_ "github.com/x-inu/XinuGate/v7/internal/translator"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 
@@ -30,8 +30,8 @@ func testNativeGemini3ThoughtSignature() string {
 	return base64.StdEncoding.EncodeToString(encoded)
 }
 
-func claudeRequestWithThinkingSignature(sig string) (cliproxyexecutor.Request, cliproxyexecutor.Options) {
-	req := cliproxyexecutor.Request{
+func claudeRequestWithThinkingSignature(sig string) (xinugateexecutor.Request, xinugateexecutor.Options) {
+	req := xinugateexecutor.Request{
 		Model: "gemini-2.5-flash",
 		Payload: []byte(`{
 		"model": "claude-3-7-sonnet-20250219",
@@ -52,10 +52,10 @@ func claudeRequestWithThinkingSignature(sig string) (cliproxyexecutor.Request, c
 		]
 	}`),
 		Metadata: map[string]any{
-			"cliproxy.resolved_api_key_model_info": &registry.ModelInfo{IsCompat: true},
+			"xinugate.resolved_api_key_model_info": &registry.ModelInfo{IsCompat: true},
 		},
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 	}
 	return req, opts
@@ -75,7 +75,7 @@ func TestGeminiExecutorExecute_SanitizesClaudeCAISSignature(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "test-api-key",
 			"base_url": server.URL,
@@ -119,7 +119,7 @@ func TestGeminiExecutorExecuteStream_SanitizesClaudeCAISSignature(t *testing.T) 
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "test-api-key",
 			"base_url": server.URL,
@@ -154,7 +154,7 @@ func TestGeminiExecutorCountTokens_SanitizesClaudeCAISSignature(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "test-api-key",
 			"base_url": server.URL,
@@ -187,7 +187,7 @@ func TestGeminiExecutorExecute_FunctionCall_ReplacesClaudeSignatureWithBypass(t 
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "test-api-key",
 			"base_url": server.URL,
@@ -216,12 +216,12 @@ func TestGeminiExecutorExecute_FunctionCall_ReplacesClaudeSignatureWithBypass(t 
 		]
 	}`)
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: reqPayload,
 	}
 
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 	}
 
@@ -252,7 +252,7 @@ func TestGeminiExecutorExecute_PreservesNativeGeminiSignature(t *testing.T) {
 
 	nativeSig := testNativeGemini3ThoughtSignature()
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "test-api-key",
 			"base_url": server.URL,
@@ -281,12 +281,12 @@ func TestGeminiExecutorExecute_PreservesNativeGeminiSignature(t *testing.T) {
 		]
 	}`)
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: reqPayload,
 	}
 
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 	}
 
@@ -316,7 +316,7 @@ func TestGeminiExecutorExecute_UnsignedRequestNotCorrupted(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key":  "test-api-key",
 			"base_url": server.URL,
@@ -332,12 +332,12 @@ func TestGeminiExecutorExecute_UnsignedRequestNotCorrupted(t *testing.T) {
 		]
 	}`)
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: reqPayload,
 	}
 
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 	}
 
@@ -352,8 +352,8 @@ func TestGeminiExecutorExecute_UnsignedRequestNotCorrupted(t *testing.T) {
 	}
 }
 
-func geminiRequestWithThinkingSignature(sig string) (cliproxyexecutor.Request, cliproxyexecutor.Options) {
-	req := cliproxyexecutor.Request{
+func geminiRequestWithThinkingSignature(sig string) (xinugateexecutor.Request, xinugateexecutor.Options) {
+	req := xinugateexecutor.Request{
 		Model: "gemini-2.5-flash",
 		Payload: []byte(`{
 		"contents": [
@@ -373,7 +373,7 @@ func geminiRequestWithThinkingSignature(sig string) (cliproxyexecutor.Request, c
 		]
 	}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 	}
 	return req, opts
@@ -393,7 +393,7 @@ func TestGeminiVertexExecutorExecute_GeminiPayload_SanitizesClaudeCAISSignature(
 	defer server.Close()
 
 	executor := NewGeminiVertexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "vertex",
 		Attributes: map[string]string{
 			"api_key":  "test-vertex-key",
@@ -427,7 +427,7 @@ func TestGeminiVertexExecutorExecuteStream_GeminiPayload_SanitizesClaudeCAISSign
 	defer server.Close()
 
 	executor := NewGeminiVertexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "vertex",
 		Attributes: map[string]string{
 			"api_key":  "test-vertex-key",
@@ -463,7 +463,7 @@ func TestGeminiVertexExecutorCountTokens_GeminiPayload_SanitizesClaudeCAISSignat
 	defer server.Close()
 
 	executor := NewGeminiVertexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "vertex",
 		Attributes: map[string]string{
 			"api_key":  "test-vertex-key",
@@ -473,12 +473,12 @@ func TestGeminiVertexExecutorCountTokens_GeminiPayload_SanitizesClaudeCAISSignat
 
 	req, opts := geminiRequestWithThinkingSignature(testClaudeCAISSample)
 
-	ctx := cliproxyexecutor.WithUpstreamAttemptTracker(context.Background())
+	ctx := xinugateexecutor.WithUpstreamAttemptTracker(context.Background())
 	_, err := executor.CountTokens(ctx, auth, req, opts)
 	if err != nil {
 		t.Fatalf("CountTokens() error = %v", err)
 	}
-	if !cliproxyexecutor.UpstreamAttempted(ctx) {
+	if !xinugateexecutor.UpstreamAttempted(ctx) {
 		t.Fatal("CountTokens() did not mark the HTTP request as an upstream attempt")
 	}
 
@@ -502,7 +502,7 @@ func TestGeminiVertexExecutorExecute_PreservesNativeGeminiSignature(t *testing.T
 
 	nativeSig := testNativeGemini3ThoughtSignature()
 	executor := NewGeminiVertexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "vertex",
 		Attributes: map[string]string{
 			"api_key":  "test-vertex-key",
@@ -532,12 +532,12 @@ func TestGeminiVertexExecutorExecute_PreservesNativeGeminiSignature(t *testing.T
 		]
 	}`)
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: reqPayload,
 	}
 
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 	}
 
@@ -567,7 +567,7 @@ func TestGeminiVertexExecutorExecute_UnsignedRequestNotCorrupted(t *testing.T) {
 	defer server.Close()
 
 	executor := NewGeminiVertexExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "vertex",
 		Attributes: map[string]string{
 			"api_key":  "test-vertex-key",
@@ -584,12 +584,12 @@ func TestGeminiVertexExecutorExecute_UnsignedRequestNotCorrupted(t *testing.T) {
 		]
 	}`)
 
-	req := cliproxyexecutor.Request{
+	req := xinugateexecutor.Request{
 		Model:   "gemini-2.5-flash",
 		Payload: reqPayload,
 	}
 
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatGemini,
 	}
 

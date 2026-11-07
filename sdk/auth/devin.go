@@ -14,7 +14,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/misc"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // DevinAuthenticator implements OAuth and headless authentication for Devin / Cognition.
@@ -43,7 +43,7 @@ func (a *DevinAuthenticator) RefreshLead() *time.Duration {
 // Login executes the interactive browser-based or headless manual authentication flow for Devin.
 func (a *DevinAuthenticator) Login(ctx context.Context, cfg *config.Config, opts *LoginOptions) (*coreauth.Auth, error) {
 	if cfg == nil {
-		return nil, fmt.Errorf("cliproxy auth: configuration is required")
+		return nil, fmt.Errorf("xinugate auth: configuration is required")
 	}
 	if ctx == nil {
 		ctx = context.Background()

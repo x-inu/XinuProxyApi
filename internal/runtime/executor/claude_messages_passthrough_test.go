@@ -11,17 +11,17 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func directClaudeMessagesContext() context.Context {
 	return context.Background()
 }
 
-func directClaudeOAuthAuth() *cliproxyauth.Auth {
-	return &cliproxyauth.Auth{
+func directClaudeOAuthAuth() *xinugateauth.Auth {
+	return &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key": "sk-ant-oat-direct-messages-test",
 		},
@@ -85,7 +85,7 @@ func TestClaudeExecutor_DirectMessagesOfficialUpstreamPreservesCallerShape(t *te
 			Request:    req,
 		}, nil
 	})
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", http.RoundTripper(transport))
 	incoming := http.Header{
 		"User-Agent":     {"pi (darwin; arm64)"},
 		"Anthropic-Beta": {"caller-beta-2099-01-01"},
@@ -94,7 +94,7 @@ func TestClaudeExecutor_DirectMessagesOfficialUpstreamPreservesCallerShape(t *te
 	auth.Attributes["base_url"] = "https://api.anthropic.com"
 	payload := []byte(`{"model":"claude-opus-5-5","system":[{"type":"text","text":"caller system","cache_control":{"type":"ephemeral"}}],"thinking":{"type":"adaptive","display":"summarized"},"tools":[{"name":"caller_tool","description":"caller tool","input_schema":{"type":"object"}}],"messages":[{"role":"user","content":"hello"}],"max_tokens":32}`)
 
-	_, err := NewClaudeExecutor(&config.Config{}).Execute(ctx, auth, cliproxyexecutor.Request{Model: "claude-opus-5-5", Payload: payload}, cliproxyexecutor.Options{
+	_, err := NewClaudeExecutor(&config.Config{}).Execute(ctx, auth, xinugateexecutor.Request{Model: "claude-opus-5-5", Payload: payload}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Headers:      incoming,
 	})
@@ -124,8 +124,8 @@ func TestClaudeExecutor_DirectMessagesOfficialUpstreamPreservesCallerShape(t *te
 	}
 }
 
-func directClaudeAPIKeyAuth() *cliproxyauth.Auth {
-	return &cliproxyauth.Auth{
+func directClaudeAPIKeyAuth() *xinugateauth.Auth {
+	return &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key": "sk-ant-api03-direct-messages-test",
 		},
@@ -186,7 +186,7 @@ func TestClaudeExecutor_PreserveCallerFingerprintAlignsSessionIDWithBody(t *test
 			Request:    req,
 		}, nil
 	})
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", http.RoundTripper(transport))
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", http.RoundTripper(transport))
 	incoming := http.Header{
 		"User-Agent":                  {"pi (darwin; arm64)"},
 		"X-Claude-Code-Session-Id":    {"forged-session-a"},
@@ -196,7 +196,7 @@ func TestClaudeExecutor_PreserveCallerFingerprintAlignsSessionIDWithBody(t *test
 	auth.Attributes["base_url"] = "https://api.anthropic.com"
 	payload := []byte(`{"model":"claude-opus-5-5","messages":[{"role":"user","content":"hello"}],"max_tokens":32}`)
 
-	_, err := NewClaudeExecutor(&config.Config{}).Execute(ctx, auth, cliproxyexecutor.Request{Model: "claude-opus-5-5", Payload: payload}, cliproxyexecutor.Options{
+	_, err := NewClaudeExecutor(&config.Config{}).Execute(ctx, auth, xinugateexecutor.Request{Model: "claude-opus-5-5", Payload: payload}, xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatClaude,
 		Headers:      incoming,
 	})

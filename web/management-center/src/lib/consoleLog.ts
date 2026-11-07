@@ -62,7 +62,7 @@ export function stripAnsi(line: string): string {
 }
 
 /** Strips duplicate [timestamp] [reqID] [level] [caller] prefix if present in the raw line. */
-export function stripCpaPrefix(line: string): string {
+export function stripLogPrefix(line: string): string {
   return line.replace(CPA_PREFIX_RE, '');
 }
 
@@ -111,7 +111,7 @@ export function toConsoleEntry(
   receivedAt: number = Date.now()
 ): ConsoleEntry {
   const rawLine = typeof raw.line === 'string' ? raw.line : '';
-  const line = stripCpaPrefix(stripAnsi(rawLine));
+  const line = stripLogPrefix(stripAnsi(rawLine));
   const json = parseJsonLine(line);
   const serverTime = typeof raw.time === 'string' ? Date.parse(raw.time) : Number.NaN;
 
@@ -155,7 +155,7 @@ export function formatClock(iso: string): string {
  * prefix in front of the bracket are skipped rather than demanded absent.
  */
 export function splitTag(line: string): { tag: string; message: string } | null {
-  const withoutPrefix = stripCpaPrefix(line).replace(LEADING_TIMESTAMP_RE, '').replace(PREFIX_RE, '').trimStart();
+  const withoutPrefix = stripLogPrefix(line).replace(LEADING_TIMESTAMP_RE, '').replace(PREFIX_RE, '').trimStart();
   const match = /^\[([^\]\s]+)\]\s?([\s\S]*)$/.exec(withoutPrefix);
   return match ? { tag: match[1], message: match[2] } : null;
 }

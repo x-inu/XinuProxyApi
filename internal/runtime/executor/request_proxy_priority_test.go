@@ -6,18 +6,18 @@ import (
 	"testing"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdkconfig "github.com/x-inu/XinuGate/v7/sdk/config"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestRequestProxyOverridesCredentialProxyForWebsocketAndAntigravity(t *testing.T) {
 	t.Parallel()
 
 	const requestProxy = "http://request-proxy.example:8081"
-	ctx := cliproxyexecutor.WithRequestProxyURL(context.Background(), requestProxy)
+	ctx := xinugateexecutor.WithRequestProxyURL(context.Background(), requestProxy)
 	cfg := &config.Config{SDKConfig: sdkconfig.SDKConfig{ProxyURL: "http://global-proxy.example:8082"}}
-	auth := &cliproxyauth.Auth{ProxyURL: "http://auth-proxy.example:8080"}
+	auth := &xinugateauth.Auth{ProxyURL: "http://auth-proxy.example:8080"}
 
 	if got := antigravityProxyURL(ctx, cfg, auth); got != requestProxy {
 		t.Fatalf("antigravity proxy = %q, want %q", got, requestProxy)

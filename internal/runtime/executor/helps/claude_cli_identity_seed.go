@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // Stable identity seeds for fingerprint-profile=claude-code-cli on non-OAuth credentials.
@@ -37,7 +37,7 @@ func StableClaudeCLIAccountUUID(seed string) string {
 
 // ClaudeCLIAuthIdentitySeed returns a stable credential identity that does not
 // rotate with delegated-provider access tokens.
-func ClaudeCLIAuthIdentitySeed(auth *cliproxyauth.Auth) string {
+func ClaudeCLIAuthIdentitySeed(auth *xinugateauth.Auth) string {
 	if auth != nil {
 		if id := strings.TrimSpace(auth.ID); id != "" {
 			return "auth-id|" + id
@@ -56,7 +56,7 @@ func ClaudeCLIAuthIdentitySeed(auth *cliproxyauth.Auth) string {
 // ApplyClaudeCredentialMetadata. Synthesized API-key / delegated-provider
 // identity is written to a clone so the shared credential metadata map is not
 // mutated on the request path.
-func PrepareClaudeCLIFingerprintAuth(auth *cliproxyauth.Auth, seed string, synthesizeMissing bool) (*cliproxyauth.Auth, error) {
+func PrepareClaudeCLIFingerprintAuth(auth *xinugateauth.Auth, seed string, synthesizeMissing bool) (*xinugateauth.Auth, error) {
 	if auth == nil {
 		return nil, fmt.Errorf("auth is nil")
 	}
@@ -78,7 +78,7 @@ func PrepareClaudeCLIFingerprintAuth(auth *cliproxyauth.Auth, seed string, synth
 // When synthesizeMissing is true (fingerprint-profile=claude-code-cli on API keys),
 // missing account_uuid / device pool are filled with stable values derived from seed.
 // Callers that hold a shared Auth must use PrepareClaudeCLIFingerprintAuth instead.
-func EnsureClaudeCLIFingerprintIdentity(auth *cliproxyauth.Auth, seed string, synthesizeMissing bool) error {
+func EnsureClaudeCLIFingerprintIdentity(auth *xinugateauth.Auth, seed string, synthesizeMissing bool) error {
 	if auth == nil {
 		return fmt.Errorf("auth is nil")
 	}

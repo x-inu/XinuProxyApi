@@ -3,7 +3,7 @@ package auth
 import (
 	"time"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func init() {
@@ -19,7 +19,7 @@ func init() {
 }
 
 func registerRefreshLead(provider string, factory func() Authenticator) {
-	cliproxyauth.RegisterRefreshLeadProvider(provider, func() *time.Duration {
+	xinugateauth.RegisterRefreshLeadProvider(provider, func() *time.Duration {
 		if factory == nil {
 			return nil
 		}

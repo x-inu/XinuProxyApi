@@ -16,7 +16,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	sdkAuth "github.com/x-inu/XinuGate/v7/sdk/auth"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // storePersister captures persistence-capable token store methods used by the watcher.

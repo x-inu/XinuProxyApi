@@ -128,7 +128,7 @@ func FetchXAINPMLatestVersion(ctx context.Context, client *http.Client) (string,
 		return "", fmt.Errorf("create npm registry request: %w", errReq)
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "CLIProxyAPI")
+	req.Header.Set("User-Agent", "XinuGate")
 
 	if client == nil {
 		client = xaiVersionHTTPClient()

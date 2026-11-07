@@ -13,9 +13,9 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	core "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	core "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // The upstream deliberately cannot finish the initial response until it reads
@@ -97,7 +97,7 @@ func TestCodexDuplexSteeringLifecycle(t *testing.T) {
 			ctx = core.WithWebsocketInput(core.WithDownstreamWebsocket(ctx), input)
 			exec := NewCodexWebsocketsExecutor(&config.Config{Codex: config.CodexConfig{ResponseSteering: true}})
 			exec.store = &codexWebsocketSessionStore{sessions: make(map[string]*codexWebsocketSession)}
-			auth := &cliproxyauth.Auth{ID: "A", Provider: "codex", Attributes: map[string]string{"api_key": "test-key", "base_url": server.URL, "websockets": "true"}}
+			auth := &xinugateauth.Auth{ID: "A", Provider: "codex", Attributes: map[string]string{"api_key": "test-key", "base_url": server.URL, "websockets": "true"}}
 			req := core.Request{Model: "gpt-6-astra", Payload: []byte(`{"model":"gpt-6-astra","input":[],"instructions":"Initial settings"}`)}
 			opts := core.Options{SourceFormat: sdktranslator.FromString("codex"), Metadata: map[string]any{core.ExecutionSessionMetadataKey: "duplex-test"}}
 			result, err := exec.ExecuteStream(ctx, auth, req, opts)
@@ -231,7 +231,7 @@ func TestCodexDuplexAppendInheritsContextAndInstructions(t *testing.T) {
 
 	exec := NewCodexWebsocketsExecutor(&config.Config{Codex: config.CodexConfig{ResponseSteering: true}})
 	exec.store = &codexWebsocketSessionStore{sessions: make(map[string]*codexWebsocketSession)}
-	auth := &cliproxyauth.Auth{ID: "append-test-auth", Provider: "codex", Attributes: map[string]string{"api_key": "test-key", "base_url": server.URL, "websockets": "true"}}
+	auth := &xinugateauth.Auth{ID: "append-test-auth", Provider: "codex", Attributes: map[string]string{"api_key": "test-key", "base_url": server.URL, "websockets": "true"}}
 	req := core.Request{
 		Model:   "gpt-6-astra",
 		Payload: []byte(`{"model":"gpt-6-astra","input":[{"role":"user","content":"turn 1"}],"instructions":"Initial system instructions"}`),
@@ -314,7 +314,7 @@ func TestCodexDuplexStandaloneCreateDoesNotInheritParentID(t *testing.T) {
 
 	exec := NewCodexWebsocketsExecutor(&config.Config{Codex: config.CodexConfig{ResponseSteering: true}})
 	exec.store = &codexWebsocketSessionStore{sessions: make(map[string]*codexWebsocketSession)}
-	auth := &cliproxyauth.Auth{ID: "standalone-create-test", Provider: "codex", Attributes: map[string]string{"api_key": "test-key", "base_url": server.URL, "websockets": "true"}}
+	auth := &xinugateauth.Auth{ID: "standalone-create-test", Provider: "codex", Attributes: map[string]string{"api_key": "test-key", "base_url": server.URL, "websockets": "true"}}
 	req := core.Request{
 		Model:   "gpt-6-astra",
 		Payload: []byte(`{"model":"gpt-6-astra","input":[{"role":"user","content":"turn 1"}]}`),
@@ -427,7 +427,7 @@ func TestCodexDuplexQueuedCreateDoesNotBlockSubsequentSteer(t *testing.T) {
 
 	exec := NewCodexWebsocketsExecutor(&config.Config{Codex: config.CodexConfig{ResponseSteering: true}})
 	exec.store = &codexWebsocketSessionStore{sessions: make(map[string]*codexWebsocketSession)}
-	auth := &cliproxyauth.Auth{ID: "steer-blocking-test", Provider: "codex", Attributes: map[string]string{"api_key": "test-key", "base_url": server.URL, "websockets": "true"}}
+	auth := &xinugateauth.Auth{ID: "steer-blocking-test", Provider: "codex", Attributes: map[string]string{"api_key": "test-key", "base_url": server.URL, "websockets": "true"}}
 	req := core.Request{
 		Model:   "gpt-6-astra",
 		Payload: []byte(`{"model":"gpt-6-astra","input":[{"role":"user","content":"start"}]}`),

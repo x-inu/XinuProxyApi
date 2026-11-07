@@ -5,25 +5,25 @@ import (
 	"context"
 	"testing"
 
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestEmitWebSocketResponseEvent(t *testing.T) {
-	var received []cliproxyexecutor.WebSocketResponseEvent
-	opts := cliproxyexecutor.Options{
+	var received []xinugateexecutor.WebSocketResponseEvent
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 		Metadata: map[string]any{
 			"request_id": "test-req-1",
 			"trace_id":   "test-trace-1",
 		},
-		WebSocketResponseObserver: func(_ context.Context, ev cliproxyexecutor.WebSocketResponseEvent) {
+		WebSocketResponseObserver: func(_ context.Context, ev xinugateexecutor.WebSocketResponseEvent) {
 			received = append(received, ev)
 		},
 	}
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "auth-123",
 		Label:    "primary-auth",
 		Provider: "codex",
@@ -66,7 +66,7 @@ func TestEmitWebSocketResponseEvent(t *testing.T) {
 }
 
 func TestEmitWebSocketResponseEventNilObserverNoOp(t *testing.T) {
-	opts := cliproxyexecutor.Options{}
+	opts := xinugateexecutor.Options{}
 	payload := []byte(`{"type":"codex.rate_limits"}`)
 	// Should not panic
 	EmitWebSocketResponseEvent(context.Background(), opts, nil, "codex", "gpt-5.3-codex", payload)

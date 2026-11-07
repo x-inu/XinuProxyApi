@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/gorilla/websocket"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // readResponsesWebsocketInput is the only downstream reader in duplex mode.
 // The bounded queue backpressures clients instead of retaining unlimited input.
-func readResponsesWebsocketInput(ctx context.Context, cancel context.CancelFunc, conn *websocket.Conn) <-chan cliproxyexecutor.WebsocketInput {
-	input := make(chan cliproxyexecutor.WebsocketInput, 16)
+func readResponsesWebsocketInput(ctx context.Context, cancel context.CancelFunc, conn *websocket.Conn) <-chan xinugateexecutor.WebsocketInput {
+	input := make(chan xinugateexecutor.WebsocketInput, 16)
 	go func() {
 		defer close(input)
 		for {
@@ -23,7 +23,7 @@ func readResponsesWebsocketInput(ctx context.Context, cancel context.CancelFunc,
 				continue
 			}
 			select {
-			case input <- cliproxyexecutor.WebsocketInput{Payload: payload}:
+			case input <- xinugateexecutor.WebsocketInput{Payload: payload}:
 			case <-ctx.Done():
 				return
 			}

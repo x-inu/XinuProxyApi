@@ -13,7 +13,7 @@ import (
 	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 const (
@@ -155,7 +155,7 @@ func isKimiAPIEndpoint(endpoint string) bool {
 	return strings.EqualFold(host, "api.kimi.com") || strings.EqualFold(host, "api.kimi.ai")
 }
 
-func isKimiMessagesUpstream(auth *cliproxyauth.Auth, endpoint string) bool {
+func isKimiMessagesUpstream(auth *xinugateauth.Auth, endpoint string) bool {
 	if auth != nil {
 		provider := strings.ToLower(strings.TrimSpace(auth.Provider))
 		if provider == "kimi" || provider == "kimi-ai" || provider == "kimi.ai" || provider == "kimi.com" {
@@ -174,7 +174,7 @@ func isJustwokerAPIEndpoint(endpoint string) bool {
 	return strings.Contains(host, "justwoker") || strings.EqualFold(host, "api.justwoker.icu")
 }
 
-func isJustwokerMessagesUpstream(auth *cliproxyauth.Auth, endpoint string) bool {
+func isJustwokerMessagesUpstream(auth *xinugateauth.Auth, endpoint string) bool {
 	if auth != nil {
 		if strings.EqualFold(strings.TrimSpace(auth.Prefix), "jdw") {
 			return true
@@ -188,7 +188,7 @@ func isJustwokerMessagesUpstream(auth *cliproxyauth.Auth, endpoint string) bool 
 	return isJustwokerAPIEndpoint(endpoint)
 }
 
-func shouldForceClaudeNonStream(cfg *config.Config, auth *cliproxyauth.Auth, endpoint string) bool {
+func shouldForceClaudeNonStream(cfg *config.Config, auth *xinugateauth.Auth, endpoint string) bool {
 	if auth != nil && auth.Attributes != nil {
 		if strings.EqualFold(strings.TrimSpace(auth.Attributes["force_non_stream"]), "true") ||
 			strings.EqualFold(strings.TrimSpace(auth.Attributes["disable_streaming"]), "true") {
@@ -207,7 +207,7 @@ func shouldForceClaudeNonStream(cfg *config.Config, auth *cliproxyauth.Auth, end
 // the full CLI profile. Kimi treats the block as prompt text, so forwarding it
 // unchanged would leak CPA's attribution into the model's context. Other system
 // content is preserved.
-func stripDefaultKimiClaudeCodeAttribution(auth *cliproxyauth.Auth, endpoint string, cliFingerprint bool, body []byte) []byte {
+func stripDefaultKimiClaudeCodeAttribution(auth *xinugateauth.Auth, endpoint string, cliFingerprint bool, body []byte) []byte {
 	if cliFingerprint || !isKimiMessagesUpstream(auth, endpoint) {
 		return body
 	}
@@ -548,7 +548,7 @@ func isClaudeCCHExcludedKey(key []byte) bool {
 	}
 }
 
-func resolveClaudeKeyConfig(cfg *config.Config, auth *cliproxyauth.Auth) *config.ClaudeKey {
+func resolveClaudeKeyConfig(cfg *config.Config, auth *xinugateauth.Auth) *config.ClaudeKey {
 	if cfg == nil || auth == nil {
 		return nil
 	}
@@ -575,7 +575,7 @@ func resolveClaudeKeyConfig(cfg *config.Config, auth *cliproxyauth.Auth) *config
 }
 
 // resolveClaudeKeyCloakConfig finds the matching ClaudeKey config and returns its CloakConfig.
-func resolveClaudeKeyCloakConfig(cfg *config.Config, auth *cliproxyauth.Auth) *config.CloakConfig {
+func resolveClaudeKeyCloakConfig(cfg *config.Config, auth *xinugateauth.Auth) *config.CloakConfig {
 	entry := resolveClaudeKeyConfig(cfg, auth)
 	if entry == nil {
 		return nil
@@ -583,7 +583,7 @@ func resolveClaudeKeyCloakConfig(cfg *config.Config, auth *cliproxyauth.Auth) *c
 	return entry.Cloak
 }
 
-func rebuildMidSystemMessageEnabled(cfg *config.Config, auth *cliproxyauth.Auth) bool {
+func rebuildMidSystemMessageEnabled(cfg *config.Config, auth *xinugateauth.Auth) bool {
 	if auth != nil && auth.Attributes != nil && strings.EqualFold(strings.TrimSpace(auth.Attributes["rebuild_mid_system_message"]), "true") {
 		return true
 	}

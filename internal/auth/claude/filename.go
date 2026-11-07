@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 // CredentialFileName returns the filename used to persist Claude OAuth credentials.

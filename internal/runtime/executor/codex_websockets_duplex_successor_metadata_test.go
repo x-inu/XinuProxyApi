@@ -11,9 +11,9 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	auth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	core "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	translator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	auth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	core "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 // Explicit creates can arrive before pending notifications. They must not

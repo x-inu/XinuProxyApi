@@ -12,8 +12,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexNativeStreamFidelity(t *testing.T) {
@@ -79,7 +79,7 @@ func testCodexNativeStreamFidelity(t *testing.T, source sdktranslator.Format) {
 					if transport == "websocket" {
 						executeStream = NewCodexWebsocketsExecutor(cfg).ExecuteStream
 					}
-					result, err := executeStream(context.Background(), codexTestAuth(server.URL), cliproxyexecutor.Request{Model: "gpt-5.6-sol", Payload: payload}, cliproxyexecutor.Options{SourceFormat: source, ResponseFormat: sdktranslator.FormatCodex, Headers: headers, Stream: true})
+					result, err := executeStream(context.Background(), codexTestAuth(server.URL), xinugateexecutor.Request{Model: "gpt-5.6-sol", Payload: payload}, xinugateexecutor.Options{SourceFormat: source, ResponseFormat: sdktranslator.FormatCodex, Headers: headers, Stream: true})
 					if err != nil {
 						t.Fatal(err)
 					}

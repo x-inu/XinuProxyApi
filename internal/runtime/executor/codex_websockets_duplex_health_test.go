@@ -14,9 +14,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/registry"
-	auth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	core "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	translator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	auth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	core "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 )
 
 func TestCodexDuplexConnectionTimeoutDoesNotCoolHealthyAccount(t *testing.T) {

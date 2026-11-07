@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/x-inu/XinuGate/v7/internal/config"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func boolPtr(b bool) *bool {
@@ -27,7 +27,7 @@ func TestCodexPerCredentialDisableCloaking_HTTP_ExplicitTrue(t *testing.T) {
 		},
 	}
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":                "custom-key",
@@ -67,7 +67,7 @@ func TestCodexPerCredentialDisableCloaking_HTTP_ExplicitFalseOverridesGlobalTrue
 		},
 	}
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":                "cloaked-key",
@@ -108,7 +108,7 @@ func TestCodexPerCredentialDisableCloaking_HTTP_FallbackToGlobal(t *testing.T) {
 		},
 	}
 
-	authNil := &cliproxyauth.Auth{
+	authNil := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":           "key-nil",
@@ -157,7 +157,7 @@ func TestCodexPerCredentialDisableCloaking_WebSocket_ExplicitTrue(t *testing.T) 
 		},
 	}
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":                "custom-key",
@@ -185,7 +185,7 @@ func TestCodexPerCredentialDisableCloaking_WebSocket_ExplicitFalseOverridesGloba
 		},
 	}
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":                "custom-key",
@@ -221,7 +221,7 @@ func TestCodexPerCredentialDisableCloaking_OAuthUnaffectedByAPIKeyOverride(t *te
 	}
 
 	// OAuth credential (does not match codex-api-key)
-	oauthAuth := &cliproxyauth.Auth{
+	oauthAuth := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"auth_kind": "oauth",
@@ -262,7 +262,7 @@ func TestCodexPerCredentialDisableCloaking_ResolvedFromConfigWithoutAttribute(t 
 	}
 
 	// Auth object with only APIKey/BaseURL attributes (no pre-synthesized codex_disable_cloaking attribute)
-	authWithoutAttr := &cliproxyauth.Auth{
+	authWithoutAttr := &xinugateauth.Auth{
 		Provider: "codex",
 		Attributes: map[string]string{
 			"api_key":           "lookup-key",

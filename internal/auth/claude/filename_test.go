@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 type credentialListStore struct {

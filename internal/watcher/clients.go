@@ -19,7 +19,7 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/util"
 	"github.com/x-inu/XinuGate/v7/internal/watcher/diff"
 	"github.com/x-inu/XinuGate/v7/internal/watcher/synthesizer"
-	coreauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	coreauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 func (w *Watcher) reloadClients(rescanAuth bool, affectedOAuthProviders []string, forceAuthRefresh bool) {

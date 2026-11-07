@@ -21,9 +21,9 @@ import (
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
 	interactionsclaude "github.com/x-inu/XinuGate/v7/internal/translator/interactions/claude"
 	"github.com/x-inu/XinuGate/v7/internal/util"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/x-inu/XinuGate/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuGate/v7/sdk/translator"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
+	xinugateexecutor "github.com/x-inu/XinuGate/v7/sdk/xinugate/executor"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 
@@ -33,7 +33,7 @@ func TestDevinExecutorIdentifierAndFormat(t *testing.T) {
 		t.Fatalf("Identifier() = %q, want %q", exec.Identifier(), "devin")
 	}
 
-	format := exec.RequestToFormat(cliproxyexecutor.Request{}, cliproxyexecutor.Options{})
+	format := exec.RequestToFormat(xinugateexecutor.Request{}, xinugateexecutor.Options{})
 	if format != sdktranslator.FormatInteractions {
 		t.Fatalf("RequestToFormat() = %q, want %q", format, sdktranslator.FormatInteractions)
 	}
@@ -41,7 +41,7 @@ func TestDevinExecutorIdentifierAndFormat(t *testing.T) {
 
 func TestDevinExecutorPrepareRequest(t *testing.T) {
 	exec := NewDevinExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key": "my-secret-key",
 		},
@@ -103,7 +103,7 @@ func TestDevinExecutorPrepareRequest(t *testing.T) {
 }
 
 func TestDevinAuthCredentials(t *testing.T) {
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"session_token": "token-xyz",
 			"base_url":      "https://custom.endpoint.com",
@@ -356,14 +356,14 @@ func TestDevinStatusError_RetryAfter(t *testing.T) {
 func TestResolveDevinSessionAndCascadeIDs(t *testing.T) {
 	// 1. Direct UUID preservation
 	rawUUID := "8176cf8a-feff-44c1-8e3e-b10f6d737ae1"
-	sid, cid := resolveDevinSessionAndCascadeIDs(context.Background(), rawUUID, rawUUID, cliproxyexecutor.Options{})
+	sid, cid := resolveDevinSessionAndCascadeIDs(context.Background(), rawUUID, rawUUID, xinugateexecutor.Options{})
 	if sid != rawUUID || cid != rawUUID {
 		t.Fatalf("sid/cid = %q/%q, want %q", sid, cid, rawUUID)
 	}
 
 	// 2. Non-UUID mapping to deterministic UUID
-	sid1, cid1 := resolveDevinSessionAndCascadeIDs(context.Background(), "lcp:12345678", "", cliproxyexecutor.Options{})
-	sid2, cid2 := resolveDevinSessionAndCascadeIDs(context.Background(), "lcp:12345678", "", cliproxyexecutor.Options{})
+	sid1, cid1 := resolveDevinSessionAndCascadeIDs(context.Background(), "lcp:12345678", "", xinugateexecutor.Options{})
+	sid2, cid2 := resolveDevinSessionAndCascadeIDs(context.Background(), "lcp:12345678", "", xinugateexecutor.Options{})
 	if sid1 != sid2 || cid1 != cid2 {
 		t.Fatalf("deterministic mapping failed: %q != %q", sid1, sid2)
 	}
@@ -373,7 +373,7 @@ func TestResolveDevinSessionAndCascadeIDs(t *testing.T) {
 
 	// 3. Fallback to ctx session
 	ctx := util.WithSessionID(context.Background(), "ctx-session-abc")
-	sidCtx, cidCtx := resolveDevinSessionAndCascadeIDs(ctx, "", "", cliproxyexecutor.Options{})
+	sidCtx, cidCtx := resolveDevinSessionAndCascadeIDs(ctx, "", "", xinugateexecutor.Options{})
 	if _, err := uuid.Parse(sidCtx); err != nil {
 		t.Fatalf("sidCtx is not a valid UUID: %q", sidCtx)
 	}
@@ -382,7 +382,7 @@ func TestResolveDevinSessionAndCascadeIDs(t *testing.T) {
 	}
 
 	// 4. Fallback to fresh UUID when nothing supplied
-	sidEmpty, cidEmpty := resolveDevinSessionAndCascadeIDs(context.Background(), "", "", cliproxyexecutor.Options{})
+	sidEmpty, cidEmpty := resolveDevinSessionAndCascadeIDs(context.Background(), "", "", xinugateexecutor.Options{})
 	if _, err := uuid.Parse(sidEmpty); err != nil {
 		t.Fatalf("sidEmpty is not a valid UUID: %q", sidEmpty)
 	}
@@ -630,7 +630,7 @@ func TestDevinExecutor_Refresh(t *testing.T) {
 	cfg := &config.Config{}
 	exec := NewDevinExecutor(cfg)
 
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:       "devin-refresh.json",
 		Provider: "devin",
 		Attributes: map[string]string{
@@ -689,7 +689,7 @@ func TestDevinExecutor_MaxCompletionTokensClamping(t *testing.T) {
 
 	cfg := &config.Config{}
 	exec := NewDevinExecutor(cfg)
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		Attributes: map[string]string{
 			"api_key": "test-key",
 		},
@@ -702,11 +702,11 @@ func TestDevinExecutor_MaxCompletionTokensClamping(t *testing.T) {
 		},
 		"input": [{"type":"user_input","content":[{"type":"text","text":"hello"}]}]
 	}`)
-	reqOversized := cliproxyexecutor.Request{
+	reqOversized := xinugateexecutor.Request{
 		Model:   modelID,
 		Payload: payloadOversized,
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -867,8 +867,8 @@ func TestStreamDevinFrames_InterleavedThinkingAndContent(t *testing.T) {
 	buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	e := &DevinExecutor{}
-	out := make(chan cliproxyexecutor.StreamChunk, 50)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 50)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -877,7 +877,7 @@ func TestStreamDevinFrames_InterleavedThinkingAndContent(t *testing.T) {
 		e.streamDevinFrames(
 			context.Background(),
 			&buf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatInteractions,
@@ -976,8 +976,8 @@ func TestStreamDevinFrames_SequentialToolCallsSameIndexDifferentID(t *testing.T)
 	buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 50)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 50)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -986,7 +986,7 @@ func TestStreamDevinFrames_SequentialToolCallsSameIndexDifferentID(t *testing.T)
 		exec.streamDevinFrames(
 			context.Background(),
 			&buf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"chat-model-uid",
 			sdktranslator.FormatInteractions,
@@ -995,7 +995,7 @@ func TestStreamDevinFrames_SequentialToolCallsSameIndexDifferentID(t *testing.T)
 		)
 	}()
 
-	var chunks []cliproxyexecutor.StreamChunk
+	var chunks []xinugateexecutor.StreamChunk
 	for chunk := range out {
 		if chunk.Err != nil {
 			t.Fatalf("unexpected chunk error: %v", chunk.Err)
@@ -1178,8 +1178,8 @@ func TestStreamDevinFrames_SameIDDoesNotDuplicateStart(t *testing.T) {
 	buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 50)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 50)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -1188,7 +1188,7 @@ func TestStreamDevinFrames_SameIDDoesNotDuplicateStart(t *testing.T) {
 		exec.streamDevinFrames(
 			context.Background(),
 			&buf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"chat-model-uid",
 			sdktranslator.FormatInteractions,
@@ -1279,8 +1279,8 @@ func TestStreamDevinFrames_StopReasonMaxTokens(t *testing.T) {
 	buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	e := &DevinExecutor{}
-	out := make(chan cliproxyexecutor.StreamChunk, 20)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 20)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -1289,7 +1289,7 @@ func TestStreamDevinFrames_StopReasonMaxTokens(t *testing.T) {
 		e.streamDevinFrames(
 			context.Background(),
 			&buf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatInteractions,
@@ -1364,8 +1364,8 @@ func TestStreamDevinFrames_StopReasonContentFilter(t *testing.T) {
 	buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	e := &DevinExecutor{}
-	out := make(chan cliproxyexecutor.StreamChunk, 20)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 20)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -1374,7 +1374,7 @@ func TestStreamDevinFrames_StopReasonContentFilter(t *testing.T) {
 		e.streamDevinFrames(
 			context.Background(),
 			&buf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatInteractions,
@@ -1706,8 +1706,8 @@ func TestStreamDevinFrames_LateThinkingSignaturesToClaudeStreaming(t *testing.T)
 			buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 			e := &DevinExecutor{}
-			out := make(chan cliproxyexecutor.StreamChunk, 50)
-			opts := cliproxyexecutor.Options{
+			out := make(chan xinugateexecutor.StreamChunk, 50)
+			opts := xinugateexecutor.Options{
 				SourceFormat:    sdktranslator.FormatClaude,
 				OriginalRequest: []byte(`{"model":"devin/swe-2","stream":true,"messages":[{"role":"user","content":"hi"}]}`),
 			}
@@ -1717,7 +1717,7 @@ func TestStreamDevinFrames_LateThinkingSignaturesToClaudeStreaming(t *testing.T)
 				e.streamDevinFrames(
 					context.Background(),
 					&buf,
-					cliproxyexecutor.Request{Model: "devin/swe-2", Payload: opts.OriginalRequest},
+					xinugateexecutor.Request{Model: "devin/swe-2", Payload: opts.OriginalRequest},
 					opts,
 					"swe-2-high",
 					sdktranslator.FormatClaude,
@@ -1909,8 +1909,8 @@ func TestStreamDevinFrames_LateThinkingSignatures_TrailerErrorClosesBlocks(t *te
 			buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{"error":{"code":"unavailable","message":"server overload"}}`)))
 
 			e := &DevinExecutor{}
-			out := make(chan cliproxyexecutor.StreamChunk, 50)
-			opts := cliproxyexecutor.Options{
+			out := make(chan xinugateexecutor.StreamChunk, 50)
+			opts := xinugateexecutor.Options{
 				SourceFormat:    sdktranslator.FormatClaude,
 				OriginalRequest: []byte(`{"model":"devin/swe-2","stream":true,"messages":[{"role":"user","content":"hi"}]}`),
 			}
@@ -1920,7 +1920,7 @@ func TestStreamDevinFrames_LateThinkingSignatures_TrailerErrorClosesBlocks(t *te
 				e.streamDevinFrames(
 					context.Background(),
 					&buf,
-					cliproxyexecutor.Request{Model: "devin/swe-2", Payload: opts.OriginalRequest},
+					xinugateexecutor.Request{Model: "devin/swe-2", Payload: opts.OriginalRequest},
 					opts,
 					"swe-2-high",
 					sdktranslator.FormatClaude,
@@ -2936,8 +2936,8 @@ func TestRegressionIssue5910_CustomToolCallInvalidJSONStr(t *testing.T) {
 	streamBuf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 50)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 50)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -2946,7 +2946,7 @@ func TestRegressionIssue5910_CustomToolCallInvalidJSONStr(t *testing.T) {
 		exec.streamDevinFrames(
 			context.Background(),
 			&streamBuf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"chat-model-uid",
 			sdktranslator.FormatInteractions,
@@ -3021,8 +3021,8 @@ func TestRegressionIssue5910_StreamInterleavedToolCallsByCallID(t *testing.T) {
 	buf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 50)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 50)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -3031,7 +3031,7 @@ func TestRegressionIssue5910_StreamInterleavedToolCallsByCallID(t *testing.T) {
 		exec.streamDevinFrames(
 			context.Background(),
 			&buf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"chat-model-uid",
 			sdktranslator.FormatInteractions,
@@ -3040,7 +3040,7 @@ func TestRegressionIssue5910_StreamInterleavedToolCallsByCallID(t *testing.T) {
 		)
 	}()
 
-	var chunks []cliproxyexecutor.StreamChunk
+	var chunks []xinugateexecutor.StreamChunk
 	for chunk := range out {
 		if chunk.Err != nil {
 			t.Fatalf("unexpected chunk error: %v", chunk.Err)
@@ -3166,8 +3166,8 @@ func TestRegressionIssue5910_UsageStatsCacheWriteTokensInResponses(t *testing.T)
 	streamBuf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 50)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 50)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatInteractions,
 	}
 
@@ -3176,7 +3176,7 @@ func TestRegressionIssue5910_UsageStatsCacheWriteTokensInResponses(t *testing.T)
 		exec.streamDevinFrames(
 			context.Background(),
 			&streamBuf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"chat-model-uid",
 			sdktranslator.FormatInteractions,
@@ -3679,18 +3679,18 @@ func TestDevinExecutor_NoModelSubstitutionWarningForIntentionalMapping_NonStream
 	})
 
 	exec := NewDevinExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:         "devin-auth-map-nonstream",
 		Provider:   "devin",
 		Attributes: map[string]string{"api_key": "test-key"},
 	}
 
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", mockRT)
-	req := cliproxyexecutor.Request{
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", mockRT)
+	req := xinugateexecutor.Request{
 		Model:   "devin/swe-2",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hello"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 	}
 
@@ -3738,18 +3738,18 @@ func TestDevinExecutor_NoModelSubstitutionWarningForIntentionalMapping_Stream(t 
 	})
 
 	exec := NewDevinExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:         "devin-auth-map-stream",
 		Provider:   "devin",
 		Attributes: map[string]string{"api_key": "test-key"},
 	}
 
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", mockRT)
-	req := cliproxyexecutor.Request{
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", mockRT)
+	req := xinugateexecutor.Request{
 		Model:   "devin/swe-2",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hello"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 	}
 
@@ -3799,18 +3799,18 @@ func TestDevinExecutor_WarnsWhenUpstreamServesUnexpectedModel(t *testing.T) {
 	})
 
 	exec := NewDevinExecutor(&config.Config{})
-	auth := &cliproxyauth.Auth{
+	auth := &xinugateauth.Auth{
 		ID:         "devin-auth-unexpected",
 		Provider:   "devin",
 		Attributes: map[string]string{"api_key": "test-key"},
 	}
 
-	ctx := context.WithValue(context.Background(), "cliproxy.roundtripper", mockRT)
-	req := cliproxyexecutor.Request{
+	ctx := context.WithValue(context.Background(), "xinugate.roundtripper", mockRT)
+	req := xinugateexecutor.Request{
 		Model:   "devin/swe-2",
 		Payload: []byte(`{"messages":[{"role":"user","content":"hello"}]}`),
 	}
-	opts := cliproxyexecutor.Options{
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAI,
 	}
 
@@ -3871,8 +3871,8 @@ func TestRegressionIssue5951_DevinToolActivityOrderedBeforeAssistantMessage(t *t
 	streamBuf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 100)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 100)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	}
 
@@ -3881,7 +3881,7 @@ func TestRegressionIssue5951_DevinToolActivityOrderedBeforeAssistantMessage(t *t
 		exec.streamDevinFrames(
 			context.Background(),
 			&streamBuf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatOpenAIResponse,
@@ -3890,7 +3890,7 @@ func TestRegressionIssue5951_DevinToolActivityOrderedBeforeAssistantMessage(t *t
 		)
 	}()
 
-	var chunks []cliproxyexecutor.StreamChunk
+	var chunks []xinugateexecutor.StreamChunk
 	for chunk := range out {
 		if chunk.Err != nil {
 			t.Fatalf("unexpected chunk error: %v", chunk.Err)
@@ -4027,8 +4027,8 @@ func TestRegressionIssue5951_InterleavedToolArgumentsAndText(t *testing.T) {
 	streamBuf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 100)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 100)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	}
 
@@ -4037,7 +4037,7 @@ func TestRegressionIssue5951_InterleavedToolArgumentsAndText(t *testing.T) {
 		exec.streamDevinFrames(
 			context.Background(),
 			&streamBuf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatOpenAIResponse,
@@ -4046,7 +4046,7 @@ func TestRegressionIssue5951_InterleavedToolArgumentsAndText(t *testing.T) {
 		)
 	}()
 
-	var chunks []cliproxyexecutor.StreamChunk
+	var chunks []xinugateexecutor.StreamChunk
 	for chunk := range out {
 		if chunk.Err != nil {
 			t.Fatalf("unexpected chunk error: %v", chunk.Err)
@@ -4148,8 +4148,8 @@ func TestRegressionIssue5951_SameFrameToolAndContent(t *testing.T) {
 	streamBuf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 100)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 100)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	}
 
@@ -4158,7 +4158,7 @@ func TestRegressionIssue5951_SameFrameToolAndContent(t *testing.T) {
 		exec.streamDevinFrames(
 			context.Background(),
 			&streamBuf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatOpenAIResponse,
@@ -4270,8 +4270,8 @@ func TestRegressionIssue5951_PreToolExplanationAndPostToolAnswer(t *testing.T) {
 	streamBuf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 100)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 100)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	}
 
@@ -4280,7 +4280,7 @@ func TestRegressionIssue5951_PreToolExplanationAndPostToolAnswer(t *testing.T) {
 		exec.streamDevinFrames(
 			context.Background(),
 			&streamBuf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatOpenAIResponse,
@@ -4289,7 +4289,7 @@ func TestRegressionIssue5951_PreToolExplanationAndPostToolAnswer(t *testing.T) {
 		)
 	}()
 
-	var chunks []cliproxyexecutor.StreamChunk
+	var chunks []xinugateexecutor.StreamChunk
 	for chunk := range out {
 		if chunk.Err != nil {
 			t.Fatalf("unexpected chunk error: %v", chunk.Err)
@@ -4413,8 +4413,8 @@ func TestRegressionIssue5951_MultiStageToolAndIntermediateExplanation(t *testing
 	streamBuf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 100)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 100)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	}
 
@@ -4423,7 +4423,7 @@ func TestRegressionIssue5951_MultiStageToolAndIntermediateExplanation(t *testing
 		exec.streamDevinFrames(
 			context.Background(),
 			&streamBuf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatOpenAIResponse,
@@ -4432,7 +4432,7 @@ func TestRegressionIssue5951_MultiStageToolAndIntermediateExplanation(t *testing
 		)
 	}()
 
-	var chunks []cliproxyexecutor.StreamChunk
+	var chunks []xinugateexecutor.StreamChunk
 	for chunk := range out {
 		if chunk.Err != nil {
 			t.Fatalf("unexpected chunk error: %v", chunk.Err)
@@ -4569,8 +4569,8 @@ func TestRegressionIssue5951_InterleavedToolsWithTextAndContinuation(t *testing.
 	streamBuf.Write(helps.WrapConnectEnvelopeWithFlag(helps.ConnectFlagEndStream, []byte(`{}`)))
 
 	exec := NewDevinExecutor(&config.Config{})
-	out := make(chan cliproxyexecutor.StreamChunk, 100)
-	opts := cliproxyexecutor.Options{
+	out := make(chan xinugateexecutor.StreamChunk, 100)
+	opts := xinugateexecutor.Options{
 		SourceFormat: sdktranslator.FormatOpenAIResponse,
 	}
 
@@ -4579,7 +4579,7 @@ func TestRegressionIssue5951_InterleavedToolsWithTextAndContinuation(t *testing.
 		exec.streamDevinFrames(
 			context.Background(),
 			&streamBuf,
-			cliproxyexecutor.Request{Model: "devin/swe-2"},
+			xinugateexecutor.Request{Model: "devin/swe-2"},
 			opts,
 			"swe-2-high",
 			sdktranslator.FormatOpenAIResponse,
@@ -4588,7 +4588,7 @@ func TestRegressionIssue5951_InterleavedToolsWithTextAndContinuation(t *testing.
 		)
 	}()
 
-	var chunks []cliproxyexecutor.StreamChunk
+	var chunks []xinugateexecutor.StreamChunk
 	for chunk := range out {
 		if chunk.Err != nil {
 			t.Fatalf("unexpected chunk error: %v", chunk.Err)

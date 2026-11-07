@@ -9,7 +9,7 @@ import (
 	claudeauth "github.com/x-inu/XinuGate/v7/internal/auth/claude"
 	"github.com/x-inu/XinuGate/v7/internal/config"
 	"github.com/x-inu/XinuGate/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/x-inu/XinuGate/v7/sdk/cliproxy/auth"
+	xinugateauth "github.com/x-inu/XinuGate/v7/sdk/xinugate/auth"
 )
 
 const (
@@ -60,7 +60,7 @@ func normalizeClaudeFingerprintProfile(raw string) string {
 	return profile
 }
 
-func claudeFingerprintProfileFromAuth(auth *cliproxyauth.Auth) string {
+func claudeFingerprintProfileFromAuth(auth *xinugateauth.Auth) string {
 	if auth == nil {
 		return claudeFingerprintProfileDefault
 	}
@@ -78,7 +78,7 @@ func claudeFingerprintProfileFromAuth(auth *cliproxyauth.Auth) string {
 	return claudeFingerprintProfileDefault
 }
 
-func claudeFingerprintProfileFromConfig(cfg *config.Config, auth *cliproxyauth.Auth) string {
+func claudeFingerprintProfileFromConfig(cfg *config.Config, auth *xinugateauth.Auth) string {
 	if profile := claudeFingerprintProfileFromAuth(auth); profile != claudeFingerprintProfileDefault {
 		return profile
 	}
@@ -93,7 +93,7 @@ func claudeFingerprintProfileFromConfig(cfg *config.Config, auth *cliproxyauth.A
 // behavior. It is deliberately independent of the upstream origin: the wire
 // profile follows the credential, while the one origin-sensitive decision (CCH
 // signing) is resolved separately by claudeCCHSigningEnabled.
-func resolveClaudeFingerprintPolicy(cfg *config.Config, auth *cliproxyauth.Auth, apiKey string) claudeFingerprintPolicy {
+func resolveClaudeFingerprintPolicy(cfg *config.Config, auth *xinugateauth.Auth, apiKey string) claudeFingerprintPolicy {
 	// Keep actual Claude OAuth lifecycle authority separate from the broader
 	// request fingerprint policy used by API keys and delegated providers.
 	authIsOAuth := isClaudeOAuthToken(apiKey)
@@ -124,7 +124,7 @@ func resolveClaudeFingerprintPolicy(cfg *config.Config, auth *cliproxyauth.Auth,
 // API keys seed the synthesized identity from the key itself; delegated
 // providers such as Kimi seed from the stable auth identity, so an access-token
 // rotation does not rotate the device fingerprint.
-func applyClaudeCLIIdentity(body []byte, auth *cliproxyauth.Auth, apiKey, upstreamURL, sessionID string, synthesize bool) ([]byte, error) {
+func applyClaudeCLIIdentity(body []byte, auth *xinugateauth.Auth, apiKey, upstreamURL, sessionID string, synthesize bool) ([]byte, error) {
 	identitySeed := apiKey
 	if isKimiMessagesUpstream(auth, upstreamURL) {
 		identitySeed = helps.ClaudeCLIAuthIdentitySeed(auth)

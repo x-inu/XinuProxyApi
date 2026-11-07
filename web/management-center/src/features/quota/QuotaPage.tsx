@@ -305,6 +305,12 @@ export function QuotaPage() {
         onRefreshAll={handleRefreshAll}
       />
 
+      <QuotaTimeline
+        entries={pageItems}
+        quotaFor={getQuota}
+        resolvedTheme={resolvedTheme}
+      />
+
       <section className={styles.workbench}>
 
         <div className={styles.tabsRow} data-reveal>
@@ -440,13 +446,6 @@ export function QuotaPage() {
             </Button>
           </div>
         )}
-
-
-        <QuotaTimeline
-          entries={pageItems}
-          quotaFor={getQuota}
-          resolvedTheme={resolvedTheme}
-        />
       </section>
     </div>
   );

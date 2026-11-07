@@ -189,6 +189,7 @@ export function MainLayout() {
   const logout = useAuthStore((state) => state.logout);
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
   const apiBase = useAuthStore((state) => state.apiBase);
+  const serverVersion = useAuthStore((state) => state.serverVersion);
   const supportsPlugin = useAuthStore((state) => state.supportsPlugin);
 
   const fetchConfig = useConfigStore((state) => state.fetchConfig);
@@ -845,6 +846,16 @@ export function MainLayout() {
         </div>
 
         <div className="header-actions floating-actions">
+          <span
+            className={`header-gateway-pill ${connectionStatus === 'connected' ? 'is-online' : 'is-offline'}`}
+            title={apiBase || 'Gateway status'}
+          >
+            <i className="header-gateway-dot" aria-hidden="true" />
+            <span className="header-gateway-text">
+              {connectionStatus === 'connected' ? 'ONLINE' : 'OFFLINE'}
+            </span>
+          </span>
+          <span className="header-actions-divider" aria-hidden="true" />
           <Button
             variant="ghost"
             size="sm"
@@ -888,7 +899,10 @@ export function MainLayout() {
               <img src={INLINE_LOGO_JPEG} alt="XinuGate logo" className="sidebar-brand-logo" />
               {showSidebarLabels && (
                 <span className="sidebar-brand-text">
-                  <span className="sidebar-brand-title">{abbrBrandName}</span>
+                  <span className="sidebar-brand-title-row">
+                    <span className="sidebar-brand-title">{abbrBrandName}</span>
+                    <span className="sidebar-brand-version">{serverVersion || 'v0.1.0'}</span>
+                  </span>
                   <span className="sidebar-brand-subtitle">{t('sidebar.subtitle')}</span>
                 </span>
               )}
@@ -907,6 +921,13 @@ export function MainLayout() {
               </div>
             ))}
           </div>
+
+          {showSidebarLabels && (
+            <div className="sidebar-footer">
+              <span className="sidebar-footer-kicker">GATEWAY NODE</span>
+              <span className="sidebar-footer-meta">SQLITE WAL · /V1</span>
+            </div>
+          )}
         </aside>
 
         {railTooltip && (

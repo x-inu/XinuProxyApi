@@ -95,6 +95,7 @@ export function AuthFilesPage() {
   });
   const [pageSizeInput, setPageSizeInput] = useState('9');
   const [viewMode, setViewMode] = useState<'diagram' | 'list'>('list');
+  const [activeVaultTab, setActiveVaultTab] = useState<'vault' | 'rules'>('vault');
   const [sortMode, setSortMode] = useState<AuthFilesSortMode>('default');
   const [uiStateHydrated, setUiStateHydrated] = useState(false);
 
@@ -592,6 +593,32 @@ export function AuthFilesPage() {
 
       <VaultPulse files={files} statusBarCache={statusBarCache} />
 
+      <div className={styles.sectionSwitch} role="tablist" aria-label="Auth Files View">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeVaultTab === 'vault'}
+          className={`${styles.sectionSwitchBtn} ${activeVaultTab === 'vault' ? styles.sectionSwitchActive : ''}`}
+          onClick={() => setActiveVaultTab('vault')}
+        >
+          <span>Credential Vault</span>
+          <span className={styles.sectionSwitchCount}>{files.length}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeVaultTab === 'rules'}
+          className={`${styles.sectionSwitchBtn} ${activeVaultTab === 'rules' ? styles.sectionSwitchActive : ''}`}
+          onClick={() => setActiveVaultTab('rules')}
+        >
+          <span>OAuth Exclusions & Model Aliases</span>
+          <span className={styles.sectionSwitchCount}>
+            {Object.keys(excluded || {}).length + Object.keys(modelAlias || {}).length}
+          </span>
+        </button>
+      </div>
+
+      {activeVaultTab === 'vault' && (
       <section className={styles.workbench} aria-label={t('auth_files.title_section')}>
         <ProviderTabs
           types={existingTypes}
@@ -735,7 +762,9 @@ export function AuthFilesPage() {
           </div>
         )}
       </section>
+      )}
 
+      {activeVaultTab === 'rules' && (
       <div className={styles.configGrid} ref={oauthSectionRef}>
         <OAuthExcludedCard
           disableControls={disableControls}
@@ -765,6 +794,7 @@ export function AuthFilesPage() {
           onDeleteAlias={handleDeleteAlias}
         />
       </div>
+      )}
 
       <AuthFileModelsModal
         open={modelsModalOpen}

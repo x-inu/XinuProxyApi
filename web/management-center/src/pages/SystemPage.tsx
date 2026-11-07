@@ -233,62 +233,65 @@ export function SystemPage() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.pageTitle}>{t('system_info.title')}</h1>
       <div className={styles.content}>
         <Card className={styles.aboutCard}>
-          <div className={styles.aboutHeader}>
-            <img src={INLINE_LOGO_JPEG} alt="XinuGate" className={styles.aboutLogo} />
-            <div className={styles.aboutTitle}>{t('system_info.about_title')}</div>
-          </div>
-
-          <div className={styles.aboutInfoGrid}>
-            <button
-              type="button"
-              className={`${styles.infoTile} ${styles.tapTile}`}
-              onClick={handleInfoVersionTap}
-            >
-              <div className={styles.tileLabel}>{t('footer.version')}</div>
-              <div className={styles.tileValue}>{appVersion}</div>
-            </button>
-
-            <div className={styles.infoTile}>
-              <div className={styles.tileLabel}>{t('footer.api_version')}</div>
-              <div className={styles.tileValue}>{apiVersion}</div>
-            </div>
-
-            <div className={styles.infoTile}>
-              <div className={styles.tileLabel}>{t('footer.build_date')}</div>
-              <div className={styles.tileValue}>{buildTime}</div>
-            </div>
-
-            <div className={styles.infoTile}>
-              <div className={styles.tileLabel}>{t('connection.status')}</div>
-              <div className={styles.tileValue}>{t(`common.${auth.connectionStatus}_status`)}</div>
-              <div className={styles.tileSub}>{auth.apiBase || '-'}</div>
-            </div>
-          </div>
-        </Card>
-
-        <Card title={t('system_info.quick_links_title')}>
-          <p className={styles.sectionDescription}>{t('system_info.quick_links_desc')}</p>
-          <div className={styles.quickLinks}>
-            <a
-              href="https://github.com/x-inu/XinuGate"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.linkCard}
-            >
-              <div className={`${styles.linkIcon} ${styles.github}`}>
-                <IconGithub size={22} />
-              </div>
-              <div className={styles.linkContent}>
-                <div className={styles.linkTitle}>
-                  {t('system_info.link_main_repo')}
-                  <IconExternalLink size={14} />
+          <div className={styles.dossierSplit}>
+            <div className={styles.dossierIdentity}>
+              <span className={styles.dossierKicker}>XINUGATE // SYSTEM DOSSIER</span>
+              <div className={styles.aboutHeader}>
+                <img src={INLINE_LOGO_JPEG} alt="XinuGate" className={styles.aboutLogo} />
+                <div className={styles.aboutTitleBlock}>
+                  <h1 className={styles.aboutTitle}>{t('system_info.about_title')}</h1>
+                  <p className={styles.aboutSubtitle}>
+                    Unified Multi-Provider AI Gateway, OAuth Credential Vault & SQLite Usage Ledger
+                  </p>
                 </div>
-                <div className={styles.linkDesc}>{t('system_info.link_main_repo_desc')}</div>
               </div>
-            </a>
+              <div className={styles.dossierActions}>
+                <a
+                  href="https://github.com/x-inu/XinuGate"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.repoButton}
+                >
+                  <IconGithub size={16} />
+                  <span>{t('system_info.link_main_repo')}</span>
+                  <IconExternalLink size={13} />
+                </a>
+                <Button variant="danger" size="sm" onClick={handleClearLoginStorage}>
+                  {t('system_info.clear_login_button')}
+                </Button>
+              </div>
+            </div>
+
+            <div className={styles.aboutInfoGrid}>
+              <button
+                type="button"
+                className={`${styles.infoTile} ${styles.tapTile}`}
+                onClick={handleInfoVersionTap}
+              >
+                <div className={styles.tileLabel}>01 // {t('footer.version')}</div>
+                <div className={styles.tileValue}>{appVersion}</div>
+              </button>
+
+              <div className={styles.infoTile}>
+                <div className={styles.tileLabel}>02 // {t('footer.api_version')}</div>
+                <div className={styles.tileValue}>{apiVersion}</div>
+              </div>
+
+              <div className={styles.infoTile}>
+                <div className={styles.tileLabel}>03 // {t('footer.build_date')}</div>
+                <div className={styles.tileValue}>{buildTime}</div>
+              </div>
+
+              <div className={styles.infoTile}>
+                <div className={styles.tileLabel}>04 // {t('connection.status')}</div>
+                <div className={styles.tileValue}>
+                  {t(`common.${auth.connectionStatus}_status`)}
+                </div>
+                <div className={styles.tileSub}>{auth.apiBase || '-'}</div>
+              </div>
+            </div>
           </div>
         </Card>
 
@@ -346,15 +349,6 @@ export function SystemPage() {
               })}
             </div>
           )}
-        </Card>
-
-        <Card title={t('system_info.clear_login_title')}>
-          <p className={styles.sectionDescription}>{t('system_info.clear_login_desc')}</p>
-          <div className={styles.clearLoginActions}>
-            <Button variant="danger" onClick={handleClearLoginStorage}>
-              {t('system_info.clear_login_button')}
-            </Button>
-          </div>
         </Card>
       </div>
 

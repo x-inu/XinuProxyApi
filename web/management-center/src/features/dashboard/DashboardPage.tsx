@@ -228,9 +228,12 @@ export function DashboardPage() {
         <span className={styles.gridWash} />
       </div>
 
-      {/* ---------- Hero ---------- */}
+      {/* ---------- Command Deck Hero ---------- */}
       <section className={styles.hero} ref={heroRef}>
         <div className={styles.heroCopy}>
+          <span className={styles.heroKicker} data-reveal>
+            XINUGATE // GATEWAY TELEMETRY
+          </span>
           <h1 className={styles.heroTitle} data-reveal>
             {t(`dashboard.${verdict.key}`)}
             <span
@@ -241,11 +244,14 @@ export function DashboardPage() {
             </span>
           </h1>
           <p className={styles.heroMeta} data-reveal>
-            {heroMetaLine}
+            {heroMetaLine} · {routingStrategy}
           </p>
           <div className={styles.heroActions} data-reveal>
             <Link to="/ai-providers" className={styles.primaryAction}>
               {t('dashboard.cta_manage_providers')}
+            </Link>
+            <Link to="/models" className={styles.secondaryAction}>
+              {t('nav.models')}
             </Link>
             <Link to="/logs" className={styles.ghostAction}>
               {t('dashboard.cta_inspect_logs')}{' '}
@@ -300,19 +306,18 @@ export function DashboardPage() {
               <b>{traffic.totalFailure.toLocaleString()}</b>
             </span>
           </div>
-        </div>
-
-        <div className={styles.heroWire}>
-          <LiveWire
-            points={heroSparkPoints}
-            ariaLabel={t('dashboard.hero_spark_label', { window: windowLabel })}
-          />
+          <div className={styles.heroWire}>
+            <LiveWire
+              points={heroSparkPoints}
+              ariaLabel={t('dashboard.hero_spark_label', { window: windowLabel })}
+            />
+          </div>
         </div>
       </section>
 
-      {/* ---------- KPI ---------- */}
+      {/* ---------- KPI Telemetry Strip ---------- */}
       <section className={styles.statsRow} ref={statsRef} aria-label={t('dashboard.stats_aria')}>
-        {statTiles.map((tile) => (
+        {statTiles.map((tile, idx) => (
           <article
             key={tile.key}
             className={styles.statTile}
@@ -323,7 +328,10 @@ export function DashboardPage() {
               } as React.CSSProperties
             }
           >
-            <span className={styles.statLabel}>{tile.label}</span>
+            <div className={styles.statHeadRow}>
+              <span className={styles.statLabel}>{tile.label}</span>
+              <span className={styles.statIndex}>0{idx + 1}</span>
+            </div>
             <strong className={styles.statValue}>{tile.value}</strong>
             {tile.meter !== null && tile.meter !== undefined && (
               <Meter
@@ -338,28 +346,25 @@ export function DashboardPage() {
         ))}
       </section>
 
-      {/* ---------- Traffic ---------- */}
-      <section className={styles.section} ref={trafficRef}>
-        <header className={styles.sectionHead}>
-          <span className={styles.eyebrow}>{t('dashboard.traffic_eyebrow')}</span>
-          <h2 className={styles.sectionTitle}>{t('dashboard.traffic_title')}</h2>
-          <p className={styles.sectionDescription}>
-            {t('dashboard.traffic_description', { window: windowLabel })}
-          </p>
-        </header>
-        <div className={styles.panel}>
+      {/* ---------- Operations 2-Column Matrix (Traffic + Provider Fleet) ---------- */}
+      <div className={styles.opsGrid}>
+        <section className={styles.panel} ref={trafficRef}>
+          <header className={styles.panelHead}>
+            <span className={styles.eyebrow}>01 // {t('dashboard.traffic_eyebrow')}</span>
+            <h2 className={styles.panelTitle}>{t('dashboard.traffic_title')}</h2>
+            <p className={styles.sectionDescription}>
+              {t('dashboard.traffic_description', { window: windowLabel })}
+            </p>
+          </header>
           <ThroughputChart traffic={traffic} />
-        </div>
-      </section>
+        </section>
 
-      {/* ---------- Provider fleet ---------- */}
-      <section className={styles.section} ref={fleetRef}>
-        <header className={styles.sectionHead}>
-          <span className={styles.eyebrow}>{t('dashboard.fleet_eyebrow')}</span>
-          <h2 className={styles.sectionTitle}>{t('dashboard.fleet_title')}</h2>
-          <p className={styles.sectionDescription}>{t('dashboard.fleet_description')}</p>
-        </header>
-        <div className={styles.panel}>
+        <section className={styles.panel} ref={fleetRef}>
+          <header className={styles.panelHead}>
+            <span className={styles.eyebrow}>02 // {t('dashboard.fleet_eyebrow')}</span>
+            <h2 className={styles.panelTitle}>{t('dashboard.fleet_title')}</h2>
+            <p className={styles.sectionDescription}>{t('dashboard.fleet_description')}</p>
+          </header>
           {providers.length === 0 ? (
             <p className={styles.emptyNote}>{t('dashboard.fleet_empty')}</p>
           ) : (
@@ -402,14 +407,14 @@ export function DashboardPage() {
               ))}
             </ul>
           )}
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* ---------- Credential health + runtime ---------- */}
       <section className={styles.detailGrid} ref={detailRef}>
         <div className={styles.panel} data-reveal>
           <header className={styles.panelHead}>
-            <span className={styles.eyebrow}>{t('dashboard.health_eyebrow')}</span>
+            <span className={styles.eyebrow}>03 // {t('dashboard.health_eyebrow')}</span>
             <h2 className={styles.panelTitle}>{t('dashboard.health_title')}</h2>
           </header>
           {!credentials || credentials.total === 0 ? (
@@ -482,7 +487,7 @@ export function DashboardPage() {
 
         <div className={styles.panel} data-reveal>
           <header className={styles.panelHead}>
-            <span className={styles.eyebrow}>{t('dashboard.runtime_eyebrow')}</span>
+            <span className={styles.eyebrow}>04 // {t('dashboard.runtime_eyebrow')}</span>
             <h2 className={styles.panelTitle}>{t('dashboard.runtime_title')}</h2>
           </header>
           <dl className={styles.specList}>
@@ -520,7 +525,7 @@ export function DashboardPage() {
       {/* ---------- CTA ---------- */}
       <section className={styles.section} ref={ctaRef}>
         <header className={styles.sectionHead} data-reveal>
-          <span className={styles.eyebrow}>{t('dashboard.cta_eyebrow')}</span>
+          <span className={styles.eyebrow}>05 // {t('dashboard.cta_eyebrow')}</span>
           <h2 className={styles.sectionTitle}>{t('dashboard.cta_title')}</h2>
         </header>
         <div className={styles.ctaGrid}>

@@ -17,45 +17,109 @@
 
 .aboutCard {
   overflow: hidden;
+  border-left: 3px solid var(--amber-color, #c8862a);
+}
+
+.dossierSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 1fr);
+  gap: $spacing-xl;
+  align-items: center;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dossierIdentity {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dossierKicker {
+  font-family: $font-mono;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber-color, #c8862a);
 }
 
 .aboutHeader {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100%;
   gap: $spacing-md;
-  padding: $spacing-lg 0 $spacing-xl;
 }
 
 .aboutLogo {
-  width: 108px;
-  height: 108px;
-  border-radius: 26px;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
   object-fit: cover;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  flex-shrink: 0;
+}
+
+.aboutTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .aboutTitle {
-  width: min(100%, 920px);
-  font-size: clamp(28px, 4.2vw, 44px);
-  font-weight: 800;
-  line-height: 1.12;
+  margin: 0;
+  font-family: $font-serif;
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 700;
+  line-height: 1.1;
   color: var(--text-primary);
   letter-spacing: -0.02em;
-  text-align: center;
-  text-wrap: balance;
-  white-space: normal;
-  overflow-wrap: anywhere;
+}
+
+.aboutSubtitle {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.dossierActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.repoButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    border-color $transition-fast,
+    background $transition-fast;
+
+  &:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-hover);
+  }
 }
 
 .aboutInfoGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: $spacing-md;
+  gap: 10px;
 
-  @media (max-width: 900px) {
+  @media (max-width: 560px) {
     grid-template-columns: 1fr;
   }
 }
@@ -63,10 +127,10 @@
 .infoTile {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-height: 120px;
-  padding: $spacing-md $spacing-lg;
-  border-radius: $radius-lg;
+  gap: 4px;
+  min-height: 88px;
+  padding: 12px 14px;
+  border-radius: 4px;
   border: 1px solid var(--border-color);
   background: color-mix(in srgb, var(--bg-secondary) 82%, transparent);
   text-align: left;
@@ -95,13 +159,17 @@
 }
 
 .tileLabel {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-family: $font-mono;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
 }
 
 .tileValue {
-  font-size: 22px;
+  font-family: $font-mono;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.25;

@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
-# XinuGate One-Step Installer for Linux
+#!/usr/bin/env sh
+# XinuGate — One-Command POSIX sh Installer for Linux
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/x-inu/XinuGate/main/install.sh | sudo bash
-#   curl -fsSL https://raw.githubusercontent.com/x-inu/XinuGate/main/install.sh | bash -s -- --port 20128
+#   curl -fsSL https://raw.xinu.my.id/xgate | sh
+#   curl -fsSL https://raw.xinu.my.id/xgate | sh -s -- --port 20128
 
-set -euo pipefail
+set -eu
 
 REPO="x-inu/XinuGate"
 PORT="${XINUGATE_PORT:-20128}"
@@ -12,7 +12,7 @@ INSTALL_DIR="${XINUGATE_DIR:-}"
 NO_SERVICE=0
 UNINSTALL=0
 
-while [[ $# -gt 0 ]]; do
+while [ "$#" -gt 0 ]; do
   case "$1" in
     --dir)
       INSTALL_DIR="$2"
@@ -31,45 +31,65 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h|--help)
-      echo "Usage: install.sh [--dir /opt/xinugate] [--port 20128] [--no-service] [--uninstall]"
+      echo "Usage: xgate [--dir /opt/xinugate] [--port 20128] [--no-service] [--uninstall]"
       exit 0
       ;;
     *)
-      echo "Unknown option: $1" >&2
+      echo "Error: Unknown option '$1'" >&2
       exit 1
       ;;
   esac
 done
 
 IS_ROOT=0
-if [[ "$(id -u)" -eq 0 ]]; then
+SUDO=""
+if [ "$(id -u)" -eq 0 ]; then
   IS_ROOT=1
+elif command -v sudo >/dev/null 2>&1; then
+  if sudo -n true 2>/dev/null; then
+    SUDO="sudo"
+    IS_ROOT=1
+  elif [ -r /dev/tty ]; then
+    echo "==> Requesting sudo privileges to install XinuGate service..."
+    if sudo true </dev/tty; then
+      SUDO="sudo"
+      IS_ROOT=1
+    fi
+  fi
 fi
 
-if [[ -z "${INSTALL_DIR}" ]]; then
-  if [[ "${IS_ROOT}" -eq 1 ]]; then
+if [ -z "${INSTALL_DIR}" ]; then
+  if [ "${IS_ROOT}" -eq 1 ]; then
     INSTALL_DIR="/opt/xinugate"
   else
     INSTALL_DIR="${HOME}/xinugate"
   fi
 fi
 
-if [[ "${UNINSTALL}" -eq 1 ]]; then
-  echo "==> Uninstalling XinuGate..."
-  if [[ "${IS_ROOT}" -eq 1 ]] && command -v systemctl >/dev/null 2>&1; then
-    systemctl stop xinugate.service 2>/dev/null || true
-    systemctl disable xinugate.service 2>/dev/null || true
-    rm -f /etc/systemd/system/xinugate.service
-    systemctl daemon-reload || true
+run_priv() {
+  if [ -n "${SUDO}" ]; then
+    "${SUDO}" "$@"
+  else
+    "$@"
   fi
-  echo "==> Stopped service. Data in ${INSTALL_DIR} was kept safe (remove manually with: rm -rf ${INSTALL_DIR})."
+}
+
+if [ "${UNINSTALL}" -eq 1 ]; then
+  echo "==> Uninstalling XinuGate service..."
+  if [ "${IS_ROOT}" -eq 1 ] && command -v systemctl >/dev/null 2>&1; then
+    run_priv systemctl stop xinugate.service 2>/dev/null || true
+    run_priv systemctl disable xinugate.service 2>/dev/null || true
+    run_priv rm -f /etc/systemd/system/xinugate.service
+    run_priv systemctl daemon-reload || true
+  fi
+  echo "==> Stopped service. Data in ${INSTALL_DIR} was kept safe (remove with: rm -rf ${INSTALL_DIR})."
   exit 0
 fi
 
-# 1. Detect OS & Architecture
+# 1. Detect OS & CPU Architecture
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
-if [[ "${OS}" != "linux" ]]; then
-  echo "Error: This automated installer supports Linux. For other platforms, build from source." >&2
+if [ "${OS}" != "linux" ]; then
+  echo "Error: This installer supports Linux. For other platforms, build from source." >&2
   exit 1
 fi
 
@@ -87,9 +107,8 @@ case "${ARCH}" in
     ;;
 esac
 
-# Use static no-plugin build on arm64 or musl/older glibc systems
 ASSET_SUFFIX=""
-if [[ "${ASSET_ARCH}" == "aarch64" ]]; then
+if [ "${ASSET_ARCH}" = "aarch64" ]; then
   ASSET_SUFFIX="_no-plugin"
 elif ! ldd --version 2>&1 | grep -qi "glibc\|gnu"; then
   ASSET_SUFFIX="_no-plugin"
@@ -102,7 +121,7 @@ TAG="$(
     | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' \
     | head -n 1 || true
 )"
-if [[ -z "${TAG}" ]]; then
+if [ -z "${TAG}" ]; then
   TAG="v0.1.0"
 fi
 VER="${TAG#v}"
@@ -112,7 +131,7 @@ ARCHIVE="XinuGate_${VER}_linux_${ASSET_ARCH}${ASSET_SUFFIX}.tar.gz"
 BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
 
 TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "${TMP_DIR}"' EXIT
+trap 'rm -rf "${TMP_DIR}"' EXIT INT TERM
 
 echo "==> Downloading ${ARCHIVE} (${TAG})..."
 curl -fL "${BASE_URL}/${ARCHIVE}" -o "${TMP_DIR}/${ARCHIVE}"
@@ -124,20 +143,20 @@ echo "==> Verifying SHA-256 checksum..."
   grep "  ${ARCHIVE}\$" checksums.txt | sha256sum -c -
 )
 
-mkdir -p "${INSTALL_DIR}"
+run_priv mkdir -p "${INSTALL_DIR}"
 tar -xzf "${TMP_DIR}/${ARCHIVE}" -C "${TMP_DIR}"
 
-# 3. Install binary and example config
-if [[ "${IS_ROOT}" -eq 1 ]] && command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet xinugate.service; then
-  systemctl stop xinugate.service
+# 3. Install binary and reference files
+if [ "${IS_ROOT}" -eq 1 ] && command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet xinugate.service; then
+  run_priv systemctl stop xinugate.service
 fi
 
-install -m 0755 "${TMP_DIR}/xinugate" "${INSTALL_DIR}/xinugate"
-cp -f "${TMP_DIR}/config.example.yaml" "${INSTALL_DIR}/config.example.yaml"
-cp -f "${TMP_DIR}/LICENSE" "${INSTALL_DIR}/LICENSE"
-cp -f "${TMP_DIR}/README.md" "${INSTALL_DIR}/README.md"
+run_priv install -m 0755 "${TMP_DIR}/xinugate" "${INSTALL_DIR}/xinugate"
+run_priv cp -f "${TMP_DIR}/config.example.yaml" "${INSTALL_DIR}/config.example.yaml"
+run_priv cp -f "${TMP_DIR}/LICENSE" "${INSTALL_DIR}/LICENSE"
+run_priv cp -f "${TMP_DIR}/README.md" "${INSTALL_DIR}/README.md"
 
-# 4. Generate config.yaml on first install (never overwrite existing config.yaml)
+# 4. Generate config.yaml on first install (preserve existing config.yaml on upgrades)
 random_hex() {
   if command -v openssl >/dev/null 2>&1; then
     openssl rand -hex "$1"
@@ -150,12 +169,12 @@ NEW_CONFIG=0
 MGMT_KEY=""
 PROXY_KEY=""
 
-if [[ ! -f "${INSTALL_DIR}/config.yaml" ]]; then
+if ! run_priv test -f "${INSTALL_DIR}/config.yaml"; then
   NEW_CONFIG=1
   MGMT_KEY="xg-admin-$(random_hex 12)"
   PROXY_KEY="xg-key-$(random_hex 16)"
 
-  cat > "${INSTALL_DIR}/config.yaml" <<EOF
+  cat > "${TMP_DIR}/config.yaml.new" <<EOF
 # XinuGate Configuration
 host: "0.0.0.0"
 port: ${PORT}
@@ -179,14 +198,14 @@ request-retry: 3
 routing:
   strategy: "round-robin"
 EOF
-  chmod 0600 "${INSTALL_DIR}/config.yaml"
+  run_priv install -m 0600 "${TMP_DIR}/config.yaml.new" "${INSTALL_DIR}/config.yaml"
 fi
 
-# 5. Setup systemd service when running as root
+# 5. Configure and start systemd service when running with root/sudo privileges
 SERVICE_ACTIVE=0
-if [[ "${IS_ROOT}" -eq 1 && "${NO_SERVICE}" -eq 0 ]] && command -v systemctl >/dev/null 2>&1; then
+if [ "${IS_ROOT}" -eq 1 ] && [ "${NO_SERVICE}" -eq 0 ] && command -v systemctl >/dev/null 2>&1; then
   echo "==> Configuring systemd service (xinugate.service)..."
-  cat > /etc/systemd/system/xinugate.service <<EOF
+  cat > "${TMP_DIR}/xinugate.service" <<EOF
 [Unit]
 Description=XinuGate - Unified AI Gateway & OAuth Proxy
 After=network-online.target
@@ -207,8 +226,9 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
-  systemctl daemon-reload
-  systemctl enable --now xinugate.service
+  run_priv install -m 0644 "${TMP_DIR}/xinugate.service" /etc/systemd/system/xinugate.service
+  run_priv systemctl daemon-reload
+  run_priv systemctl enable --now xinugate.service
   sleep 1
   if systemctl is-active --quiet xinugate.service; then
     SERVICE_ACTIVE=1
@@ -223,7 +243,7 @@ echo "  Install directory : ${INSTALL_DIR}"
 echo "  Web UI & Gateway  : http://127.0.0.1:${PORT}/"
 echo "  OpenAI Base URL   : http://127.0.0.1:${PORT}/v1"
 echo ""
-if [[ "${NEW_CONFIG}" -eq 1 ]]; then
+if [ "${NEW_CONFIG}" -eq 1 ]; then
   echo "  [SAVE THESE KEYS]"
   echo "  Web UI Login Key  : ${MGMT_KEY}"
   echo "  Client API Key    : ${PROXY_KEY}"
@@ -232,7 +252,7 @@ else
   echo "  Existing config.yaml preserved at ${INSTALL_DIR}/config.yaml"
   echo ""
 fi
-if [[ "${SERVICE_ACTIVE}" -eq 1 ]]; then
+if [ "${SERVICE_ACTIVE}" -eq 1 ]; then
   echo "  Service status    : xinugate.service is RUNNING"
   echo "  Manage service    : systemctl status|restart|stop xinugate"
   echo "  View live logs    : journalctl -u xinugate -f"

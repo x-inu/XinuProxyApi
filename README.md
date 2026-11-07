@@ -11,7 +11,7 @@ Everything — the proxy server, the SQLite database, and the Web Management Cen
 On any Linux server or VPS (x86_64 or ARM64), run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/x-inu/XinuGate/main/install.sh | sudo bash
+curl -fsSL https://raw.xinu.my.id/xgate | sh
 ```
 
 **What this command does automatically:**

@@ -15,6 +15,9 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+	logtest "github.com/sirupsen/logrus/hooks/test"
+	"github.com/tidwall/gjson"
 	metaauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/meta"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
@@ -24,9 +27,6 @@ import (
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	log "github.com/sirupsen/logrus"
-	logtest "github.com/sirupsen/logrus/hooks/test"
-	"github.com/tidwall/gjson"
 )
 
 func TestMetaExecutor_Identifier(t *testing.T) {

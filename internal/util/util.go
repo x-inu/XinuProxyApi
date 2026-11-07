@@ -11,8 +11,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 )
 
 var functionNameSanitizer = regexp.MustCompile(`[^a-zA-Z0-9_.:-]`)

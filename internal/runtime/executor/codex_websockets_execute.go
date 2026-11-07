@@ -8,14 +8,14 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 func (e *CodexWebsocketsExecutor) Execute(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (resp cliproxyexecutor.Response, err error) {

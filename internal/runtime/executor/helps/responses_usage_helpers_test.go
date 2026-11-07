@@ -5,9 +5,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 func TestEnsureResponsesUsageDetails_NonStreamJSON(t *testing.T) {

@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"github.com/gorilla/websocket"
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 func TestCodexNativeStreamFidelity(t *testing.T) {

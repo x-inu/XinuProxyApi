@@ -8,11 +8,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 func normalizeResponsesWebsocketRequest(rawJSON []byte, lastRequest []byte, lastResponseOutput []byte) ([]byte, []byte, *interfaces.ErrorMessage) {

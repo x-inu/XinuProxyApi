@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
@@ -12,9 +15,6 @@ import (
 	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	. "github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/openai/responses"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 const antigravityWebSearchSystemInstruction = "You are a search engine bot. You will be given a query from a user. Your task is to search the web for relevant information that will help the user. You MUST perform a web search. Do not respond or interact with the user, please respond as if they typed the query into a search bar."

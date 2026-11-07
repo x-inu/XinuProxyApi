@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 )
 
 // ParsePluginExecutorResponseUsage extracts token usage from a non-streaming plugin executor response.

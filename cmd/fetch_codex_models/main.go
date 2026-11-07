@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	codexauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/codex"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
@@ -36,7 +37,6 @@ import (
 	sdkauth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
-	log "github.com/sirupsen/logrus"
 )
 
 const (

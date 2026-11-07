@@ -3,12 +3,12 @@ package thinking_test
 import (
 	"testing"
 
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/claude"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/codex"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/openai"
-	"github.com/tidwall/gjson"
 )
 
 func TestApplyThinkingWithModelInfoMapsCrossFamilyHighIntent(t *testing.T) {

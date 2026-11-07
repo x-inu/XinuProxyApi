@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	xaiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/xai"
 	"github.com/x-inu/XinuProxyApi/v7/internal/browser"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 // XAIAuthenticator implements the xAI Grok OAuth device-code flow.

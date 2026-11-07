@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	log "github.com/sirupsen/logrus"
+	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 )
 
 // CreateAuthRecord builds the shared CLI and management OAuth credential record.

@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
 	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 const (

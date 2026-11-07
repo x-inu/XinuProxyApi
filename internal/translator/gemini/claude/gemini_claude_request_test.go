@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	internalsignature "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/tidwall/gjson"
+	internalsignature "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 )
 
 func TestConvertClaudeRequestToGemini_ToolChoice_SpecificTool(t *testing.T) {

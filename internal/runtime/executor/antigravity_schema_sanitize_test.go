@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	antigravitychat "github.com/x-inu/XinuProxyApi/v7/internal/translator/antigravity/openai/chat-completions"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	"github.com/tidwall/gjson"
 )
 
 const sanitizeTestPayload = `{

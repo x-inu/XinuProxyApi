@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	"github.com/tidwall/gjson"
 )
 
 func newResponsesStreamTestHandler(t *testing.T) (*OpenAIResponsesAPIHandler, *httptest.ResponseRecorder, *gin.Context, http.Flusher) {

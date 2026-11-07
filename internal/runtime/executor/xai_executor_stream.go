@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
 )
 
 func (e *XAIExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Auth, req cliproxyexecutor.Request, opts cliproxyexecutor.Options) (_ *cliproxyexecutor.StreamResult, err error) {

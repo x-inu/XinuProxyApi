@@ -12,13 +12,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
 	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 type responsesWebsocketForwardOptions struct {

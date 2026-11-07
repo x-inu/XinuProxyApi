@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	_ "modernc.org/sqlite"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	_ "modernc.org/sqlite"
 )
 
 const (

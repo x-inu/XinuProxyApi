@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 type capturedCodexRequest struct {

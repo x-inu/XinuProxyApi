@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/auth/codex"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 const (

@@ -14,13 +14,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/buildinfo"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
 	"github.com/x-inu/XinuProxyApi/v7/internal/pluginstore"
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 

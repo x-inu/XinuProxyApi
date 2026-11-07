@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 	"github.com/tidwall/gjson"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 )
 
 func parseClaudeResponsesSSEEvent(t *testing.T, chunk []byte) (string, gjson.Result) {

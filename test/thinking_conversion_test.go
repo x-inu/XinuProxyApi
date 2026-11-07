@@ -17,11 +17,11 @@ import (
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/openai"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/xai"
 
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 // thinkingTestCase represents a common test case structure for both suffix and body tests.

@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	internalcache "github.com/x-inu/XinuProxyApi/v7/internal/cache"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 type kimiLocalBadRequestError struct{}

@@ -15,9 +15,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/klauspost/compress/zstd"
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/httpwire"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *Server) responseCompressionMiddleware() gin.HandlerFunc {

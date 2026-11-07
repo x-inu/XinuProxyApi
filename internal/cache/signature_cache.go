@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 	log "github.com/sirupsen/logrus"
+	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 )
 
 // SignatureEntry holds a cached thinking signature with timestamp

@@ -10,11 +10,11 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/internal/auth/codex"
 	"github.com/x-inu/XinuProxyApi/v7/internal/browser"
 	// legacy client removed
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/misc"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 // CodexAuthenticator implements the OAuth login flow for Codex accounts.

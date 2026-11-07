@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/home"
-	log "github.com/sirupsen/logrus"
 )
 
 type stubHomeAppLogClient struct {

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 )
 
 // ModelSupportsWebSearch checks whether the given model supports native web search,

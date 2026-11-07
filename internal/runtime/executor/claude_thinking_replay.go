@@ -6,14 +6,14 @@ import (
 	"encoding/hex"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 	internalcache "github.com/x-inu/XinuProxyApi/v7/internal/cache"
 	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
 )
 
 // claudeThinkingReplayScope reuses the bounded replay state shape shared with Kimi.

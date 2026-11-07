@@ -1,5 +1,6 @@
 .PHONY: management backend build test verify clean
 
+export PATH := /usr/local/go/bin:$(PATH)
 VERSION ?= dev
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
 BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)

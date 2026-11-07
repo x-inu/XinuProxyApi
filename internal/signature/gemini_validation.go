@@ -73,8 +73,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 

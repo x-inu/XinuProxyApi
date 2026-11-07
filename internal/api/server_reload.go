@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/access"
 	"github.com/x-inu/XinuProxyApi/v7/internal/cache"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
@@ -16,7 +17,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 

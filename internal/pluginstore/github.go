@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/httpfetch"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/httpfetch"
 )
 
 const userAgent = "CLIProxyAPI"

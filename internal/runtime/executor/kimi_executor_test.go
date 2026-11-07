@@ -10,15 +10,15 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+	logtest "github.com/sirupsen/logrus/hooks/test"
+	"github.com/tidwall/gjson"
 	kimiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/kimi"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	log "github.com/sirupsen/logrus"
-	logtest "github.com/sirupsen/logrus/hooks/test"
-	"github.com/tidwall/gjson"
 )
 
 func TestNewKimiExecutorInitializesDelegatedClaudeConfig(t *testing.T) {

@@ -3,9 +3,9 @@ package chat_completions
 import (
 	"strings"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 )
 
 func ConvertOpenAIRequestToInteractions(modelName string, inputRawJSON []byte, stream bool) []byte {

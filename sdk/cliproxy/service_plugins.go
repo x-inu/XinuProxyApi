@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
@@ -14,7 +15,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	log "github.com/sirupsen/logrus"
 )
 
 const (

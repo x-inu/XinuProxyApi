@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
 	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	log "github.com/sirupsen/logrus"
 )
 
 type antigravityCreditsFallbackExecutor struct {

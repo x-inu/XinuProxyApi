@@ -8,12 +8,12 @@ package claude
 import (
 	"strings"
 
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 // ConvertClaudeRequestToOpenAI parses and transforms an Anthropic API request into OpenAI Chat Completions API format.

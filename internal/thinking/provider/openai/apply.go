@@ -6,10 +6,10 @@
 package openai
 
 import (
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 )
 
 // Applier implements thinking.ProviderApplier for OpenAI models.

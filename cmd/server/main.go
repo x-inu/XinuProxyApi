@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 	configaccess "github.com/x-inu/XinuProxyApi/v7/internal/access/config_access"
 	"github.com/x-inu/XinuProxyApi/v7/internal/api"
 	"github.com/x-inu/XinuProxyApi/v7/internal/buildinfo"
@@ -41,7 +42,6 @@ import (
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	sdkpluginstore "github.com/x-inu/XinuProxyApi/v7/sdk/pluginstore"
-	log "github.com/sirupsen/logrus"
 )
 
 var (

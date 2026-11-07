@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 )
 
 func registerTestWebSearchModel(t *testing.T, clientID, provider, modelID string, supportsSearch bool) {

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	metaauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/meta"
 	"github.com/x-inu/XinuProxyApi/v7/internal/browser"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 // MetaAuthenticator implements the Meta Muse OAuth device-code flow.

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/tidwall/gjson"
+	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 

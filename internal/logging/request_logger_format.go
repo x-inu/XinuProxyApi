@@ -13,10 +13,10 @@ import (
 
 	"github.com/andybalholm/brotli"
 	"github.com/klauspost/compress/zstd"
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/buildinfo"
 	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	log "github.com/sirupsen/logrus"
 )
 
 func (l *FileRequestLogger) writeNonStreamingLog(

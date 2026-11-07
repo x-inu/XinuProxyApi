@@ -10,10 +10,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
-	requestlogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
+	requestlogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
 )
 
 type websocketTimelineAppender interface {

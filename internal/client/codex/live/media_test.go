@@ -11,9 +11,9 @@ import (
 	"github.com/pion/interceptor"
 	"github.com/pion/rtp"
 	"github.com/pion/webrtc/v4"
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	log "github.com/sirupsen/logrus"
 	logtest "github.com/sirupsen/logrus/hooks/test"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 )
 
 func TestPionMediaRelaySelectsRemoteProxyMode(t *testing.T) {

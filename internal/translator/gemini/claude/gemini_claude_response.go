@@ -13,10 +13,10 @@ import (
 	"strings"
 	"sync/atomic"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 // Params holds parameters for response conversion.

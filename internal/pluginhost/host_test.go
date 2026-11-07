@@ -14,12 +14,12 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
 )
 
 func enabledPluginConfigs(ids ...string) map[string]config.PluginInstanceConfig {

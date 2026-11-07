@@ -12,11 +12,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/misc"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/singleflight"
 )
 

@@ -20,6 +20,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/tidwall/gjson"
 	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 	requestlogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
@@ -30,7 +31,6 @@ import (
 	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	"github.com/tidwall/gjson"
 )
 
 type homeResponsesWebsocketDispatcher struct {

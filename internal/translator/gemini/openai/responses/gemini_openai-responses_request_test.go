@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	internalsignature "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/tidwall/gjson"
+	internalsignature "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 )
 
 const testResponsesGeminiThoughtSignature = "EjQKMgEMOdbHO0Gd+c9Mxk4ELwPGbpCEcp2mFfYYLix2UVtBH3fL8GECc4+JITVnHF4qZDsA"

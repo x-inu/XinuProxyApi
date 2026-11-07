@@ -9,9 +9,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 )
 
 type claudeToResponsesState struct {

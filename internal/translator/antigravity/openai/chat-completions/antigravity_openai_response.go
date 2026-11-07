@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 
-	. "github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/openai/chat-completions"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	. "github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/openai/chat-completions"
 )
 
 // convertCliResponseToOpenAIChatParams holds parameters for response conversion.

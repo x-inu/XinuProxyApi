@@ -15,13 +15,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
 	"github.com/x-inu/XinuProxyApi/v7/internal/auth/codex"
 	"github.com/x-inu/XinuProxyApi/v7/internal/credentialweight"
 	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/synthesizer"
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 // PatchAuthFileStatus toggles the disabled state of an auth file

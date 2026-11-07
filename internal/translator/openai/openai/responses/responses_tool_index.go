@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/tidwall/gjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 )
 
 type responsesToolIdentity struct {

@@ -4,9 +4,9 @@ import (
 	"regexp"
 	"strings"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 )
 
 // Claude reports server-side web search as a pair of assistant content blocks: a

@@ -13,11 +13,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 // convertGeminiResponseToOpenAIChatParams holds parameters for response conversion.

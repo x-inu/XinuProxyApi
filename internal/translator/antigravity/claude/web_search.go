@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 )
 
 type webSearchGroundingSupport struct {

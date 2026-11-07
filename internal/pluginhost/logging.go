@@ -3,8 +3,8 @@ package pluginhost
 import (
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 )
 
 func pluginLogFields(id, name, version, path string) log.Fields {

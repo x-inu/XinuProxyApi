@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 )
 
 func ConvertInteractionsRequestToOpenAI(modelName string, inputRawJSON []byte, stream bool) []byte {

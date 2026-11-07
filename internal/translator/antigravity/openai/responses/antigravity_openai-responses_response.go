@@ -3,8 +3,8 @@ package responses
 import (
 	"context"
 
-	. "github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/openai/responses"
 	"github.com/tidwall/gjson"
+	. "github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/openai/responses"
 )
 
 func ConvertAntigravityResponseToOpenAIResponses(ctx context.Context, modelName string, originalRequestRawJSON, requestRawJSON, rawJSON []byte, param *any) [][]byte {

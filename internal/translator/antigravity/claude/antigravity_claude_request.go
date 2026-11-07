@@ -9,15 +9,15 @@ import (
 	"context"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/cache"
 	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/common"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 func resolveThinkingSignature(modelName, thinkingText, rawSignature string) string {

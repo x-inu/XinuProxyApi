@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
-	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/codex"
 	log "github.com/sirupsen/logrus"
 	logtest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
+	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/codex"
 )
 
 func TestExtractCodexReasoningEffortWithConfigurationUpdate(t *testing.T) {

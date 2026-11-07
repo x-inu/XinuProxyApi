@@ -108,7 +108,22 @@ func isFreeModelName(lowerName string) bool {
 		strings.HasPrefix(lowerName, "opencodefree/") {
 		return true
 	}
+	if strings.Contains(lowerName, "crouton-alpha") ||
+		strings.Contains(lowerName, "space-bunny-alpha") {
+		return true
+	}
 	return false
+}
+
+// IsFreeModelName reports whether a model identifier represents an explicit
+// free-tier model or route (e.g., ":free", "-free", "oc/...", "gfree/...",
+// "stealth/crouton-alpha").
+func IsFreeModelName(model string) bool {
+	name := strings.ToLower(strings.TrimSpace(model))
+	if name == "" {
+		return false
+	}
+	return isFreeModelName(name)
 }
 
 // IsFreeProvider reports whether a provider identifier corresponds to a

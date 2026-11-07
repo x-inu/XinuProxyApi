@@ -4,9 +4,9 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/tidwall/gjson"
 )
 
 func TestEnsureClaudeCLIFingerprintIdentitySynthesizesStableSources(t *testing.T) {

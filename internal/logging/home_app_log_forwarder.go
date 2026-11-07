@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/home"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/home"
 )
 
 const defaultHomeAppLogQueueSize = 1024

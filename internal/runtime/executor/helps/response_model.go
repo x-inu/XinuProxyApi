@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 )
 
 const (

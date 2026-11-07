@@ -9,10 +9,10 @@ import (
 	"time"
 	"unicode/utf8"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 type geminiDetachedReasoningItem struct {

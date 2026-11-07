@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/home"
 	"github.com/x-inu/XinuProxyApi/v7/internal/homeplugins"
@@ -19,7 +20,6 @@ import (
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executionregistry"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	log "github.com/sirupsen/logrus"
 )
 
 type homeSubscriberSupervisor struct {

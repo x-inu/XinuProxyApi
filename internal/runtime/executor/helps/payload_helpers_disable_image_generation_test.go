@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 )
 
 func TestApplyPayloadConfigWithRoot_DisableImageGeneration_RemovesToolsEntry(t *testing.T) {

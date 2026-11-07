@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"strings"
 
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
 	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 type claudeDiagnosticsRequestState struct {

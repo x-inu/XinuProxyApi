@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 // TestClaudeBillingFingerprintMultiTurnUsesFirstUserText verifies that in a multi-turn conversation,

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync/atomic"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
 	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
@@ -15,7 +16,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
-	log "github.com/sirupsen/logrus"
 )
 
 type rpcHostHTTPRequest struct {

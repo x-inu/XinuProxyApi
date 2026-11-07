@@ -3,8 +3,8 @@ package helps
 import (
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 )
 
 func TestShouldUseMaxCompletionTokensForModel(t *testing.T) {

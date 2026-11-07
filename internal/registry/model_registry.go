@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	misc "github.com/x-inu/XinuProxyApi/v7/internal/misc"
 	log "github.com/sirupsen/logrus"
+	misc "github.com/x-inu/XinuProxyApi/v7/internal/misc"
 )
 
 // OpenAIImageModelType marks models that are callable through OpenAI-compatible image endpoints.

@@ -5,8 +5,8 @@ import (
 
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
 
-	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 	"github.com/tidwall/gjson"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 )
 
 func TestOpenAIToCodex_PreservesBuiltinTools(t *testing.T) {

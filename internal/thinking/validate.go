@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 )
 
 // ValidateConfig validates a thinking configuration against model capabilities.

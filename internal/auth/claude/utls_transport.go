@@ -9,11 +9,11 @@ import (
 	"time"
 
 	tls "github.com/refraction-networking/utls"
+	log "github.com/sirupsen/logrus"
 	internalcache "github.com/x-inu/XinuProxyApi/v7/internal/cache"
 	"github.com/x-inu/XinuProxyApi/v7/internal/httpwire"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/proxy"
 )
 

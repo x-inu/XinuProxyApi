@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/signature"
 )
 
 func TestConvertOpenAIRequestToAntigravitySkipsEmptyTextPartsWithoutNulls(t *testing.T) {

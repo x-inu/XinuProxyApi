@@ -3,12 +3,12 @@ package executor
 import (
 	"testing"
 
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 func TestXAIResponsesPreparationStripsUnsupportedConfigurationUpdates(t *testing.T) {

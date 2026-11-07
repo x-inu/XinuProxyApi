@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	gemresponses "github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/openai/responses"
 	"github.com/tidwall/gjson"
+	gemresponses "github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/openai/responses"
 )
 
 func antigravityLiveSSEChunks(t *testing.T) [][]byte {

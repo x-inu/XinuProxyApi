@@ -3,9 +3,9 @@ package thinking
 import (
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 )
 
 // SummaryMode represents whether the client explicitly requested reasoning summaries.

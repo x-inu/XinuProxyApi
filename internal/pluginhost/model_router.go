@@ -5,8 +5,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 )
 
 func (h *Host) RouteModel(ctx context.Context, req pluginapi.ModelRouteRequest) (pluginapi.ModelRouteResponse, bool) {

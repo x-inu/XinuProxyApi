@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/synthesizer"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *Service) applyConfigUpdate(newCfg *config.Config) {

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 	_ "github.com/x-inu/XinuProxyApi/v7/sdk/translator/builtin"
-	log "github.com/sirupsen/logrus"
 )
 
 type registryModelInfo = registry.ModelInfo

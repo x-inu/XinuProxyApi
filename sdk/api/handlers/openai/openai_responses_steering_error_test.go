@@ -13,12 +13,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	runtimeexecutor "github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/tidwall/gjson"
 )
 
 // Exercise both WebSocket endpoints with the real handler, manager and executor.

@@ -16,6 +16,7 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/httpwire"
 	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
@@ -23,7 +24,6 @@ import (
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/proxy"
 )
 

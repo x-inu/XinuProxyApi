@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/api"
 	"github.com/x-inu/XinuProxyApi/v7/internal/home"
 	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
@@ -17,7 +18,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	log "github.com/sirupsen/logrus"
 )
 
 // Run starts the service and blocks until the context is cancelled or the server stops.

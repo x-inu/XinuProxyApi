@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/api"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy"
-	log "github.com/sirupsen/logrus"
 )
 
 // StartService builds and runs the proxy service using the exported SDK.

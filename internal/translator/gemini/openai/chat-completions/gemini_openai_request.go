@@ -5,13 +5,13 @@ package chat_completions
 import (
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/x-inu/XinuProxyApi/v7/internal/translator/gemini/common"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 const geminiFunctionThoughtSignature = "skip_thought_signature_validator"

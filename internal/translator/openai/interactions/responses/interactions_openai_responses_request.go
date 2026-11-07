@@ -3,10 +3,10 @@ package responses
 import (
 	"strings"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 func ConvertOpenAIResponsesRequestToInteractions(modelName string, inputRawJSON []byte, stream bool) []byte {

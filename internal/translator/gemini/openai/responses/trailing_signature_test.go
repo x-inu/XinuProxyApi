@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 )
 
 func TestGeminiResponsesLateSignaturePreservesSummary(t *testing.T) {

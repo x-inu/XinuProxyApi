@@ -9,12 +9,12 @@ import (
 	"runtime"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/auth/codex"
 	kimiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/kimi"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	log "github.com/sirupsen/logrus"
 )
 
 // FileSynthesizer generates Auth entries from OAuth JSON files.

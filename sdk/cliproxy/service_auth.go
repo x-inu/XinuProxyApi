@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/x-inu/XinuProxyApi/v7/internal/watcher"
@@ -12,7 +13,6 @@ import (
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	log "github.com/sirupsen/logrus"
 )
 
 // newDefaultAuthManager creates a default authentication manager with supported OAuth providers.

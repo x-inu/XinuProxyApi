@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	helps "github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
@@ -16,7 +17,6 @@ import (
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 type configuredThinkingExecutor struct {

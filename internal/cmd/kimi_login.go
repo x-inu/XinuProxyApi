@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 // DoKimiLogin triggers the OAuth device flow for Kimi (Moonshot AI) and saves tokens.

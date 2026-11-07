@@ -16,10 +16,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 func legacyAntigravityFunctionResponseContentIndexForReplay(payload []byte, itemResult gjson.Result) (int, string, bool) {

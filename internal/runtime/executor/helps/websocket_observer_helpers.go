@@ -3,9 +3,9 @@ package helps
 import (
 	"context"
 
+	"github.com/tidwall/gjson"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	"github.com/tidwall/gjson"
 )
 
 // EmitWebSocketResponseEvent delivers an upstream WebSocket response frame to any configured observer.

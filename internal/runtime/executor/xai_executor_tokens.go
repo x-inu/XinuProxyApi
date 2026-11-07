@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/tidwall/gjson"
+	"github.com/tiktoken-go/tokenizer"
 	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
-	"github.com/tiktoken-go/tokenizer"
 )
 
 // CountTokens estimates token count for xAI Responses requests.

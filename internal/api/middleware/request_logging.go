@@ -14,9 +14,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/klauspost/compress/zstd"
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	log "github.com/sirupsen/logrus"
 )
 
 const (

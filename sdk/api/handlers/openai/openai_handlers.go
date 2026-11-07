@@ -16,6 +16,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	codexmodels "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/models"
 	. "github.com/x-inu/XinuProxyApi/v7/internal/constant"
 	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
@@ -23,8 +25,6 @@ import (
 	responsesconverter "github.com/x-inu/XinuProxyApi/v7/internal/translator/openai/openai/responses"
 	"github.com/x-inu/XinuProxyApi/v7/internal/usagehistory"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 // OpenAIAPIHandler contains the handlers for OpenAI API endpoints.
@@ -375,9 +375,8 @@ func EnrichOpenAIModel(model map[string]any) OpenAIModelResponse {
 
 	// Pricing estimation
 	var pricing *OpenAIModelPricing
-	idLower := strings.ToLower(strings.TrimSpace(id))
-	isExplicitFree := strings.Contains(rootLower, ":free") ||
-		strings.HasSuffix(idLower, "-free") ||
+	isExplicitFree := usagehistory.IsFreeModelName(id) ||
+		usagehistory.IsFreeModelName(root) ||
 		usagehistory.IsFreeProvider(ownedBy)
 	rate, hasRate := usagehistory.RateFor(id)
 	if !hasRate {
@@ -399,7 +398,7 @@ func EnrichOpenAIModel(model map[string]any) OpenAIModelResponse {
 			Reasoning:     rate.OutputPerM,
 			CacheCreation: cacheWriteRate,
 		}
-	} else if hasRate && isExplicitFree {
+	} else if isExplicitFree {
 		pricing = &OpenAIModelPricing{
 			Input:         0,
 			Output:        0,

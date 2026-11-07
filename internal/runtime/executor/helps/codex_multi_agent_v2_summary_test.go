@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 func TestCompatibilityTranslationPreservesExplicitClaudeVisibility(t *testing.T) {

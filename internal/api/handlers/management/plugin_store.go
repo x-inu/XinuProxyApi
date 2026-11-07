@@ -13,13 +13,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/htmlsanitize"
 	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
 	"github.com/x-inu/XinuProxyApi/v7/internal/pluginstore"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 

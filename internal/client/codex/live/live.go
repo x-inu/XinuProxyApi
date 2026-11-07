@@ -17,6 +17,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
@@ -24,7 +25,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
-	log "github.com/sirupsen/logrus"
 )
 
 const (

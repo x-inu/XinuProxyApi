@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 func TestFinishReasonToolCallsNotOverwritten(t *testing.T) {

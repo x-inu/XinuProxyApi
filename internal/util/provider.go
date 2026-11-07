@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
-	log "github.com/sirupsen/logrus"
 )
 
 const openAICompatibleProviderPrefix = "openai-compatible-"

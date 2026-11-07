@@ -3,8 +3,8 @@ package common
 import (
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 const (

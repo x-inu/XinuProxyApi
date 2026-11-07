@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 
-	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	translatorcommon "github.com/x-inu/XinuProxyApi/v7/internal/translator/common"
 )
 
 // ConvertCodexResponseToOpenAIResponses converts OpenAI Chat Completions streaming chunks

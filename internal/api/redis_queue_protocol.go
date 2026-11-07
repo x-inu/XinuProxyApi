@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
 )
 
 const (

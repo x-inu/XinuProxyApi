@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	log "github.com/sirupsen/logrus"
 )
 
 type rpcPluginAdapter struct {

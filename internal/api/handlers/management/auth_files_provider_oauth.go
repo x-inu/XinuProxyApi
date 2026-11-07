@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/auth/antigravity"
 	"github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
 	"github.com/x-inu/XinuProxyApi/v7/internal/auth/codex"
@@ -25,7 +26,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	log "github.com/sirupsen/logrus"
 )
 
 type codexOAuthService interface {

@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/discovery"
-	log "github.com/sirupsen/logrus"
 )
 
 const defaultDiscoveryRefreshInterval = 15 * time.Second

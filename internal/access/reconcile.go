@@ -6,10 +6,10 @@ import (
 	"sort"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	configaccess "github.com/x-inu/XinuProxyApi/v7/internal/access/config_access"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
-	log "github.com/sirupsen/logrus"
 )
 
 // ReconcileProviders builds the desired provider list by reusing existing providers when possible

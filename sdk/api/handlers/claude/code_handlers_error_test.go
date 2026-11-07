@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	"github.com/tidwall/gjson"
 )
 
 func TestClaudeErrorExtractsOpenAIStyleUpstreamJSON(t *testing.T) {

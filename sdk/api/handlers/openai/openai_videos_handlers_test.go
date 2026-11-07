@@ -12,12 +12,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	apihandlers "github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	"github.com/tidwall/gjson"
 )
 
 func performVideosEndpointRequest(t *testing.T, method string, endpointPath string, contentType string, body io.Reader, handler gin.HandlerFunc) *httptest.ResponseRecorder {

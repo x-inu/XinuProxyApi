@@ -14,9 +14,9 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/synthesizer"
 	"gopkg.in/yaml.v3"
 
+	log "github.com/sirupsen/logrus"
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 // storePersister captures persistence-capable token store methods used by the watcher.

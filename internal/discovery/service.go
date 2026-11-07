@@ -8,9 +8,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
-	log "github.com/sirupsen/logrus"
 )
 
 // ResolveDiscoveryStateDir returns an absolute state directory for discovery metadata,

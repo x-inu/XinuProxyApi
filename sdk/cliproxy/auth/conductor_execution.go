@@ -14,13 +14,13 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	cliproxysession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
 	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	log "github.com/sirupsen/logrus"
 )
 
 func newUpstreamAttemptContext(ctx context.Context) context.Context {

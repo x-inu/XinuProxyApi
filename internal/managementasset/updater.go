@@ -17,11 +17,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/httpfetch"
 	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/singleflight"
 )
 

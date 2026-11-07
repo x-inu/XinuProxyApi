@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 	"github.com/tidwall/gjson"
+	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 )
 
 type fakeXAIReasoningReplayKVClient struct {

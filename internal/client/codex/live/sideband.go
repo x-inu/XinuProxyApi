@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
@@ -22,7 +23,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
-	log "github.com/sirupsen/logrus"
 	xproxy "golang.org/x/net/proxy"
 )
 

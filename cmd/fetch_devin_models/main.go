@@ -30,6 +30,7 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
@@ -38,7 +39,6 @@ import (
 	sdkauth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
-	log "github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 

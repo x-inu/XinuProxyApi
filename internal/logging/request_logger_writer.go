@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 )
 
 var requestLogID atomic.Uint64

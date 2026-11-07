@@ -6,9 +6,9 @@ package util
 import (
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
-	log "github.com/sirupsen/logrus"
 )
 
 // SetProxy configures the provided HTTP client with proxy settings from the configuration.

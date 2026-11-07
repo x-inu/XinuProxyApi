@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
@@ -18,7 +19,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
-	"github.com/tidwall/gjson"
 )
 
 func TestParseInteractionsRequestTarget(t *testing.T) {

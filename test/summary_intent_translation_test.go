@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/antigravity"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
 )
 
 func TestSummaryIntentTranslation(t *testing.T) {

@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
 	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
-	log "github.com/sirupsen/logrus"
 )
 
 // DoClaudeLogin triggers the Claude OAuth flow through the shared authentication manager.

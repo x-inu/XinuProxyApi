@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	helps "github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/claude"
@@ -11,8 +13,6 @@ import (
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
 	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 type editUpdatePluginHooks struct {

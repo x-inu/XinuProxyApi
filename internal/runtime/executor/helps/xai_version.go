@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 )
 
 const (

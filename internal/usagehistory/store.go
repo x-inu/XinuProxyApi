@@ -15,8 +15,8 @@ import (
 	"sync"
 	"time"
 
-	_ "modernc.org/sqlite"
 	log "github.com/sirupsen/logrus"
+	_ "modernc.org/sqlite"
 )
 
 // schemaVersion identifies the on-disk rollup format.

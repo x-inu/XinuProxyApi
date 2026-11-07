@@ -3,9 +3,9 @@ package helps
 import (
 	"strings"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 )
 
 // ShouldUseMaxCompletionTokensForModel reports whether the resolved model under an

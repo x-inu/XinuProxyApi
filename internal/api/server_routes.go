@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	managementHandlers "github.com/x-inu/XinuProxyApi/v7/internal/api/handlers/management"
 	claudemodels "github.com/x-inu/XinuProxyApi/v7/internal/client/claude/models"
 	codexlive "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/live"
@@ -30,7 +31,6 @@ import (
 	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	log "github.com/sirupsen/logrus"
 )
 
 const oauthCallbackSuccessHTML = `<html><head><meta charset="utf-8"><title>Authentication successful</title><script>setTimeout(function(){window.close();},5000);</script></head><body><h1>Authentication successful!</h1><p>You can close this window.</p><p>This window will close automatically in 5 seconds.</p></body></html>`

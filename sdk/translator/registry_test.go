@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 )
 
 type fakePluginHooks struct {

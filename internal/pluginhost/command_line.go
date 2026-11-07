@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
 	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
-	log "github.com/sirupsen/logrus"
 )
 
 type commandLineFlagRecord struct {

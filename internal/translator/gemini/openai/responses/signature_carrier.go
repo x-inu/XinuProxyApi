@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"strings"
 
-	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
 )
 
 const (

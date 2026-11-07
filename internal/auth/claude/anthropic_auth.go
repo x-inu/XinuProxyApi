@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"golang.org/x/sync/singleflight"
 )
 

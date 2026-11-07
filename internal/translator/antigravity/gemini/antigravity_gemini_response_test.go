@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 func TestRestoreUsageMetadata(t *testing.T) {

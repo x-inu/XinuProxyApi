@@ -3,11 +3,11 @@ package thinking_test
 import (
 	"testing"
 
+	"github.com/tidwall/gjson"
 	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/claude"
 	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/kimi"
-	"github.com/tidwall/gjson"
 )
 
 // TestKimiK28ClaudeMessagesMaxPreservesMax verifies that K2.8 models preserve effort=max

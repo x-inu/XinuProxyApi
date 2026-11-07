@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/pluginstore"
 	log "github.com/sirupsen/logrus"
+	"github.com/x-inu/XinuProxyApi/v7/internal/pluginstore"
 )
 
 const (

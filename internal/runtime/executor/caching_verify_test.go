@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"github.com/tidwall/gjson"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 )
 
 func TestEnsureCacheControl(t *testing.T) {

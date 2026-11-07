@@ -1100,7 +1100,6 @@ function getNextDirtyFields(
       'rmSecretKey',
       'rmDisableControlPanel',
       'rmPanelRepo',
-      'authDir',
       'apiKeysText',
       'publicModelsEndpoint',
       'debug',
@@ -1315,7 +1314,6 @@ export function useVisualConfig() {
               ? remoteManagement['panel-repo']
               : '',
 
-        authDir: typeof parsed['auth-dir'] === 'string' ? parsed['auth-dir'] : '',
         apiKeysText: resolveApiKeysText(parsed),
         publicModelsEndpoint: Boolean(parsed['public-models-endpoint']),
         pluginsEnabled: Boolean(plugins?.enabled),
@@ -1492,7 +1490,6 @@ export function useVisualConfig() {
           deleteIfMapEmpty(doc, ['remote-management']);
         }
 
-        if (dirtyFields.has('authDir')) setStringInDoc(doc, ['auth-dir'], values.authDir);
         if (dirtyFields.has('apiKeysText')) {
           const apiKeys = values.apiKeysText
             .split('\n')

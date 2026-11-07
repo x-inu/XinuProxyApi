@@ -51,13 +51,6 @@ export const CONFIG_FIELD_SEARCH_INDEX: ConfigFieldSearchEntry[] = [
     yamlKeys: ['port'],
   },
   {
-    fieldId: 'authDir',
-    sectionId: 'connectivity',
-    labelKey: L('sections.auth.auth_dir'),
-    hintKey: L('sections.auth.auth_dir_hint'),
-    yamlKeys: ['auth-dir'],
-  },
-  {
     fieldId: 'apiKeys',
     sectionId: 'connectivity',
     labelKey: L('api_keys.label'),

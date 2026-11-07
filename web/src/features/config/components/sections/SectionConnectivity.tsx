@@ -35,17 +35,6 @@ export function SectionConnectivity({
           <PortField values={values} disabled={disabled} onChange={onChange} error={portError} />
         </FieldGrid>
 
-        <FieldAnchor fieldId="authDir">
-          <Input
-            label={t('config_management.visual.sections.auth.auth_dir')}
-            placeholder="~/.xinugate"
-            value={values.authDir}
-            onChange={(e) => onChange({ authDir: e.target.value })}
-            disabled={disabled}
-            hint={t('config_management.visual.sections.auth.auth_dir_hint')}
-          />
-        </FieldAnchor>
-
         <ApiKeysField values={values} disabled={disabled} onChange={onChange} />
 
         <FieldAnchor fieldId="publicModelsEndpoint">

@@ -82,8 +82,7 @@ export function SystemPage() {
   const requestLogDirty = requestLogDraft !== requestLogEnabled;
   const canEditRequestLog = auth.connectionStatus === 'connected' && Boolean(config);
 
-  const appVersion = __APP_VERSION__ || t('system_info.version_unknown');
-  const apiVersion = auth.serverVersion || t('system_info.version_unknown');
+  const apiVersion = auth.serverVersion || __APP_VERSION__ || t('system_info.version_unknown');
   const buildTime =
     formatDateTimeValue(auth.serverBuildDate, i18n.language) || t('system_info.version_unknown');
 
@@ -270,22 +269,17 @@ export function SystemPage() {
                 className={`${styles.infoTile} ${styles.tapTile}`}
                 onClick={handleInfoVersionTap}
               >
-                <div className={styles.tileLabel}>01 // {t('footer.version')}</div>
-                <div className={styles.tileValue}>{appVersion}</div>
+                <div className={styles.tileLabel}>01 // {t('footer.api_version')}</div>
+                <div className={styles.tileValue}>{apiVersion}</div>
               </button>
 
               <div className={styles.infoTile}>
-                <div className={styles.tileLabel}>02 // {t('footer.api_version')}</div>
-                <div className={styles.tileValue}>{apiVersion}</div>
-              </div>
-
-              <div className={styles.infoTile}>
-                <div className={styles.tileLabel}>03 // {t('footer.build_date')}</div>
+                <div className={styles.tileLabel}>02 // {t('footer.build_date')}</div>
                 <div className={styles.tileValue}>{buildTime}</div>
               </div>
 
               <div className={styles.infoTile}>
-                <div className={styles.tileLabel}>04 // {t('connection.status')}</div>
+                <div className={styles.tileLabel}>03 // {t('connection.status')}</div>
                 <div className={styles.tileValue}>
                   {t(`common.${auth.connectionStatus}_status`)}
                 </div>

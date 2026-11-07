@@ -1386,8 +1386,7 @@
   },
   "footer": {
     "api_version": "XinuGate Version",
-    "build_date": "Build Time",
-    "version": "Management UI Version"
+    "build_date": "Build Time"
   },
   "providersPage": {
     "header": {

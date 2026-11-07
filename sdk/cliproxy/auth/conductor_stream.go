@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 )
 
 func discardStreamChunks(ch <-chan cliproxyexecutor.StreamChunk) {

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"strings"
 
-	claudeauth "github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claude"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
+	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )

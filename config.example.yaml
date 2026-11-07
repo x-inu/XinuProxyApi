@@ -43,10 +43,10 @@ remote-management:
 
   # GitHub repository used only when management panel auto-updates are enabled.
   # Accepts a repository URL or releases API URL.
-  panel-github-repository: "https://github.com/x-inu/Cli-Proxy-API-Management-Center"
+  panel-github-repository: "https://github.com/x-inu/XinuProxyApi"
 
 # Authentication directory (supports ~ for home directory)
-auth-dir: "~/.cli-proxy-api"
+auth-dir: "~/.xinuproxyapi"
 
 # API keys for authentication
 api-keys:

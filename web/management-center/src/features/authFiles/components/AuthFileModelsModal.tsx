@@ -41,7 +41,7 @@ export function AuthFileModelsModal(props: AuthFileModelsModalProps) {
         <EmptyState
           title={t('auth_files.models_unsupported', { defaultValue: 'This version does not support this feature' })}
           description={t('auth_files.models_unsupported_desc', {
-            defaultValue: 'Update CLI Proxy API to the latest version and try again',
+            defaultValue: 'Update XinuProxyApi to the latest version and try again',
           })}
         />
       ) : models.length === 0 ? (

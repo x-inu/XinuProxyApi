@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	internalconfig "github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/home"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executionregistry"
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/pluginapi"
+	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/home"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executionregistry"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 )
 
 type schedulerTestExecutor struct {

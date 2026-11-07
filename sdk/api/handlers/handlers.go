@@ -1,4 +1,4 @@
-// Package handlers provides core API handler functionality for the CLI Proxy API server.
+// Package handlers provides core API handler functionality for the XinuProxyApi server.
 // It includes common types, client management, load balancing, and error handling
 // shared across all API endpoint handlers (OpenAI, Claude, Gemini).
 package handlers
@@ -16,15 +16,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/thinking"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
-	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	coresession "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/session"
-	coreusage "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
+	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	coresession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
+	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	"github.com/tidwall/gjson"
 	"golang.org/x/net/context"
 )

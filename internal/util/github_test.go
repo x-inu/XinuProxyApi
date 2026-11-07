@@ -3,7 +3,7 @@ package util
 import (
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/githubauth"
+	"github.com/x-inu/XinuProxyApi/v7/internal/githubauth"
 )
 
 func TestResolveGitHubToken(t *testing.T) {

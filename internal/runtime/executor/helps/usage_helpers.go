@@ -15,12 +15,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/clienterror"
-	internallogging "github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/thinking"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
+	internallogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )

@@ -12,14 +12,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/clienterror"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/thinking"
-	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/thinking/provider/codex"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
+	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
+	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/codex"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 )
 
 func TestParseOpenAIUsageChatCompletions(t *testing.T) {

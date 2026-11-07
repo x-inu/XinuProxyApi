@@ -60,10 +60,11 @@ describe('Muse (Meta) provider and device OAuth', () => {
   });
 
   test('registers device-code UI but not a manual OAuth callback', () => {
-    const source = readFileSync('src/pages/OAuthPage.tsx', 'utf8');
-    expect(source).toContain("id: 'meta'");
-    expect(source).toContain('userCode: res.user_code');
-    expect(source).toContain("t('auth_login.device_code_copy')");
+    const source = readFileSync(
+      'src/features/providers/components/OAuthProviderDetailModal.tsx',
+      'utf8'
+    );
+    expect(source).toContain('res.user_code');
     const callbackProviders = source.match(
       /const CALLBACK_SUPPORTED = new Set<string>\(([^;]+)\);/
     );

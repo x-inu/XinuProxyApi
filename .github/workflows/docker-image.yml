@@ -1,13 +1,11 @@
 name: docker-image
 
 on:
-  push:
-    tags:
-      - v*
+  workflow_dispatch:
 
 env:
   APP_NAME: XinuProxyApi
-  DOCKERHUB_REPO: eceasy/cli-proxy-api
+  DOCKERHUB_REPO: x-inu/xinu-proxy-api
 
 jobs:
   docker_amd64:

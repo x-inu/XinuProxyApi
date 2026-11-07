@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/watcher/synthesizer"
-	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/watcher/synthesizer"
+	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	log "github.com/sirupsen/logrus"
 )
 

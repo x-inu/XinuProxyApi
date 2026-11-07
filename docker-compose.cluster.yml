@@ -1,6 +1,6 @@
 services:
   xinu-proxy-api:
-    image: ${CLI_PROXY_IMAGE:-eceasy/cli-proxy-api:latest}
+    image: ${XINU_PROXY_IMAGE:-x-inu/xinu-proxy-api:latest}
     pull_policy: always
     build:
       context: .
@@ -15,9 +15,9 @@ services:
     ports:
       - "20128:20128"
     volumes:
-      - ${CLI_PROXY_HOME_PATH:-./home}:/root/.cli-proxy-api
-      - ${CLI_PROXY_LOG_PATH:-./logs}:/xinuproxyapi/logs
-      - ${CLI_PROXY_PLUGIN_PATH:-./plugins}:/xinuproxyapi/plugins
+      - ${XINU_PROXY_HOME_PATH:-./home}:/root/.xinuproxyapi
+      - ${XINU_PROXY_LOG_PATH:-./logs}:/xinuproxyapi/logs
+      - ${XINU_PROXY_PLUGIN_PATH:-./plugins}:/xinuproxyapi/plugins
     command: >
       sh -eu -c '
         if [ -z "$$HOME_JWT" ]; then

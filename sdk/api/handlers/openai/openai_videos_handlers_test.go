@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	apihandlers "github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
-	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	coreexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	sdkconfig "github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	apihandlers "github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
+	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	"github.com/tidwall/gjson"
 )
 

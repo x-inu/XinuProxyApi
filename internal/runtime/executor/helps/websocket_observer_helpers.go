@@ -3,8 +3,8 @@ package helps
 import (
 	"context"
 
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
 	"github.com/tidwall/gjson"
 )
 

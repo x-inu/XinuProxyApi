@@ -17,24 +17,24 @@ import (
 	"time"
 
 	gin "github.com/gin-gonic/gin"
-	managementHandlers "github.com/router-for-me/CLIProxyAPI/v7/internal/api/handlers/management"
-	claudemodels "github.com/router-for-me/CLIProxyAPI/v7/internal/client/claude/models"
-	codexmodels "github.com/router-for-me/CLIProxyAPI/v7/internal/client/codex/models"
-	proxyconfig "github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/home"
-	internallogging "github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginhost"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/redisqueue"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor"
-	runtimehelps "github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
-	sdkaccess "github.com/router-for-me/CLIProxyAPI/v7/sdk/access"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executionregistry"
-	coreexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	coreusage "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
-	sdkconfig "github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/pluginapi"
+	managementHandlers "github.com/x-inu/XinuProxyApi/v7/internal/api/handlers/management"
+	claudemodels "github.com/x-inu/XinuProxyApi/v7/internal/client/claude/models"
+	codexmodels "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/models"
+	proxyconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/home"
+	internallogging "github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
+	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
+	runtimehelps "github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
+	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executionregistry"
+	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
+	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 	log "github.com/sirupsen/logrus"
 	logtest "github.com/sirupsen/logrus/hooks/test"
 	"gopkg.in/yaml.v3"
@@ -1832,7 +1832,7 @@ func TestRootServesControlPanelForBrowsersAndJSONForAPIClients(t *testing.T) {
 		if rr.Code != http.StatusOK {
 			t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusOK, rr.Body.String())
 		}
-		if !strings.Contains(rr.Body.String(), "CLI Proxy API Server") {
+		if !strings.Contains(rr.Body.String(), "XinuProxyApi Server") {
 			t.Fatalf("root did not serve the JSON listing: %s", rr.Body.String())
 		}
 	})
@@ -1845,7 +1845,7 @@ func TestRootServesControlPanelForBrowsersAndJSONForAPIClients(t *testing.T) {
 		if rr.Code != http.StatusOK {
 			t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusOK, rr.Body.String())
 		}
-		if !strings.Contains(rr.Body.String(), "CLI Proxy API Server") {
+		if !strings.Contains(rr.Body.String(), "XinuProxyApi Server") {
 			t.Fatalf("root did not serve the JSON listing: %s", rr.Body.String())
 		}
 	})
@@ -1869,7 +1869,7 @@ func TestRootServesJSONForBrowsersWhenControlPanelDisabled(t *testing.T) {
 	if rr.Code != http.StatusOK {
 		t.Fatalf("status = %d, want %d body=%s", rr.Code, http.StatusOK, rr.Body.String())
 	}
-	if !strings.Contains(rr.Body.String(), "CLI Proxy API Server") {
+	if !strings.Contains(rr.Body.String(), "XinuProxyApi Server") {
 		t.Fatalf("root should fall back to JSON when the panel is disabled: %s", rr.Body.String())
 	}
 }

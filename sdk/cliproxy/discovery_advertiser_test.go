@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/discovery"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/discovery"
 )
 
 type fakeAdvertiser struct {

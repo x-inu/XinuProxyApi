@@ -3,7 +3,7 @@ package api
 import (
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 	"gopkg.in/yaml.v3"
 )
 

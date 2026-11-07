@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	coreusage "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
-	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 	"google.golang.org/protobuf/encoding/protowire"
 )
 

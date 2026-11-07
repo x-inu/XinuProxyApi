@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
 )
 
 func TestFetchLatestAssetSetsGitHubAuthorization(t *testing.T) {

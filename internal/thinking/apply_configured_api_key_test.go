@@ -3,11 +3,11 @@ package thinking_test
 import (
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/thinking"
-	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/thinking/provider/claude"
-	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/thinking/provider/codex"
-	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/thinking/provider/openai"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
+	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/claude"
+	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/codex"
+	_ "github.com/x-inu/XinuProxyApi/v7/internal/thinking/provider/openai"
 	"github.com/tidwall/gjson"
 )
 

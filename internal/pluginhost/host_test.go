@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/thinking"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/pluginabi"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginabi"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 )
@@ -77,7 +77,7 @@ func TestHostApplyConfig_DisabledGlobalDoesNotResolvePluginsDir(t *testing.T) {
 	disabledCfg, errParseConfig := config.ParseConfigBytes([]byte(`
 plugins:
   enabled: false
-  dir: "~/.cli-proxy-api/plugins"
+  dir: "~/.xinuproxyapi/plugins"
 `))
 	if errParseConfig != nil {
 		t.Fatalf("ParseConfigBytes() error = %v", errParseConfig)
@@ -407,7 +407,7 @@ func TestHostApplyConfigRegistersInterceptorOnlyPlugin(t *testing.T) {
 				Name:             "alpha",
 				Version:          "1.0.0",
 				Author:           "test",
-				GitHubRepository: "https://github.com/router-for-me/CLIProxyAPI",
+				GitHubRepository: "https://github.com/x-inu/XinuProxyApi",
 			},
 			Capabilities: pluginapi.Capabilities{
 				RequestInterceptor: requestInterceptorFunc(func(ctx context.Context, req pluginapi.RequestInterceptRequest) (pluginapi.RequestInterceptResponse, error) {
@@ -440,7 +440,7 @@ func TestHostApplyConfigDispatchesInterceptorRPCMethods(t *testing.T) {
 				Name:             "alpha",
 				Version:          "1.0.0",
 				Author:           "test",
-				GitHubRepository: "https://github.com/router-for-me/CLIProxyAPI",
+				GitHubRepository: "https://github.com/x-inu/XinuProxyApi",
 			},
 			Capabilities: pluginapi.Capabilities{
 				RequestInterceptor: requestInterceptorFunc(func(ctx context.Context, req pluginapi.RequestInterceptRequest) (pluginapi.RequestInterceptResponse, error) {
@@ -1424,7 +1424,7 @@ func TestHostApplyConfig_InvalidMetadataOrNoCapabilitiesSkipped(t *testing.T) {
 			Name:             "no-caps",
 			Version:          "1.0.0",
 			Author:           "test",
-			GitHubRepository: "https://github.com/router-for-me/CLIProxyAPI",
+			GitHubRepository: "https://github.com/x-inu/XinuProxyApi",
 		}}
 	}
 	h := NewForTest(loader)

@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/proxyutil"
+	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/proxyutil"
 	"golang.org/x/net/context"
 )
 

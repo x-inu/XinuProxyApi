@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executionregistry"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executionregistry"
 )
 
 func TestHandleHangupForwardsPinnedOAuthCall(t *testing.T) {

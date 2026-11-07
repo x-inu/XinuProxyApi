@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	codexlive "github.com/router-for-me/CLIProxyAPI/v7/internal/client/codex/live"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/home"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/safemode"
-	sdkaccess "github.com/router-for-me/CLIProxyAPI/v7/sdk/access"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
+	codexlive "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/live"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/home"
+	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuProxyApi/v7/internal/safemode"
+	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 	log "github.com/sirupsen/logrus"
 )
 

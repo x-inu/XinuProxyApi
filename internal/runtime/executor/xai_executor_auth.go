@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	xaiauth "github.com/router-for-me/CLIProxyAPI/v7/internal/auth/xai"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	xaiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/xai"
+	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	log "github.com/sirupsen/logrus"
 )
 

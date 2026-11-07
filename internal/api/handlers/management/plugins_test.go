@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginhost"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 	"gopkg.in/yaml.v3"
 )
 
@@ -528,7 +528,7 @@ func TestDeletePluginRejectsUnresolvedPluginsDir(t *testing.T) {
 	t.Setenv("USERPROFILE", "")
 	t.Chdir(workspace)
 
-	literalPluginsDir := filepath.Join(workspace, "~", ".cli-proxy-api", "plugins")
+	literalPluginsDir := filepath.Join(workspace, "~", ".xinuproxyapi", "plugins")
 	targetDir := filepath.Join(literalPluginsDir, runtime.GOOS, runtime.GOARCH)
 	if errMkdir := os.MkdirAll(targetDir, 0o755); errMkdir != nil {
 		t.Fatalf("MkdirAll(%s) error = %v", targetDir, errMkdir)
@@ -540,7 +540,7 @@ func TestDeletePluginRejectsUnresolvedPluginsDir(t *testing.T) {
 	h := &Handler{
 		cfg: &config.Config{
 			Plugins: config.PluginsConfig{
-				Dir: "~/.cli-proxy-api/plugins",
+				Dir: "~/.xinuproxyapi/plugins",
 				Configs: map[string]config.PluginInstanceConfig{
 					"sample": pluginConfigFromYAML(t, "enabled: false\n"),
 				},

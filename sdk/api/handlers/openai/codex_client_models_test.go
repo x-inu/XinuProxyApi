@@ -3,9 +3,9 @@ package openai
 import (
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
 )
 
 func TestCodexClientModelsResponseMultiAgentV2FollowsConfig(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	homekv "github.com/router-for-me/CLIProxyAPI/v7/internal/home"
+	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )

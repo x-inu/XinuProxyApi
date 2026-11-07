@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	sigcompat "github.com/router-for-me/CLIProxyAPI/v7/internal/signature"
-	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 	"github.com/tidwall/gjson"
 	"google.golang.org/protobuf/encoding/protowire"
 )

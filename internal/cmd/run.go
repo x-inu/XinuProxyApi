@@ -1,4 +1,4 @@
-// Package cmd provides command-line interface functionality for the CLI Proxy API server.
+// Package cmd provides command-line interface functionality for the XinuProxyApi server.
 // It includes authentication flows for various AI service providers, service startup,
 // and other command-line operations.
 package cmd
@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/api"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginhost"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy"
+	"github.com/x-inu/XinuProxyApi/v7/internal/api"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy"
 	log "github.com/sirupsen/logrus"
 )
 

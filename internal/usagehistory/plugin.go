@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	coreusage "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
+	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
 )
 
 // plugin implements coreusage.Plugin and folds each usage record into the

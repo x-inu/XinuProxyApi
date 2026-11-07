@@ -6,14 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginhost"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	sdkaccess "github.com/router-for-me/CLIProxyAPI/v7/sdk/access"
-	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
-	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
-	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
+	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
+	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 	log "github.com/sirupsen/logrus"
 )
 

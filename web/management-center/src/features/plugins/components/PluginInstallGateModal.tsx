@@ -67,7 +67,7 @@ export function PluginInstallGateModal({
   const logo = resolvePluginAssetURL(entry.logo, apiBase);
   const rawSourceText = entry.sourceName || entry.sourceUrl;
   const sourceText = isDefaultPluginStoreSource(entry)
-    ? t('plugin_store.cli_proxy_api_source')
+    ? t('plugin_store.xinu_proxy_api_source')
     : rawSourceText;
   const tokenMatches = typed.trim() === token;
 

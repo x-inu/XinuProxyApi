@@ -11,7 +11,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 )
 
 const (

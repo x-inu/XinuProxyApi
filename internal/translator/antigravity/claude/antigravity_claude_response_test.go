@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/cache"
-	sigcompat "github.com/router-for-me/CLIProxyAPI/v7/internal/signature"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
+	"github.com/x-inu/XinuProxyApi/v7/internal/cache"
+	sigcompat "github.com/x-inu/XinuProxyApi/v7/internal/signature"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )

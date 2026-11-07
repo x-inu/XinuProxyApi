@@ -43,9 +43,9 @@ export const buildRepositoryURL = (repository: string) => {
 
 // The exact, fully-qualified prefix every first-party repository lives under.
 // Matching the whole URL (not just the extracted owner) prevents look-alike
-// hosts like "https://github.com.evil.com/router-for-me/..." from being
+// hosts like "https://github.com.evil.com/x-inu/..." from being
 // mistaken for the official org.
-export const OFFICIAL_PLUGIN_REPO_PREFIX = 'https://github.com/router-for-me/';
+export const OFFICIAL_PLUGIN_REPO_PREFIX = 'https://github.com/x-inu/';
 export const DEFAULT_PLUGIN_STORE_SOURCE_ID = 'official';
 const DEFAULT_PLUGIN_STORE_SOURCE_NAME = 'official';
 
@@ -60,7 +60,7 @@ export const getPluginRepositorySlug = (repository: string): string => {
 };
 
 // A repository is official only when its canonical github.com URL sits exactly
-// under the router-for-me org prefix. Slugs ("router-for-me/repo") and full URLs
+// under the x-inu org prefix. Slugs ("x-inu/repo") and full URLs
 // are both normalized first; anything else (other hosts, look-alike domains,
 // other owners) is untrusted.
 export const isOfficialRepository = (repository: string): boolean =>

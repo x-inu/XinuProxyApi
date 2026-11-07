@@ -1,10 +1,7 @@
 name: release
 
 on:
-  push:
-    # run only against tags
-    tags:
-      - '*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -36,7 +33,7 @@ jobs:
           trap 'rm -f "$release_notes_file" "$generated_notes_file" "$changelog_entries_file" "$changelog_notes_file" "$updated_notes_file"' EXIT
 
           cat > "$release_notes_file" <<'EOF'
-          <!-- cliproxyapi-linux-release-assets:start -->
+          <!-- xinuproxyapi-linux-release-assets:start -->
           ## Linux release assets
 
           - `XinuProxyApi_<version>_linux_<arch>.tar.gz` is the default Linux build. It supports dynamic library plugins and is built against a GLIBC 2.17 baseline.
@@ -46,7 +43,7 @@ jobs:
 
           - `XinuProxyApi_<version>_freebsd_aarch64_no-plugin.tar.gz` is the FreeBSD arm64 build. It is built without CGO and does not support dynamic library plugins.
 
-          <!-- cliproxyapi-linux-release-assets:end -->
+          <!-- xinuproxyapi-linux-release-assets:end -->
           EOF
 
           git fetch --force --tags

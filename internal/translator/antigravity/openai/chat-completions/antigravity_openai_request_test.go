@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/signature"
+	"github.com/x-inu/XinuProxyApi/v7/internal/signature"
 	"github.com/tidwall/gjson"
 )
 

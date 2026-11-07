@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/misc"
+	"github.com/x-inu/XinuProxyApi/v7/internal/misc"
 	log "github.com/sirupsen/logrus"
 )
 

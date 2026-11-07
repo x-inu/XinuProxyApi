@@ -3,7 +3,7 @@ package common
 import (
 	"strings"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
 	"github.com/tidwall/gjson"
 )
 

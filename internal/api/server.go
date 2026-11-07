@@ -1,4 +1,4 @@
-// Package api provides the HTTP API server implementation for the CLI Proxy API.
+// Package api provides the HTTP API server implementation for XinuProxyApi.
 // It includes the main server struct, routing setup, middleware for CORS and authentication,
 // and integration with various AI API handlers (OpenAI, Claude, Gemini).
 // The server supports hot-reloading of clients and configuration.
@@ -18,18 +18,18 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	managementHandlers "github.com/router-for-me/CLIProxyAPI/v7/internal/api/handlers/management"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/api/middleware"
-	codexlive "github.com/router-for-me/CLIProxyAPI/v7/internal/client/codex/live"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/githubauth"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/managementasset"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginhost"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/redisqueue"
-	sdkaccess "github.com/router-for-me/CLIProxyAPI/v7/sdk/access"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	managementHandlers "github.com/x-inu/XinuProxyApi/v7/internal/api/handlers/management"
+	"github.com/x-inu/XinuProxyApi/v7/internal/api/middleware"
+	codexlive "github.com/x-inu/XinuProxyApi/v7/internal/client/codex/live"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/githubauth"
+	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
+	"github.com/x-inu/XinuProxyApi/v7/internal/managementasset"
+	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
+	"github.com/x-inu/XinuProxyApi/v7/internal/redisqueue"
+	sdkaccess "github.com/x-inu/XinuProxyApi/v7/sdk/access"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/http2"
 	"gopkg.in/yaml.v3"

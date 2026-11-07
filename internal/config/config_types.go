@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	sdkpluginstore "github.com/router-for-me/CLIProxyAPI/v7/sdk/pluginstore"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	sdkpluginstore "github.com/x-inu/XinuProxyApi/v7/sdk/pluginstore"
 	"gopkg.in/yaml.v3"
 )
 

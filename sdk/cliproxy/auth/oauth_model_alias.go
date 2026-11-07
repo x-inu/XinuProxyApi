@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	internalconfig "github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/thinking"
+	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/thinking"
 )
 
 const oauthModelAliasesAttributeKey = "model_aliases"

@@ -13,7 +13,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/discovery"
+	"github.com/x-inu/XinuProxyApi/v7/internal/discovery"
 	"gopkg.in/yaml.v3"
 )
 

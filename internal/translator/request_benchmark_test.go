@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	translatorapi "github.com/router-for-me/CLIProxyAPI/v7/internal/translator/translator"
+	translatorapi "github.com/x-inu/XinuProxyApi/v7/internal/translator/translator"
 	"github.com/tidwall/gjson"
 )
 

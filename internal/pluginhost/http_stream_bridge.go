@@ -8,7 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/pluginapi"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
 )
 
 type hostHTTPStreamKey struct {

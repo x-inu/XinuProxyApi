@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	auth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	core "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	translator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	auth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	core "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	translator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 	"github.com/tidwall/gjson"
 )
 

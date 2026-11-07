@@ -1,5 +1,4 @@
 # Binaries
-cli-proxy-api
 xinu-proxy-api
 *.exe
 
@@ -14,9 +13,12 @@ conv/*
 temp/*
 refs/*
 plugins/*
-examples/plugin/bin/*
 
 # Storage backends
+sqlitestore/*
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 pgstore/*
 gitstore/*
 objectstore/*

@@ -17,18 +17,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/httpfetch"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
-	sdkconfig "github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/httpfetch"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	sdkconfig "github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/singleflight"
 )
 
 const (
-	defaultManagementReleaseURL = "https://api.github.com/repos/x-inu/Cli-Proxy-API-Management-Center/releases/latest"
+	defaultManagementReleaseURL = "https://api.github.com/repos/x-inu/XinuProxyApi/releases/latest"
 	managementAssetName         = "management.html"
-	httpUserAgent               = "CLIProxyAPI-management-updater"
+	httpUserAgent               = "XinuProxyApi-management-updater"
 	managementSyncMinInterval   = 30 * time.Second
 	updateCheckInterval         = 3 * time.Hour
 	maxAssetDownloadSize        = 50 << 20 // 50 MB safety limit for management asset downloads

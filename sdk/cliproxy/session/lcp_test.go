@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 )
 
 func TestExtractCanonicalTurnsProtocols(t *testing.T) {

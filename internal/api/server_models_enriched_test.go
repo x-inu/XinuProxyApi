@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	proxyconfig "github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
+	proxyconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
 )
 
 // extractJSONKeyOrder parses a JSON object slice and returns the exact ordered list of keys for each object.

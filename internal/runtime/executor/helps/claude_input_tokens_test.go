@@ -14,7 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tiktoken-go/tokenizer"
 
-	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 )
 
 type failingClaudeInputCodec struct{}

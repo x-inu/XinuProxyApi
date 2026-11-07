@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	homekv "github.com/router-for-me/CLIProxyAPI/v7/internal/home"
+	homekv "github.com/x-inu/XinuProxyApi/v7/internal/home"
 )
 
 type fakeKimiThinkingReplayKVClient struct {

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginhost"
-	runtimeexecutor "github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor"
-	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/pluginhost"
+	runtimeexecutor "github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
+	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 )
 
 type serviceTestPluginExecutor struct{}

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	cliproxysession "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/session"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	cliproxysession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
 	log "github.com/sirupsen/logrus"
 )
 

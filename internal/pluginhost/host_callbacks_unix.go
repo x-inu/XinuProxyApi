@@ -17,7 +17,7 @@ import (
 	"context"
 	"unsafe"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/clienterror"
+	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
 )
 
 //export cliproxyHostCall

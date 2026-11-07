@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	internalconfig "github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	cliproxysession "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/session"
-	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
+	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	cliproxyexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	cliproxysession "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/session"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 )
 
 const (

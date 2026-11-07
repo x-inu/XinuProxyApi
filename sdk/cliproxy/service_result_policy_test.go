@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	internalconfig "github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	internalconfig "github.com/x-inu/XinuProxyApi/v7/internal/config"
+	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 )
 
 func TestBuilder_WithResultPolicy(t *testing.T) {

@@ -1,4 +1,4 @@
-module github.com/router-for-me/CLIProxyAPI/v7
+module github.com/x-inu/XinuProxyApi/v7
 
 go 1.26.10
 

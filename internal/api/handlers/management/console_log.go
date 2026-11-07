@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
+	"github.com/x-inu/XinuProxyApi/v7/internal/logging"
 )
 
 const consolePingInterval = 25 * time.Second

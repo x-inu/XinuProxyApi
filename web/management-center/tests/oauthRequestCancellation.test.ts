@@ -1,7 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { AxiosError, type AxiosResponse } from 'axios';
 import { apiClient } from '@/services/api/client';
-import { createOAuthAttempts } from '@/pages/oauthAttempts';
 
 // Use the real Axios interceptor chain with a deferred transport response.
 // Abandoned requests must not emit old server metadata or log out a new session.
@@ -19,8 +18,8 @@ describe('OAuth transport cancellation', () => {
         dispatched = resolve;
       });
       let deliver!: () => void;
-      const attempts = createOAuthAttempts({ setTimeout: () => 0, clearTimeout: () => {} });
-      const attempt = attempts.begin('devin');
+      const attempt = new AbortController();
+      const current = new AbortController();
       try {
         const request = apiClient.get('/get-auth-status', {
           signal: attempt.signal,
@@ -44,14 +43,14 @@ describe('OAuth transport cancellation', () => {
             }),
         });
         await started;
-        attempts.invalidateAll();
-        const current = attempts.begin('devin');
+        attempt.abort();
         deliver();
         await expect(request).rejects.toHaveProperty('code', 'ERR_CANCELED');
         expect(events).toEqual([]);
         expect(current.signal.aborted).toBe(false);
       } finally {
-        attempts.invalidateAll();
+        attempt.abort();
+        current.abort();
         if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
         else Reflect.deleteProperty(globalThis, 'window');
       }

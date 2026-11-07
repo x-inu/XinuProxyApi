@@ -10,13 +10,13 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
-	runtimeexecutor "github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor"
-	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/translator"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
-	openaihandlers "github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers/openai"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuProxyApi/v7/internal/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/registry"
+	runtimeexecutor "github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
+	_ "github.com/x-inu/XinuProxyApi/v7/internal/translator"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers"
+	openaihandlers "github.com/x-inu/XinuProxyApi/v7/sdk/api/handlers/openai"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 )
 
 // TestCodexIncompleteStreamIsNotTypedAsInvalidRequest drives the real /v1/responses

@@ -14,7 +14,7 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 )
 
 const (

@@ -10,7 +10,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executionregistry"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executionregistry"
 )
 
 const (

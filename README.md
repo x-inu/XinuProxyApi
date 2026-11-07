@@ -12,8 +12,9 @@ Point any OpenAI-, Gemini-, or Claude-compatible client or SDK at your own insta
 - Function calling / tools and multimodal (text + image) input.
 - Multiple accounts per provider with round-robin load balancing.
 - OpenAI-compatible upstream providers via config (e.g. OpenRouter).
+- Built-in SQLite WAL storage for configuration, OAuth credentials, cooldown state, and usage history.
 - Bundled single-file Management Center served from the same origin.
-- Reusable Go SDK for embedding the proxy (see `docs/sdk-usage.md`).
+- Reusable Go SDK (`sdk/`) for embedding the proxy.
 
 ## Repository layout
 
@@ -114,6 +115,21 @@ To serve over HTTPS, put a reverse proxy (Nginx, Caddy, Cloudflare Tunnel, etc.)
 
 When exposing the Management API beyond localhost, also set `remote-management.allow-remote: true` and use a long, random `secret-key`.
 
+### 6. Run with Docker (optional)
+
+You can also build and run XinuProxyApi in a container using Docker Compose:
+
+```bash
+cp config.example.yaml config.yaml
+# Interactive helper (pre-built image or local source build)
+./docker-build.sh
+
+# Or build and start directly with Docker Compose
+XINU_PROXY_IMAGE=xinu-proxy-api:local docker compose up -d --build
+```
+
+For cluster / control-plane worker mode, see `docker-compose.cluster.yml` and `.env.cluster.example`.
+
 ## Build from source
 
 Requirements: Go 1.26+, Bun 1.3.14 (Node.js 24 for frontend CI parity).
@@ -152,25 +168,19 @@ Open the site in a browser and enter your **management key** (the `secret-key` f
 ### Sections
 
 - **Dashboard** — live request activity, connection status, and a health summary at a glance.
-- **AI Providers** — configure and manage upstream providers and OpenAI-compatible endpoints.
-- **Auth Files** — inspect and manage per-account credential files created by the OAuth login flows.
-- **Quota** — per-account quota tracking cards so you can monitor usage across many accounts.
-- **Config** — structured editor for the server configuration, no manual YAML editing required.
-- **Plugins** — plugin management, gated by backend support.
+- **Usage** — persistent hourly token and estimated cost breakdown per provider and model.
+- **AI Providers** — unified card grid for Custom Providers, OAuth Providers, Free Tier (OpenCode Free), and API Key Providers.
+- **Models** — per-provider model catalog discovery, free-only filtering, and global/per-account model toggles.
+- **Auth Files** — inspect and manage per-account credential files created by OAuth login flows.
+- **Quota** — per-account quota tracking cards across providers.
+- **Config** — structured visual editor and full YAML editor for the server configuration.
+- **Console Log** — real-time SSE server console stream with live log-level switching (`ERR`, `WRN`, `INF`, `DBG`).
 
 ### Security notes
 
 - The Management Center shell is publicly reachable, but every Management API operation requires the management key.
 - Treat the management key as highly privileged: the Management API can read and change configuration, access stored credentials, and drive outbound API calls. Use a long random value and rotate it if exposed.
 - Never commit `config.yaml`, `.env`, management keys, provider credentials, auth files, or logs.
-
-## SDK docs
-
-- Usage: [docs/sdk-usage.md](docs/sdk-usage.md)
-- Advanced (executors & translators): [docs/sdk-advanced.md](docs/sdk-advanced.md)
-- Access: [docs/sdk-access.md](docs/sdk-access.md)
-- Watcher: [docs/sdk-watcher.md](docs/sdk-watcher.md)
-- Custom provider example: `examples/custom-provider`
 
 ## Release behavior
 

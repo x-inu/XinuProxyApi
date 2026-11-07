@@ -3,8 +3,8 @@ package helps
 import (
 	"testing"
 
-	kimiauth "github.com/router-for-me/CLIProxyAPI/v7/internal/auth/kimi"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	kimiauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/kimi"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 )
 
 func TestResolveKimiResponsesURL(t *testing.T) {

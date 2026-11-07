@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 )
 
 // TestApplyClaudeCredentialMetadataConcurrentSharedAuth pins the invariant that a

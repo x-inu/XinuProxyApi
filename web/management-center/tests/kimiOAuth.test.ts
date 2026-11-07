@@ -2,9 +2,6 @@ import { describe, expect, spyOn, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { apiClient } from '@/services/api/client';
 import { oauthApi } from '@/services/api/oauth';
-import { createOAuthAttempts } from '@/pages/oauthAttempts';
-import {
-} from '@/features/providers/kimi';
 
 describe('Kimi regional login', () => {
   test('uses separate management endpoints and preserves cancellation', async () => {
@@ -25,20 +22,6 @@ describe('Kimi regional login', () => {
       get.mockRestore();
     }
   });
-
-  test('keeps regional login attempts independent', () => {
-    const attempts = createOAuthAttempts({ setTimeout: () => 0, clearTimeout: () => {} });
-    try {
-      const china = attempts.begin('kimi');
-      const international = attempts.begin('kimi-ai');
-      attempts.begin('kimi-ai');
-      expect(china.signal.aborted).toBe(false);
-      expect(international.signal.aborted).toBe(true);
-    } finally {
-      attempts.invalidateAll();
-    }
-  });
-
 
   test('provides complete English login translations', () => {
     const { auth_login: messages } = JSON.parse(

@@ -5,13 +5,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/watcher"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/wsrelay"
-	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
-	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/config"
+	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor"
+	"github.com/x-inu/XinuProxyApi/v7/internal/util"
+	"github.com/x-inu/XinuProxyApi/v7/internal/watcher"
+	"github.com/x-inu/XinuProxyApi/v7/internal/wsrelay"
+	sdkAuth "github.com/x-inu/XinuProxyApi/v7/sdk/auth"
+	coreauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/config"
 	log "github.com/sirupsen/logrus"
 )
 

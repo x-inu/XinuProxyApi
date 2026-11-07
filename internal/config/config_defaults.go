@@ -1,8 +1,8 @@
 package config
 
 const (
-	DefaultPanelGitHubRepository = "https://github.com/x-inu/Cli-Proxy-API-Management-Center"
+	DefaultPanelGitHubRepository = "https://github.com/x-inu/XinuProxyApi"
 	DefaultPprofAddr             = "127.0.0.1:8316"
-	DefaultAuthDir               = "~/.cli-proxy-api"
+	DefaultAuthDir               = "~/.xinuproxyapi"
 	DefaultDiscoveryServiceType  = "_ai-gateway._tcp"
 )

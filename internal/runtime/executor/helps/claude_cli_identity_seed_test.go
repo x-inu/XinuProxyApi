@@ -4,8 +4,8 @@ import (
 	"sync"
 	"testing"
 
-	claudeauth "github.com/router-for-me/CLIProxyAPI/v7/internal/auth/claude"
-	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
+	claudeauth "github.com/x-inu/XinuProxyApi/v7/internal/auth/claude"
+	cliproxyauth "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/auth"
 	"github.com/tidwall/gjson"
 )
 

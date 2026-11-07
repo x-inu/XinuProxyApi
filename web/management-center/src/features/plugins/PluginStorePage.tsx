@@ -802,7 +802,7 @@ export function PluginStorePage() {
             ? `v${entry.version}`
             : '';
     const sourceName = isDefaultPluginStoreSource(entry)
-      ? t('plugin_store.cli_proxy_api_source')
+      ? t('plugin_store.xinu_proxy_api_source')
       : entry.sourceName;
     const sourceText = sourceName ? t('plugin_store.source_name', { source: sourceName }) : '';
     const metaItems = [versionText, sourceText, entry.author, entry.license].filter(Boolean);

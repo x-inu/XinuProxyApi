@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/clienterror"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/interfaces"
-	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
-	coreexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	coreusage "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
-	"github.com/router-for-me/CLIProxyAPI/v7/sdk/pluginapi"
-	sdktranslator "github.com/router-for-me/CLIProxyAPI/v7/sdk/translator"
+	"github.com/x-inu/XinuProxyApi/v7/internal/clienterror"
+	"github.com/x-inu/XinuProxyApi/v7/internal/interfaces"
+	"github.com/x-inu/XinuProxyApi/v7/internal/runtime/executor/helps"
+	coreexecutor "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/executor"
+	coreusage "github.com/x-inu/XinuProxyApi/v7/sdk/cliproxy/usage"
+	"github.com/x-inu/XinuProxyApi/v7/sdk/pluginapi"
+	sdktranslator "github.com/x-inu/XinuProxyApi/v7/sdk/translator"
 	"golang.org/x/net/context"
 )
 
